@@ -73,3 +73,5 @@ Thumbs.db
 # Security - prevent sensitive files from being committed
 debug-assistant.php
 *.env.production
+*.keystore
+*.jks

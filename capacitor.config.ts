@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.obos.fiberops',
+  appId: 'com.fsm.TechnicianApp',
   appName: 'FsmTechnicianApp',
   webDir: 'www',
   plugins: {

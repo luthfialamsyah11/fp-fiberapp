@@ -1,0 +1,252 @@
+/*
+ * FiberOps Technician App - Global Styles
+ * Design System: Modern Mobile-First, Light Theme
+ * Font: Inter | Corners: 16px | Inspired by Google Maps, Grab, Gojek
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* NO dark mode - enforce light theme */
+
+// ─── FiberOps Design Tokens ────────────────────────────────────────────────────
+:root {
+  // Brand
+  --fo-primary: #2563EB;
+  --fo-primary-light: #3B82F6;
+  --fo-primary-dark: #1D4ED8;
+  --fo-primary-50: #EFF6FF;
+  --fo-primary-100: #DBEAFE;
+  --fo-primary-200: #BFDBFE;
+
+  // Backgrounds
+  --fo-bg: #F8FAFC;
+  --fo-surface: #FFFFFF;
+
+  // Text
+  --fo-text: #0F172A;
+  --fo-text-secondary: #64748B;
+  --fo-text-muted: #94A3B8;
+
+  // Borders
+  --fo-border: #E2E8F0;
+  --fo-border-light: #F1F5F9;
+
+  // Semantic
+  --fo-success: #16A34A;
+  --fo-success-light: #DCFCE7;
+  --fo-warning: #F59E0B;
+  --fo-warning-light: #FEF3C7;
+  --fo-danger: #DC2626;
+  --fo-danger-light: #FEE2E2;
+
+  // Shadows
+  --fo-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --fo-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --fo-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --fo-shadow-primary: 0 4px 14px rgba(37, 99, 235, 0.3);
+
+  // Radius
+  --fo-radius: 16px;
+  --fo-radius-sm: 12px;
+  --fo-radius-lg: 20px;
+  --fo-radius-full: 9999px;
+
+  // Ionic overrides
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ion-background-color: var(--fo-bg);
+  --ion-text-color: var(--fo-text);
+  --ion-toolbar-background: var(--fo-surface);
+  --ion-toolbar-color: var(--fo-text);
+  --ion-color-primary: var(--fo-primary);
+  --ion-color-primary-rgb: 37, 99, 235;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #1D4ED8;
+  --ion-color-primary-tint: #3B82F6;
+  --ion-color-success: var(--fo-success);
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-warning: var(--fo-warning);
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-danger: var(--fo-danger);
+  --ion-color-danger-contrast: #ffffff;
+  --ion-item-background: var(--fo-surface);
+  --ion-card-background: var(--fo-surface);
+}
+
+// ─── Global Resets ──────────────────────────────────────────────────────────────
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  background: var(--fo-bg);
+  color: var(--fo-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ion-content {
+  --background: var(--fo-bg);
+}
+
+// ─── Ionic Component Overrides ──────────────────────────────────────────────────
+ion-toolbar {
+  --background: var(--fo-surface);
+  --color: var(--fo-text);
+  --border-color: var(--fo-border);
+  --min-height: 56px;
+}
+
+ion-header {
+  &::after {
+    display: none; // remove default header shadow line
+  }
+}
+
+ion-badge {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
+  border-radius: var(--fo-radius-full);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+ion-refresher-content {
+  --color: var(--fo-primary);
+}
+
+// ─── Scrollbar Styling ──────────────────────────────────────────────────────────
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fo-border);
+  border-radius: var(--fo-radius-full);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+// ─── Safe Area for Tab Bar ──────────────────────────────────────────────────────
+.has-tab-bar {
+  --padding-bottom: 80px;
+}
+
+// ─── Premium Modern UI Utilities ────────────────────────────────────────────────
+.fo-card {
+  background: var(--fo-surface);
+  border-radius: var(--fo-radius);
+  box-shadow: var(--fo-shadow-sm);
+  border: 1px solid var(--fo-border-light);
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: none;
+  }
+}
+
+.fo-section-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--fo-text-secondary);
+  letter-spacing: 0.05em;
+  margin: 20px 8px 8px;
+}
+
+.fo-list-group {
+  background: var(--fo-surface);
+  border-radius: var(--fo-radius);
+  border: 1px solid var(--fo-border-light);
+  overflow: hidden;
+  box-shadow: var(--fo-shadow-sm);
+  margin-bottom: 16px;
+}
+
+.fo-list-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--fo-surface);
+  border-bottom: 1px solid var(--fo-border-light);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background-color: var(--fo-border-light);
+  }
+
+  .item-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    margin-right: 14px;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 18px;
+    }
+
+    &.blue { background: rgba(37, 99, 235, 0.1); ion-icon { color: var(--fo-primary); } }
+    &.green { background: rgba(22, 163, 74, 0.1); ion-icon { color: var(--fo-success); } }
+    &.orange { background: rgba(245, 158, 11, 0.1); ion-icon { color: var(--fo-warning); } }
+    &.danger { background: rgba(220, 38, 38, 0.1); ion-icon { color: var(--fo-danger); } }
+    &.slate { background: rgba(100, 116, 139, 0.1); ion-icon { color: var(--fo-text-secondary); } }
+  }
+
+  .item-content {
+    flex: 1;
+    min-width: 0;
+
+    .item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fo-text);
+      line-height: 1.3;
+    }
+
+    .item-sub {
+      font-size: 11px;
+      color: var(--fo-text-secondary);
+      margin-top: 1px;
+    }
+  }
+
+  .item-chevron {
+    font-size: 16px;
+    color: var(--fo-text-muted);
+    margin-left: 10px;
+    flex-shrink: 0;
+  }
+}
+

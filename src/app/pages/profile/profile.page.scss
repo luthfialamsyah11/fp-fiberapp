@@ -1,0 +1,376 @@
+.prof-content {
+  --background: #F8FAFC;
+}
+
+.prof-body {
+  padding: 0 16px;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────────
+.prof-header-section {
+  padding: 56px 0 16px;
+
+  h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+}
+
+// ─── Profile Hero Card ────────────────────────────────────────────────────────────
+.profile-hero-card {
+  background: #FFFFFF;
+  border-radius: var(--fo-radius);
+  border: 1px solid var(--fo-border-light);
+  box-shadow: var(--fo-shadow-sm);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+}
+
+.profile-main-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.avatar-circle {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, var(--fo-primary) 0%, var(--fo-primary-dark) 100%);
+  color: #FFFFFF;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 800;
+  box-shadow: var(--fo-shadow-primary);
+  flex-shrink: 0;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  h3 {
+    margin: 0 0 2px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--fo-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  p {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--fo-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: var(--fo-radius-full);
+  padding: 4px 10px;
+  align-self: flex-start;
+  
+  ion-icon {
+    font-size: 12px;
+    color: var(--fo-primary);
+  }
+
+  span {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fo-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+// ─── Stats Row ───────────────────────────────────────────────────────────────────
+.stats-row {
+  display: flex;
+  align-items: center;
+  background: var(--fo-border-light);
+  border-radius: var(--fo-radius-sm);
+  padding: 12px 6px;
+}
+
+.stat-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--fo-text);
+}
+
+.stat-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--fo-text-secondary);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--fo-border);
+}
+
+// ─── Edit Mode Card ───────────────────────────────────────────────────────────────
+.edit-card {
+  background: #FFFFFF;
+  border-radius: var(--fo-radius);
+  border: 1px solid var(--fo-border-light);
+  box-shadow: var(--fo-shadow);
+  padding: 24px 20px;
+  margin-bottom: 24px;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.edit-header {
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--fo-text);
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--fo-text-secondary);
+  }
+}
+
+.input-group {
+  margin-bottom: 18px;
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fo-text-secondary);
+    margin-bottom: 6px;
+  }
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  background: var(--fo-bg);
+  border-radius: 12px;
+  padding: 0 14px;
+  border: 1.5px solid var(--fo-border);
+  transition: all 0.2s;
+
+  &.focused {
+    border-color: var(--fo-primary);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+
+    ion-icon { color: var(--fo-primary); }
+  }
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--fo-text-muted);
+    margin-right: 10px;
+    transition: color 0.2s;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 0;
+    font-size: 14px;
+    color: var(--fo-text);
+    outline: none;
+    font-family: 'Inter', sans-serif;
+
+    &::placeholder { color: var(--fo-text-muted); }
+  }
+}
+
+.edit-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 14px;
+  background: var(--fo-bg);
+  color: var(--fo-text);
+  border: 1px solid var(--fo-border);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:active {
+    background-color: var(--fo-border-light);
+  }
+}
+
+.btn-save {
+  flex: 2;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--fo-primary) 0%, var(--fo-primary-dark) 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--fo-shadow-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.95;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  --color: #ffffff;
+}
+
+// ─── Logout Button ───────────────────────────────────────────────────────────────
+.logout-container {
+  margin-top: 24px;
+}
+
+.btn-logout-premium {
+  width: 100%;
+  padding: 15px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--fo-danger);
+  border-radius: var(--fo-radius-sm);
+  color: var(--fo-danger);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s;
+
+  &:active {
+    background-color: var(--fo-danger-light);
+  }
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+// ─── App Info ────────────────────────────────────────────────────────────────────
+.app-version-label {
+  text-align: center;
+  padding: 24px 0 12px;
+
+  p {
+    font-size: 11px;
+    color: var(--fo-text-muted);
+    margin: 0 0 2px;
+  }
+
+  .copyright {
+    color: var(--fo-text-muted);
+    opacity: 0.7;
+  }
+}
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────────
+.skeleton-wrap {
+  padding: 80px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .sk-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
+    background-size: 200% 100%;
+    margin-bottom: 24px;
+    animation: shimmer 1.2s infinite;
+  }
+
+  .sk-form {
+    width: 100%;
+
+    .sk-input {
+      height: 48px;
+      background: linear-gradient(90deg, #E2E8F0 25%, #F1F5F9 50%, #E2E8F0 75%);
+      background-size: 200% 100%;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      animation: shimmer 1.2s infinite;
+    }
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.footer-space { height: 24px; }

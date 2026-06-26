@@ -1,0 +1,95 @@
+<ion-content class="tl-content has-tab-bar">
+
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Header -->
+  <div class="tl-header-section">
+    <div class="tl-title-row">
+      <h1>Daftar Tugas</h1>
+      <span class="task-count" *ngIf="!isLoading">{{ filteredTasks.length }} tugas</span>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-box">
+      <ion-icon name="search-outline"></ion-icon>
+      <input
+        type="text"
+        placeholder="Cari tugas atau lokasi..."
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Filter Chips -->
+  <div class="filter-scroll">
+    <button
+      *ngFor="let f of filters"
+      class="filter-chip"
+      [class.active]="selectedFilter === f.value"
+      (click)="setFilter(f.value)"
+    >
+      {{ f.label }}
+    </button>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="skeleton-item" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredTasks.length === 0" class="empty-state">
+    <div class="empty-icon-wrap">
+      <ion-icon name="clipboard-outline"></ion-icon>
+    </div>
+    <h3>Tidak ada tugas</h3>
+    <p>Tidak ada tugas yang sesuai dengan filter ini</p>
+  </div>
+
+  <!-- Task Cards -->
+  <div class="task-list" *ngIf="!isLoading && filteredTasks.length > 0">
+    <div
+      class="task-card"
+      *ngFor="let task of filteredTasks"
+      (click)="goToDetail(task.id)"
+    >
+      <div class="priority-bar" [style.background]="getPriorityColor(task.priority)"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <span class="task-title">{{ task.title }}</span>
+          <ion-badge [color]="getStatusColor(task.status)">
+            {{ getStatusLabel(task.status) }}
+          </ion-badge>
+        </div>
+
+        <div class="card-meta">
+          <span class="meta-item" *ngIf="task.customer_name">
+            <ion-icon name="person-outline"></ion-icon>
+            {{ task.customer_name }}
+          </span>
+          <span class="meta-item" *ngIf="task.location">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ task.location }}
+          </span>
+          <span class="meta-item" *ngIf="task.scheduled_at">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ task.scheduled_at | date:'dd MMM yyyy' }}
+          </span>
+        </div>
+
+        <div class="card-desc" *ngIf="task.description">
+          {{ task.description }}
+        </div>
+      </div>
+      <div class="card-arrow">
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-space"></div>
+</ion-content>
+
+<app-tab-bar activeTab="tasks"></app-tab-bar>

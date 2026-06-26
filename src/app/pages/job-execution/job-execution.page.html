@@ -1,0 +1,156 @@
+<ion-content class="je-content">
+
+  <!-- Skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="sk-block"></div>
+    <div class="sk-block short"></div>
+    <div class="sk-block"></div>
+  </div>
+
+  <div *ngIf="!isLoading && task">
+
+    <!-- Task Info Banner -->
+    <div class="task-banner">
+      <button class="back-btn" (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+      <div class="banner-content">
+        <span class="banner-label">Pelaksanaan Tugas</span>
+        <h2>{{ task.title }}</h2>
+        <div class="banner-meta">
+          <span *ngIf="task.location">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ task.location }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="je-body">
+
+      <!-- Start Task Button (if assigned but not started) -->
+      <div class="section-card" *ngIf="task.status === 'assigned' || task.status === 'accepted'">
+        <div class="section-header">
+          <div class="section-icon blue">
+            <ion-icon name="play-circle-outline"></ion-icon>
+          </div>
+          <span>Mulai Tugas</span>
+        </div>
+        <p class="section-desc">Klik tombol di bawah untuk memulai pengerjaan tugas ini.</p>
+        <button class="btn-action btn-start" (click)="startTask()">
+          <ion-icon name="play-outline"></ion-icon>
+          Mulai Sekarang
+        </button>
+      </div>
+
+      <!-- Progress Update (if in progress) -->
+      <div class="section-card" *ngIf="task.status === 'on-going'">
+        <div class="section-header">
+          <div class="section-icon purple">
+            <ion-icon name="bar-chart-outline"></ion-icon>
+          </div>
+          <span>Update Progres</span>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-labels">
+            <span>Progres</span>
+            <span class="progress-val">{{ progressPercent }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="progressPercent"></div>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            [(ngModel)]="progressPercent"
+            class="progress-slider"
+          />
+        </div>
+
+        <div class="input-group">
+          <label>Catatan Progres</label>
+          <textarea
+            [(ngModel)]="progressNote"
+            placeholder="Deskripsikan perkembangan pekerjaan..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <button
+          class="btn-action btn-update"
+          (click)="updateProgress()"
+          [disabled]="isUpdating"
+        >
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          {{ isUpdating ? 'Menyimpan...' : 'Simpan Progres' }}
+        </button>
+      </div>
+
+      <!-- Proof of Work Upload -->
+      <div class="section-card" *ngIf="task.status === 'on-going'">
+        <div class="section-header">
+          <div class="section-icon orange">
+            <ion-icon name="camera-outline"></ion-icon>
+          </div>
+          <span>Bukti Pekerjaan</span>
+        </div>
+
+        <div class="file-picker" (click)="fileInput.click()">
+          <div class="picker-icon">
+            <ion-icon name="image-outline"></ion-icon>
+          </div>
+          <span *ngIf="!selectedFile">Pilih foto bukti pekerjaan</span>
+          <span *ngIf="selectedFile" class="file-name">{{ selectedFile.name }}</span>
+        </div>
+        <input #fileInput type="file" accept="image/*" style="display:none" (change)="onFileChange($event)" />
+
+        <div class="input-group">
+          <label>Deskripsi</label>
+          <input
+            type="text"
+            [(ngModel)]="proofDescription"
+            placeholder="Deskripsi singkat bukti pekerjaan"
+          />
+        </div>
+
+        <button
+          class="btn-action btn-upload"
+          (click)="uploadProof()"
+          [disabled]="isUploading || !selectedFile"
+        >
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          {{ isUploading ? 'Mengunggah...' : 'Unggah Bukti' }}
+        </button>
+      </div>
+
+      <!-- Complete Task -->
+      <div class="section-card complete-card" *ngIf="task.status === 'on-going'">
+        <div class="section-header">
+          <div class="section-icon green">
+            <ion-icon name="checkmark-done-outline"></ion-icon>
+          </div>
+          <span>Selesaikan Tugas</span>
+        </div>
+        <p class="section-desc">Pastikan semua pekerjaan telah selesai dan bukti sudah diunggah sebelum menyelesaikan tugas.</p>
+        <button class="btn-action btn-complete" (click)="completeTask()">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Tandai Selesai
+        </button>
+      </div>
+
+      <!-- Already Completed -->
+      <div class="done-banner" *ngIf="task.status === 'completed'">
+        <div class="done-icon-wrap">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <h3>Tugas Telah Selesai</h3>
+        <p>Pekerjaan ini sudah diselesaikan.</p>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

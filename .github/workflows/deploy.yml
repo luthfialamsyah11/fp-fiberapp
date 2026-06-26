@@ -1,0 +1,84 @@
+name: 🚀 Auto Deploy FSM to Rumahweb FTP
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    name: Build and Deploy to cPanel via FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository code
+      - name: 📁 Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js environment
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3. Install dependencies and build Ionic/Angular frontend
+      - name: 🏗️ Install & Build Frontend
+        run: |
+          npm ci
+          npx ng build --configuration production --base-href /
+
+      # 4. Deploy Compiled Frontend PWA to /publik_html/app/
+      - name: 🚀 Deploy PWA Client
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./www/
+          server-dir: /public_html/app/
+          dry-run: false
+
+      # 4.5 Deploy Landing Page to /public_html/ (Root)
+      - name: 🚀 Deploy Root Landing Page
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./landing-page/
+          server-dir: /public_html/
+          dry-run: false
+
+      # 5. Deploy Admin Public bootstrap assets to /publik_html/admin/
+      - name: 🚀 Deploy Admin Public
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./admin-public/
+          server-dir: /public_html/admin/
+          dry-run: false
+
+      # 6. Deploy Backend Core Laravel (exclude vendor, node_modules, tests, local .env) to /inti laravel/
+      - name: 🚀 Deploy Laravel Backend Core
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./fsm-backend/
+          server-dir: /laravel-core/
+          dry-run: false
+          exclude: |
+            **/node_modules/**
+            **/vendor/**
+            **/tests/**
+            **/.git*
+            **/.env*
+            **/composer.lock
+            **/package-lock.json
+            **/laravel.zip
+            **/resources.zip

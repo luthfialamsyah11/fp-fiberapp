@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiberOps | Solusi Cerdas Manajemen Fiber Optik</title>
+    
+    <!-- Meta SEO -->
+    <meta name="description" content="FiberOps: Portal manajemen teknisi, progress tracking, dan administrasi ISP cerdas.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css?v=2.0">
+    
+    <!-- Inline script to detect JS and prevent layout hide on JS failure -->
+    <script>document.documentElement.classList.add('js-enabled');</script>
+</head>
+<body>
+    
+    <!-- Background Tech Overlays -->
+    <div class="mouse-glow" id="mouse-glow"></div>
+    <div class="grid-overlay"></div>
+    <div class="blob blob-cyan"></div>
+    <div class="blob blob-purple"></div>
+
+    <main class="container">
+        <!-- Header/Hero Section -->
+        <header class="hero" id="hero-section">
+            <div class="logo-wrapper">
+                <ion-icon name="pulse-outline" class="logo-icon"></ion-icon>
+            </div>
+            <h1 class="title">Fiber<span>Ops</span></h1>
+            <p class="subtitle">Sistem Koordinasi Lapangan & Dasbor Diagnostik Infrastruktur Jaringan</p>
+        </header>
+
+        <!-- Navigation Portal -->
+        <section class="portal-grid" id="portal-section">
+            
+            <!-- Admin Dashboard Card -->
+            <a href="https://admin.bentengsiber.com/login" class="portal-card admin-card">
+                <div class="card-glow"></div>
+                <div class="card-icon admin-icon">
+                    <ion-icon name="terminal-outline"></ion-icon>
+                </div>
+                <div class="card-content">
+                    <h2>Clientzone Admin</h2>
+                    <p>Pusat kendali administrator untuk memantau status jaringan, penugasan teknisi, persetujuan kerja, dan diagnostik server.</p>
+                </div>
+                <div class="card-footer">
+                    <span>Akses Panel Kontrol</span>
+                    <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+            </a>
+
+            <!-- Technician Playstore Card -->
+            <a href="playstore.html" class="portal-card tech-card">
+                <div class="card-glow"></div>
+                <div class="card-icon tech-icon">
+                    <ion-icon name="phone-portrait-outline"></ion-icon>
+                </div>
+                <div class="card-content">
+                    <h2>Technician App</h2>
+                    <p>Aplikasi pelaporan teknisi lapangan. Unduh installer resmi langsung melalui Google Play Store di perangkat mobile Anda.</p>
+                </div>
+                <div class="card-footer">
+                    <span>Instal di Playstore</span>
+                    <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+            </a>
+
+        </section>
+
+        <!-- Platform Metrics Showcase -->
+        <section class="metrics-showcase" id="metrics-section">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-circle">
+                        <span class="metric-val">12+</span>
+                    </div>
+                    <div class="metric-label">Teknisi Aktif</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-circle">
+                        <span class="metric-val">45+</span>
+                    </div>
+                    <div class="metric-label">Tugas Harian</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-circle">
+                        <span class="metric-val">94%</span>
+                    </div>
+                    <div class="metric-label">Rasio Selesai</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Platform Architecture Map Section -->
+        <section class="architecture-section" id="architecture-section">
+            <div class="arch-header">
+                <h2>Aliran Data & Arsitektur Sistem</h2>
+                <p>Bagaimana FiberOps mengintegrasikan lapangan dengan pusat kendali secara realtime.</p>
+            </div>
+            
+            <div class="arch-map">
+                <!-- Node 1: Mobile App -->
+                <div class="arch-node">
+                    <div class="node-icon"><ion-icon name="phone-portrait-outline"></ion-icon></div>
+                    <h3>Technician App</h3>
+                    <span>Ionic PWA (Mobile)</span>
+                </div>
+                
+                <!-- Connection Line 1 -->
+                <div class="arch-link">
+                    <svg class="link-svg">
+                        <path d="M 0,25 L 120,25" class="link-path link-path-1"></path>
+                    </svg>
+                    <span class="link-label">API Request</span>
+                </div>
+                
+                <!-- Node 2: Core API -->
+                <div class="arch-node node-core">
+                    <div class="node-icon"><ion-icon name="server-outline"></ion-icon></div>
+                    <h3>Laravel Core</h3>
+                    <span>API Gateway & DB</span>
+                </div>
+                
+                <!-- Connection Line 2 -->
+                <div class="arch-link">
+                    <svg class="link-svg">
+                        <path d="M 0,25 L 120,25" class="link-path link-path-2"></path>
+                    </svg>
+                    <span class="link-label">Realtime Feed</span>
+                </div>
+                
+                <!-- Node 3: Dashboard -->
+                <div class="arch-node">
+                    <div class="node-icon"><ion-icon name="desktop-outline"></ion-icon></div>
+                    <h3>Clientzone Web</h3>
+                    <span>Admin Dashboard</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Features Section -->
+        <section class="detailed-features" id="detailed-features">
+            <div class="feature-card">
+                <div class="f-icon"><ion-icon name="navigate-outline"></ion-icon></div>
+                <h3>Peta & Lokasi Lapangan</h3>
+                <p>Melacak koordinat teknisi saat pengerjaan tugas secara langsung demi optimalisasi rute dan efisiensi koordinasi.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><ion-icon name="images-outline"></ion-icon></div>
+                <h3>Validasi Progress Visual</h3>
+                <p>Pengunggahan bukti foto pengerjaan tugas secara digital untuk meminimalkan manipulasi data lapangan.</p>
+            </div>
+            <div class="feature-card">
+                <div class="f-icon"><ion-icon name="terminal-outline"></ion-icon></div>
+                <h3>Pusat Kontrol Cerdas</h3>
+                <p>Didukung oleh panel kendali khusus untuk diagnosa kesehatan server dan perbaikan database sekali klik.</p>
+            </div>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section class="tech-stack-section">
+            <div class="stack-badges">
+                <div class="stack-badge"><ion-icon name="logo-laravel"></ion-icon> Laravel</div>
+                <div class="stack-badge"><ion-icon name="logo-angular"></ion-icon> Angular</div>
+                <div class="stack-badge"><ion-icon name="logo-ionic"></ion-icon> Ionic PWA</div>
+                <div class="stack-badge"><ion-icon name="logo-electron"></ion-icon> Capacitor</div>
+                <div class="stack-badge"><ion-icon name="logo-firebase"></ion-icon> MySQL</div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p><a href="privacy-policy.html" style="color: #22d3ee; text-decoration: none; margin-right: 1rem;">Kebijakan Privasi</a></p>
+        <p>&copy; 2026 FiberOps by Benteng Siber. All rights reserved.</p>
+    </footer>
+
+    <!-- Ionicons Script -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <!-- Custom Script -->
+    <script src="script.js?v=2.0"></script>
+</body>
+</html>

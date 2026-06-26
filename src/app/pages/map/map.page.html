@@ -1,0 +1,88 @@
+<ion-content class="map-content has-tab-bar">
+
+  <!-- Map Visual Area -->
+  <div class="map-viewport">
+    <div class="map-grid">
+      <div class="grid-line h" *ngFor="let i of [1,2,3,4,5,6,7]"></div>
+      <div class="grid-line v" *ngFor="let i of [1,2,3,4,5,6,7]"></div>
+    </div>
+    
+    <!-- Center Pin -->
+    <div class="center-pin" [class.pulsing]="!isLocating">
+      <div class="pin-ring"></div>
+      <div class="pin-dot"></div>
+    </div>
+
+    <!-- Floating Controls -->
+    <div class="map-controls">
+      <button class="map-ctrl-btn" (click)="refreshLocation()" [class.spinning]="isLocating">
+        <ion-icon name="locate-outline"></ion-icon>
+      </button>
+      <button class="map-ctrl-btn" (click)="openInMaps()">
+        <ion-icon name="navigate-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Coordinates Overlay -->
+    <div class="coords-overlay" *ngIf="latitude !== null && longitude !== null">
+      <div class="coords-badge">
+        <ion-icon name="location"></ion-icon>
+        <span>{{ latitude.toFixed(6) }}, {{ longitude.toFixed(6) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Sheet -->
+  <div class="map-sheet">
+
+    <!-- Location Status -->
+    <div class="location-status-card">
+      <div class="loc-header">
+        <div class="loc-icon" [class.active]="!locationError" [class.error]="locationError">
+          <ion-icon [name]="locationError ? 'warning-outline' : 'radio-outline'"></ion-icon>
+        </div>
+        <div class="loc-info">
+          <h3 *ngIf="!locationError">GPS Aktif</h3>
+          <h3 *ngIf="locationError">GPS Tidak Tersedia</h3>
+          <p *ngIf="accuracy">Akurasi: ±{{ accuracy }}m</p>
+          <p *ngIf="lastUpdated">Update: {{ lastUpdated | date:'HH:mm:ss' }}</p>
+          <p *ngIf="!lastUpdated && !locationError">Mencari lokasi...</p>
+        </div>
+        <button class="refresh-btn" (click)="refreshLocation()" [disabled]="isLocating">
+          <ion-icon name="refresh-outline" [class.spin]="isLocating"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Task Card -->
+    <div class="active-task-card" *ngIf="activeTask" (click)="navigateToTask()">
+      <div class="task-indicator">
+        <div class="pulse-dot"></div>
+      </div>
+      <div class="task-info">
+        <span class="task-label">Tugas Aktif</span>
+        <h4>{{ activeTask.title }}</h4>
+        <p *ngIf="activeTask.location">
+          <ion-icon name="location-outline"></ion-icon>
+          {{ activeTask.location }}
+        </p>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="task-arrow"></ion-icon>
+    </div>
+
+    <!-- No Active Task -->
+    <div class="no-task-card" *ngIf="!activeTask">
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      <p>Tidak ada tugas aktif saat ini</p>
+    </div>
+
+    <!-- Quick Navigate Button -->
+    <button class="btn-navigate" (click)="openInMaps()">
+      <ion-icon name="navigate-outline"></ion-icon>
+      Buka di Google Maps
+    </button>
+  </div>
+
+</ion-content>
+
+<app-tab-bar activeTab="map"></app-tab-bar>

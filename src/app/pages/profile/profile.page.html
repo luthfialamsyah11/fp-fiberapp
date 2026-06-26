@@ -1,0 +1,179 @@
+<ion-content class="prof-content has-tab-bar">
+  <!-- Loading Skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="sk-avatar"></div>
+    <div class="sk-form">
+      <div class="sk-input"></div>
+      <div class="sk-input"></div>
+      <div class="sk-input"></div>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <div *ngIf="!isLoading" class="prof-body">
+
+    <!-- Header -->
+    <div class="prof-header-section">
+      <h1>Profil Saya</h1>
+    </div>
+
+    <!-- VIEW MODE -->
+    <ng-container *ngIf="!isEditing">
+      <!-- Profile Summary Card -->
+      <div class="profile-hero-card">
+        <div class="profile-main-info">
+          <div class="avatar-circle">
+            {{ name ? name.substring(0, 1).toUpperCase() : 'T' }}
+          </div>
+          <div class="user-meta">
+            <h3>{{ name || 'Teknisi' }}</h3>
+            <p>{{ email }}</p>
+            <div class="role-badge">
+              <ion-icon name="shield-checkmark"></ion-icon>
+              <span>Teknisi Premium</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Driver Performance Stats Row -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-num">4.9 ★</span>
+            <span class="stat-lbl">Rating</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-box">
+            <span class="stat-num">100%</span>
+            <span class="stat-lbl">Penerimaan</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-box">
+            <span class="stat-num">32t</span>
+            <span class="stat-lbl">Tugas Selesai</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings List Category: Akun -->
+      <div class="fo-section-header">Pengaturan Akun</div>
+      <div class="fo-list-group">
+        <div class="fo-list-item" (click)="isEditing = true">
+          <div class="item-icon-wrap blue">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <div class="item-content">
+            <div class="item-title">Ubah Data Diri</div>
+            <div class="item-sub">Nama lengkap & Nomor telepon aktif</div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+        </div>
+
+        <div class="fo-list-item" (click)="changePassword()">
+          <div class="item-icon-wrap orange">
+            <ion-icon name="key-outline"></ion-icon>
+          </div>
+          <div class="item-content">
+            <div class="item-title">Ubah Kata Sandi</div>
+            <div class="item-sub">Ganti kata sandi pengaman akun</div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Settings List Category: Dukungan & Info -->
+      <div class="fo-section-header">Dukungan & Aplikasi</div>
+      <div class="fo-list-group">
+        <div class="fo-list-item" (click)="helpCenter()">
+          <div class="item-icon-wrap green">
+            <ion-icon name="help-circle-outline"></ion-icon>
+          </div>
+          <div class="item-content">
+            <div class="item-title">Pusat Bantuan</div>
+            <div class="item-sub">Bantuan teknis lapangan & hubungi IT</div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+        </div>
+
+        <div class="fo-list-item" (click)="appInfo()">
+          <div class="item-icon-wrap slate">
+            <ion-icon name="information-circle-outline"></ion-icon>
+          </div>
+          <div class="item-content">
+            <div class="item-title">Tentang FiberOps</div>
+            <div class="item-sub">Informasi versi aplikasi & hak cipta</div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <div class="logout-container">
+        <button class="btn-logout-premium" (click)="doLogout()">
+          <ion-icon name="log-out-outline"></ion-icon>
+          <span>Keluar dari Akun</span>
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- EDIT MODE -->
+    <ng-container *ngIf="isEditing">
+      <div class="edit-card">
+        <div class="edit-header">
+          <h3>Edit Data Diri</h3>
+          <p>Ubah nama dan nomor telepon Anda di bawah ini</p>
+        </div>
+
+        <div class="input-group">
+          <label>Nama Lengkap</label>
+          <div class="input-container" [class.focused]="nameFocused">
+            <ion-icon name="person-outline"></ion-icon>
+            <input
+              type="text"
+              [(ngModel)]="name"
+              placeholder="Nama lengkap Anda..."
+              [disabled]="isSaving"
+              (focus)="nameFocused = true"
+              (blur)="nameFocused = false"
+            />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Nomor Telepon</label>
+          <div class="input-container" [class.focused]="phoneFocused">
+            <ion-icon name="call-outline"></ion-icon>
+            <input
+              type="tel"
+              [(ngModel)]="phone"
+              placeholder="Nomor telepon aktif..."
+              [disabled]="isSaving"
+              (focus)="phoneFocused = true"
+              (blur)="phoneFocused = false"
+            />
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="edit-actions">
+          <button class="btn-cancel" (click)="isEditing = false" [disabled]="isSaving">
+            Batal
+          </button>
+          <button class="btn-save" (click)="saveProfile()" [disabled]="isSaving">
+            <ion-spinner name="crescent" *ngIf="isSaving" class="btn-spinner"></ion-spinner>
+            <span>{{ isSaving ? 'Menyimpan...' : 'Simpan' }}</span>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- App version label -->
+    <div class="app-version-label" *ngIf="!isEditing">
+      <p>FiberOps v1.0.4-premium</p>
+      <p class="copyright">&copy; 2026 FiberOps. All rights reserved.</p>
+    </div>
+
+    <div class="footer-space"></div>
+  </div>
+</ion-content>
+
+<app-tab-bar activeTab="profile"></app-tab-bar>

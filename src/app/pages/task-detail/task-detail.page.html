@@ -1,0 +1,146 @@
+<ion-content class="td-content">
+
+  <!-- Skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="sk-header"></div>
+    <div class="sk-body">
+      <div class="sk-line w60"></div>
+      <div class="sk-line w100"></div>
+      <div class="sk-line w80"></div>
+      <div class="sk-line w100"></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && task">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <button class="back-btn" (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+      <div class="hero-content">
+        <div class="hero-badges">
+          <ion-badge [color]="getStatusColor(task.status)" class="big-badge">
+            {{ getStatusLabel(task.status) }}
+          </ion-badge>
+          <span class="priority-tag" [style.background]="getPriorityColor(task.priority)">
+            <ion-icon name="flag-outline"></ion-icon>
+            {{ getPriorityLabel(task.priority) }}
+          </span>
+        </div>
+        <h1 class="hero-title">{{ task.title }}</h1>
+      </div>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="info-section">
+
+      <!-- Description -->
+      <div class="info-card" *ngIf="task.description">
+        <div class="info-label">
+          <ion-icon name="document-text-outline"></ion-icon>
+          Deskripsi Pekerjaan
+        </div>
+        <p class="info-value">{{ task.description }}</p>
+      </div>
+
+      <!-- Customer & Schedule Row -->
+      <div class="info-row">
+        <div class="info-card half" *ngIf="task.customer_name">
+          <div class="info-label">
+            <ion-icon name="person-outline"></ion-icon>
+            Pelanggan
+          </div>
+          <p class="info-value">{{ task.customer_name }}</p>
+          <p class="info-sub" *ngIf="task.customer_phone">
+            <ion-icon name="call-outline"></ion-icon>
+            {{ task.customer_phone }}
+          </p>
+        </div>
+
+        <div class="info-card half" *ngIf="task.scheduled_at">
+          <div class="info-label">
+            <ion-icon name="calendar-outline"></ion-icon>
+            Jadwal
+          </div>
+          <p class="info-value">{{ task.scheduled_at | date:'dd MMM yyyy' }}</p>
+          <p class="info-sub">{{ task.scheduled_at | date:'HH:mm' }} WIB</p>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="info-card" *ngIf="task.location">
+        <div class="info-label">
+          <ion-icon name="location-outline"></ion-icon>
+          Lokasi
+        </div>
+        <p class="info-value">{{ task.location }}</p>
+        <button class="btn-navigate-mini" *ngIf="task.latitude && task.longitude" (click)="openMaps()">
+          <ion-icon name="navigate-outline"></ion-icon>
+          Navigasi
+        </button>
+      </div>
+
+      <!-- Notes -->
+      <div class="info-card" *ngIf="task.notes">
+        <div class="info-label">
+          <ion-icon name="chatbox-outline"></ion-icon>
+          Catatan Tambahan
+        </div>
+        <p class="info-value">{{ task.notes }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Not Found -->
+  <div *ngIf="!isLoading && !task" class="empty-state">
+    <div class="empty-icon-wrap">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+    </div>
+    <h3>Tugas tidak ditemukan</h3>
+    <button class="btn-go-back" (click)="goBack()">Kembali</button>
+  </div>
+
+</ion-content>
+
+<!-- Action Footer -->
+<ion-footer *ngIf="!isLoading && task" class="td-footer">
+  <div class="footer-actions">
+
+    <!-- Assigned: can accept or reject -->
+    <ng-container *ngIf="task.status === 'assigned' || task.status === 'pending'">
+      <button class="btn-reject" (click)="rejectTask()" [disabled]="isActioning">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        Tolak
+      </button>
+      <button class="btn-accept" (click)="acceptTask()" [disabled]="isActioning">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Terima
+      </button>
+    </ng-container>
+
+    <!-- Accepted / on-going: go to execution -->
+    <button
+      *ngIf="task.status === 'on-going' || task.status === 'accepted'"
+      class="btn-execute"
+      (click)="goToExecution()"
+    >
+      <ion-icon name="construct-outline"></ion-icon>
+      Kerjakan Tugas
+    </button>
+
+    <!-- Completed -->
+    <div *ngIf="task.status === 'completed'" class="status-done">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Tugas Selesai
+    </div>
+
+    <!-- Rejected -->
+    <div *ngIf="task.status === 'rejected'" class="status-rejected">
+      <ion-icon name="close-circle"></ion-icon>
+      Tugas Ditolak
+    </div>
+
+  </div>
+</ion-footer>

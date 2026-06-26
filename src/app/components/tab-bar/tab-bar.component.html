@@ -1,0 +1,14 @@
+<div class="tab-bar">
+  <button
+    *ngFor="let tab of tabs"
+    class="tab-item"
+    [class.active]="activeTab === tab.key"
+    (click)="navigate(tab)"
+  >
+    <div class="tab-icon-wrap">
+      <div class="tab-indicator" *ngIf="activeTab === tab.key"></div>
+      <ion-icon [name]="getIcon(tab)"></ion-icon>
+    </div>
+    <span class="tab-label">{{ tab.label }}</span>
+  </button>
+</div>

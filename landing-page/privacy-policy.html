@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebijakan Privasi | FiberOps</title>
+
+    <!-- Meta SEO -->
+    <meta name="description" content="Kebijakan Privasi aplikasi FiberOps - Sistem Manajemen Teknisi Lapangan oleh Benteng Siber.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <style>
+        /* ===== CSS Reset & Base ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #22d3ee;
+            --accent-purple: #a78bfa;
+            --accent-blue: #3b82f6;
+            --border-subtle: rgba(148, 163, 184, 0.1);
+            --border-glow: rgba(34, 211, 238, 0.15);
+            --font-heading: 'Sora', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== Background Effects ===== */
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .blob {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            opacity: 0.15; pointer-events: none; z-index: 0;
+        }
+        .blob-cyan { width: 500px; height: 500px; background: var(--accent-cyan); top: -100px; right: -150px; }
+        .blob-purple { width: 400px; height: 400px; background: var(--accent-purple); bottom: -80px; left: -100px; }
+
+        /* ===== Layout ===== */
+        .container {
+            position: relative; z-index: 1;
+            max-width: 860px; margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* ===== Navigation ===== */
+        .top-nav {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 1rem 0 2.5rem;
+        }
+
+        .back-link {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: var(--accent-cyan); text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 0.75; }
+        .back-link ion-icon { font-size: 1.1rem; }
+
+        /* ===== Header ===== */
+        .policy-header {
+            text-align: center; margin-bottom: 3rem;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .policy-header .logo-text {
+            font-family: var(--font-heading);
+            font-size: 1.5rem; font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .policy-header .logo-text span { color: var(--accent-cyan); }
+
+        .policy-header h1 {
+            font-family: var(--font-heading);
+            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+
+        .policy-header .effective-date {
+            font-size: 0.9rem; color: var(--text-muted);
+        }
+
+        /* ===== Content Sections ===== */
+        .policy-section {
+            margin-bottom: 2.5rem;
+            padding: 1.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            transition: border-color 0.3s;
+        }
+        .policy-section:hover { border-color: var(--border-glow); }
+
+        .policy-section h2 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem; font-weight: 600;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 0.6rem;
+        }
+        .policy-section h2 ion-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+        .policy-section h3 {
+            font-family: var(--font-heading);
+            font-size: 1rem; font-weight: 600;
+            color: var(--text-primary);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        .policy-section p,
+        .policy-section li {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.85;
+        }
+
+        .policy-section ul, .policy-section ol {
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        .policy-section li { margin-bottom: 0.35rem; }
+
+        .policy-section a {
+            color: var(--accent-cyan);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .policy-section a:hover { opacity: 0.8; }
+
+        /* ===== Data Table ===== */
+        .data-table {
+            width: 100%; border-collapse: collapse;
+            margin: 1rem 0; font-size: 0.9rem;
+        }
+        .data-table th, .data-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .data-table th {
+            color: var(--accent-cyan);
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .data-table td { color: var(--text-secondary); }
+        .data-table tbody tr:hover { background: rgba(34, 211, 238, 0.03); }
+
+        /* ===== Contact Card ===== */
+        .contact-card {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(167, 139, 250, 0.08));
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2rem; text-align: center;
+            margin-top: 3rem;
+        }
+        .contact-card h2 {
+            font-family: var(--font-heading);
+            font-size: 1.15rem; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 0.75rem;
+        }
+        .contact-card p {
+            color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0.35rem;
+        }
+        .contact-card a { color: var(--accent-cyan); text-decoration: none; }
+        .contact-card a:hover { text-decoration: underline; }
+
+        /* ===== Footer ===== */
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 3rem;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            .container { padding: 1.25rem 1rem 3rem; }
+            .policy-section { padding: 1.25rem; border-radius: 12px; }
+            .data-table { font-size: 0.8rem; }
+            .data-table th, .data-table td { padding: 0.6rem 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Effects -->
+    <div class="grid-overlay"></div>
+    <div class="blob blob-cyan"></div>
+    <div class="blob blob-purple"></div>
+
+    <div class="container">
+
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <a href="index.html" class="back-link">
+                <ion-icon name="arrow-back-outline"></ion-icon>
+                Kembali ke Beranda
+            </a>
+        </nav>
+
+        <!-- Header -->
+        <header class="policy-header">
+            <div class="logo-text">Fiber<span>Ops</span></div>
+            <h1>Kebijakan Privasi</h1>
+            <p class="effective-date">Berlaku sejak: 26 Juni 2026 &bull; Terakhir diperbarui: 26 Juni 2026</p>
+        </header>
+
+        <!-- Section 1: Pendahuluan -->
+        <section class="policy-section" id="pendahuluan">
+            <h2><ion-icon name="information-circle-outline"></ion-icon> 1. Pendahuluan</h2>
+            <p>
+                Selamat datang di <strong>FiberOps</strong> ("Aplikasi", "Kami"). FiberOps adalah aplikasi manajemen teknisi lapangan 
+                (<em>Field Service Management</em>) yang dikembangkan oleh <strong>Benteng Siber</strong> ("Pengembang") untuk 
+                membantu perusahaan penyedia layanan internet (ISP) dalam mengelola dan memantau pekerjaan teknisi jaringan fiber optik di lapangan.
+            </p>
+            <p>
+                Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pribadi 
+                Anda saat menggunakan aplikasi mobile FiberOps yang tersedia di Google Play Store maupun melalui akses web Progressive Web App (PWA). 
+                Dengan mengunduh, menginstal, atau menggunakan Aplikasi ini, Anda menyetujui praktik yang dijelaskan dalam Kebijakan Privasi ini.
+            </p>
+        </section>
+
+        <!-- Section 2: Data yang Dikumpulkan -->
+        <section class="policy-section" id="data-dikumpulkan">
+            <h2><ion-icon name="layers-outline"></ion-icon> 2. Data yang Kami Kumpulkan</h2>
+            <p>Kami mengumpulkan jenis data berikut untuk menjalankan fungsi utama Aplikasi:</p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Jenis Data</th>
+                        <th>Detail</th>
+                        <th>Tujuan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Informasi Akun</strong></td>
+                        <td>Nama, alamat email, kata sandi (terenkripsi), dan peran pengguna (teknisi/admin)</td>
+                        <td>Autentikasi dan otorisasi akses aplikasi</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Lokasi GPS</strong></td>
+                        <td>Koordinat latitude &amp; longitude secara real-time saat pelacakan aktif</td>
+                        <td>Pemantauan posisi teknisi di lapangan dan optimasi rute perjalanan</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Foto &amp; Gambar</strong></td>
+                        <td>Foto bukti kerja lapangan (sebelum &amp; sesudah pengerjaan tugas)</td>
+                        <td>Dokumentasi dan validasi progres pengerjaan tugas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Profil</strong></td>
+                        <td>Informasi profil pengguna yang diperbarui melalui pengaturan akun</td>
+                        <td>Personalisasi pengalaman pengguna dan identifikasi teknisi</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Tugas</strong></td>
+                        <td>Catatan progres, status tugas, dan riwayat pekerjaan</td>
+                        <td>Pengelolaan alur kerja dan pelaporan kinerja</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Token Autentikasi</strong></td>
+                        <td>Token sesi yang disimpan secara lokal di perangkat</td>
+                        <td>Menjaga sesi login tanpa perlu login ulang berulang kali</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 3: Izin Perangkat -->
+        <section class="policy-section" id="izin-perangkat">
+            <h2><ion-icon name="key-outline"></ion-icon> 3. Izin Perangkat yang Diperlukan</h2>
+            <p>Untuk menjalankan fungsi-fungsi di atas, Aplikasi memerlukan izin akses perangkat berikut:</p>
+            <ul>
+                <li>
+                    <strong>Lokasi (ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION)</strong> &mdash; 
+                    Diperlukan untuk melacak posisi GPS teknisi saat menjalankan tugas di lapangan. Pelacakan lokasi hanya aktif saat teknisi 
+                    memulai sesi kerja dan dihentikan secara otomatis saat sesi selesai atau aplikasi ditutup.
+                </li>
+                <li>
+                    <strong>Kamera (CAMERA)</strong> &mdash; 
+                    Diperlukan untuk mengambil foto bukti dokumentasi pengerjaan tugas lapangan (kondisi sebelum dan sesudah perbaikan).
+                </li>
+                <li>
+                    <strong>Penyimpanan (READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE)</strong> &mdash; 
+                    Diperlukan untuk menyimpan foto sementara sebelum diunggah ke server serta menyimpan token autentikasi secara lokal.
+                </li>
+                <li>
+                    <strong>Internet (INTERNET, ACCESS_NETWORK_STATE)</strong> &mdash; 
+                    Diperlukan untuk komunikasi dengan server API backend guna sinkronisasi data tugas, lokasi, dan berkas dokumentasi.
+                </li>
+            </ul>
+            <p>
+                Anda memiliki kendali penuh atas izin-izin tersebut melalui pengaturan perangkat Android Anda dan dapat mencabut izin kapan saja, 
+                meskipun hal ini dapat mempengaruhi fungsionalitas Aplikasi.
+            </p>
+        </section>
+
+        <!-- Section 4: Penggunaan Data -->
+        <section class="policy-section" id="penggunaan-data">
+            <h2><ion-icon name="analytics-outline"></ion-icon> 4. Bagaimana Kami Menggunakan Data Anda</h2>
+            <p>Data yang kami kumpulkan digunakan secara eksklusif untuk tujuan-tujuan berikut:</p>
+            <ol>
+                <li>Memverifikasi identitas pengguna dan mengelola akses terhadap sistem</li>
+                <li>Menampilkan dan mengelola daftar tugas yang ditugaskan kepada teknisi</li>
+                <li>Memantau posisi GPS teknisi secara real-time demi koordinasi dan keselamatan lapangan</li>
+                <li>Menyimpan dan menampilkan dokumentasi foto bukti kerja sebagai validasi progres</li>
+                <li>Menyediakan riwayat tugas dan laporan kinerja kepada administrator/dispatcher</li>
+                <li>Meningkatkan kualitas layanan dan pengalaman pengguna aplikasi</li>
+            </ol>
+            <p>
+                <strong>Kami TIDAK menggunakan data Anda untuk:</strong>
+            </p>
+            <ul>
+                <li>Iklan pihak ketiga atau pemasaran komersial</li>
+                <li>Penjualan data kepada pihak ketiga</li>
+                <li>Pembuatan profil perilaku untuk tujuan di luar konteks pekerjaan</li>
+                <li>Pelacakan lokasi di luar jam kerja atau di luar sesi tugas aktif</li>
+            </ul>
+        </section>
+
+        <!-- Section 5: Penyimpanan & Keamanan Data -->
+        <section class="policy-section" id="keamanan-data">
+            <h2><ion-icon name="shield-checkmark-outline"></ion-icon> 5. Penyimpanan &amp; Keamanan Data</h2>
+            <p>Kami berkomitmen melindungi data pribadi Anda dengan menerapkan langkah-langkah keamanan berikut:</p>
+            <ul>
+                <li>
+                    <strong>Enkripsi Kata Sandi</strong> &mdash; Seluruh kata sandi pengguna disimpan dalam bentuk hash menggunakan algoritma 
+                    bcrypt dan tidak pernah disimpan dalam teks biasa (<em>plaintext</em>).
+                </li>
+                <li>
+                    <strong>Token Autentikasi</strong> &mdash; Akses API dilindungi menggunakan sistem token berbasis Laravel Sanctum 
+                    yang kedaluwarsa secara otomatis setelah periode tertentu.
+                </li>
+                <li>
+                    <strong>Transmisi Data Terenkripsi</strong> &mdash; Seluruh komunikasi antara aplikasi dan server dilakukan melalui 
+                    protokol HTTPS (SSL/TLS) untuk mencegah penyadapan data saat transit.
+                </li>
+                <li>
+                    <strong>Penyimpanan Lokal</strong> &mdash; Token sesi disimpan secara aman di penyimpanan lokal perangkat 
+                    menggunakan modul Ionic Storage dan dihapus saat pengguna melakukan logout.
+                </li>
+                <li>
+                    <strong>Akses Terbatas</strong> &mdash; Data hanya dapat diakses oleh pengguna yang terautentikasi sesuai dengan 
+                    peran masing-masing (teknisi hanya dapat melihat data miliknya, admin dapat melihat data seluruh teknisi yang diawasi).
+                </li>
+            </ul>
+        </section>
+
+        <!-- Section 6: Berbagi Data -->
+        <section class="policy-section" id="berbagi-data">
+            <h2><ion-icon name="share-social-outline"></ion-icon> 6. Berbagi Data dengan Pihak Ketiga</h2>
+            <p>
+                Kami <strong>tidak menjual, menyewakan, atau membagikan</strong> data pribadi Anda kepada pihak ketiga untuk tujuan komersial. 
+                Data Anda hanya dapat diakses oleh:
+            </p>
+            <ul>
+                <li>
+                    <strong>Administrator/Dispatcher Perusahaan</strong> &mdash; Personel yang berwenang di perusahaan ISP tempat Anda bekerja 
+                    untuk keperluan koordinasi dan pemantauan tugas.
+                </li>
+                <li>
+                    <strong>Penyedia Layanan Hosting</strong> &mdash; Server kami dihosting pada penyedia layanan yang memenuhi standar 
+                    keamanan industri. Penyedia hosting tidak memiliki akses langsung terhadap data aplikasi Anda.
+                </li>
+            </ul>
+            <p>
+                Kami dapat mengungkapkan data Anda jika diwajibkan oleh hukum yang berlaku, perintah pengadilan, atau proses hukum yang sah 
+                di wilayah Republik Indonesia.
+            </p>
+        </section>
+
+        <!-- Section 7: Hak Pengguna -->
+        <section class="policy-section" id="hak-pengguna">
+            <h2><ion-icon name="person-circle-outline"></ion-icon> 7. Hak-Hak Anda sebagai Pengguna</h2>
+            <p>Sesuai dengan peraturan perlindungan data yang berlaku, Anda memiliki hak untuk:</p>
+            <ul>
+                <li><strong>Mengakses</strong> &mdash; Meminta salinan data pribadi yang kami simpan tentang Anda</li>
+                <li><strong>Memperbaiki</strong> &mdash; Memperbarui atau mengoreksi data pribadi yang tidak akurat melalui halaman profil aplikasi</li>
+                <li><strong>Menghapus</strong> &mdash; Meminta penghapusan akun dan seluruh data terkait dengan menghubungi administrator perusahaan atau pengembang</li>
+                <li><strong>Mencabut Izin</strong> &mdash; Menonaktifkan izin perangkat (lokasi, kamera, penyimpanan) kapan saja melalui pengaturan Android</li>
+                <li><strong>Logout</strong> &mdash; Mengakhiri sesi dan menghapus token autentikasi dari perangkat Anda kapan saja</li>
+            </ul>
+            <p>
+                Untuk menjalankan hak-hak di atas, silakan hubungi kami melalui informasi kontak yang tercantum di bagian akhir dokumen ini.
+            </p>
+        </section>
+
+        <!-- Section 8: Retensi Data -->
+        <section class="policy-section" id="retensi-data">
+            <h2><ion-icon name="time-outline"></ion-icon> 8. Retensi Data</h2>
+            <p>
+                Kami menyimpan data pribadi Anda selama akun Anda masih aktif dan diperlukan untuk tujuan operasional. Secara spesifik:
+            </p>
+            <ul>
+                <li><strong>Data Akun</strong> &mdash; Disimpan selama akun teknisi aktif. Dihapus dalam waktu 30 hari setelah permintaan penghapusan akun.</li>
+                <li><strong>Data Lokasi GPS</strong> &mdash; Log koordinat disimpan untuk keperluan audit dan pelaporan, dan dapat dihapus berdasarkan kebijakan retensi perusahaan.</li>
+                <li><strong>Foto Bukti Kerja</strong> &mdash; Disimpan selama diperlukan sebagai dokumentasi penyelesaian tugas dan dapat dihapus melalui panel admin.</li>
+                <li><strong>Token Lokal</strong> &mdash; Dihapus secara otomatis saat pengguna melakukan logout dari aplikasi.</li>
+            </ul>
+        </section>
+
+        <!-- Section 9: Perlindungan Anak -->
+        <section class="policy-section" id="perlindungan-anak">
+            <h2><ion-icon name="people-outline"></ion-icon> 9. Perlindungan Anak</h2>
+            <p>
+                Aplikasi FiberOps ditujukan secara eksklusif untuk penggunaan profesional oleh teknisi lapangan dan personel perusahaan ISP 
+                yang berusia minimal <strong>18 tahun</strong>. Kami tidak secara sengaja mengumpulkan data pribadi dari anak-anak di bawah 
+                usia 13 tahun. Jika Anda menemukan bahwa seorang anak telah memberikan data pribadi kepada kami tanpa persetujuan orang tua 
+                atau wali, silakan hubungi kami agar kami dapat segera menghapus data tersebut.
+            </p>
+        </section>
+
+        <!-- Section 10: Perubahan Kebijakan -->
+        <section class="policy-section" id="perubahan-kebijakan">
+            <h2><ion-icon name="document-text-outline"></ion-icon> 10. Perubahan Kebijakan Privasi</h2>
+            <p>
+                Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu untuk mencerminkan perubahan pada praktik pengumpulan data 
+                atau persyaratan hukum yang berlaku. Perubahan material akan diberitahukan melalui:
+            </p>
+            <ul>
+                <li>Pemberitahuan di dalam Aplikasi</li>
+                <li>Pembaruan tanggal "Terakhir diperbarui" di bagian atas halaman ini</li>
+                <li>Komunikasi melalui email kepada pengguna terdaftar (jika diperlukan)</li>
+            </ul>
+            <p>
+                Penggunaan berkelanjutan atas Aplikasi setelah perubahan dipublikasikan merupakan persetujuan Anda terhadap Kebijakan Privasi 
+                yang telah diperbarui.
+            </p>
+        </section>
+
+        <!-- Section 11: Kepatuhan Google Play -->
+        <section class="policy-section" id="kepatuhan-playstore">
+            <h2><ion-icon name="logo-google-playstore"></ion-icon> 11. Kepatuhan terhadap Kebijakan Google Play</h2>
+            <p>
+                Aplikasi ini mematuhi <a href="https://play.google.com/about/developer-content-policy/" target="_blank" rel="noopener noreferrer">
+                Kebijakan Konten Pengembang Google Play</a> dan <a href="https://play.google.com/about/privacy-security-deception/user-data/" 
+                target="_blank" rel="noopener noreferrer">Kebijakan Data Pengguna Google Play</a>, termasuk:
+            </p>
+            <ul>
+                <li>Pengungkapan yang jelas dan transparan mengenai pengumpulan data</li>
+                <li>Penggunaan data secara ketat sesuai dengan tujuan yang dinyatakan</li>
+                <li>Penanganan data pengguna secara aman dengan enkripsi yang memadai</li>
+                <li>Penyediaan mekanisme bagi pengguna untuk meminta penghapusan data</li>
+            </ul>
+        </section>
+
+        <!-- Contact Card -->
+        <div class="contact-card" id="kontak">
+            <h2>📧 Hubungi Kami</h2>
+            <p>Jika Anda memiliki pertanyaan, keluhan, atau permintaan terkait Kebijakan Privasi ini, silakan hubungi:</p>
+            <br>
+            <p><strong>Benteng Siber (Pengembang FiberOps)</strong></p>
+            <p>Email: <a href="mailto:support@bentengsiber.com">support@bentengsiber.com</a></p>
+            <p>Website: <a href="https://bentengsiber.com" target="_blank" rel="noopener noreferrer">bentengsiber.com</a></p>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 FiberOps by Benteng Siber. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

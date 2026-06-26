@@ -1,0 +1,246 @@
+<ion-content class="dash-content has-tab-bar">
+
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Header Section -->
+  <div class="dash-header">
+    <div class="header-top">
+      <div class="user-info">
+        <div class="avatar">
+          {{ getInitial() }}
+        </div>
+        <div>
+          <p class="greeting">{{ getGreeting() }}</p>
+          <h2 class="username">{{ user?.name || 'Teknisi' }}</h2>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="notif-btn" (click)="goToTaskList()">
+          <ion-icon name="notifications-outline"></ion-icon>
+          <span class="notif-dot" *ngIf="pendingTasks > 0"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Brand Badge -->
+    <div class="header-badge-wrap">
+      <div class="header-badge">
+        <ion-icon name="shield-checkmark"></ion-icon>
+        <span>FiberOps Premium Field Force</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Online/Offline Status Switcher (Grab/Gojek inspired) -->
+  <div class="status-toggle-container">
+    <div class="status-toggle-bar" [class.online]="isOnline" (click)="toggleOnlineStatus()">
+      <div class="status-indicator">
+        <div class="pulse-ring" *ngIf="isOnline"></div>
+        <div class="indicator-dot"></div>
+      </div>
+      <span class="status-text">
+        {{ isOnline ? 'Aktif Menerima Tugas' : 'Offline / Istirahat' }}
+      </span>
+      <button class="status-switch-btn">
+        <div class="switch-handle"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="skeleton-stats">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+    <div class="skeleton-list">
+      <div class="skeleton-item" *ngFor="let i of [1,2,3]"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading" class="dash-body">
+
+    <!-- Performance Dashboard Summary Card -->
+    <div class="perf-card">
+      <div class="perf-header">Performa Hari Ini</div>
+      <div class="perf-stats">
+        <div class="perf-item">
+          <span class="perf-num green">4.9 ★</span>
+          <span class="perf-label">Rating</span>
+        </div>
+        <div class="perf-divider"></div>
+        <div class="perf-item">
+          <span class="perf-num blue">100%</span>
+          <span class="perf-label">Penerimaan</span>
+        </div>
+        <div class="perf-divider"></div>
+        <div class="perf-item">
+          <span class="perf-num purple">{{ completedTasks }}</span>
+          <span class="perf-label">Selesai</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid (Overview) -->
+    <div class="stats-grid">
+      <div class="stat-card" (click)="goToTaskList()">
+        <div class="stat-icon-wrap pending">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ pendingTasks }}</span>
+          <span class="stat-label">Menunggu</span>
+        </div>
+      </div>
+
+      <div class="stat-card" (click)="goToTaskList()">
+        <div class="stat-icon-wrap progress">
+          <ion-icon name="construct-outline"></ion-icon>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ inProgressTasks }}</span>
+          <span class="stat-label">Dikerjakan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Offline Overlay/Warning (if Offline) -->
+    <div class="offline-warning-card" *ngIf="!isOnline">
+      <ion-icon name="power-outline"></ion-icon>
+      <h4>Status Anda Sedang Offline</h4>
+      <p>Aktifkan status di atas untuk menerima notifikasi penugasan baru dari dispatcher.</p>
+    </div>
+
+    <!-- Active Task Card -->
+    <div class="current-job-premium" *ngIf="activeTask && isOnline" (click)="goToTaskDetail(activeTask.id)">
+      <div class="job-header">
+        <div class="job-pulse-container">
+          <div class="pulse-ring"></div>
+          <div class="pulse-dot"></div>
+        </div>
+        <span class="job-label">Tugas Sedang Dikerjakan</span>
+        <ion-icon name="chevron-forward-outline" class="job-arrow"></ion-icon>
+      </div>
+      <h3 class="job-title">{{ activeTask.title }}</h3>
+      <div class="job-meta">
+        <span *ngIf="activeTask.location">
+          <ion-icon name="location-outline"></ion-icon>
+          {{ activeTask.location }}
+        </span>
+        <span *ngIf="activeTask.customer_name">
+          <ion-icon name="person-outline"></ion-icon>
+          {{ activeTask.customer_name }}
+        </span>
+      </div>
+      <div class="job-progress" *ngIf="activeTask.progress_percent !== undefined && activeTask.progress_percent !== null">
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="activeTask.progress_percent"></div>
+        </div>
+        <span class="progress-text">{{ activeTask.progress_percent }}%</span>
+      </div>
+    </div>
+
+    <!-- Next Assignment Card -->
+    <div class="next-assignment-premium" *ngIf="nextTask && isOnline && !activeTask" (click)="goToTaskDetail(nextTask.id)">
+      <div class="na-header">
+        <ion-icon name="calendar-outline" class="na-icon"></ion-icon>
+        <span>Tugas Berikutnya</span>
+      </div>
+      <h4>{{ nextTask.title }}</h4>
+      <div class="na-meta">
+        <span *ngIf="nextTask.scheduled_at">
+          <ion-icon name="time-outline"></ion-icon>
+          {{ nextTask.scheduled_at | date:'dd MMM yyyy, HH:mm' }}
+        </span>
+        <ion-badge [color]="getStatusColor(nextTask.status)">
+          {{ getStatusLabel(nextTask.status) }}
+        </ion-badge>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section-title">Aksi Cepat</div>
+    <div class="quick-actions">
+      <button class="action-btn" (click)="goToTaskList()">
+        <div class="action-icon blue">
+          <ion-icon name="clipboard-outline"></ion-icon>
+        </div>
+        <span>Daftar Tugas</span>
+      </button>
+      <button class="action-btn" (click)="goToMap()">
+        <div class="action-icon green">
+          <ion-icon name="map-outline"></ion-icon>
+        </div>
+        <span>Peta Lokasi</span>
+      </button>
+      <button class="action-btn" (click)="goToHistory()">
+        <div class="action-icon purple">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <span>Riwayat</span>
+      </button>
+      <button class="action-btn" (click)="goToProfile()">
+        <div class="action-icon orange">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <span>Profil</span>
+      </button>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="section-title">Tugas Terbaru</div>
+
+    <div *ngIf="recentTasks.length === 0" class="empty-state">
+      <ion-icon name="clipboard-outline"></ion-icon>
+      <p>Belum ada tugas yang ditugaskan</p>
+    </div>
+
+    <div class="task-list" *ngIf="recentTasks.length > 0">
+      <div
+        class="task-card-premium"
+        *ngFor="let task of recentTasks"
+        (click)="goToTaskDetail(task.id)"
+      >
+        <div class="task-priority-bar" [style.background]="getPriorityColor(task.priority)"></div>
+        <div class="task-body">
+          <div class="task-top">
+            <span class="task-title">{{ task.title }}</span>
+            <ion-badge [color]="getStatusColor(task.status)" class="status-badge">
+              {{ getStatusLabel(task.status) }}
+            </ion-badge>
+          </div>
+          <div class="task-meta">
+            <span class="task-meta-item" *ngIf="task.location">
+              <ion-icon name="location-outline"></ion-icon>
+              {{ task.location }}
+            </span>
+            <span class="task-meta-item priority-label" [style.color]="getPriorityColor(task.priority)">
+              <ion-icon name="flag-outline"></ion-icon>
+              {{ getPriorityLabel(task.priority) }}
+            </span>
+          </div>
+        </div>
+        <div class="task-arrow">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- View All Button -->
+    <button class="btn-view-all" (click)="goToTaskList()" *ngIf="tasks.length > 5">
+      Lihat Semua Tugas ({{ tasks.length }})
+      <ion-icon name="arrow-forward-outline"></ion-icon>
+    </button>
+
+    <div class="footer-space"></div>
+  </div>
+
+</ion-content>
+
+<app-tab-bar activeTab="home"></app-tab-bar>

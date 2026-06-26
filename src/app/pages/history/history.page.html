@@ -1,0 +1,96 @@
+<ion-content class="hist-content has-tab-bar">
+
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Header -->
+  <div class="hist-header-section">
+    <h1>Riwayat Tugas</h1>
+    <p class="hist-subtitle">Tugas yang telah selesai atau ditolak</p>
+  </div>
+
+  <!-- Summary Box -->
+  <div class="summary-box" *ngIf="!isLoading && histories.length > 0">
+    <div class="summary-item">
+      <span class="sum-num">{{ histories.length }}</span>
+      <span class="sum-label">Total</span>
+    </div>
+    <div class="summary-item">
+      <div class="sum-dot success"></div>
+      <span class="sum-num success">{{ countByStatus('completed') }}</span>
+      <span class="sum-label">Selesai</span>
+    </div>
+    <div class="summary-item">
+      <div class="sum-dot danger"></div>
+      <span class="sum-num danger">{{ countByStatus('rejected') }}</span>
+      <span class="sum-label">Ditolak</span>
+    </div>
+  </div>
+
+  <!-- Skeleton -->
+  <div *ngIf="isLoading" class="skeleton-wrap">
+    <div class="sk-item" *ngFor="let i of [1,2,3,4,5]"></div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && histories.length === 0" class="empty-state">
+    <div class="empty-icon-wrap">
+      <ion-icon name="time-outline"></ion-icon>
+    </div>
+    <h3>Belum ada riwayat</h3>
+    <p>Tugas yang telah selesai atau ditolak akan muncul di sini</p>
+  </div>
+
+  <!-- History List -->
+  <div class="hist-list" *ngIf="!isLoading && histories.length > 0">
+
+    <div
+      class="hist-card"
+      *ngFor="let item of histories"
+      (click)="goToDetail(item.id)"
+    >
+      <div class="hist-icon-wrap" [class.completed]="item.status === 'completed'" [class.rejected]="item.status === 'rejected'">
+        <ion-icon [name]="getStatusIcon(item.status)"></ion-icon>
+      </div>
+
+      <div class="hist-body">
+        <div class="hist-top">
+          <span class="hist-title">{{ item.title }}</span>
+          <ion-badge [color]="getStatusColor(item.status)">
+            {{ getStatusLabel(item.status) }}
+          </ion-badge>
+        </div>
+
+        <div class="hist-meta">
+          <span *ngIf="item.customer_name">
+            <ion-icon name="person-outline"></ion-icon>
+            {{ item.customer_name }}
+          </span>
+          <span *ngIf="item.location">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ item.location }}
+          </span>
+          <span *ngIf="item.updated_at">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ item.updated_at | date:'dd MMM yyyy' }}
+          </span>
+        </div>
+
+        <div class="hist-progress" *ngIf="item.progress_percent !== undefined && item.progress_percent !== null">
+          <div class="prog-bar">
+            <div class="prog-fill" [style.width.%]="item.progress_percent"></div>
+          </div>
+          <span class="prog-label">{{ item.progress_percent }}%</span>
+        </div>
+      </div>
+
+      <ion-icon name="chevron-forward-outline" class="hist-arrow"></ion-icon>
+    </div>
+
+  </div>
+
+  <div class="footer-space"></div>
+</ion-content>
+
+<app-tab-bar activeTab="history"></app-tab-bar>

@@ -3,5 +3,6 @@
     "@ionic/angular/common",
     "@ionic/angular/standalone"
   ],
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "php.validate.executablePath": "C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64\\php.exe"
 }

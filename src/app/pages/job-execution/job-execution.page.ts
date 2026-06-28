@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 @Component({
   selector: 'app-job-execution',
@@ -28,6 +29,7 @@ export class JobExecutionPage implements OnInit {
 
   // Proof of work
   selectedFile: File | null = null;
+  previewUrl: string | null = null;
   proofDescription = '';
   isUploading = false;
 
@@ -97,9 +99,34 @@ export class JobExecutionPage implements OnInit {
     }
   }
 
-  onFileChange(event: any) {
-    const file = event.target.files[0];
-    if (file) this.selectedFile = file;
+  async takePicture() {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 70,
+        allowEditing: false,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera // Langsung buka kamera
+      });
+
+      if (image && image.base64String) {
+        // Convert Base64 to Blob
+        const byteCharacters = atob(image.base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        
+        // Buat objek File
+        this.selectedFile = new File([blob], `proof_${new Date().getTime()}.jpg`, { type: 'image/jpeg' });
+        
+        // Simpan preview
+        this.previewUrl = `data:image/jpeg;base64,${image.base64String}`;
+      }
+    } catch (e) {
+      console.log('User cancelled camera or error:', e);
+    }
   }
 
   async uploadProof() {
@@ -112,6 +139,7 @@ export class JobExecutionPage implements OnInit {
       await this.api.uploadProof(this.taskId, this.selectedFile, this.proofDescription);
       await this.showToast('Bukti pekerjaan berhasil diunggah', 'success');
       this.selectedFile = null;
+      this.previewUrl = null;
       this.proofDescription = '';
     } catch (e) {
       this.showToast('Gagal mengunggah bukti', 'danger');

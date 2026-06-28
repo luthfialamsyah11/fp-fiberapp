@@ -98,14 +98,17 @@
           <span>Bukti Pekerjaan</span>
         </div>
 
-        <div class="file-picker" (click)="fileInput.click()">
-          <div class="picker-icon">
-            <ion-icon name="image-outline"></ion-icon>
+        <div class="file-picker" (click)="takePicture()">
+          <div class="picker-icon" *ngIf="!selectedFile">
+            <ion-icon name="camera-outline"></ion-icon>
           </div>
-          <span *ngIf="!selectedFile">Pilih foto bukti pekerjaan</span>
-          <span *ngIf="selectedFile" class="file-name">{{ selectedFile.name }}</span>
+          <span *ngIf="!selectedFile">Ambil foto bukti pekerjaan</span>
+          
+          <div *ngIf="previewUrl" class="file-preview-wrap">
+            <img [src]="previewUrl" class="file-preview" alt="Preview" />
+            <span class="file-name">Foto berhasil diambil</span>
+          </div>
         </div>
-        <input #fileInput type="file" accept="image/*" style="display:none" (change)="onFileChange($event)" />
 
         <div class="input-group">
           <label>Deskripsi</label>

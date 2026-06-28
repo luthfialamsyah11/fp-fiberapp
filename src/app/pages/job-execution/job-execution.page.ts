@@ -105,7 +105,7 @@ export class JobExecutionPage implements OnInit {
         quality: 70,
         allowEditing: false,
         resultType: CameraResultType.Base64,
-        source: CameraSource.Camera // Langsung buka kamera
+        source: CameraSource.Prompt // Menggunakan Prompt agar bisa pilih dari Galeri/File atau Kamera
       });
 
       if (image && image.base64String) {

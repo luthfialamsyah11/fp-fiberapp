@@ -10,6 +10,16 @@ use App\Http\Controllers\Api\Admin\TaskController as AdminTaskController;
 use App\Http\Controllers\Api\Admin\TechnicianController;
 use Illuminate\Support\Facades\Route;
 
+// Welcome / Info
+Route::get('/', function () {
+    return response()->json([
+        'name'    => 'FSM (Field Service Management) API',
+        'version' => '1.0.0',
+        'status'  => 'running',
+        'docs'    => 'Import openapi.json ke Apidog/Postman untuk dokumentasi lengkap',
+    ]);
+});
+
 // Public
 Route::post('/login', [AuthController::class, 'login']);
 

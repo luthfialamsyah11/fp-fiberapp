@@ -1,0 +1,1322 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "FSM (Field Service Management) API",
+    "description": "API untuk aplikasi Field Service Management - Benteng Siber. Mencakup endpoint untuk autentikasi, manajemen tugas teknisi, progress update, proof of work, GPS tracking, dan admin panel.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "FSM Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://admin.bentengsiber.com/api",
+      "description": "Production Server"
+    },
+    {
+      "url": "http://127.0.0.1:8000/api",
+      "description": "Local Development"
+    }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "Autentikasi (Login, Logout, Profile)" },
+    { "name": "Technician - Tasks", "description": "Manajemen tugas untuk teknisi" },
+    { "name": "Technician - Progress", "description": "Update progress tugas" },
+    { "name": "Technician - Proof of Work", "description": "Upload bukti pekerjaan" },
+    { "name": "Technician - GPS", "description": "Tracking lokasi teknisi" },
+    { "name": "Admin - Dashboard", "description": "Dashboard statistik admin" },
+    { "name": "Admin - Tasks", "description": "Manajemen tugas oleh admin" },
+    { "name": "Admin - Technicians", "description": "Manajemen data teknisi oleh admin" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Sanctum Token",
+        "description": "Token didapat dari endpoint POST /login"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Ahmad Teknisi" },
+          "email": { "type": "string", "format": "email", "example": "ahmad@example.com" },
+          "role": { "type": "string", "enum": ["admin", "technician"], "example": "technician" },
+          "phone": { "type": "string", "nullable": true, "example": "081234567890" },
+          "is_active": { "type": "boolean", "example": true },
+          "is_online": { "type": "boolean", "example": false },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "title": { "type": "string", "example": "Perbaikan AC Gedung A" },
+          "customer_name": { "type": "string", "example": "PT. ABC" },
+          "customer_phone": { "type": "string", "nullable": true, "example": "021-5551234" },
+          "description": { "type": "string", "example": "AC di lantai 3 tidak dingin" },
+          "address": { "type": "string", "example": "Jl. Sudirman No. 10, Jakarta" },
+          "location": { "type": "string", "nullable": true, "example": "Jl. Sudirman No. 10, Jakarta" },
+          "latitude": { "type": "number", "format": "float", "nullable": true, "example": -6.2088 },
+          "longitude": { "type": "number", "format": "float", "nullable": true, "example": 106.8456 },
+          "technician_id": { "type": "integer", "nullable": true, "example": 2 },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "assigned", "accepted", "on-going", "completed"],
+            "example": "assigned"
+          },
+          "priority": { "type": "string", "nullable": true, "example": "high" },
+          "additional_notes": { "type": "string", "nullable": true },
+          "scheduled_at": { "type": "string", "format": "date-time", "nullable": true },
+          "resolved_location": { "type": "string", "example": "Jl. Sudirman No. 10, Jakarta" },
+          "status_label": { "type": "string", "example": "Ditugaskan" },
+          "progress_percent": { "type": "integer", "example": 50 },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "technician": { "$ref": "#/components/schemas/User" },
+          "progress_updates": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProgressUpdate" }
+          },
+          "proof_of_work": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProofOfWork" }
+          }
+        }
+      },
+      "ProgressUpdate": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "task_id": { "type": "integer", "example": 1 },
+          "user_id": { "type": "integer", "example": 2 },
+          "note": { "type": "string", "example": "Sudah cek unit outdoor" },
+          "progress_percent": { "type": "integer", "example": 30 },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "user": { "$ref": "#/components/schemas/User" }
+        }
+      },
+      "ProofOfWork": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "task_id": { "type": "integer", "example": 1 },
+          "image": { "type": "string", "example": "proof/abc123.jpg" },
+          "image_url": { "type": "string", "example": "https://admin.bentengsiber.com/storage/proof/abc123.jpg" },
+          "description": { "type": "string", "nullable": true, "example": "Foto setelah perbaikan selesai" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "TechnicianLocation": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "technician_id": { "type": "integer", "example": 2 },
+          "latitude": { "type": "number", "format": "double", "example": -6.2088 },
+          "longitude": { "type": "number", "format": "double", "example": 106.8456 },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "technician": { "$ref": "#/components/schemas/User" }
+        }
+      },
+      "DashboardStats": {
+        "type": "object",
+        "properties": {
+          "total": { "type": "integer", "example": 25 },
+          "assigned": { "type": "integer", "example": 5 },
+          "accepted": { "type": "integer", "example": 3 },
+          "ongoing": { "type": "integer", "example": 7 },
+          "completed": { "type": "integer", "example": 10 },
+          "active_techs": { "type": "integer", "example": 8 }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "Error message" }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "The given data was invalid." },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "example": {
+              "email": ["The email field is required."]
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login",
+        "description": "Login dengan email dan password. Mengembalikan token Sanctum untuk autentikasi.",
+        "operationId": "login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "admin@bentengsiber.com" },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string", "example": "1|abcdef123456..." },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Email atau password salah",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Akun tidak aktif",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout",
+        "description": "Logout dan menghapus token saat ini.",
+        "operationId": "logout",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logout berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Logout berhasil" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get Current User",
+        "description": "Mendapatkan data user yang sedang login.",
+        "operationId": "me",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Data user berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile": {
+      "put": {
+        "tags": ["Auth"],
+        "summary": "Update Profile",
+        "description": "Update profil user yang sedang login (name, phone, is_online).",
+        "operationId": "updateProfile",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Ahmad Baru" },
+                  "phone": { "type": "string", "example": "081234567890" },
+                  "is_online": { "type": "boolean", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile berhasil diupdate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "tags": ["Technician - Tasks"],
+        "summary": "Get My Tasks",
+        "description": "Mendapatkan daftar tugas milik teknisi yang sedang login. Bisa difilter berdasarkan status.",
+        "operationId": "getTasks",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter berdasarkan status tugas",
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "assigned", "accepted", "on-going", "completed"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar tugas berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Task" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/history": {
+      "get": {
+        "tags": ["Technician - Tasks"],
+        "summary": "Get Task History",
+        "description": "Mendapatkan riwayat tugas yang sudah selesai (status: completed).",
+        "operationId": "getTaskHistory",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Riwayat tugas berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Task" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}": {
+      "get": {
+        "tags": ["Technician - Tasks"],
+        "summary": "Get Task Detail",
+        "description": "Mendapatkan detail tugas beserta technician, progress updates, dan proof of work.",
+        "operationId": "getTaskDetail",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail tugas berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}/accept": {
+      "post": {
+        "tags": ["Technician - Tasks"],
+        "summary": "Accept Task",
+        "description": "Teknisi menerima tugas yang di-assign kepadanya. Status berubah dari 'assigned' ke 'accepted'.",
+        "operationId": "acceptTask",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tugas berhasil diterima",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized - bukan teknisi yang ditugaskan",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Status tugas bukan 'assigned'",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}/reject": {
+      "post": {
+        "tags": ["Technician - Tasks"],
+        "summary": "Reject Task",
+        "description": "Teknisi menolak tugas. Status berubah kembali ke 'pending' dan technician_id di-null-kan.",
+        "operationId": "rejectTask",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tugas berhasil ditolak",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Tugas ditolak" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Tugas tidak bisa ditolak",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}/start": {
+      "post": {
+        "tags": ["Technician - Tasks"],
+        "summary": "Start Task",
+        "description": "Teknisi memulai pengerjaan tugas. Status berubah dari 'accepted' ke 'on-going'.",
+        "operationId": "startTask",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tugas berhasil dimulai",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Tugas belum diterima",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}/complete": {
+      "post": {
+        "tags": ["Technician - Tasks"],
+        "summary": "Complete Task",
+        "description": "Teknisi menyelesaikan tugas. Status berubah dari 'on-going' ke 'completed'.",
+        "operationId": "completeTask",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tugas berhasil diselesaikan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Pekerjaan belum dimulai",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}/progress": {
+      "post": {
+        "tags": ["Technician - Progress"],
+        "summary": "Add Progress Update",
+        "description": "Menambahkan update progress untuk tugas tertentu.",
+        "operationId": "addProgress",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["note", "progress_percent"],
+                "properties": {
+                  "note": { "type": "string", "example": "Sudah cek unit outdoor, perlu ganti freon" },
+                  "progress_percent": { "type": "integer", "minimum": 0, "maximum": 100, "example": 50 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Progress berhasil ditambahkan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/ProgressUpdate" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}/proof": {
+      "get": {
+        "tags": ["Technician - Proof of Work"],
+        "summary": "Get Proof of Work",
+        "description": "Mendapatkan daftar bukti pekerjaan untuk tugas tertentu.",
+        "operationId": "getProofs",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar bukti pekerjaan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/ProofOfWork" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Technician - Proof of Work"],
+        "summary": "Upload Proof of Work",
+        "description": "Upload foto bukti pekerjaan (max 5MB). Gunakan multipart/form-data.",
+        "operationId": "uploadProof",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["image"],
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "File gambar (max 5MB)"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "Foto setelah perbaikan selesai"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bukti pekerjaan berhasil diupload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/ProofOfWork" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error (file terlalu besar / bukan gambar)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/location": {
+      "post": {
+        "tags": ["Technician - GPS"],
+        "summary": "Update Location",
+        "description": "Mengirim/update lokasi GPS teknisi.",
+        "operationId": "updateLocation",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["latitude", "longitude"],
+                "properties": {
+                  "latitude": { "type": "number", "format": "double", "example": -6.2088 },
+                  "longitude": { "type": "number", "format": "double", "example": 106.8456 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lokasi berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Lokasi diperbarui" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/dashboard": {
+      "get": {
+        "tags": ["Admin - Dashboard"],
+        "summary": "Get Dashboard",
+        "description": "Mendapatkan statistik dashboard admin: jumlah tugas per status, teknisi aktif, recent tasks, dan lokasi teknisi.",
+        "operationId": "adminDashboard",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Data dashboard berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stats": { "$ref": "#/components/schemas/DashboardStats" },
+                    "recent_tasks": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Task" }
+                    },
+                    "tech_locations": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/TechnicianLocation" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - bukan admin",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tasks": {
+      "get": {
+        "tags": ["Admin - Tasks"],
+        "summary": "Get All Tasks (Admin)",
+        "description": "Admin mendapatkan semua tugas. Bisa difilter berdasarkan status dan technician_id.",
+        "operationId": "adminGetTasks",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter berdasarkan status",
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "assigned", "accepted", "on-going", "completed"]
+            }
+          },
+          {
+            "name": "technician_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter berdasarkan ID teknisi",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar tugas berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Task" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin - Tasks"],
+        "summary": "Create Task (Admin)",
+        "description": "Admin membuat tugas baru. Jika technician_id diisi, status otomatis 'assigned'. Jika tidak, status 'pending'.",
+        "operationId": "adminCreateTask",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "customer_name", "description", "address"],
+                "properties": {
+                  "title": { "type": "string", "example": "Perbaikan AC Gedung A" },
+                  "customer_name": { "type": "string", "example": "PT. ABC" },
+                  "description": { "type": "string", "example": "AC di lantai 3 tidak dingin" },
+                  "address": { "type": "string", "example": "Jl. Sudirman No. 10, Jakarta" },
+                  "latitude": { "type": "number", "format": "float", "nullable": true, "example": -6.2088 },
+                  "longitude": { "type": "number", "format": "float", "nullable": true, "example": 106.8456 },
+                  "technician_id": { "type": "integer", "nullable": true, "example": 2, "description": "ID teknisi. Jika diisi, status otomatis 'assigned'." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tugas berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tasks/{task}": {
+      "get": {
+        "tags": ["Admin - Tasks"],
+        "summary": "Get Task Detail (Admin)",
+        "description": "Admin mendapatkan detail tugas beserta technician, progress updates, dan proof of work.",
+        "operationId": "adminGetTaskDetail",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail tugas berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task tidak ditemukan",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Admin - Tasks"],
+        "summary": "Update Task (Admin)",
+        "description": "Admin mengupdate data tugas.",
+        "operationId": "adminUpdateTask",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "customer_name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "address": { "type": "string" },
+                  "latitude": { "type": "number", "format": "float", "nullable": true },
+                  "longitude": { "type": "number", "format": "float", "nullable": true },
+                  "status": { "type": "string", "enum": ["pending", "assigned", "accepted", "on-going", "completed"] },
+                  "priority": { "type": "string" },
+                  "additional_notes": { "type": "string", "nullable": true },
+                  "scheduled_at": { "type": "string", "format": "date-time", "nullable": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tugas berhasil diupdate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/tasks/{task}/assign": {
+      "post": {
+        "tags": ["Admin - Tasks"],
+        "summary": "Assign Task to Technician",
+        "description": "Admin meng-assign tugas ke teknisi tertentu. Status otomatis berubah ke 'assigned'.",
+        "operationId": "adminAssignTask",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "task",
+            "in": "path",
+            "required": true,
+            "description": "ID tugas",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["technician_id"],
+                "properties": {
+                  "technician_id": { "type": "integer", "example": 2, "description": "ID teknisi yang akan ditugaskan" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tugas berhasil di-assign",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Task" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/technicians": {
+      "get": {
+        "tags": ["Admin - Technicians"],
+        "summary": "Get All Technicians",
+        "description": "Admin mendapatkan daftar semua teknisi beserta lokasi terakhir.",
+        "operationId": "adminGetTechnicians",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Daftar teknisi berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/User" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin - Technicians"],
+        "summary": "Create Technician",
+        "description": "Admin membuat akun teknisi baru.",
+        "operationId": "adminCreateTechnician",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": { "type": "string", "example": "Budi Teknisi" },
+                  "email": { "type": "string", "format": "email", "example": "budi@example.com" },
+                  "password": { "type": "string", "minLength": 6, "example": "password123" },
+                  "phone": { "type": "string", "nullable": true, "example": "081234567890" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Teknisi berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error (email sudah digunakan, dll)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/technicians/{user}": {
+      "put": {
+        "tags": ["Admin - Technicians"],
+        "summary": "Update Technician",
+        "description": "Admin mengupdate data teknisi (name, phone, is_active).",
+        "operationId": "adminUpdateTechnician",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "description": "ID teknisi",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Budi Updated" },
+                  "phone": { "type": "string", "example": "089876543210" },
+                  "is_active": { "type": "boolean", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data teknisi berhasil diupdate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin - Technicians"],
+        "summary": "Deactivate Technician",
+        "description": "Admin menonaktifkan teknisi (soft delete, set is_active = false).",
+        "operationId": "adminDeleteTechnician",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "description": "ID teknisi",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teknisi berhasil dinonaktifkan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Teknisi dinonaktifkan" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
+import { NavigationService } from '../../services/navigation.service';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 @Component({
@@ -17,10 +18,13 @@ export class JobExecutionPage implements OnInit {
   private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
   private actionSheetCtrl = inject(ActionSheetController);
+  private navigationService = inject(NavigationService);
 
   task: any = null;
   isLoading = true;
   taskId!: number;
+  isStarting = false;
+  isCompleting = false;
 
   // Progress update
   progressNote = '';
@@ -28,6 +32,7 @@ export class JobExecutionPage implements OnInit {
   isUpdating = false;
 
   // Proof of work
+  @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   proofDescription = '';
@@ -54,6 +59,8 @@ export class JobExecutionPage implements OnInit {
   }
 
   async startTask() {
+    if (this.isStarting) return;
+    this.isStarting = true;
     const loading = await this.loadingCtrl.create({ message: 'Memulai tugas...' });
     await loading.present();
     try {
@@ -61,9 +68,11 @@ export class JobExecutionPage implements OnInit {
       await loading.dismiss();
       await this.showToast('Tugas dimulai', 'success');
       await this.loadTask();
-    } catch (e) {
+    } catch (e: any) {
       await loading.dismiss();
-      this.showToast('Gagal memulai tugas', 'danger');
+      this.showToast(e?.error?.message || e?.message || 'Gagal memulai tugas', 'danger');
+    } finally {
+      this.isStarting = false;
     }
   }
 
@@ -78,14 +87,16 @@ export class JobExecutionPage implements OnInit {
       await this.showToast('Progres diperbarui', 'success');
       this.progressNote = '';
       await this.loadTask();
-    } catch (e) {
-      this.showToast('Gagal memperbarui progres', 'danger');
+    } catch (e: any) {
+      this.showToast(e?.error?.message || e?.message || 'Gagal memperbarui progres', 'danger');
     } finally {
       this.isUpdating = false;
     }
   }
 
   async completeTask() {
+    if (this.isCompleting || this.isUploading) return;
+    this.isCompleting = true;
     const loading = await this.loadingCtrl.create({ message: 'Menyelesaikan tugas...' });
     await loading.present();
     try {
@@ -93,9 +104,12 @@ export class JobExecutionPage implements OnInit {
       await loading.dismiss();
       await this.showToast('Tugas berhasil diselesaikan! 🎉', 'success');
       this.router.navigate(['/task-list']);
-    } catch (e) {
+    } catch (e: any) {
       await loading.dismiss();
-      this.showToast('Gagal menyelesaikan tugas', 'danger');
+      const errMsg = e?.error?.message || e?.message || 'Gagal menyelesaikan tugas';
+      this.showToast(errMsg, 'danger');
+    } finally {
+      this.isCompleting = false;
     }
   }
 
@@ -125,7 +139,23 @@ export class JobExecutionPage implements OnInit {
         this.previewUrl = `data:image/jpeg;base64,${image.base64String}`;
       }
     } catch (e) {
-      console.log('User cancelled camera or error:', e);
+      console.log('Native camera not available or user cancelled, falling back to file picker:', e);
+      // Fallback to web/PWA file picker
+      if (this.fileInputRef?.nativeElement) {
+        this.fileInputRef.nativeElement.click();
+      }
+    }
+  }
+
+  onFileSelected(event: any) {
+    const file = event?.target?.files?.[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -141,10 +171,23 @@ export class JobExecutionPage implements OnInit {
       this.selectedFile = null;
       this.previewUrl = null;
       this.proofDescription = '';
-    } catch (e) {
-      this.showToast('Gagal mengunggah bukti', 'danger');
+      await this.loadTask();
+    } catch (e: any) {
+      this.showToast(e?.error?.message || e?.message || 'Gagal mengunggah bukti', 'danger');
     } finally {
       this.isUploading = false;
+    }
+  }
+
+  openNavigation() {
+    if (this.task?.latitude && this.task?.longitude) {
+      this.navigationService.openNavigationOptions(
+        this.task.latitude,
+        this.task.longitude,
+        this.task.customer_name ? `${this.task.customer_name} (${this.task.title})` : this.task.title
+      );
+    } else {
+      this.showToast('Koordinat GPS lokasi tugas tidak tersedia', 'warning');
     }
   }
 

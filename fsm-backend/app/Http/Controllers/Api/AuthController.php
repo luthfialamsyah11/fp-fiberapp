@@ -26,6 +26,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Akun tidak aktif'], 403);
         }
 
+        $user->update(['is_online' => true]);
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -36,6 +37,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $request->user()->update(['is_online' => false]);
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logout berhasil']);
     }

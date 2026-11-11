@@ -147,6 +147,11 @@
                 <ion-icon name="settings-outline" class="text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span>Settings</span>
             </a>
+
+            <a href="{{ route('admin.guide') }}" class="nav-item flex items-center px-3 py-2.5 rounded-xl transition-all text-slate-300 text-sm {{ request()->routeIs('admin.guide') ? 'active text-white' : '' }}">
+                <ion-icon name="book-outline" class="text-lg mr-3 flex-shrink-0 text-amber-400"></ion-icon>
+                <span>Panduan Web Admin</span>
+            </a>
         </nav>
         
         <!-- User Info / Logout Footer -->
@@ -202,23 +207,24 @@
                         <div class="px-4 py-3">
                             <p class="text-xs font-bold text-slate-900">Recent Notifications</p>
                         </div>
-                        <div class="py-1 max-h-60 overflow-y-auto">
-                            <!-- Mock Notifications -->
-                            <a href="{{ route('admin.tasks.index', ['status' => 'completed']) }}" class="block px-4 py-3 hover:bg-slate-50 transition-colors">
-                                <p class="text-xs font-semibold text-slate-900">Alex Pratama completed job #TSK-0001</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">30 mins ago</p>
-                            </a>
-                            <a href="{{ route('admin.tasks.index', ['status' => 'on-going']) }}" class="block px-4 py-3 hover:bg-slate-50 transition-colors">
-                                <p class="text-xs font-semibold text-slate-900">New Fiber connection requested by Lestari Indah</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">1 hour ago</p>
-                            </a>
-                            <a href="{{ route('admin.tracking') }}" class="block px-4 py-3 hover:bg-slate-50 transition-colors">
-                                <p class="text-xs font-semibold text-slate-900">Budi Santoso active at SCBD Site</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">2 hours ago</p>
-                            </a>
+                        <div class="py-1 max-h-64 overflow-y-auto">
+                            @if(isset($notifications) && count($notifications) > 0)
+                                @foreach($notifications as $notif)
+                                    <a href="{{ $notif['url'] }}" class="block px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+                                        <p class="text-xs font-semibold text-slate-900">{{ $notif['title'] }}</p>
+                                        <p class="text-[10px] text-slate-500 mt-0.5">{{ $notif['note'] }}</p>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">{{ $notif['time_ago'] }}</p>
+                                    </a>
+                                @endforeach
+                            @else
+                                <div class="px-4 py-6 text-center text-slate-400 text-xs">
+                                    <ion-icon name="notifications-off-outline" class="text-2xl mb-1 text-slate-300"></ion-icon>
+                                    <p>Tidak ada notifikasi baru.</p>
+                                </div>
+                            @endif
                         </div>
                         <div class="px-4 py-2 text-center bg-slate-50 rounded-b-xl">
-                            <a href="#" class="text-[10px] font-bold text-primary hover:underline">Mark all as read</a>
+                            <a href="{{ route('admin.history') }}" class="text-[10px] font-bold text-primary hover:underline">Lihat Riwayat Lengkap</a>
                         </div>
                     </div>
                 </div>

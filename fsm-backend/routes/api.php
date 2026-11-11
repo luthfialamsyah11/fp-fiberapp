@@ -21,7 +21,7 @@ Route::get('/', function () {
 });
 
 // Public
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:60,1');
 
 // Authenticated
 Route::middleware('auth:sanctum')->group(function () {
@@ -40,14 +40,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks/{task}/complete', [TaskController::class, 'complete']);
 
     // Teknisi - Progress
-    Route::post('/tasks/{task}/progress', [ProgressController::class, 'store']);
+    Route::post('/tasks/{task}/progress', [ProgressController::class, 'store'])->middleware('throttle:30,1');
 
     // Teknisi - GPS
-    Route::post('/location', [LocationController::class, 'update']);
+    Route::post('/location', [LocationController::class, 'update'])->middleware('throttle:60,1');
 
     // Teknisi - Proof of Work
     Route::get('/tasks/{task}/proof', [ProofController::class, 'index']);
-    Route::post('/tasks/{task}/proof', [ProofController::class, 'store']);
+    Route::post('/tasks/{task}/proof', [ProofController::class, 'store'])->middleware('throttle:30,1');
 
     // Admin Routes
     Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {

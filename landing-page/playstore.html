@@ -1,133 +1,101 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unduh FiberOps Technician - Playstore</title>
+    <title>Technician Mobile Application | Benteng Siber Ecosystem</title>
     
+    <!-- Meta SEO -->
+    <meta name="description" content="Official mobile application for FiberOps Field Technicians on Android and PWA. Instant web app access and full native Android Studio source code ready for Play Store deployment.">
+    <meta name="theme-color" content="#070a10">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS Link -->
-    <link rel="stylesheet" href="style.css?v=2.0">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Ionicons Script -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .playstore-card {
-            background: var(--bg-panel);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 50px 40px;
-            max-width: 500px;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
-        .playstore-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 28px;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-        }
-        
-        .playstore-icon {
-            font-size: 80px;
-            color: var(--primary);
-            margin-bottom: 24px;
-            filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.2));
-            animation: floatIcon 4s ease-in-out infinite;
-        }
-        
-        @keyframes floatIcon {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        h1 {
-            font-family: var(--font-heading);
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: white;
-            font-weight: 700;
-        }
-        
-        p {
-            font-family: var(--font-body);
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 35px;
-            font-size: 0.95rem;
-        }
-        
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.02);
-            color: white;
-            text-decoration: none;
-            padding: 14px 28px;
-            border-radius: 50px;
-            border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .btn-back:hover {
-            background: rgba(0, 242, 254, 0.05);
-            border-color: var(--primary);
-            color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
-            transform: translateY(-2px);
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    <!-- Custom CSS Link -->
+    <link rel="stylesheet" href="style.css?v=4.0">
 </head>
 <body>
 
-    <!-- Background Tech Overlays -->
+    <!-- Background Ambient Overlays -->
     <div class="mouse-glow" id="mouse-glow"></div>
     <div class="grid-overlay"></div>
     <div class="blob blob-cyan"></div>
     <div class="blob blob-purple"></div>
 
-    <div class="playstore-card">
-        <ion-icon name="logo-google-playstore" class="playstore-icon"></ion-icon>
-        <h1>Aplikasi Khusus Mobile</h1>
-        <p>Aplikasi <strong>FiberOps Technician</strong> dirancang khusus untuk perangkat seluler. Silakan unduh dan instal aplikasi ini langsung melalui Google Play Store di HP Android Anda.</p>
-        <a href="index.html" class="btn-back"><ion-icon name="arrow-back-outline"></ion-icon> Kembali ke Beranda</a>
+    <div class="standalone-wrapper">
+        <div class="app-download-card">
+            
+            <div class="card-top-meta" style="justify-content: center; margin-bottom: var(--space-4);">
+                <span class="card-category-tag" style="background: rgba(139, 92, 246, 0.12); color: var(--accent); border: 1px solid rgba(139, 92, 246, 0.3);">
+                    ENTERPRISE PRIVATE BUILD &bull; PWA &amp; NATIVE ANDROID
+                </span>
+            </div>
+
+            <ion-icon name="phone-portrait-outline" class="app-icon-large"></ion-icon>
+            
+            <h1 class="card-title" style="font-size: 1.8rem; margin-bottom: var(--space-2);">
+                FiberOps Technician Mobile
+            </h1>
+            
+            <p class="card-desc" style="margin-bottom: var(--space-4);">
+                Professional field service workspace for fiber optic incident resolution, multi-waypoint route navigation, guided 2-slot photographic proof, and real-time fleet GPS synchronization.
+            </p>
+
+            <!-- Feature highlights -->
+            <ul class="app-feature-bullets">
+                <li>
+                    <ion-icon name="globe-outline"></ion-icon>
+                    <span><strong>Instant Web App (PWA):</strong> Runs immediately in modern mobile browsers (Android/iOS) without APK sideloading or store downloads.</span>
+                </li>
+                <li>
+                    <ion-icon name="code-working-outline"></ion-icon>
+                    <span><strong>Android Studio Native Ready:</strong> Includes full native Capacitor Android project repository ready for direct compilation and release to your Google Play Console.</span>
+                </li>
+                <li>
+                    <ion-icon name="navigate-circle"></ion-icon>
+                    <span><strong>Auto-GPS Telemetry:</strong> High-precision background and foreground location tracking with dispatch geofence triggers.</span>
+                </li>
+                <li>
+                    <ion-icon name="camera"></ion-icon>
+                    <span><strong>Guided 2-Slot Camera Proofs:</strong> Strict pre-work (Before) and post-work (After) photo documentation with anti-tampering hash verification.</span>
+                </li>
+            </ul>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-6);">
+                <a href="https://app.bentengsiber.com" target="_blank" rel="noopener" class="btn-primary-glow" style="justify-content: center;">
+                    <ion-icon name="open-outline"></ion-icon>
+                    <span>Launch Technician Web App (PWA)</span>
+                </a>
+                
+                <a href="index.html#demo" class="btn-secondary-outline" style="justify-content: center;">
+                    <ion-icon name="key-outline" style="color: var(--emerald);"></ion-icon>
+                    <span>View Demo Technician Credentials (alex@fsm.com)</span>
+                </a>
+
+                <a href="index.html#acquisition" class="btn-amber-glow" style="justify-content: center; font-size: 0.88rem; padding: 12px 20px;">
+                    <ion-icon name="briefcase-outline"></ion-icon>
+                    <span>Acquire Android Source Code &amp; Domain</span>
+                </a>
+            </div>
+
+            <!-- Back link -->
+            <a href="index.html" class="nav-link" style="justify-content: center; font-size: 0.85rem;">
+                <ion-icon name="arrow-back-outline"></ion-icon>
+                <span>Back to Ecosystem Home</span>
+            </a>
+
+        </div>
     </div>
 
     <!-- Custom Script -->
-    <script src="script.js?v=2.0"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 </html>

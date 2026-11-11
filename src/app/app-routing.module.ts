@@ -10,8 +10,8 @@ const routes: Routes = [
   },
   {
     path: 'dashboard',
-    loadChildren: () => import('./pages/dashboard/dashboard.module').then(m => m.DashboardPageModule),
-    canActivate: [AuthGuard]
+    redirectTo: 'task-list',
+    pathMatch: 'full'
   },
   {
     path: 'task-list',
@@ -25,13 +25,12 @@ const routes: Routes = [
   },
   {
     path: 'job-execution/:id',
-    loadChildren: () => import('./pages/job-execution/job-execution.module').then(m => m.JobExecutionPageModule),
-    canActivate: [AuthGuard]
+    redirectTo: 'task-detail/:id'
   },
   {
     path: 'history',
-    loadChildren: () => import('./pages/history/history.module').then(m => m.HistoryPageModule),
-    canActivate: [AuthGuard]
+    redirectTo: 'profile',
+    pathMatch: 'full'
   },
   {
     path: 'profile',

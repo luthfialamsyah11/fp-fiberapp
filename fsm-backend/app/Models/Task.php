@@ -34,16 +34,46 @@ class Task extends Model
         return $this->hasMany(ProgressUpdate::class)->orderBy('created_at', 'desc');
     }
 
+    public function latestProgressUpdate()
+    {
+        return $this->hasOne(ProgressUpdate::class)->latestOfMany();
+    }
+
     // Alias: proofs (used in web views)
     public function proofs()
     {
         return $this->hasMany(ProofOfWork::class);
     }
 
+    public function latestProof()
+    {
+        return $this->hasOne(ProofOfWork::class)->latestOfMany();
+    }
+
     // Original relation name kept for compatibility
     public function proofOfWork()
     {
         return $this->hasMany(ProofOfWork::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereIn('status', ['assigned', 'accepted', 'on-going']);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function scopeHighPriority($query)
+    {
+        return $query->where('priority', 'high');
     }
 
     /**
@@ -75,6 +105,9 @@ class Task extends Model
      */
     public function getProgressPercentAttribute(): int
     {
+        if ($this->relationLoaded('progressUpdates')) {
+            return $this->progressUpdates->first()?->progress_percent ?? 0;
+        }
         return $this->progressUpdates()->first()?->progress_percent ?? 0;
     }
 }

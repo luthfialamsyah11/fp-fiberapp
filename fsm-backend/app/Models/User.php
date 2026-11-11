@@ -35,4 +35,24 @@ class User extends Authenticatable
     {
         return $this->hasOne(TechnicianLocation::class, 'technician_id')->latestOfMany();
     }
+
+    public function progressUpdates()
+    {
+        return $this->hasMany(ProgressUpdate::class);
+    }
+
+    public function proofs()
+    {
+        return $this->hasManyThrough(ProofOfWork::class, Task::class, 'technician_id', 'task_id');
+    }
+
+    public function scopeTechnicians($query)
+    {
+        return $query->where('role', 'technician');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }

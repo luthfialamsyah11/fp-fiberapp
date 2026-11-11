@@ -374,3 +374,21 @@
 }
 
 .footer-space { height: 24px; }
+
+.empty-history-box {
+  background: var(--fo-surface);
+  border: 1px dashed var(--fo-border);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  color: var(--fo-text-muted);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}

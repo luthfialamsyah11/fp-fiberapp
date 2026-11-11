@@ -21,6 +21,7 @@ export class ProfilePage implements OnInit {
   private alertCtrl = inject(AlertController);
 
   user: any = null;
+  completedTasks: any[] = [];
   name = '';
   phone = '';
   email = '';
@@ -48,6 +49,14 @@ export class ProfilePage implements OnInit {
         this.email = this.user.email || '';
         this.role = this.user.role || '';
       }
+
+      // Load completed history
+      try {
+        const hRes: any = await this.api.getHistory();
+        this.completedTasks = Array.isArray(hRes) ? hRes : (hRes?.data ?? []);
+      } catch (hErr) {
+        console.warn('Failed to load history in profile', hErr);
+      }
     } catch (e: any) {
       const errMsg = e?.error?.message || 'Gagal memuat profil';
       const status = e?.status !== undefined ? e.status : 'N/A';
@@ -55,6 +64,10 @@ export class ProfilePage implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  goToDetail(id: number) {
+    this.router.navigate(['/task-detail', id]);
   }
 
   async saveProfile() {

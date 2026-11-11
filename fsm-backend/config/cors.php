@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', 'https://app.bentengsiber.com,https://admin.bentengsiber.com,https://bentengsiber.com,http://localhost:8100,http://127.0.0.1:8100,http://localhost:3000,http://127.0.0.1:3000')))),
 
     'allowed_origins_patterns' => [],
 

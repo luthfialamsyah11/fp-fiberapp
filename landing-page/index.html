@@ -1,192 +1,653 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FiberOps | Solusi Cerdas Manajemen Fiber Optik</title>
+    <title>Benteng Siber Ecosystem | Enterprise Field Operations (FiberOps FSM) &amp; Cyber Defense</title>
     
     <!-- Meta SEO -->
-    <meta name="description" content="FiberOps: Portal manajemen teknisi, progress tracking, dan administrasi ISP cerdas.">
-    
+    <meta name="description" content="Benteng Siber Ecosystem: Turnkey platform integrating smart fiber optics field service management (FiberOps FSM) and automated enterprise cyber threat posture diagnostics. Premium domain and 100% full tech stack available for immediate acquisition.">
+    <meta name="theme-color" content="#070a10">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bentengsiber.com/">
+    <meta property="og:title" content="Benteng Siber Ecosystem — Turnkey Field Ops &amp; Cyber Defense Suite">
+    <meta property="og:description" content="Unified operational command center for fiber network engineers and enterprise cybersecurity posture scanning. Domain &amp; full tech stack ready for acquisition.">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Ionicons Script -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=2.0">
-    
-    <!-- Inline script to detect JS and prevent layout hide on JS failure -->
-    <script>document.documentElement.classList.add('js-enabled');</script>
+    <link rel="stylesheet" href="style.css?v=4.0">
 </head>
 <body>
     
-    <!-- Background Tech Overlays -->
+    <!-- Background Ambient Overlays -->
     <div class="mouse-glow" id="mouse-glow"></div>
     <div class="grid-overlay"></div>
     <div class="blob blob-cyan"></div>
     <div class="blob blob-purple"></div>
 
-    <main class="container">
-        <!-- Header/Hero Section -->
-        <header class="hero" id="hero-section">
-            <div class="logo-wrapper">
-                <ion-icon name="pulse-outline" class="logo-icon"></ion-icon>
+    <!-- Top Announcement Bar (Asset For Sale) -->
+    <div class="top-acquisition-bar" id="sale-announcement">
+        <span>🚀 <strong>DIGITAL ASSET FOR SALE:</strong> Premium Domain <strong>bentengsiber.com</strong> + Full Tech Stack (Laravel 10 API, Angular 17 PWA, Next.js 14 Scanner, Native Android) Ready for Transfer.</span>
+        <a href="#acquisition" class="acquisition-bar-btn">
+            <span>Inquire Price &amp; Terms</span>
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+        </a>
+    </div>
+
+    <!-- Top Sticky Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="index.html" class="brand-lockup">
+                <div class="brand-icon-shield">
+                    <ion-icon name="shield-checkmark"></ion-icon>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">
+                        Benteng Siber <span class="badge-sub">ECOSYSTEM</span>
+                    </div>
+                    <div class="brand-subtitle">Defense &amp; Field Operations</div>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Menu -->
+            <ul class="nav-center-menu">
+                <li><a href="#portals" class="nav-link"><ion-icon name="grid-outline"></ion-icon> Portals</a></li>
+                <li><a href="#demo" class="nav-link"><ion-icon name="flask-outline"></ion-icon> Live Sandbox</a></li>
+                <li><a href="#acquisition" class="nav-link nav-link-highlight"><ion-icon name="bag-handle-outline"></ion-icon> Acquire Asset</a></li>
+                <li><a href="#scanner-spotlight" class="nav-link"><ion-icon name="scan-outline"></ion-icon> Scanner</a></li>
+                <li><a href="#architecture" class="nav-link"><ion-icon name="git-network-outline"></ion-icon> Architecture</a></li>
+                <li><a href="#compliance" class="nav-link"><ion-icon name="lock-closed-outline"></ion-icon> Compliance</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <div class="system-status-pill desktop-only">
+                    <span class="status-dot"></span>
+                    <span>All Systems Operational</span>
+                </div>
+                <a href="#demo" class="btn-nav-portal desktop-only">
+                    <span>Live Sandbox</span>
+                    <ion-icon name="arrow-forward-outline"></ion-icon>
+                </a>
+                <!-- Mobile Menu Hamburger Button -->
+                <button type="button" class="btn-mobile-toggle" id="btn-mobile-toggle" aria-label="Toggle navigation drawer" aria-expanded="false">
+                    <ion-icon name="menu-outline" id="menu-icon-state"></ion-icon>
+                </button>
             </div>
-            <h1 class="title">Fiber<span>Ops</span></h1>
-            <p class="subtitle">Sistem Koordinasi Lapangan & Dasbor Diagnostik Infrastruktur Jaringan</p>
+        </div>
+    </nav>
+
+    <!-- Mobile Sidebar Drawer Backdrop -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+    <!-- Mobile Responsive Sidebar Drawer -->
+    <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile Navigation Sidebar">
+        <div class="drawer-header">
+            <a href="index.html" class="brand-lockup">
+                <div class="brand-icon-shield">
+                    <ion-icon name="shield-checkmark"></ion-icon>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">
+                        Benteng Siber <span class="badge-sub">ECOSYSTEM</span>
+                    </div>
+                    <div class="brand-subtitle">Defense &amp; Field Operations</div>
+                </div>
+            </a>
+            <button type="button" class="btn-drawer-close" id="drawer-close" aria-label="Close navigation drawer">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+
+        <div class="drawer-status-wrap">
+            <div class="system-status-pill">
+                <span class="status-dot"></span>
+                <span>All Systems Operational</span>
+            </div>
+        </div>
+
+        <nav class="drawer-nav">
+            <span class="drawer-nav-label">PORTALS &amp; SECTIONS</span>
+            <ul class="drawer-menu">
+                <li>
+                    <a href="#portals" class="drawer-link">
+                        <ion-icon name="grid-outline"></ion-icon>
+                        <span>Ecosystem Portals</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#demo" class="drawer-link">
+                        <ion-icon name="flask-outline"></ion-icon>
+                        <span>Interactive Sandbox</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#acquisition" class="drawer-link drawer-link-highlight">
+                        <ion-icon name="bag-handle-outline"></ion-icon>
+                        <span>Acquire This Asset</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#scanner-spotlight" class="drawer-link">
+                        <ion-icon name="scan-outline"></ion-icon>
+                        <span>Security Scanner</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#telemetry" class="drawer-link">
+                        <ion-icon name="speedometer-outline"></ion-icon>
+                        <span>Live Telemetry</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#architecture" class="drawer-link">
+                        <ion-icon name="git-network-outline"></ion-icon>
+                        <span>Architecture Topology</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#compliance" class="drawer-link">
+                        <ion-icon name="shield-checkmark-outline"></ion-icon>
+                        <span>Compliance &amp; Specs</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="drawer-footer">
+            <a href="#demo" class="btn-primary-glow drawer-action-btn">
+                <ion-icon name="key-outline"></ion-icon>
+                <span>Access Live Sandbox</span>
+            </a>
+            <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20am%20interested%20in%20acquiring%20the%20bentengsiber.com%20digital%20asset%20and%20tech%20stack." target="_blank" rel="noopener" class="btn-whatsapp-buy drawer-action-btn">
+                <ion-icon name="logo-whatsapp"></ion-icon>
+                <span>WhatsApp Acquisition Inquiry</span>
+            </a>
+            <div class="drawer-meta-foot">
+                <span>Domain: <strong>bentengsiber.com</strong></span>
+                <span>Laravel 10 &bull; Angular 17 &bull; Next.js 14</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Container -->
+    <main class="container">
+        
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="kicker-tag">
+                <ion-icon name="shield-half-outline"></ion-icon>
+                <span>Enterprise Field Operations &amp; Autonomous Cyber Defense</span>
+            </div>
+            
+            <h1 class="title">
+                Synergizing Smart Field Operations &amp; <br>
+                <span class="gradient-highlight">Unified Cyber Defense</span>
+            </h1>
+            
+            <p class="subtitle">
+                Benteng Siber Ecosystem converges intelligent fiber optics field workforce management (FiberOps FSM) with automated threat posture diagnostics (Security Scanner) into an all-in-one, turnkey digital asset ready for enterprise ownership.
+            </p>
+            
+            <div class="hero-cta-group">
+                <a href="#portals" class="btn-primary-glow">
+                    <ion-icon name="apps-outline"></ion-icon>
+                    <span>Explore 4 Gateway Portals</span>
+                </a>
+                <a href="#demo" class="btn-secondary-outline">
+                    <ion-icon name="key-outline"></ion-icon>
+                    <span>Test Live Demo Sandbox</span>
+                </a>
+                <a href="#acquisition" class="btn-amber-glow">
+                    <ion-icon name="briefcase-outline"></ion-icon>
+                    <span>Asset Acquisition Inquiry</span>
+                </a>
+            </div>
         </header>
 
-        <!-- Navigation Portal -->
-        <section class="portal-grid" id="portal-section">
-            
-            <!-- Admin Dashboard Card -->
-            <a href="https://admin.bentengsiber.com/login" class="portal-card admin-card">
-                <div class="card-glow"></div>
-                <div class="card-icon admin-icon">
-                    <ion-icon name="terminal-outline"></ion-icon>
-                </div>
-                <div class="card-content">
-                    <h2>Clientzone Admin</h2>
-                    <p>Pusat kendali administrator untuk memantau status jaringan, penugasan teknisi, persetujuan kerja, dan diagnostik server.</p>
-                </div>
-                <div class="card-footer">
-                    <span>Akses Panel Kontrol</span>
-                    <ion-icon name="chevron-forward-outline"></ion-icon>
-                </div>
-            </a>
+        <!-- 4-Card Unified Gateway Grid -->
+        <section class="portal-grid-section" id="portals">
+            <div class="section-header">
+                <span class="section-tag">Unified Gateway Hub</span>
+                <h2 class="section-title">Single Sign-On Access to All Modules</h2>
+                <p class="section-desc">Unified authentication and operational gateway for executives, dispatchers, field engineers, and cybersecurity analysts.</p>
+            </div>
 
-            <!-- Technician Playstore Card -->
-            <a href="playstore.html" class="portal-card tech-card">
-                <div class="card-glow"></div>
-                <div class="card-icon tech-icon">
-                    <ion-icon name="phone-portrait-outline"></ion-icon>
-                </div>
-                <div class="card-content">
-                    <h2>Technician App</h2>
-                    <p>Aplikasi pelaporan teknisi lapangan. Unduh installer resmi langsung melalui Google Play Store di perangkat mobile Anda.</p>
-                </div>
-                <div class="card-footer">
-                    <span>Instal di Playstore</span>
-                    <ion-icon name="chevron-forward-outline"></ion-icon>
-                </div>
-            </a>
+            <div class="portal-grid-4">
+                
+                <!-- Card 1: Clientzone Admin Portal -->
+                <a href="https://admin.bentengsiber.com/login" class="portal-card card-admin" target="_blank" rel="noopener">
+                    <div class="card-top-meta">
+                        <span class="card-category-tag">DESKTOP COMMAND</span>
+                        <ion-icon name="laptop-outline" style="color: var(--primary);"></ion-icon>
+                    </div>
+                    <div class="card-icon-box">
+                        <ion-icon name="terminal-outline"></ion-icon>
+                    </div>
+                    <h3 class="card-title">Clientzone Admin</h3>
+                    <p class="card-desc">
+                        Dispatcher &amp; executive command center. Monitor technician fleet movement in real-time, allocate repair tickets, validate proof-of-work SLA photos, and monitor server telemetry.
+                    </p>
+                    <div class="card-footer">
+                        <span>Open Command Portal</span>
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </a>
 
+                <!-- Card 2: Technician PWA Web App -->
+                <a href="https://app.bentengsiber.com" class="portal-card card-pwa" target="_blank" rel="noopener">
+                    <div class="card-top-meta">
+                        <span class="card-category-tag">MOBILE &amp; WEB APP</span>
+                        <ion-icon name="globe-outline" style="color: var(--emerald);"></ion-icon>
+                    </div>
+                    <div class="card-icon-box">
+                        <ion-icon name="construct-outline"></ion-icon>
+                    </div>
+                    <h3 class="card-title">Technician Web App</h3>
+                    <p class="card-desc">
+                        Instant Progressive Web App (PWA) for field crews. Runs directly in any mobile browser with zero app-store download, smart GPS dispatching, offline caching, and 1-tap customer shortcuts.
+                    </p>
+                    <div class="card-footer">
+                        <span>Access Web Portal</span>
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </a>
+
+                <!-- Card 3: Technician Android Native & Private Build -->
+                <a href="playstore.html" class="portal-card card-apk">
+                    <div class="card-top-meta">
+                        <span class="card-category-tag">MOBILE &amp; ENTERPRISE</span>
+                        <ion-icon name="phone-portrait-outline" style="color: var(--accent);"></ion-icon>
+                    </div>
+                    <div class="card-icon-box">
+                        <ion-icon name="phone-portrait-outline"></ion-icon>
+                    </div>
+                    <h3 class="card-title">Technician Mobile App</h3>
+                    <p class="card-desc">
+                        Native Android private build for technicians. Includes complete Android Studio source code, tamper-proof mock location validation, and high-precision telemetry.
+                    </p>
+                    <div class="card-footer">
+                        <span>App Details &amp; Build Specs</span>
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </a>
+
+                <!-- Card 4: Security Posture Scanner SaaS -->
+                <a href="https://scanner.bentengsiber.com" class="portal-card card-scanner" target="_blank" rel="noopener">
+                    <div class="card-top-meta">
+                        <span class="card-category-tag">SECURITY INTELLIGENCE</span>
+                        <ion-icon name="shield-half-outline" style="color: var(--amber);"></ion-icon>
+                    </div>
+                    <div class="card-icon-box">
+                        <ion-icon name="shield-checkmark-outline"></ion-icon>
+                    </div>
+                    <h3 class="card-title">Security Scanner</h3>
+                    <p class="card-desc">
+                        Automated cyber resilience diagnostic engine. Inspects SSL/TLS cipher suites, DNSSEC validation, HTTP security headers, and public port exposure with instant audit scoring.
+                    </p>
+                    <div class="card-footer">
+                        <span>Run Security Audit</span>
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </a>
+
+            </div>
         </section>
 
-        <!-- Platform Metrics Showcase -->
-        <section class="metrics-showcase" id="metrics-section">
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-circle">
-                        <span class="metric-val">12+</span>
+        <!-- Live Demo Sandbox Credentials Section -->
+        <section class="demo-sandbox-section" id="demo">
+            <div class="section-header" style="margin-bottom: var(--space-6);">
+                <span class="section-tag" style="color: var(--emerald);">Instant Sandbox Preview</span>
+                <h2 class="section-title">Test-Drive Live Demo Accounts</h2>
+                <p class="section-desc">
+                    Experience both the dispatcher administration portal and field technician workspace using our active sandbox credentials:
+                </p>
+            </div>
+
+            <div class="demo-credentials-grid">
+                
+                <!-- Demo 1: Admin Dispatcher -->
+                <div class="demo-card">
+                    <div>
+                        <div class="demo-card-header">
+                            <ion-icon name="desktop-outline" class="demo-card-icon"></ion-icon>
+                            <div>
+                                <h3 class="demo-card-title">Clientzone Admin Portal</h3>
+                                <span class="demo-card-sub">Role: Administrator &amp; Fleet Dispatcher</span>
+                            </div>
+                        </div>
+
+                        <div class="demo-data-box" style="margin-top: var(--space-4);">
+                            <div class="demo-row">
+                                <span class="demo-label">Login URL:</span>
+                                <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener" style="color: var(--primary); font-size: 0.8rem; text-decoration: none;">admin.bentengsiber.com/login</a>
+                            </div>
+                            <div class="demo-row">
+                                <span class="demo-label">Email:</span>
+                                <div class="demo-value-wrap">
+                                    <span class="demo-code" id="admin-email">admin@fsm.com</span>
+                                    <button type="button" class="btn-copy-code" data-copy="admin@fsm.com" title="Copy Email">
+                                        <ion-icon name="copy-outline"></ion-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="demo-row">
+                                <span class="demo-label">Password:</span>
+                                <div class="demo-value-wrap">
+                                    <span class="demo-code" id="admin-pass">password123</span>
+                                    <button type="button" class="btn-copy-code" data-copy="password123" title="Copy Password">
+                                        <ion-icon name="copy-outline"></ion-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="metric-label">Teknisi Aktif</div>
+
+                    <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener" class="btn-login-sandbox">
+                        <span>Launch &amp; Login to Admin Portal</span>
+                        <ion-icon name="open-outline"></ion-icon>
+                    </a>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-circle">
-                        <span class="metric-val">45+</span>
+
+                <!-- Demo 2: Technician PWA -->
+                <div class="demo-card">
+                    <div>
+                        <div class="demo-card-header">
+                            <ion-icon name="phone-portrait-outline" class="demo-card-icon" style="color: var(--primary); background: rgba(0, 242, 254, 0.1);"></ion-icon>
+                            <div>
+                                <h3 class="demo-card-title">Technician Web App (PWA)</h3>
+                                <span class="demo-card-sub">Role: Field Engineer / Technician</span>
+                            </div>
+                        </div>
+
+                        <div class="demo-data-box" style="margin-top: var(--space-4);">
+                            <div class="demo-row">
+                                <span class="demo-label">Login URL:</span>
+                                <a href="https://app.bentengsiber.com" target="_blank" rel="noopener" style="color: var(--primary); font-size: 0.8rem; text-decoration: none;">app.bentengsiber.com</a>
+                            </div>
+                            <div class="demo-row">
+                                <span class="demo-label">Email:</span>
+                                <div class="demo-value-wrap">
+                                    <span class="demo-code" id="tech-email">alex@fsm.com</span>
+                                    <button type="button" class="btn-copy-code" data-copy="alex@fsm.com" title="Copy Email">
+                                        <ion-icon name="copy-outline"></ion-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="demo-row">
+                                <span class="demo-label">Password:</span>
+                                <div class="demo-value-wrap">
+                                    <span class="demo-code" id="tech-pass">password123</span>
+                                    <button type="button" class="btn-copy-code" data-copy="password123" title="Copy Password">
+                                        <ion-icon name="copy-outline"></ion-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="metric-label">Tugas Harian</div>
+
+                    <a href="https://app.bentengsiber.com" target="_blank" rel="noopener" class="btn-login-sandbox" style="border-color: var(--border-glow-cyan); color: var(--primary); background: rgba(0, 242, 254, 0.1);">
+                        <span>Launch &amp; Login to Technician App</span>
+                        <ion-icon name="open-outline"></ion-icon>
+                    </a>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-circle">
-                        <span class="metric-val">94%</span>
-                    </div>
-                    <div class="metric-label">Rasio Selesai</div>
+
+            </div>
+        </section>
+
+        <!-- Turnkey Asset Acquisition Package Section -->
+        <section class="asset-sale-section" id="acquisition">
+            <div class="section-header" style="margin-bottom: var(--space-6);">
+                <span class="section-tag tag-amber">Turnkey Digital Asset Sale</span>
+                <h2 class="section-title">Acquire Full Ownership: Domain &amp; 100% Tech Stack</h2>
+                <p class="section-desc">
+                    The entire <strong>bentengsiber.com</strong> ecosystem is prepared for complete ownership transfer to telecommunication ISPs, fiber infrastructure contractors, or tech investors.
+                </p>
+            </div>
+
+            <div class="asset-features-grid">
+                <div class="asset-feature-box">
+                    <h4><ion-icon name="globe-outline"></ion-icon> Domain bentengsiber.com</h4>
+                    <p>Highly authoritative, memorable brand domain for telecommunication, fiber networking, and cyber defense industries. Instant EPP authorization transfer code.</p>
+                </div>
+
+                <div class="asset-feature-box">
+                    <h4><ion-icon name="code-slash-outline"></ion-icon> 100% Full Source Code</h4>
+                    <p>Includes Laravel 10 Sanctum API backend, Angular 17/Ionic PWA frontend, Next.js 14 SaaS scanner, and native Android Studio project repository.</p>
+                </div>
+
+                <div class="asset-feature-box">
+                    <h4><ion-icon name="server-outline"></ion-icon> Production Database &amp; Hosting Ready</h4>
+                    <p>Active MySQL schema, cPanel/VPS deployment configurations, database migration history, and documented production API gateway routes.</p>
+                </div>
+
+                <div class="asset-feature-box">
+                    <h4><ion-icon name="shield-checkmark-outline"></ion-icon> Hardened &amp; Zero Known Bugs</h4>
+                    <p>Comprehensively audited: immune to IDOR, Mass-Assignment, and SSRF attacks, equipped with tamper-proof photo verification hash controls.</p>
+                </div>
+            </div>
+
+            <!-- Contact Box for Direct WhatsApp & Email -->
+            <div class="acquisition-contact-box">
+                <h3>Interested in Acquiring This Complete Ecosystem?</h3>
+                <p>
+                    Contact the asset owner directly to discuss valuation, escrow transfer process, and complete Git source code repository handover.
+                </p>
+                <div class="acquisition-btn-group">
+                    <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20am%20interested%20in%20acquiring%20the%20bentengsiber.com%20domain%20and%20tech%20stack." target="_blank" rel="noopener" class="btn-whatsapp-buy">
+                        <ion-icon name="logo-whatsapp"></ion-icon>
+                        <span>Inquire via WhatsApp</span>
+                    </a>
+                    <a href="mailto:owner@bentengsiber.com?subject=Acquisition%20Inquiry%20for%20bentengsiber.com%20Digital%20Asset" class="btn-email-buy">
+                        <ion-icon name="mail-outline"></ion-icon>
+                        <span>Inquire via Official Email</span>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- Platform Architecture Map Section -->
-        <section class="architecture-section" id="architecture-section">
-            <div class="arch-header">
-                <h2>Aliran Data & Arsitektur Sistem</h2>
-                <p>Bagaimana FiberOps mengintegrasikan lapangan dengan pusat kendali secara realtime.</p>
+        <!-- Live Quick Scanner Spotlight Section -->
+        <section class="scanner-spotlight-section" id="scanner-spotlight">
+            <div class="scanner-inner">
+                <span class="section-tag">Interactive Diagnostic Tool</span>
+                <h2 class="section-title">Quick Domain Security Posture Audit</h2>
+                <p class="section-desc">
+                    Benchmark your domain against SSL/TLS certificate expirations, missing security headers (HSTS, CSP), and public DNS misconfigurations in seconds.
+                </p>
+
+                <form id="quick-scan-form" class="scanner-input-container">
+                    <ion-icon name="globe-outline"></ion-icon>
+                    <input type="text" id="scan-domain-input" class="scanner-input" placeholder="Enter target domain (e.g. yourdomain.com)" required autocomplete="off" spellcheck="false">
+                    <button type="submit" class="btn-scan-trigger">
+                        <span>Scan Domain Now</span>
+                        <ion-icon name="flash-outline"></ion-icon>
+                    </button>
+                </form>
+
+                <div class="scanner-micro-tags">
+                    <span><ion-icon name="checkmark-circle-outline" style="color: var(--emerald);"></ion-icon> Non-Intrusive Scan</span>
+                    <span><ion-icon name="lock-closed-outline" style="color: var(--primary);"></ion-icon> Grade A SSL/TLS Analysis</span>
+                    <span><ion-icon name="shield-outline" style="color: var(--accent);"></ion-icon> DNSSEC &amp; Headers Validation</span>
+                </div>
             </div>
-            
-            <div class="arch-map">
-                <!-- Node 1: Mobile App -->
+        </section>
+
+        <!-- Telemetry & Metrics Showcase -->
+        <section class="metrics-section" id="telemetry">
+            <div class="section-header">
+                <span class="section-tag">Reliability &amp; Scale</span>
+                <h2 class="section-title">Battle-Tested Performance &amp; Resilience</h2>
+                <p class="section-desc">Engineered for mission-critical telecommunications infrastructure with high-availability SLA standards.</p>
+            </div>
+
+            <div class="metrics-grid-4">
+                <div class="metric-card">
+                    <div class="metric-number">99.98%</div>
+                    <div class="metric-title">Platform Uptime</div>
+                    <div class="metric-detail">24/7 continuous operational availability</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">&lt;45ms</div>
+                    <div class="metric-title">Edge API Latency</div>
+                    <div class="metric-detail">Lightning-fast field synchronization response</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">100%</div>
+                    <div class="metric-title">Tamper-Proof Proofs</div>
+                    <div class="metric-detail">Cryptographic validation of job completion</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">0</div>
+                    <div class="metric-title">Zero-Day Breaches</div>
+                    <div class="metric-detail">Isolated architecture &amp; OWASP ASVS hardened</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Architecture Map -->
+        <section class="architecture-section" id="architecture">
+            <div class="section-header">
+                <span class="section-tag">System Topology</span>
+                <h2 class="section-title">Unified Data Pipeline &amp; Architecture</h2>
+                <p class="section-desc">How real-time field workforce dispatching and cyber protection telemetry communicate synchronously.</p>
+            </div>
+
+            <div class="arch-flow-container">
                 <div class="arch-node">
-                    <div class="node-icon"><ion-icon name="phone-portrait-outline"></ion-icon></div>
-                    <h3>Technician App</h3>
-                    <span>Ionic PWA (Mobile)</span>
+                    <div class="arch-node-icon"><ion-icon name="phone-portrait-outline"></ion-icon></div>
+                    <h4>Technician Clients</h4>
+                    <span>PWA &amp; Native Android</span>
                 </div>
-                
-                <!-- Connection Line 1 -->
-                <div class="arch-link">
-                    <svg class="link-svg">
-                        <path d="M 0,25 L 120,25" class="link-path link-path-1"></path>
-                    </svg>
-                    <span class="link-label">API Request</span>
+
+                <div class="arch-connector">
+                    <ion-icon name="arrow-forward-outline" class="connector-arrow"></ion-icon>
+                    <span>HTTPS / API</span>
                 </div>
-                
-                <!-- Node 2: Core API -->
-                <div class="arch-node node-core">
-                    <div class="node-icon"><ion-icon name="server-outline"></ion-icon></div>
-                    <h3>Laravel Core</h3>
-                    <span>API Gateway & DB</span>
-                </div>
-                
-                <!-- Connection Line 2 -->
-                <div class="arch-link">
-                    <svg class="link-svg">
-                        <path d="M 0,25 L 120,25" class="link-path link-path-2"></path>
-                    </svg>
-                    <span class="link-label">Realtime Feed</span>
-                </div>
-                
-                <!-- Node 3: Dashboard -->
+
                 <div class="arch-node">
-                    <div class="node-icon"><ion-icon name="desktop-outline"></ion-icon></div>
-                    <h3>Clientzone Web</h3>
-                    <span>Admin Dashboard</span>
+                    <div class="arch-node-icon"><ion-icon name="server-outline"></ion-icon></div>
+                    <h4>Sanctum Gateway</h4>
+                    <span>Laravel 10 Core Engine</span>
+                </div>
+
+                <div class="arch-connector">
+                    <ion-icon name="arrow-forward-outline" class="connector-arrow"></ion-icon>
+                    <span>Realtime Sync</span>
+                </div>
+
+                <div class="arch-node">
+                    <div class="arch-node-icon"><ion-icon name="desktop-outline"></ion-icon></div>
+                    <h4>Command Center</h4>
+                    <span>Clientzone Dispatcher</span>
+                </div>
+
+                <div class="arch-connector">
+                    <ion-icon name="arrow-forward-outline" class="connector-arrow"></ion-icon>
+                    <span>Threat Audit</span>
+                </div>
+
+                <div class="arch-node">
+                    <div class="arch-node-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></div>
+                    <h4>Security Scanner</h4>
+                    <span>Next.js 14 Audit Engine</span>
                 </div>
             </div>
         </section>
 
-        <!-- Detailed Features Section -->
-        <section class="detailed-features" id="detailed-features">
-            <div class="feature-card">
-                <div class="f-icon"><ion-icon name="navigate-outline"></ion-icon></div>
-                <h3>Peta & Lokasi Lapangan</h3>
-                <p>Melacak koordinat teknisi saat pengerjaan tugas secara langsung demi optimalisasi rute dan efisiensi koordinasi.</p>
+        <!-- Compliance & Security Specifications -->
+        <section class="compliance-section" id="compliance">
+            <div class="section-header">
+                <span class="section-tag">Enterprise Hardening</span>
+                <h2 class="section-title">Security Standards &amp; Compliance</h2>
+                <p class="section-desc">Every line of code is structured to satisfy rigorous data governance and protection criteria.</p>
             </div>
-            <div class="feature-card">
-                <div class="f-icon"><ion-icon name="images-outline"></ion-icon></div>
-                <h3>Validasi Progress Visual</h3>
-                <p>Pengunggahan bukti foto pengerjaan tugas secara digital untuk meminimalkan manipulasi data lapangan.</p>
-            </div>
-            <div class="feature-card">
-                <div class="f-icon"><ion-icon name="terminal-outline"></ion-icon></div>
-                <h3>Pusat Kontrol Cerdas</h3>
-                <p>Didukung oleh panel kendali khusus untuk diagnosa kesehatan server dan perbaikan database sekali klik.</p>
-            </div>
-        </section>
 
-        <!-- Tech Stack Section -->
-        <section class="tech-stack-section">
-            <div class="stack-badges">
-                <div class="stack-badge"><ion-icon name="logo-laravel"></ion-icon> Laravel</div>
-                <div class="stack-badge"><ion-icon name="logo-angular"></ion-icon> Angular</div>
-                <div class="stack-badge"><ion-icon name="logo-ionic"></ion-icon> Ionic PWA</div>
-                <div class="stack-badge"><ion-icon name="logo-electron"></ion-icon> Capacitor</div>
-                <div class="stack-badge"><ion-icon name="logo-firebase"></ion-icon> MySQL</div>
+            <div class="compliance-grid">
+                <div class="compliance-item">
+                    <ion-icon name="lock-closed" class="compliance-icon"></ion-icon>
+                    <div>
+                        <h4>OWASP ASVS Hardened</h4>
+                        <p>Defended against IDOR, Mass-Assignment, SQL Injection, and Cross-Site Scripting (XSS) vectors.</p>
+                    </div>
+                </div>
+
+                <div class="compliance-item">
+                    <ion-icon name="finger-print" class="compliance-icon"></ion-icon>
+                    <div>
+                        <h4>Token Auth &amp; Rate-Limiting</h4>
+                        <p>Encrypted authentication via Laravel Sanctum with dynamic anti-bruteforce request throttling.</p>
+                    </div>
+                </div>
+
+                <div class="compliance-item">
+                    <ion-icon name="shield-checkmark" class="compliance-icon"></ion-icon>
+                    <div>
+                        <h4>RFC 9116 Compliant</h4>
+                        <p>Complies with standardized coordinated vulnerability disclosure via <code>security.txt</code> specification.</p>
+                    </div>
+                </div>
+
+                <div class="compliance-item">
+                    <ion-icon name="key" class="compliance-icon"></ion-icon>
+                    <div>
+                        <h4>Tamper-Proof Work Verification</h4>
+                        <p>Mandatory 2-slot photographic proof requirements with anti-tamper client validation before SLA closure.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
     </main>
 
+    <!-- Enterprise Footer -->
     <footer>
-        <p><a href="privacy-policy.html" style="color: #22d3ee; text-decoration: none; margin-right: 1rem;">Kebijakan Privasi</a></p>
-        <p>&copy; 2026 FiberOps by Benteng Siber. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="brand-title">
+                    Benteng Siber <span class="badge-sub">ECOSYSTEM</span>
+                </div>
+                <p>
+                    The leading unified ecosystem integrating intelligent fiber optics field workforce management (FiberOps FSM) and automated enterprise cyber posture intelligence.
+                </p>
+            </div>
+
+            <div class="footer-col">
+                <h5>Ecosystem Portals</h5>
+                <ul>
+                    <li><a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener">Clientzone Admin</a></li>
+                    <li><a href="https://app.bentengsiber.com" target="_blank" rel="noopener">Technician Web App</a></li>
+                    <li><a href="playstore.html">Technician Mobile Edition</a></li>
+                    <li><a href="https://scanner.bentengsiber.com" target="_blank" rel="noopener">Security Posture Scanner</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h5>Asset &amp; Legal</h5>
+                <ul>
+                    <li><a href="#acquisition">Acquire Domain &amp; Tech Stack</a></li>
+                    <li><a href="#demo">Live Sandbox Credentials</a></li>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="https://scanner.bentengsiber.com/.well-known/security.txt" target="_blank" rel="noopener">Security.txt (RFC 9116)</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>&copy; 2026 Benteng Siber Ecosystem. All rights reserved.</span>
+            <span>FiberOps &copy; 2026 Powered by Benteng Siber. Turnkey Asset Ready.</span>
+        </div>
     </footer>
 
-    <!-- Ionicons Script -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    
     <!-- Custom Script -->
-    <script src="script.js?v=2.0"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 </html>

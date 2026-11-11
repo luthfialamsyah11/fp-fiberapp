@@ -23,6 +23,14 @@ export class DashboardPage implements OnInit {
   isLoading = true;
   isOnline = true;
 
+  // Memoized task metrics to prevent Angular change detection thrashing
+  pendingTasksCount = 0;
+  inProgressTasksCount = 0;
+  completedTasksCount = 0;
+  recentTasksList: any[] = [];
+  currentActiveTask: any = null;
+  currentNextTask: any = null;
+
   async toggleOnlineStatus() {
     const newStatus = !this.isOnline;
     this.isOnline = newStatus;
@@ -48,27 +56,27 @@ export class DashboardPage implements OnInit {
   }
 
   get pendingTasks() {
-    return this.tasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'accepted').length;
+    return this.pendingTasksCount;
   }
 
   get inProgressTasks() {
-    return this.tasks.filter(t => t.status === 'on-going').length;
+    return this.inProgressTasksCount;
   }
 
   get completedTasks() {
-    return this.tasks.filter(t => t.status === 'completed').length;
+    return this.completedTasksCount;
   }
 
   get recentTasks() {
-    return this.tasks.slice(0, 5);
+    return this.recentTasksList;
   }
 
   get activeTask() {
-    return this.tasks.find(t => t.status === 'on-going') || null;
+    return this.currentActiveTask;
   }
 
   get nextTask() {
-    return this.tasks.find(t => t.status === 'assigned' || t.status === 'accepted' || t.status === 'pending') || null;
+    return this.currentNextTask;
   }
 
   async ngOnInit() {}
@@ -100,6 +108,13 @@ export class DashboardPage implements OnInit {
       try {
         const tasks: any = await this.api.getTasks();
         this.tasks = Array.isArray(tasks) ? tasks : (tasks?.data ?? []);
+        // Compute metrics once per fetch
+        this.pendingTasksCount = this.tasks.filter(t => t.status === 'pending' || t.status === 'assigned' || t.status === 'accepted').length;
+        this.inProgressTasksCount = this.tasks.filter(t => t.status === 'on-going').length;
+        this.completedTasksCount = this.tasks.filter(t => t.status === 'completed').length;
+        this.recentTasksList = this.tasks.slice(0, 5);
+        this.currentActiveTask = this.tasks.find(t => t.status === 'on-going') || null;
+        this.currentNextTask = this.tasks.find(t => t.status === 'assigned' || t.status === 'accepted' || t.status === 'pending') || null;
       } catch (tasksError) {
         console.error('Failed to load tasks in dashboard', tasksError);
       }
@@ -147,6 +162,7 @@ export class DashboardPage implements OnInit {
     switch (status) {
       case 'pending':
       case 'assigned': return 'warning';
+      case 'accepted': return 'success';
       case 'on-going': return 'primary';
       case 'completed': return 'success';
       case 'rejected': return 'danger';
@@ -158,6 +174,7 @@ export class DashboardPage implements OnInit {
     switch (status) {
       case 'pending': return 'Menunggu';
       case 'assigned': return 'Ditugaskan';
+      case 'accepted': return 'Diterima';
       case 'on-going': return 'Dikerjakan';
       case 'completed': return 'Selesai';
       case 'rejected': return 'Ditolak';

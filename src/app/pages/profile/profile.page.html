@@ -48,10 +48,30 @@
           </div>
           <div class="stat-divider"></div>
           <div class="stat-box">
-            <span class="stat-num">32t</span>
+            <span class="stat-num">{{ completedTasks.length }}t</span>
             <span class="stat-lbl">Tugas Selesai</span>
           </div>
         </div>
+      </div>
+
+      <!-- Riwayat Tugas Selesai (Integrated History) -->
+      <div class="fo-section-header">Riwayat Tugas Selesai ({{ completedTasks.length }})</div>
+      <div class="fo-list-group" *ngIf="completedTasks.length > 0">
+        <div class="fo-list-item history-item" *ngFor="let h of completedTasks.slice(0, 6)" (click)="goToDetail(h.id)">
+          <div class="item-icon-wrap green">
+            <ion-icon name="checkmark-done-outline"></ion-icon>
+          </div>
+          <div class="item-content">
+            <div class="item-title truncate">{{ h.title }}</div>
+            <div class="item-sub">
+              {{ h.customer_name || 'Pelanggan' }} • {{ h.updated_at | date:'dd MMM yyyy, HH:mm' }}
+            </div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+        </div>
+      </div>
+      <div class="empty-history-box" *ngIf="completedTasks.length === 0">
+        <p>Belum ada riwayat tugas yang diselesaikan.</p>
       </div>
 
       <!-- Settings List Category: Akun -->

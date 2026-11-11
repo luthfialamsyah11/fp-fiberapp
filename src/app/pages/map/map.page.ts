@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocationService } from '../../services/location.service';
 import { ApiService } from '../../services/api.service';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-map',
@@ -13,6 +14,7 @@ export class MapPage implements OnInit, OnDestroy {
   private locationService = inject(LocationService);
   private api = inject(ApiService);
   private router = inject(Router);
+  private navigationService = inject(NavigationService);
 
   latitude: number | null = null;
   longitude: number | null = null;
@@ -21,20 +23,35 @@ export class MapPage implements OnInit, OnDestroy {
   isLocating = true;
   activeTask: any = null;
   locationError = false;
-  private locationInterval: any;
+  private locationInterval: any = null;
 
   async ngOnInit() {
-    await this.getCurrentLocation();
-    this.locationInterval = setInterval(() => this.getCurrentLocation(), 15000);
+    // Basic init
   }
 
   async ionViewWillEnter() {
     await this.loadActiveTask();
+    await this.getCurrentLocation();
+    this.startLocationPolling();
+  }
+
+  ionViewDidLeave() {
+    this.stopLocationPolling();
   }
 
   ngOnDestroy() {
+    this.stopLocationPolling();
+  }
+
+  private startLocationPolling() {
+    this.stopLocationPolling();
+    this.locationInterval = setInterval(() => this.getCurrentLocation(), 15000);
+  }
+
+  private stopLocationPolling() {
     if (this.locationInterval) {
       clearInterval(this.locationInterval);
+      this.locationInterval = null;
     }
   }
 
@@ -48,6 +65,11 @@ export class MapPage implements OnInit, OnDestroy {
         this.longitude = position.coords.longitude;
         this.accuracy = Math.round(position.coords.accuracy);
         this.lastUpdated = new Date();
+
+        // Dispatch coordinates to backend dispatcher tracking
+        this.api.updateLocation(this.latitude, this.longitude).catch((err) => {
+          console.warn('[MapPage] Could not sync GPS to backend:', err);
+        });
       }
     } catch (e) {
       console.error('Location error:', e);
@@ -74,11 +96,17 @@ export class MapPage implements OnInit, OnDestroy {
 
   openInMaps() {
     if (this.activeTask?.latitude && this.activeTask?.longitude) {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${this.activeTask.latitude},${this.activeTask.longitude}`;
-      window.open(url, '_system');
+      this.navigationService.openNavigationOptions(
+        this.activeTask.latitude,
+        this.activeTask.longitude,
+        this.activeTask.title || 'Lokasi Tugas Aktif'
+      );
     } else if (this.latitude && this.longitude) {
-      const url = `https://www.google.com/maps/@${this.latitude},${this.longitude},17z`;
-      window.open(url, '_system');
+      this.navigationService.openNavigationOptions(
+        this.latitude,
+        this.longitude,
+        'Posisi Saya Saat Ini'
+      );
     }
   }
 

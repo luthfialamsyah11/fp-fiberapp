@@ -1,6 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { LocationService } from '../../services/location.service';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-task-list',
@@ -11,16 +13,21 @@ import { ApiService } from '../../services/api.service';
 export class TaskListPage implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
+  private locationService = inject(LocationService);
+  private navigationService = inject(NavigationService);
 
+  user: any = null;
+  isOnline = true;
   tasks: any[] = [];
   filteredTasks: any[] = [];
+  activeMission: any = null;
   isLoading = true;
   selectedFilter = 'all';
   searchQuery = '';
 
   filters = [
-    { value: 'all', label: 'Semua' },
-    { value: 'assigned', label: 'Ditugaskan' },
+    { value: 'all', label: 'Semua Tugas' },
+    { value: 'assigned', label: 'Tugas Baru' },
     { value: 'accepted', label: 'Diterima' },
     { value: 'on-going', label: 'Dikerjakan' },
   ];
@@ -28,19 +35,71 @@ export class TaskListPage implements OnInit {
   ngOnInit() {}
 
   async ionViewWillEnter() {
-    await this.loadTasks();
+    await this.loadInitialData();
+  }
+
+  async loadInitialData() {
+    this.isLoading = true;
+    try {
+      // 1. Load User Profile & Online status
+      try {
+        const uRes: any = await this.api.getMe();
+        this.user = uRes?.data ?? uRes;
+        if (this.user) {
+          this.isOnline = this.user.is_online !== undefined ? !!this.user.is_online : true;
+          if (this.isOnline) {
+            this.locationService.startTracking();
+          } else {
+            this.locationService.stopTracking();
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load user profile in task list', err);
+      }
+
+      // 2. Load Tasks
+      await this.loadTasks();
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async toggleOnlineStatus() {
+    const nextStatus = !this.isOnline;
+    this.isOnline = nextStatus;
+
+    if (nextStatus) {
+      this.locationService.startTracking();
+    } else {
+      this.locationService.stopTracking();
+    }
+
+    try {
+      await this.api.updateProfile({ is_online: nextStatus });
+    } catch (e) {
+      console.error('Failed to toggle status:', e);
+      this.isOnline = !nextStatus;
+      if (this.isOnline) {
+        this.locationService.startTracking();
+      } else {
+        this.locationService.stopTracking();
+      }
+    }
   }
 
   async loadTasks() {
-    this.isLoading = true;
     try {
       const res: any = await this.api.getTasks();
       this.tasks = Array.isArray(res) ? res : (res?.data ?? []);
+      
+      // Determine Sticky Active Mission (Prioritize 'on-going', then 'accepted')
+      this.activeMission = this.tasks.find(t => t.status === 'on-going') 
+        || this.tasks.find(t => t.status === 'accepted') 
+        || null;
+
       this.applyFilter();
     } catch (e) {
       console.error(e);
-    } finally {
-      this.isLoading = false;
     }
   }
 
@@ -53,8 +112,9 @@ export class TaskListPage implements OnInit {
       const q = this.searchQuery.toLowerCase();
       list = list.filter(t =>
         t.title?.toLowerCase().includes(q) ||
-        t.location?.toLowerCase().includes(q) ||
-        t.customer_name?.toLowerCase().includes(q)
+        (t.location || t.address || t.resolved_location)?.toLowerCase().includes(q) ||
+        t.customer_name?.toLowerCase().includes(q) ||
+        t.customer_phone?.toLowerCase().includes(q)
       );
     }
     this.filteredTasks = list;
@@ -72,6 +132,32 @@ export class TaskListPage implements OnInit {
 
   goToDetail(id: number) {
     this.router.navigate(['/task-detail', id]);
+  }
+
+  openWhatsApp(task: any, event?: Event) {
+    if (event) event.stopPropagation();
+    if (!task?.customer_phone) return;
+    let cleanPhone = task.customer_phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.substring(1);
+    }
+    const customer = task.customer_name || 'Pelanggan';
+    const technician = this.user?.name || 'Teknisi FiberOps';
+    const text = encodeURIComponent(`Halo Bapak/Ibu ${customer}, saya ${technician} dari tim teknisi FiberOps sedang menuju ke lokasi Anda untuk pengerjaan tiket: ${task.title}.`);
+    window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
+  }
+
+  callCustomer(task: any, event?: Event) {
+    if (event) event.stopPropagation();
+    if (!task?.customer_phone) return;
+    window.open(`tel:${task.customer_phone}`, '_system');
+  }
+
+  openNavigation(task: any, event?: Event) {
+    if (event) event.stopPropagation();
+    if (task?.latitude && task?.longitude) {
+      this.navigationService.openNavigationOptions(task.latitude, task.longitude, task.title);
+    }
   }
 
   getStatusColor(status: string): string {
@@ -107,7 +193,11 @@ export class TaskListPage implements OnInit {
     }
   }
 
+  trackByTaskId(index: number, task: any): number {
+    return task.id;
+  }
+
   doRefresh(event: any) {
-    this.loadTasks().then(() => event.target.complete());
+    this.loadInitialData().then(() => event.target.complete());
   }
 }

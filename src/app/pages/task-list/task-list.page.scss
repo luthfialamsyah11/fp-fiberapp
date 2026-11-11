@@ -2,10 +2,209 @@
   --background: #F8FAFC;
 }
 
+// ─── Top Greeting & Status Bar ───────────────────────────────────────────────────
+.tech-top-bar {
+  padding: 50px 16px 12px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .greeting-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+  }
+
+  .tech-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 2px 0 0;
+  }
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #94A3B8;
+  }
+
+  .status-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748B;
+  }
+
+  &.online {
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+    .status-dot {
+      background: #10B981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+    .status-text {
+      color: #047857;
+    }
+  }
+}
+
+// ─── Active Mission Sticky Hero Card ─────────────────────────────────────────────
+.active-mission-card {
+  margin: 16px 16px 8px;
+  background: linear-gradient(135deg, #1E3A5F 0%, #1E40AF 100%);
+  border-radius: 20px;
+  padding: 18px;
+  color: #FFFFFF;
+  box-shadow: 0 10px 25px -5px rgba(30, 64, 175, 0.35);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  .mission-badge-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .mission-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: #FFFFFF;
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34D399;
+      box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.4);
+    }
+  }
+
+  .mission-priority {
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .mission-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 4px 0 10px;
+    line-height: 1.35;
+  }
+
+  .mission-meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 14px;
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.85);
+
+      ion-icon {
+        font-size: 14px;
+        color: #93C5FD;
+      }
+
+      .cust-name {
+        font-weight: 700;
+      }
+      .cust-phone {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+  }
+
+  .mission-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+    .btn-quick {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 9px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+
+      &:active {
+        opacity: 0.75;
+      }
+
+      ion-icon {
+        font-size: 15px;
+      }
+    }
+
+    .btn-gps {
+      background: rgba(255, 255, 255, 0.18);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-wa {
+      background: #22C55E;
+      color: #FFFFFF;
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-open {
+      background: #FFFFFF;
+      color: #1E40AF;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+  }
+}
+
 // ─── Header Section ──────────────────────────────────────────────────────────────
 .tl-header-section {
-  padding: 56px 16px 12px;
-  background: #F8FAFC;
+  padding: 14px 16px 10px;
+  background: transparent;
 }
 
 .tl-title-row {

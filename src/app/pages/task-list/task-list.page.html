@@ -4,10 +4,67 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- Header -->
+  <!-- Top Greeting & Online Status Bar -->
+  <div class="tech-top-bar">
+    <div class="tech-info">
+      <span class="greeting-sub">Halo, Selamat Bekerja</span>
+      <h2 class="tech-name">{{ user?.name || 'Teknisi FiberOps' }}</h2>
+    </div>
+    <button class="status-pill" [class.online]="isOnline" (click)="toggleOnlineStatus()">
+      <span class="status-dot"></span>
+      <span class="status-text">{{ isOnline ? 'Online' : 'Offline' }}</span>
+    </button>
+  </div>
+
+  <!-- Active Mission Card (Sticky Hero when in progress or accepted) -->
+  <div class="active-mission-card" *ngIf="activeMission" (click)="goToDetail(activeMission.id)">
+    <div class="mission-badge-row">
+      <span class="mission-tag">
+        <span class="pulse-dot"></span>
+        MISI AKTIF ({{ getStatusLabel(activeMission.status) }})
+      </span>
+      <span class="mission-priority" [style.color]="getPriorityColor(activeMission.priority)">
+        ● Prioritas {{ activeMission.priority | uppercase }}
+      </span>
+    </div>
+
+    <h3 class="mission-title">{{ activeMission.title }}</h3>
+
+    <div class="mission-meta-list">
+      <div class="meta-row" *ngIf="activeMission.customer_name">
+        <ion-icon name="person-circle-outline"></ion-icon>
+        <span class="cust-name">{{ activeMission.customer_name }}</span>
+        <span class="cust-phone" *ngIf="activeMission.customer_phone">({{ activeMission.customer_phone }})</span>
+      </div>
+      <div class="meta-row" *ngIf="activeMission.location || activeMission.address">
+        <ion-icon name="location-outline"></ion-icon>
+        <span>{{ activeMission.location || activeMission.address }}</span>
+      </div>
+    </div>
+
+    <!-- Quick Action Shortcuts -->
+    <div class="mission-actions-row">
+      <button class="btn-quick btn-gps" *ngIf="activeMission.latitude && activeMission.longitude" (click)="openNavigation(activeMission, $event)">
+        <ion-icon name="navigate-outline"></ion-icon>
+        <span>Rute GPS</span>
+      </button>
+
+      <button class="btn-quick btn-wa" *ngIf="activeMission.customer_phone" (click)="openWhatsApp(activeMission, $event)">
+        <ion-icon name="logo-whatsapp"></ion-icon>
+        <span>WhatsApp</span>
+      </button>
+
+      <button class="btn-quick btn-open" (click)="goToDetail(activeMission.id)">
+        <span>Buka Tugas</span>
+        <ion-icon name="arrow-forward-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Section Header -->
   <div class="tl-header-section">
     <div class="tl-title-row">
-      <h1>Daftar Tugas</h1>
+      <h1>Antrean Tugas</h1>
       <span class="task-count" *ngIf="!isLoading">{{ filteredTasks.length }} tugas</span>
     </div>
 
@@ -16,7 +73,7 @@
       <ion-icon name="search-outline"></ion-icon>
       <input
         type="text"
-        placeholder="Cari tugas atau lokasi..."
+        placeholder="Cari tugas, pelanggan, atau lokasi..."
         (input)="onSearch($event)"
       />
     </div>
@@ -52,7 +109,7 @@
   <div class="task-list" *ngIf="!isLoading && filteredTasks.length > 0">
     <div
       class="task-card"
-      *ngFor="let task of filteredTasks"
+      *ngFor="let task of filteredTasks; trackBy: trackByTaskId"
       (click)="goToDetail(task.id)"
     >
       <div class="priority-bar" [style.background]="getPriorityColor(task.priority)"></div>

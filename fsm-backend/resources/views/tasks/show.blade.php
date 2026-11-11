@@ -233,8 +233,18 @@
 
         <!-- Task & Technician Coordinates Map -->
         <div class="bg-white rounded-xl border border-fsmBorder overflow-hidden shadow-sm flex flex-col">
-            <div class="px-5 py-3 border-b border-fsmBorder bg-slate-50/50">
+            <div class="px-5 py-3 border-b border-fsmBorder bg-slate-50/50 flex items-center justify-between">
                 <h3 class="text-xs font-semibold text-textPrimary uppercase tracking-wider">Location Monitoring</h3>
+                @if($task->latitude && $task->longitude)
+                    <div class="flex items-center gap-1.5">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $task->latitude }},{{ $task->longitude }}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-[10px] font-bold transition-all flex items-center gap-1" title="Buka rute di Google Maps">
+                            <ion-icon name="navigate-outline"></ion-icon> Maps
+                        </a>
+                        <a href="https://waze.com/ul?ll={{ $task->latitude }},{{ $task->longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 text-[10px] font-bold transition-all flex items-center gap-1" title="Buka rute di Waze">
+                            <ion-icon name="car-sport-outline"></ion-icon> Waze
+                        </a>
+                    </div>
+                @endif
             </div>
             
             @if($task->latitude && $task->longitude)

@@ -1,5 +1,17 @@
-<ion-content class="login-content" [scrollY]="false">
+<ion-content class="login-content" [scrollY]="true">
   <div class="login-container">
+
+    <!-- Top Navigation / Status -->
+    <div class="top-bar">
+      <a href="http://127.0.0.1:8085" class="back-link">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        <span>Portal</span>
+      </a>
+      <div class="system-status">
+        <span class="status-dot"></span>
+        <span>Online</span>
+      </div>
+    </div>
 
     <!-- Brand Header -->
     <div class="login-header">
@@ -7,59 +19,118 @@
         <div class="logo-icon">
           <ion-icon name="flash"></ion-icon>
         </div>
-        <div class="logo-glow"></div>
+        <div class="logo-ring"></div>
       </div>
-      <h1>FiberOps</h1>
-      <p class="subtitle">Field Service Technician</p>
+      <div class="kicker-tag">Aplikasi Teknisi Lapangan</div>
+      <h1>FiberOps Mobile</h1>
+      <p class="subtitle">Field Service Management System</p>
     </div>
 
     <!-- Login Card -->
     <div class="login-card">
-      <h2>Masuk ke Akun</h2>
-      <p class="card-desc">Masukkan kredensial Anda untuk melanjutkan</p>
+      <div class="card-header">
+        <h2>Masuk ke Akun</h2>
+        <p class="card-desc">Masukkan kredensial teknisi Anda untuk memulai shift</p>
+      </div>
 
+      <!-- Quick Demo Credentials Picker -->
+      <div class="demo-selector">
+        <div class="demo-label">
+          <ion-icon name="key-outline"></ion-icon>
+          <span>Pilih Akun Demo Cepat:</span>
+        </div>
+        <div class="demo-chips">
+          <button 
+            *ngFor="let tech of demoTechnicians" 
+            type="button" 
+            class="demo-chip"
+            [class.active]="email === tech.email"
+            (click)="fillDemo(tech.email)"
+          >
+            <span class="chip-name">{{ tech.name }}</span>
+            <span class="chip-role">{{ tech.role }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Form Inputs -->
       <div class="form-group">
-        <label>Email</label>
+        <label for="tech-email">Alamat Email</label>
         <div class="input-wrap" [class.focused]="emailFocused">
           <ion-icon name="mail-outline" class="input-icon"></ion-icon>
           <input
+            id="tech-email"
             type="email"
             [(ngModel)]="email"
-            placeholder="nama@perusahaan.com"
+            placeholder="alex@fsm.com"
             autocomplete="email"
             (focus)="emailFocused = true"
             (blur)="emailFocused = false"
+            (keyup.enter)="login()"
           />
         </div>
       </div>
 
       <div class="form-group">
-        <label>Password</label>
+        <label for="tech-password">Kata Sandi</label>
         <div class="input-wrap" [class.focused]="passwordFocused">
           <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
           <input
+            id="tech-password"
             [type]="showPassword ? 'text' : 'password'"
             [(ngModel)]="password"
-            placeholder="Masukkan password"
+            placeholder="Masukkan kata sandi"
+            autocomplete="current-password"
             (focus)="passwordFocused = true"
             (blur)="passwordFocused = false"
+            (keyup.enter)="login()"
           />
-          <button class="toggle-btn" (click)="togglePassword()" type="button">
+          <!-- 44x44px Touch Target Toggle Button -->
+          <button 
+            class="toggle-btn" 
+            (click)="togglePassword()" 
+            type="button"
+            aria-label="Tampilkan atau sembunyikan password"
+          >
             <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
           </button>
         </div>
       </div>
 
-      <button class="btn-login" (click)="login()">
-        <span>Masuk</span>
-        <ion-icon name="arrow-forward-outline"></ion-icon>
+      <!-- Remember Me -->
+      <div class="options-row">
+        <label class="remember-label">
+          <input type="checkbox" [(ngModel)]="rememberMe" />
+          <span>Ingat email saya</span>
+        </label>
+        <span class="secure-badge">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          Sanctum SSL
+        </span>
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        class="btn-login" 
+        (click)="login()" 
+        [disabled]="isLoading"
+        type="button"
+      >
+        <span *ngIf="!isLoading">Masuk ke Dashboard</span>
+        <span *ngIf="isLoading">Memverifikasi...</span>
+        <ion-icon *ngIf="!isLoading" name="arrow-forward-outline"></ion-icon>
+        <ion-spinner *ngIf="isLoading" name="crescent" class="btn-spinner"></ion-spinner>
       </button>
+
+      <div class="admin-portal-link">
+        <p>Login sebagai Administrator? <a href="http://127.0.0.1:8000/login" target="_blank">Buka Web Admin</a></p>
+      </div>
     </div>
 
     <!-- Footer -->
     <div class="login-footer">
-      <p>FiberOps Technician v1.0</p>
-      <p class="copyright">&copy; 2024 FiberOps. All rights reserved.</p>
+      <p class="app-version">FiberOps Technician v1.0.4-premium</p>
+      <p class="copyright">&copy; 2026 FiberOps ISP System. Hak cipta dilindungi.</p>
     </div>
   </div>
 </ion-content>

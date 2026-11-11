@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Services\SettingService;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -21,6 +22,9 @@ class TaskController extends Controller
 
     public function show(Task $task)
     {
+        if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         $task->load(['technician', 'progressUpdates.user', 'proofOfWork']);
         return response()->json(['data' => $task]);
     }
@@ -56,8 +60,8 @@ class TaskController extends Controller
         if ($task->technician_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-        if ($task->status !== 'accepted') {
-            return response()->json(['message' => 'Tugas belum diterima'], 422);
+        if (!in_array($task->status, ['assigned', 'accepted'])) {
+            return response()->json(['message' => 'Tugas tidak dalam status yang dapat dimulai'], 422);
         }
 
         $task->update(['status' => 'on-going']);
@@ -73,7 +77,23 @@ class TaskController extends Controller
             return response()->json(['message' => 'Pekerjaan belum dimulai'], 422);
         }
 
+        // Enforce Proof of Work guardrail if configured in settings
+        $requireProof = SettingService::get('require_proof_photo', '1');
+        if ($requireProof == '1' && $task->proofOfWork()->count() === 0) {
+            return response()->json(['message' => 'Wajib mengunggah minimal 1 foto bukti pekerjaan sebelum menyelesaikan tugas'], 422);
+        }
+
         $task->update(['status' => 'completed']);
+
+        // Dispatch real-time webhook alert if configured
+        SettingService::dispatchWebhook('TASK_COMPLETED', [
+            'task_id'         => $task->id,
+            'title'           => $task->title,
+            'customer_name'   => $task->customer_name,
+            'technician_name' => auth()->user()->name,
+            'status'          => 'completed',
+        ]);
+
         return response()->json(['data' => $task]);
     }
 

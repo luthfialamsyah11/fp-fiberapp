@@ -28,8 +28,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('admin.login.post');
 });
 
-// Protected Admin Routes
-Route::middleware(['auth'])->group(function () {
+// Protected Admin Routes (Strict RBAC - Admin Role Only)
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
     
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -48,9 +48,16 @@ Route::middleware(['auth'])->group(function () {
     // New FSM Admin Redesign Routes
     Route::get('/assignments', [\App\Http\Controllers\Web\AssignmentController::class, 'index'])->name('admin.assignments');
     Route::get('/tracking', [\App\Http\Controllers\Web\TrackingController::class, 'index'])->name('admin.tracking');
+    Route::get('/tracking/live-data', [\App\Http\Controllers\Web\TrackingController::class, 'liveData'])->name('admin.tracking.live');
     Route::get('/proofs', [\App\Http\Controllers\Web\ProofController::class, 'index'])->name('admin.proofs');
     Route::get('/history', [\App\Http\Controllers\Web\JobHistoryController::class, 'index'])->name('admin.history');
     Route::get('/reports', [\App\Http\Controllers\Web\ReportController::class, 'index'])->name('admin.reports');
+    Route::get('/reports/export', [\App\Http\Controllers\Web\ReportController::class, 'export'])->name('admin.reports.export');
     Route::get('/settings', [\App\Http\Controllers\Web\SettingsController::class, 'index'])->name('admin.settings');
     Route::post('/settings', [\App\Http\Controllers\Web\SettingsController::class, 'update'])->name('admin.settings.update');
+    Route::post('/settings/test-webhook', [\App\Http\Controllers\Web\SettingsController::class, 'testWebhook'])->name('admin.settings.test_webhook');
+    Route::post('/settings/purge-cache', [\App\Http\Controllers\Web\SettingsController::class, 'purgeCache'])->name('admin.settings.purge_cache');
+    
+    // User Guide / Documentation
+    Route::get('/guide', [\App\Http\Controllers\Web\GuideController::class, 'index'])->name('admin.guide');
 });

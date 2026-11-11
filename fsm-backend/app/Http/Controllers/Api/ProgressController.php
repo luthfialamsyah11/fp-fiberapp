@@ -11,19 +11,23 @@ class ProgressController extends Controller
 {
     public function store(Request $request, Task $task)
     {
+        if ($task->technician_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($task->status !== 'on-going') {
+            return response()->json(['message' => 'Catatan progres hanya dapat ditambahkan saat tugas berstatus dikerjakan (on-going)'], 422);
+        }
+
         $request->validate([
             'note'             => 'required|string',
             'progress_percent' => 'required|integer|min:0|max:100',
         ]);
 
-        if ($task->technician_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         $progress = ProgressUpdate::create([
             'task_id'          => $task->id,
             'user_id'          => auth()->id(),
-            'note'             => $request->note,
+            'note'             => strip_tags(trim($request->note)),
             'progress_percent' => $request->progress_percent,
         ]);
 

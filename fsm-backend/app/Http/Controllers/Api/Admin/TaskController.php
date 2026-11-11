@@ -26,21 +26,24 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title'         => 'required|string',
-            'customer_name' => 'required|string',
-            'description'   => 'required|string',
-            'address'       => 'required|string',
-            'latitude'      => 'nullable|numeric',
-            'longitude'     => 'nullable|numeric',
-            'technician_id' => 'nullable|exists:users,id',
+        $validated = $request->validate([
+            'title'            => 'required|string|max:255',
+            'customer_name'    => 'required|string|max:255',
+            'description'      => 'required|string',
+            'address'          => 'required|string',
+            'priority'         => 'sometimes|in:low,medium,high',
+            'latitude'         => 'nullable|numeric|between:-90,90',
+            'longitude'        => 'nullable|numeric|between:-180,180',
+            'technician_id'    => 'nullable|exists:users,id',
+            'scheduled_at'     => 'nullable|date',
+            'customer_phone'   => 'nullable|string|max:50',
+            'additional_notes' => 'nullable|string',
         ]);
 
-        $data = $request->all();
-        $data['status'] = !empty($data['technician_id']) ? 'assigned' : 'pending';
-        $data['location'] = $data['address'];
+        $validated['status'] = !empty($validated['technician_id']) ? 'assigned' : 'pending';
+        $validated['location'] = $validated['address'];
 
-        $task = Task::create($data);
+        $task = Task::create($validated);
         return response()->json(['data' => $task], 201);
     }
 
@@ -52,7 +55,26 @@ class TaskController extends Controller
 
     public function update(Request $request, Task $task)
     {
-        $task->update($request->all());
+        $validated = $request->validate([
+            'title'            => 'sometimes|string|max:255',
+            'description'      => 'sometimes|string',
+            'customer_name'    => 'sometimes|string|max:255',
+            'customer_phone'   => 'nullable|string|max:50',
+            'address'          => 'sometimes|string',
+            'priority'         => 'sometimes|in:low,medium,high',
+            'status'           => 'sometimes|in:pending,assigned,accepted,on-going,completed,rejected',
+            'technician_id'    => 'nullable|exists:users,id',
+            'latitude'         => 'nullable|numeric',
+            'longitude'        => 'nullable|numeric',
+            'scheduled_at'     => 'nullable|date',
+            'additional_notes' => 'nullable|string',
+        ]);
+
+        if (isset($validated['address'])) {
+            $validated['location'] = $validated['address'];
+        }
+
+        $task->update($validated);
         return response()->json(['data' => $task]);
     }
 

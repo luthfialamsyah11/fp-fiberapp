@@ -22,6 +22,10 @@
             <ion-icon name="location-outline"></ion-icon>
             {{ task.location }}
           </span>
+          <button *ngIf="task.latitude && task.longitude" class="btn-banner-nav" (click)="openNavigation()">
+            <ion-icon name="navigate-outline"></ion-icon>
+            <span>Rute GPS</span>
+          </button>
         </div>
       </div>
     </div>
@@ -37,9 +41,9 @@
           <span>Mulai Tugas</span>
         </div>
         <p class="section-desc">Klik tombol di bawah untuk memulai pengerjaan tugas ini.</p>
-        <button class="btn-action btn-start" (click)="startTask()">
+        <button class="btn-action btn-start" (click)="startTask()" [disabled]="isStarting">
           <ion-icon name="play-outline"></ion-icon>
-          Mulai Sekarang
+          {{ isStarting ? 'Memulai...' : 'Mulai Sekarang' }}
         </button>
       </div>
 
@@ -99,6 +103,13 @@
         </div>
 
         <div class="file-picker" (click)="takePicture()">
+          <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            style="display: none;"
+          />
           <div class="picker-icon" *ngIf="!selectedFile">
             <ion-icon name="camera-outline"></ion-icon>
           </div>
@@ -127,6 +138,23 @@
           <ion-icon name="cloud-upload-outline"></ion-icon>
           {{ isUploading ? 'Mengunggah...' : 'Unggah Bukti' }}
         </button>
+
+        <!-- Attached Proofs Gallery -->
+        <div class="attached-proofs-card" *ngIf="task?.proof_of_work && task.proof_of_work.length > 0">
+          <div class="attached-header">
+            <ion-icon name="images-outline"></ion-icon>
+            <span>Bukti Terlampir ({{ task.proof_of_work.length }})</span>
+          </div>
+          <div class="proofs-grid">
+            <div class="proof-thumb-item" *ngFor="let p of task.proof_of_work; let i = index">
+              <img [src]="p.image_url" alt="Bukti #{{ i + 1 }}" loading="lazy" />
+              <div class="thumb-meta">
+                <span class="thumb-num">#{{ i + 1 }}</span>
+                <span class="thumb-desc" *ngIf="p.description">{{ p.description }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Complete Task -->
@@ -138,9 +166,9 @@
           <span>Selesaikan Tugas</span>
         </div>
         <p class="section-desc">Pastikan semua pekerjaan telah selesai dan bukti sudah diunggah sebelum menyelesaikan tugas.</p>
-        <button class="btn-action btn-complete" (click)="completeTask()">
+        <button class="btn-action btn-complete" (click)="completeTask()" [disabled]="isCompleting || isUploading">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
-          Tandai Selesai
+          {{ isCompleting ? 'Menyelesaikan...' : 'Tandai Selesai' }}
         </button>
       </div>
 

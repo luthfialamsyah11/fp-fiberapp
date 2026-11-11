@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\SettingService;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -59,7 +60,19 @@ class TaskController extends Controller
         // Let's check what the model actually has: customer_name, title, description, address, latitude, longitude.
         $validated['location'] = $validated['address'];
 
-        Task::create($validated);
+        $task = Task::create($validated);
+
+        // If emergency high priority task, dispatch real-time webhook alert
+        if ($task->priority === 'high') {
+            SettingService::dispatchWebhook('TASK_EMERGENCY_CREATED', [
+                'task_id'       => $task->id,
+                'title'         => $task->title,
+                'customer_name' => $task->customer_name,
+                'priority'      => 'high',
+                'location'      => $task->location,
+                'technician'    => $task->technician ? $task->technician->name : 'Unassigned',
+            ]);
+        }
 
         return redirect()->route('admin.tasks.index')->with('success', 'Tugas berhasil dibuat.');
     }

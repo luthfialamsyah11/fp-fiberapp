@@ -14,11 +14,11 @@ jobs:
     steps:
       # 1. Checkout repository code
       - name: 📁 Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Setup Node.js environment
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -29,7 +29,16 @@ jobs:
           npm ci
           npx ng build --configuration production --base-href /
 
-      # 4. Deploy Compiled Frontend PWA to /publik_html/app/
+      # 3.5 Verify FTP Secrets Existence
+      - name: 🔍 Verify FTP Secrets Configuration
+        run: |
+          if [ -z "${{ secrets.FTP_SERVER }}" ] || [ -z "${{ secrets.FTP_USERNAME }}" ] || [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
+            echo "::error::GitHub Repository Secrets (FTP_SERVER, FTP_USERNAME, or FTP_PASSWORD) are missing or empty in this repository! Please configure them in Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "FTP Secrets are populated and ready for deployment."
+
+      # 4. Deploy Compiled Frontend PWA to /public_html/app/
       - name: 🚀 Deploy PWA Client
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -51,7 +60,7 @@ jobs:
           server-dir: /public_html/
           dry-run: false
 
-      # 5. Deploy Admin Public bootstrap assets to /publik_html/admin/
+      # 5. Deploy Admin Public bootstrap assets to /public_html/admin/
       - name: 🚀 Deploy Admin Public
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -62,7 +71,7 @@ jobs:
           server-dir: /public_html/admin/
           dry-run: false
 
-      # 6. Deploy Backend Core Laravel (exclude vendor, node_modules, tests, local .env) to /inti laravel/
+      # 6. Deploy Backend Core Laravel (exclude vendor, node_modules, tests, local .env) to /laravel-core/
       - name: 🚀 Deploy Laravel Backend Core
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:

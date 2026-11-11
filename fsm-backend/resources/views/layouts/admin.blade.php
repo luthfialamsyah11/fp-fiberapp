@@ -113,6 +113,11 @@
                 <span>Task Management</span>
             </a>
 
+            <a href="{{ route('admin.inventory.index') }}" class="nav-item flex items-center px-3 py-2.5 rounded-xl transition-all text-slate-300 text-sm {{ request()->routeIs('admin.inventory.*') ? 'active text-white' : '' }}">
+                <ion-icon name="cube-outline" class="text-lg mr-3 flex-shrink-0"></ion-icon>
+                <span>Inventaris &amp; Material</span>
+            </a>
+
             <a href="{{ route('admin.assignments') }}" class="nav-item flex items-center px-3 py-2.5 rounded-xl transition-all text-slate-300 text-sm {{ request()->routeIs('admin.assignments') ? 'active text-white' : '' }}">
                 <ion-icon name="calendar-clear-outline" class="text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span>Assignment Monitoring</span>

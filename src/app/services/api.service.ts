@@ -88,4 +88,29 @@ export class ApiService {
   async getProof(taskId: number) {
     return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/proof`));
   }
+
+  // Inventory & Materials (BOM)
+  async getInventory(): Promise<any> {
+    return firstValueFrom(this.http.get(`${this.baseUrl}/inventory`));
+  }
+
+  async getTaskMaterials(taskId: number): Promise<any> {
+    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/materials`));
+  }
+
+  async addTaskMaterial(taskId: number, data: { inventory_item_id: number; quantity: number; serial_number?: string; notes?: string }): Promise<any> {
+    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/materials`, data));
+  }
+
+  async deleteTaskMaterial(taskId: number, materialId: number): Promise<any> {
+    return firstValueFrom(this.http.delete(`${this.baseUrl}/tasks/${taskId}/materials/${materialId}`));
+  }
+
+  // Customer Digital Signature
+  async saveTaskSignature(taskId: number, signature: string, signerName: string): Promise<any> {
+    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/signature`, {
+      signature,
+      signer_name: signerName
+    }));
+  }
 }

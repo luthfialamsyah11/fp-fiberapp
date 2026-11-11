@@ -49,7 +49,8 @@ class TaskController extends Controller
 
     public function show(Task $task)
     {
-        $task->load(['technician', 'progressUpdates.user', 'proofOfWork']);
+        $task->ensureTrackingToken();
+        $task->load(['technician', 'progressUpdates.user', 'proofOfWork', 'materials.inventoryItem']);
         return response()->json(['data' => $task]);
     }
 

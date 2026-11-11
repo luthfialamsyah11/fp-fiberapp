@@ -17,8 +17,16 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\TaskController;
 use App\Http\Controllers\Web\TechnicianController;
+use App\Http\Controllers\Web\CustomerTrackingController;
+use App\Http\Controllers\Web\BastController;
 
-// Public Admin Routes
+// Public Customer Live Tracking Page (Uber-Style, No Login Required)
+Route::get('/track/{token}', [CustomerTrackingController::class, 'show'])->name('customer.tracking');
+
+// BAST Official Work Order Printout (Accessible by Admin session or valid ?token=...)
+Route::get('tasks/{task}/bast', [BastController::class, 'show'])->name('admin.tasks.bast');
+
+// Public Admin Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::get('/', function () {
         return redirect()->route('admin.login');
@@ -44,6 +52,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         'as' => 'admin'
     ]);
     Route::post('tasks/{task}/assign', [TaskController::class, 'assign'])->name('admin.tasks.assign');
+
+    // Inventaris & Material Management
+    Route::resource('inventory', \App\Http\Controllers\Web\InventoryController::class, [
+        'as' => 'admin'
+    ]);
 
     // New FSM Admin Redesign Routes
     Route::get('/assignments', [\App\Http\Controllers\Web\AssignmentController::class, 'index'])->name('admin.assignments');

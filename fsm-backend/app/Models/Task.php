@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Task extends Model
 {
     protected $fillable = [
         'title', 'customer_name', 'customer_phone', 'description', 'address', 'location',
         'latitude', 'longitude', 'technician_id', 'status', 'priority',
-        'additional_notes', 'scheduled_at'
+        'additional_notes', 'scheduled_at',
+        'tracking_token', 'customer_signature', 'customer_signer_name', 'customer_signed_at'
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
+        'customer_signed_at' => 'datetime',
         'latitude' => 'float',
         'longitude' => 'float',
     ];
@@ -21,8 +24,32 @@ class Task extends Model
     protected $appends = [
         'resolved_location',
         'status_label',
-        'progress_percent'
+        'progress_percent',
+        'tracking_url'
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($task) {
+            if (empty($task->tracking_token)) {
+                $task->tracking_token = Str::random(32);
+            }
+        });
+    }
+
+    public function ensureTrackingToken(): string
+    {
+        if (empty($this->tracking_token)) {
+            $this->update(['tracking_token' => Str::random(32)]);
+        }
+        return $this->tracking_token;
+    }
+
+    public function getTrackingUrlAttribute(): string
+    {
+        $token = $this->tracking_token ?? $this->ensureTrackingToken();
+        return url('/track/' . $token);
+    }
 
     public function technician()
     {
@@ -37,6 +64,11 @@ class Task extends Model
     public function latestProgressUpdate()
     {
         return $this->hasOne(ProgressUpdate::class)->latestOfMany();
+    }
+
+    public function materials()
+    {
+        return $this->hasMany(TaskMaterial::class)->with('inventoryItem');
     }
 
     // Alias: proofs (used in web views)

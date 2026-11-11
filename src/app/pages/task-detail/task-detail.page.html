@@ -42,6 +42,13 @@
           <span>WhatsApp</span>
         </button>
 
+        <button class="btn-tool btn-tool-tracking" *ngIf="task.customer_phone" (click)="shareCustomerTracking()" title="Bagikan Live Tracking ke Pelanggan">
+          <div class="icon-circle tracking">
+            <ion-icon name="radio-outline"></ion-icon>
+          </div>
+          <span>Live Track</span>
+        </button>
+
         <button class="btn-tool btn-tool-call" *ngIf="task.customer_phone" (click)="callCustomer()">
           <div class="icon-circle call">
             <ion-icon name="call-outline"></ion-icon>
@@ -60,7 +67,7 @@
           <div class="icon-circle copy">
             <ion-icon name="copy-outline"></ion-icon>
           </div>
-          <span>Salin Alamat</span>
+          <span>Salin</span>
         </button>
       </div>
     </div>
@@ -108,6 +115,21 @@
           </div>
         </div>
         <p class="stage-desc">Gunakan navigasi GPS di atas untuk panduan jalan. Tekan tombol di bawah saat Anda telah tiba di lokasi pelanggan.</p>
+
+        <!-- Live Tracking Share Banner -->
+        <div class="tracking-share-box" *ngIf="task.customer_phone">
+          <div class="ts-info">
+            <div class="pulse-radar-dot"></div>
+            <div>
+              <strong>Kirim Link Live Tracking</strong>
+              <p>Pelanggan dapat memantau pergerakan armada Anda di peta secara live ala Uber.</p>
+            </div>
+          </div>
+          <button class="btn-share-wa" (click)="shareCustomerTracking()">
+            <ion-icon name="logo-whatsapp"></ion-icon>
+            <span>Kirim Link via WhatsApp</span>
+          </button>
+        </div>
 
         <button class="btn-action-lg btn-start" (click)="startTask()" [disabled]="isStarting">
           <ion-icon name="play-circle-outline"></ion-icon>
@@ -216,6 +238,141 @@
             <ion-icon name="save-outline"></ion-icon>
             <span>{{ isUpdatingProgress ? 'Menyimpan...' : 'Simpan Progres' }}</span>
           </button>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- FITUR ENTERPRISE 1: MATERIAL & SUKU CADANG TERPAKAI (BOM TRACKER) -->
+        <!-- =================================================================== -->
+        <div class="stage-card bom-card">
+          <div class="stage-header">
+            <div class="stage-icon-circle blue">
+              <ion-icon name="cube-outline"></ion-icon>
+            </div>
+            <div class="stage-title-wrap">
+              <span class="stage-tag blue">LOGISTIK & INVENTARIS</span>
+              <h3>Material & Suku Cadang Terpakai (BOM)</h3>
+            </div>
+          </div>
+          <p class="stage-desc">Catat kabel, ONT, atau konektor yang dipasang pada tiket ini. Stok gudang akan otomatis dipotong.</p>
+
+          <!-- Input Form Material -->
+          <div class="bom-form">
+            <div class="bom-input-group">
+              <label>Pilih Barang dari Gudang</label>
+              <select [(ngModel)]="selectedInventoryId" class="bom-select">
+                <option [ngValue]="null">-- Pilih Material / Perangkat --</option>
+                <option *ngFor="let item of inventoryItems" [ngValue]="item.id">
+                  [{{ item.code || item.sku }}] {{ item.name }} (Stok: {{ item.stock }} {{ item.unit }})
+                </option>
+              </select>
+            </div>
+
+            <div class="bom-grid-row">
+              <div class="bom-input-group half">
+                <label>Jumlah (Qty)</label>
+                <input type="number" min="0.1" step="any" [(ngModel)]="materialQuantity" placeholder="1" class="bom-input" />
+              </div>
+              <div class="bom-input-group half">
+                <label>Nomor Seri / SN (Opsional)</label>
+                <input type="text" [(ngModel)]="materialSerialNumber" placeholder="Misal: SN-ZTE-1029" class="bom-input" />
+              </div>
+            </div>
+
+            <div class="bom-input-group">
+              <label>Catatan Penggunaan (Opsional)</label>
+              <input type="text" [(ngModel)]="materialNotes" placeholder="Misal: Dari ODP-04 ke roset pelanggan" class="bom-input" />
+            </div>
+
+            <button class="btn-action-bom-add" (click)="addMaterial()" [disabled]="isAddingMaterial || !selectedInventoryId">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              <span>{{ isAddingMaterial ? 'Menambahkan...' : 'Catat Pemakaian Material' }}</span>
+            </button>
+          </div>
+
+          <!-- Daftar Material Terpakai -->
+          <div class="bom-list" *ngIf="task.materials && task.materials.length > 0">
+            <div class="bom-list-title">
+              <span>Item Terpakai Pada Tiket Ini</span>
+              <span class="bom-count-pill">{{ task.materials.length }} Item</span>
+            </div>
+            <div class="bom-item-row" *ngFor="let m of task.materials">
+              <div class="bom-item-info">
+                <div class="bom-item-name">{{ m.inventory_item?.name || m.item_name || 'Material' }}</div>
+                <div class="bom-item-details">
+                  <span class="bom-qty-tag">{{ m.quantity }} {{ m.inventory_item?.unit || 'unit' }}</span>
+                  <span *ngIf="m.serial_number" class="bom-sn-tag">SN: {{ m.serial_number }}</span>
+                  <span *ngIf="m.notes" class="bom-notes-txt">{{ m.notes }}</span>
+                </div>
+              </div>
+              <button class="btn-del-bom" (click)="removeMaterial(m)" title="Hapus & Kembalikan Stok">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
+            </div>
+          </div>
+          <div class="bom-empty" *ngIf="!task.materials || task.materials.length === 0">
+            <span>Belum ada material yang dicatat untuk tiket ini.</span>
+          </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- FITUR ENTERPRISE 2: TANDA TANGAN DIGITAL PELANGGAN (BAST DIGITAL) -->
+        <!-- =================================================================== -->
+        <div class="stage-card signature-card">
+          <div class="stage-header">
+            <div class="stage-icon-circle emerald">
+              <ion-icon name="pencil-outline"></ion-icon>
+            </div>
+            <div class="stage-title-wrap">
+              <span class="stage-tag emerald">SERAH TERIMA (BAST)</span>
+              <h3>Tanda Tangan Digital Pelanggan</h3>
+            </div>
+            <span class="status-indicator-badge" [class.done]="task.customer_signature">
+              {{ task.customer_signature ? 'Sudah Ditandatangani' : 'Diperlukan' }}
+            </span>
+          </div>
+          <p class="stage-desc">Mintalah tanda tangan pelanggan langsung di layar ini sebagai bukti verifikasi sah serah terima pekerjaan (BAST).</p>
+
+          <!-- Preview Jika Sudah Pernah Ditandatangani -->
+          <div class="signed-preview-box" *ngIf="task.customer_signature">
+            <div class="signed-preview-header">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <span>Tanda Tangan Tersimpan</span>
+            </div>
+            <div class="signed-img-frame">
+              <img [src]="task.customer_signature" alt="Tanda Tangan Pelanggan" class="signed-img" />
+            </div>
+            <div class="signed-meta">
+              <div><strong>Nama Penerima:</strong> {{ task.customer_signer_name || task.customer_name }}</div>
+              <div *ngIf="task.customer_signed_at"><strong>Waktu Tanda Tangan:</strong> {{ task.customer_signed_at | date:'dd MMM yyyy, HH:mm' }} WIB</div>
+            </div>
+          </div>
+
+          <!-- Drawing Canvas Box -->
+          <div class="signature-canvas-wrap">
+            <div class="signer-name-field">
+              <label>Nama Lengkap Penerima / Pelanggan:</label>
+              <input type="text" [(ngModel)]="customerSignerName" placeholder="Contoh: Bpk. Ahmad Dahlan" class="signer-input" />
+            </div>
+
+            <div class="canvas-container">
+              <canvas #signatureCanvas id="signature-canvas" class="signature-pad"></canvas>
+              <div class="canvas-watermark" *ngIf="!isCanvasDrawn">
+                <ion-icon name="finger-print-outline"></ion-icon>
+                <span>Tanda tangan di sini menggunakan jari atau stylus</span>
+              </div>
+            </div>
+
+            <div class="canvas-actions">
+              <button class="btn-canvas-clear" (click)="clearCanvas()" type="button">
+                <ion-icon name="refresh-outline"></ion-icon>
+                <span>Hapus & Ulangi</span>
+              </button>
+              <button class="btn-canvas-save" (click)="saveSignature()" [disabled]="!isCanvasDrawn || isSavingSignature" type="button">
+                <ion-icon name="checkmark-done-outline"></ion-icon>
+                <span>{{ isSavingSignature ? 'Menyimpan...' : 'Simpan Tanda Tangan' }}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Selesaikan Tugas Card -->
@@ -339,6 +496,23 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Tombol BAST PDF Resmi & Info Tanda Tangan (Khusus Status Selesai / Arsip) -->
+        <div class="info-card bast-shortcut-card" *ngIf="task.status === 'completed'">
+          <div class="bast-banner-content">
+            <div class="bast-icon">
+              <ion-icon name="document-attach-outline"></ion-icon>
+            </div>
+            <div class="bast-text">
+              <h4>Dokumen BAST Digital Resmi</h4>
+              <p>Berita Acara Serah Terima lengkap dengan foto before-after, koordinat GPS, dan tanda tangan digital pelanggan.</p>
+            </div>
+          </div>
+          <a [href]="'http://127.0.0.1:8000/tasks/' + task.id + '/bast?token=' + task.tracking_token" target="_blank" class="btn-open-bast">
+            <ion-icon name="print-outline"></ion-icon>
+            <span>Buka & Cetak Dokumen BAST (PDF)</span>
+          </a>
         </div>
 
       </div>

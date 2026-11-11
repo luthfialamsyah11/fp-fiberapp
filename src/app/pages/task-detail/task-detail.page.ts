@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
@@ -11,7 +11,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
   styleUrls: ['./task-detail.page.scss'],
   standalone: false,
 })
-export class TaskDetailPage implements OnInit {
+export class TaskDetailPage implements OnInit, AfterViewInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private navCtrl = inject(NavController);
@@ -64,12 +64,33 @@ export class TaskDetailPage implements OnInit {
     additional: false,
   };
 
+  // ─── Material & Inventory (BOM) Tracker ─────────────────────────────────────
+  inventoryItems: any[] = [];
+  selectedInventoryId: number | null = null;
+  materialQuantity: number = 1;
+  materialSerialNumber: string = '';
+  materialNotes: string = '';
+  isAddingMaterial = false;
+
+  // ─── Customer Digital Signature (Canvas) ───────────────────────────────────
+  @ViewChild('signatureCanvas') signatureCanvasRef?: ElementRef<HTMLCanvasElement>;
+  private canvasCtx: CanvasRenderingContext2D | null = null;
+  private isDrawing = false;
+  isCanvasDrawn = false;
+  customerSignerName = '';
+  isSavingSignature = false;
+
   async ngOnInit() {
     this.taskId = Number(this.route.snapshot.paramMap.get('id'));
   }
 
   async ionViewWillEnter() {
     await this.loadTask();
+    await this.loadInventory();
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => this.initSignatureCanvas(), 500);
   }
 
   async loadTask() {
@@ -90,6 +111,12 @@ export class TaskDetailPage implements OnInit {
       if (this.task?.progress_percent) {
         this.progressPercent = this.task.progress_percent;
       }
+
+      if (this.task?.customer_name && !this.customerSignerName) {
+        this.customerSignerName = this.task.customer_name;
+      }
+
+      setTimeout(() => this.initSignatureCanvas(), 300);
     } catch (e) {
       this.showToast('Gagal memuat detail tugas', 'danger');
     } finally {
@@ -97,52 +124,57 @@ export class TaskDetailPage implements OnInit {
     }
   }
 
+  async loadInventory() {
+    try {
+      const res: any = await this.api.getInventory();
+      this.inventoryItems = res?.data ?? [];
+      if (this.inventoryItems.length > 0 && !this.selectedInventoryId) {
+        this.selectedInventoryId = this.inventoryItems[0].id;
+      }
+    } catch (e) {
+      console.warn('Gagal memuat katalog inventaris', e);
+    }
+  }
+
   // ─── TAHAP 1: TERIMA / TOLAK ───────────────────────────────────────────────────
   async acceptTask() {
-    const alert = await this.alertCtrl.create({
-      header: 'Terima Tugas',
-      message: 'Apakah Anda yakin ingin menerima tugas ini?',
-      buttons: [
-        { text: 'Batal', role: 'cancel' },
-        {
-          text: 'Terima',
-          handler: async () => {
-            this.isActioning = true;
-            try {
-              await this.api.acceptTask(this.taskId);
-              await this.showToast('Tugas berhasil diterima! Siap berangkat.', 'success');
-              await this.loadTask();
-            } catch (e: any) {
-              this.showToast(e?.error?.message || 'Gagal menerima tugas', 'danger');
-            } finally {
-              this.isActioning = false;
-            }
-          }
-        }
-      ]
-    });
-    await alert.present();
+    if (this.isActioning) return;
+    this.isActioning = true;
+    const loading = await this.loadingCtrl.create({ message: 'Menerima tugas...' });
+    await loading.present();
+    try {
+      await this.api.acceptTask(this.taskId);
+      await loading.dismiss();
+      await this.showToast('Tugas berhasil diterima! Siap meluncur ke lokasi.', 'success');
+      await this.loadTask();
+    } catch (e: any) {
+      await loading.dismiss();
+      this.showToast(e?.error?.message || 'Gagal menerima tugas', 'danger');
+    } finally {
+      this.isActioning = false;
+    }
   }
 
   async rejectTask() {
     const alert = await this.alertCtrl.create({
-      header: 'Tolak Tugas',
+      header: 'Tolak Penugasan?',
       message: 'Apakah Anda yakin ingin menolak tugas ini? Tiket akan dikembalikan ke dispatcher.',
       buttons: [
         { text: 'Batal', role: 'cancel' },
         {
-          text: 'Tolak',
+          text: 'Tolak Tugas',
           role: 'destructive',
           handler: async () => {
-            this.isActioning = true;
+            const loading = await this.loadingCtrl.create({ message: 'Menolak tugas...' });
+            await loading.present();
             try {
               await this.api.rejectTask(this.taskId);
-              await this.showToast('Tugas ditolak', 'warning');
+              await loading.dismiss();
+              await this.showToast('Tugas telah ditolak.', 'medium');
               this.router.navigate(['/task-list']);
             } catch (e: any) {
+              await loading.dismiss();
               this.showToast(e?.error?.message || 'Gagal menolak tugas', 'danger');
-            } finally {
-              this.isActioning = false;
             }
           }
         }
@@ -151,16 +183,16 @@ export class TaskDetailPage implements OnInit {
     await alert.present();
   }
 
-  // ─── TAHAP 2: MULAI PENGERJAAN ─────────────────────────────────────────────────
+  // ─── TAHAP 2: MULAI KERJAKAN ───────────────────────────────────────────────────
   async startTask() {
     if (this.isStarting) return;
     this.isStarting = true;
-    const loading = await this.loadingCtrl.create({ message: 'Memulai tugas...' });
+    const loading = await this.loadingCtrl.create({ message: 'Memulai pekerjaan...' });
     await loading.present();
     try {
       await this.api.startTask(this.taskId);
       await loading.dismiss();
-      await this.showToast('Tugas dimulai! Silakan ambil Foto Sebelum.', 'success');
+      await this.showToast('Tugas telah dimulai! Status beralih ke On-Going.', 'success');
       await this.loadTask();
     } catch (e: any) {
       await loading.dismiss();
@@ -170,33 +202,30 @@ export class TaskDetailPage implements OnInit {
     }
   }
 
-  // ─── TAHAP 3: UPDATE PROGRES & BUKTI FOTO ──────────────────────────────────────
+  // ─── TAHAP 3: UPDATE PROGRES & FOTO BUKTI ──────────────────────────────────────
   async updateProgress() {
-    if (!this.progressNote.trim()) {
-      this.showToast('Isi catatan perkembangan pekerjaan terlebih dahulu', 'warning');
-      return;
-    }
+    if (this.isUpdatingProgress) return;
     this.isUpdatingProgress = true;
     try {
-      await this.api.updateProgress(this.taskId, this.progressNote, this.progressPercent);
-      await this.showToast('Catatan progres berhasil disimpan', 'success');
+      await this.api.updateProgress(this.taskId, this.progressNote || 'Pembaruan progres lapangan', this.progressPercent);
+      await this.showToast(`Progres diperbarui ke ${this.progressPercent}%`, 'success');
       this.progressNote = '';
       await this.loadTask();
     } catch (e: any) {
-      this.showToast(e?.error?.message || 'Gagal menyimpan progres', 'danger');
+      this.showToast(e?.error?.message || 'Gagal memperbarui progres', 'danger');
     } finally {
       this.isUpdatingProgress = false;
     }
   }
 
-  async triggerCapture(slot: 'before' | 'after' | 'additional') {
+  async selectPhotoForSlot(slot: 'before' | 'after' | 'additional') {
     this.activeSlot = slot;
     try {
       const image = await Camera.getPhoto({
-        quality: 75,
+        quality: 85,
         allowEditing: false,
         resultType: CameraResultType.Base64,
-        source: CameraSource.Prompt,
+        source: CameraSource.Camera,
       });
 
       if (image && image.base64String) {
@@ -256,6 +285,177 @@ export class TaskDetailPage implements OnInit {
     }
   }
 
+  // ─── TAHAP 3.5: MATERIAL & INVENTORY (BOM) ──────────────────────────────────
+  async addMaterial() {
+    if (!this.selectedInventoryId) {
+      this.showToast('Pilih suku cadang/material terlebih dahulu', 'warning');
+      return;
+    }
+    if (this.materialQuantity <= 0) {
+      this.showToast('Kuantitas harus lebih dari 0', 'warning');
+      return;
+    }
+
+    this.isAddingMaterial = true;
+    try {
+      await this.api.addTaskMaterial(this.taskId, {
+        inventory_item_id: Number(this.selectedInventoryId),
+        quantity: Number(this.materialQuantity),
+        serial_number: this.materialSerialNumber || undefined,
+        notes: this.materialNotes || undefined,
+      });
+
+      await this.showToast('Material berhasil dicatat dan stok gudang terpotong!', 'success');
+      this.materialSerialNumber = '';
+      this.materialNotes = '';
+      this.materialQuantity = 1;
+      await this.loadTask();
+      await this.loadInventory();
+    } catch (e: any) {
+      this.showToast(e?.error?.message || 'Gagal menambahkan material', 'danger');
+    } finally {
+      this.isAddingMaterial = false;
+    }
+  }
+
+  async deleteMaterial(materialId: number) {
+    const alert = await this.alertCtrl.create({
+      header: 'Hapus Material?',
+      message: 'Item ini akan dihapus dan stok akan dikembalikan ke gudang.',
+      buttons: [
+        { text: 'Batal', role: 'cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: async () => {
+            try {
+              await this.api.deleteTaskMaterial(this.taskId, materialId);
+              await this.showToast('Material berhasil dihapus & stok dikembalikan.', 'success');
+              await this.loadTask();
+              await this.loadInventory();
+            } catch (e: any) {
+              this.showToast(e?.error?.message || 'Gagal menghapus material', 'danger');
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  removeMaterial(material: any) {
+    if (material?.id) {
+      this.deleteMaterial(material.id);
+    }
+  }
+
+  triggerCapture(slot: 'before' | 'after' | 'additional') {
+    this.selectPhotoForSlot(slot);
+  }
+
+  clearCanvas() {
+    this.clearSignature();
+  }
+
+  // ─── TAHAP 3.8: CUSTOMER DIGITAL E-SIGNATURE (CANVAS) ───────────────────────
+  initSignatureCanvas() {
+    if (!this.signatureCanvasRef?.nativeElement) return;
+    const canvas = this.signatureCanvasRef.nativeElement;
+    this.canvasCtx = canvas.getContext('2d');
+    if (!this.canvasCtx) return;
+
+    // Resize canvas based on display container width
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width > 0 ? rect.width : 340;
+    canvas.height = 150;
+
+    this.canvasCtx.lineWidth = 2.5;
+    this.canvasCtx.lineCap = 'round';
+    this.canvasCtx.lineJoin = 'round';
+    this.canvasCtx.strokeStyle = '#0284c7';
+
+    // Touch events for Mobile
+    canvas.addEventListener('touchstart', (e) => this.handleCanvasTouch(e, 'start'), { passive: false });
+    canvas.addEventListener('touchmove', (e) => this.handleCanvasTouch(e, 'move'), { passive: false });
+    canvas.addEventListener('touchend', () => this.handleCanvasTouch(null, 'end'), { passive: false });
+
+    // Mouse events for Desktop/Emulators
+    canvas.addEventListener('mousedown', (e) => this.handleCanvasMouse(e, 'start'));
+    canvas.addEventListener('mousemove', (e) => this.handleCanvasMouse(e, 'move'));
+    canvas.addEventListener('mouseup', () => this.handleCanvasMouse(null, 'end'));
+    canvas.addEventListener('mouseleave', () => this.handleCanvasMouse(null, 'end'));
+  }
+
+  private handleCanvasTouch(e: TouchEvent | null, type: 'start' | 'move' | 'end') {
+    if (!this.canvasCtx || !this.signatureCanvasRef) return;
+    if (e) e.preventDefault();
+
+    const canvas = this.signatureCanvasRef.nativeElement;
+    const rect = canvas.getBoundingClientRect();
+
+    if (type === 'start' && e && e.touches[0]) {
+      this.isDrawing = true;
+      this.isCanvasDrawn = true;
+      this.canvasCtx.beginPath();
+      this.canvasCtx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+    } else if (type === 'move' && this.isDrawing && e && e.touches[0]) {
+      this.canvasCtx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+      this.canvasCtx.stroke();
+    } else if (type === 'end') {
+      this.isDrawing = false;
+    }
+  }
+
+  private handleCanvasMouse(e: MouseEvent | null, type: 'start' | 'move' | 'end') {
+    if (!this.canvasCtx || !this.signatureCanvasRef) return;
+    const canvas = this.signatureCanvasRef.nativeElement;
+    const rect = canvas.getBoundingClientRect();
+
+    if (type === 'start' && e) {
+      this.isDrawing = true;
+      this.isCanvasDrawn = true;
+      this.canvasCtx.beginPath();
+      this.canvasCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    } else if (type === 'move' && this.isDrawing && e) {
+      this.canvasCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      this.canvasCtx.stroke();
+    } else if (type === 'end') {
+      this.isDrawing = false;
+    }
+  }
+
+  clearSignature() {
+    if (!this.canvasCtx || !this.signatureCanvasRef) return;
+    const canvas = this.signatureCanvasRef.nativeElement;
+    this.canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+    this.isCanvasDrawn = false;
+  }
+
+  async saveSignature() {
+    if (!this.isCanvasDrawn || !this.signatureCanvasRef) {
+      this.showToast('Silakan bubuhkan tanda tangan pelanggan terlebih dahulu', 'warning');
+      return;
+    }
+    if (!this.customerSignerName.trim()) {
+      this.showToast('Masukkan nama terang pelanggan', 'warning');
+      return;
+    }
+
+    const canvas = this.signatureCanvasRef.nativeElement;
+    const dataUrl = canvas.toDataURL('image/png');
+
+    this.isSavingSignature = true;
+    try {
+      await this.api.saveTaskSignature(this.taskId, dataUrl, this.customerSignerName);
+      await this.showToast('Tanda tangan pelanggan berhasil disimpan & disahkan!', 'success');
+      await this.loadTask();
+    } catch (e: any) {
+      this.showToast(e?.error?.message || 'Gagal menyimpan tanda tangan', 'danger');
+    } finally {
+      this.isSavingSignature = false;
+    }
+  }
+
   // ─── TAHAP 4: SELESAIKAN TUGAS ─────────────────────────────────────────────────
   async completeTask() {
     if (this.isCompleting) return;
@@ -268,7 +468,7 @@ export class TaskDetailPage implements OnInit {
 
     const alert = await this.alertCtrl.create({
       header: 'Konfirmasi Penyelesaian',
-      message: 'Apakah pekerjaan sudah dipastikan tuntas dan perangkat pelanggan berfungsi normal?',
+      message: 'Apakah pekerjaan sudah dipastikan tuntas, material tercatat, dan tanda tangan pelanggan telah disimpan?',
       buttons: [
         { text: 'Periksa Lagi', role: 'cancel' },
         {
@@ -280,7 +480,7 @@ export class TaskDetailPage implements OnInit {
             try {
               await this.api.completeTask(this.taskId);
               await loading.dismiss();
-              await this.showToast('Selamat! Tugas berhasil diselesaikan. 🎉', 'success');
+              await this.showToast('Selamat! Tugas berhasil diselesaikan. BAST siap dicetak. 🎉', 'success');
               await this.loadTask();
             } catch (e: any) {
               await loading.dismiss();
@@ -295,7 +495,27 @@ export class TaskDetailPage implements OnInit {
     await alert.present();
   }
 
-  // ─── PINTASAN KOMUNIKASI & NAVIGASI 1-TAP ──────────────────────────────────────
+  // ─── PINTASAN KOMUNIKASI, UBER-TRACKING & NAVIGASI 1-TAP ───────────────────────
+  shareCustomerTracking() {
+    if (!this.task?.customer_phone) {
+      this.showToast('Nomor telepon pelanggan tidak tersedia', 'warning');
+      return;
+    }
+
+    let cleanPhone = this.task.customer_phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.substring(1);
+    }
+    const customer = this.task.customer_name || 'Pelanggan';
+    const techName = this.user?.name || 'Teknisi FiberOps';
+    const trackingUrl = this.task?.tracking_url || `http://127.0.0.1:8000/track/${this.task?.tracking_token}`;
+    
+    const text = encodeURIComponent(
+      `Halo Bapak/Ibu ${customer}, saya ${techName} dari tim teknisi FiberOps sedang meluncur ke lokasi Anda untuk tiket: ${this.task.title}.\n\nAnda dapat melacak pergerakan posisi armada kami secara real-time di:\n👉 ${trackingUrl}\n\nMohon pastikan ada orang di lokasi. Terima kasih!`
+    );
+    window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
+  }
+
   openWhatsApp() {
     if (!this.task?.customer_phone) return;
     let cleanPhone = this.task.customer_phone.replace(/[^0-9]/g, '');

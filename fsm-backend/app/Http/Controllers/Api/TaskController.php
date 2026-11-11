@@ -25,7 +25,8 @@ class TaskController extends Controller
         if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-        $task->load(['technician', 'progressUpdates.user', 'proofOfWork']);
+        $task->ensureTrackingToken();
+        $task->load(['technician', 'progressUpdates.user', 'proofOfWork', 'materials.inventoryItem']);
         return response()->json(['data' => $task]);
     }
 

@@ -1288,6 +1288,126 @@ body.drawer-open {
     gap: 4px;
 }
 
+/* In-Page Quick Scan Live Results Card */
+.scan-results-box {
+    background: #0B111E;
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin: var(--space-6) auto var(--space-4);
+    max-width: 640px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 242, 254, 0.15);
+    animation: fadeIn 0.3s ease-in-out;
+    text-align: left;
+}
+
+.scan-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.scan-target-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.scan-target-badge ion-icon {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.scan-score-badge {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid #10B981;
+    color: #10B981;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+}
+
+.scan-checks-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: var(--space-4);
+}
+
+.scan-check-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.scan-check-icon.ok {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #10B981;
+    color: #070a10;
+    font-size: 11px;
+    font-weight: 900;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.scan-check-info strong {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.scan-check-info span {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.scan-footer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-scan-dismiss {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-scan-dismiss:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #FFFFFF;
+}
+
 /* ==========================================================================
    TELEMETRY & METRICS SHOWCASE
    ========================================================================== */

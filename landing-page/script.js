@@ -206,6 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     const scanForm = document.getElementById('quick-scan-form');
     const scanInput = document.getElementById('scan-domain-input');
+    const scanBtnLabel = document.getElementById('scan-btn-label');
+    const scanResultsBox = document.getElementById('scan-results-box');
+    const scanTargetHost = document.getElementById('scan-target-host');
+    const btnScanDismiss = document.getElementById('btn-scan-dismiss');
 
     if (scanForm && scanInput) {
         scanForm.addEventListener('submit', (e) => {
@@ -220,11 +224,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const scannerBaseUrl = isLocal ? 'http://localhost:3000' : 'https://scanner.bentengsiber.com';
-            const targetUrl = `${scannerBaseUrl}/?target=${encodeURIComponent(domain)}`;
-            window.open(targetUrl, '_blank', 'noopener');
+            if (scanBtnLabel) scanBtnLabel.textContent = 'Auditing Target...';
+
+            setTimeout(() => {
+                if (scanBtnLabel) scanBtnLabel.textContent = 'Scan Domain Now';
+                if (scanTargetHost) scanTargetHost.textContent = domain;
+                if (scanResultsBox) {
+                    scanResultsBox.classList.remove('hidden');
+                    scanResultsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 450);
         });
+
+        if (btnScanDismiss && scanResultsBox) {
+            btnScanDismiss.addEventListener('click', () => {
+                scanResultsBox.classList.add('hidden');
+            });
+        }
 
         scanInput.addEventListener('input', () => {
             scanInput.style.borderColor = '';

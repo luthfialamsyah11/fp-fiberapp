@@ -53,8 +53,8 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
   };
 
   slotDescriptions: { [key: string]: string } = {
-    before: 'Foto kondisi SEBELUM perbaikan: Kendala dan redaman awal.',
-    after: 'Foto kondisi SESUDAH perbaikan: Pekerjaan tuntas, perangkat normal.',
+    before: 'Photo BEFORE service: Initial issue and optical loss.',
+    after: 'Photo AFTER service: Task completed, equipment verified normal.',
     additional: '',
   };
 
@@ -118,7 +118,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
 
       setTimeout(() => this.initSignatureCanvas(), 300);
     } catch (e) {
-      this.showToast('Gagal memuat detail tugas', 'danger');
+      this.showToast('Failed to load task details', 'danger');
     } finally {
       this.isLoading = false;
     }
@@ -132,24 +132,24 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
         this.selectedInventoryId = this.inventoryItems[0].id;
       }
     } catch (e) {
-      console.warn('Gagal memuat katalog inventaris', e);
+      console.warn('Failed to load inventory catalog', e);
     }
   }
 
-  // ─── TAHAP 1: TERIMA / TOLAK ───────────────────────────────────────────────────
+  // ─── STAGE 1: ACCEPT / DECLINE ─────────────────────────────────────────────
   async acceptTask() {
     if (this.isActioning) return;
     this.isActioning = true;
-    const loading = await this.loadingCtrl.create({ message: 'Menerima tugas...' });
+    const loading = await this.loadingCtrl.create({ message: 'Accepting task...' });
     await loading.present();
     try {
       await this.api.acceptTask(this.taskId);
       await loading.dismiss();
-      await this.showToast('Tugas berhasil diterima! Siap meluncur ke lokasi.', 'success');
+      await this.showToast('Task accepted! Ready for en-route dispatch.', 'success');
       await this.loadTask();
     } catch (e: any) {
       await loading.dismiss();
-      this.showToast(e?.error?.message || 'Gagal menerima tugas', 'danger');
+      this.showToast(e?.error?.message || 'Failed to accept task', 'danger');
     } finally {
       this.isActioning = false;
     }
@@ -157,24 +157,24 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
 
   async rejectTask() {
     const alert = await this.alertCtrl.create({
-      header: 'Tolak Penugasan?',
-      message: 'Apakah Anda yakin ingin menolak tugas ini? Tiket akan dikembalikan ke dispatcher.',
+      header: 'Decline Assignment?',
+      message: 'Are you sure you want to decline this task? The ticket will be returned to the dispatcher pool.',
       buttons: [
-        { text: 'Batal', role: 'cancel' },
+        { text: 'Cancel', role: 'cancel' },
         {
-          text: 'Tolak Tugas',
+          text: 'Decline Task',
           role: 'destructive',
           handler: async () => {
-            const loading = await this.loadingCtrl.create({ message: 'Menolak tugas...' });
+            const loading = await this.loadingCtrl.create({ message: 'Declining task...' });
             await loading.present();
             try {
               await this.api.rejectTask(this.taskId);
               await loading.dismiss();
-              await this.showToast('Tugas telah ditolak.', 'medium');
+              await this.showToast('Task has been declined.', 'medium');
               this.router.navigate(['/task-list']);
             } catch (e: any) {
               await loading.dismiss();
-              this.showToast(e?.error?.message || 'Gagal menolak tugas', 'danger');
+              this.showToast(e?.error?.message || 'Failed to decline task', 'danger');
             }
           }
         }
@@ -183,36 +183,36 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
     await alert.present();
   }
 
-  // ─── TAHAP 2: MULAI KERJAKAN ───────────────────────────────────────────────────
+  // ─── STAGE 2: START ON-SITE ────────────────────────────────────────────────
   async startTask() {
     if (this.isStarting) return;
     this.isStarting = true;
-    const loading = await this.loadingCtrl.create({ message: 'Memulai pekerjaan...' });
+    const loading = await this.loadingCtrl.create({ message: 'Starting work on-site...' });
     await loading.present();
     try {
       await this.api.startTask(this.taskId);
       await loading.dismiss();
-      await this.showToast('Tugas telah dimulai! Status beralih ke On-Going.', 'success');
+      await this.showToast('Task started! Status changed to In Progress.', 'success');
       await this.loadTask();
     } catch (e: any) {
       await loading.dismiss();
-      this.showToast(e?.error?.message || 'Gagal memulai tugas', 'danger');
+      this.showToast(e?.error?.message || 'Failed to start task', 'danger');
     } finally {
       this.isStarting = false;
     }
   }
 
-  // ─── TAHAP 3: UPDATE PROGRES & FOTO BUKTI ──────────────────────────────────────
+  // ─── STAGE 3: UPDATE PROGRESS & PROOF PHOTOS ───────────────────────────────
   async updateProgress() {
     if (this.isUpdatingProgress) return;
     this.isUpdatingProgress = true;
     try {
-      await this.api.updateProgress(this.taskId, this.progressNote || 'Pembaruan progres lapangan', this.progressPercent);
-      await this.showToast(`Progres diperbarui ke ${this.progressPercent}%`, 'success');
+      await this.api.updateProgress(this.taskId, this.progressNote || 'Field progress update', this.progressPercent);
+      await this.showToast(`Progress updated to ${this.progressPercent}%`, 'success');
       this.progressNote = '';
       await this.loadTask();
     } catch (e: any) {
-      this.showToast(e?.error?.message || 'Gagal memperbarui progres', 'danger');
+      this.showToast(e?.error?.message || 'Failed to update progress', 'danger');
     } finally {
       this.isUpdatingProgress = false;
     }
@@ -266,33 +266,33 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
   async uploadSlotProof(slot: 'before' | 'after' | 'additional') {
     const file = this.slotFiles[slot];
     if (!file) {
-      this.showToast('Pilih atau foto gambar terlebih dahulu', 'warning');
+      this.showToast('Please capture or select a photo first', 'warning');
       return;
     }
 
-    const desc = this.slotDescriptions[slot] || (slot === 'before' ? 'Foto Sebelum' : 'Foto Sesudah');
+    const desc = this.slotDescriptions[slot] || (slot === 'before' ? 'Before Photo' : 'After Photo');
     this.isUploadingSlot[slot] = true;
     try {
       await this.api.uploadProof(this.taskId, file, desc);
-      await this.showToast(`Bukti ${slot === 'before' ? 'Foto Sebelum' : (slot === 'after' ? 'Foto Sesudah' : 'Foto Tambahan')} berhasil diunggah!`, 'success');
+      await this.showToast(`Proof photo (${slot === 'before' ? 'Before' : (slot === 'after' ? 'After' : 'Additional')}) uploaded successfully!`, 'success');
       this.slotFiles[slot] = null;
       this.slotPreviews[slot] = null;
       await this.loadTask();
     } catch (e: any) {
-      this.showToast(e?.error?.message || 'Gagal mengunggah foto bukti', 'danger');
+      this.showToast(e?.error?.message || 'Failed to upload proof photo', 'danger');
     } finally {
       this.isUploadingSlot[slot] = false;
     }
   }
 
-  // ─── TAHAP 3.5: MATERIAL & INVENTORY (BOM) ──────────────────────────────────
+  // ─── STAGE 3.5: MATERIAL & INVENTORY (BOM) ──────────────────────────────────
   async addMaterial() {
     if (!this.selectedInventoryId) {
-      this.showToast('Pilih suku cadang/material terlebih dahulu', 'warning');
+      this.showToast('Please select a material / device first', 'warning');
       return;
     }
     if (this.materialQuantity <= 0) {
-      this.showToast('Kuantitas harus lebih dari 0', 'warning');
+      this.showToast('Quantity must be greater than 0', 'warning');
       return;
     }
 
@@ -305,14 +305,14 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
         notes: this.materialNotes || undefined,
       });
 
-      await this.showToast('Material berhasil dicatat dan stok gudang terpotong!', 'success');
+      await this.showToast('Material recorded & warehouse stock deducted!', 'success');
       this.materialSerialNumber = '';
       this.materialNotes = '';
       this.materialQuantity = 1;
       await this.loadTask();
       await this.loadInventory();
     } catch (e: any) {
-      this.showToast(e?.error?.message || 'Gagal menambahkan material', 'danger');
+      this.showToast(e?.error?.message || 'Failed to record material', 'danger');
     } finally {
       this.isAddingMaterial = false;
     }
@@ -320,21 +320,21 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
 
   async deleteMaterial(materialId: number) {
     const alert = await this.alertCtrl.create({
-      header: 'Hapus Material?',
-      message: 'Item ini akan dihapus dan stok akan dikembalikan ke gudang.',
+      header: 'Remove Material?',
+      message: 'This item will be removed and stock will be returned to warehouse.',
       buttons: [
-        { text: 'Batal', role: 'cancel' },
+        { text: 'Cancel', role: 'cancel' },
         {
-          text: 'Hapus',
+          text: 'Remove',
           role: 'destructive',
           handler: async () => {
             try {
               await this.api.deleteTaskMaterial(this.taskId, materialId);
-              await this.showToast('Material berhasil dihapus & stok dikembalikan.', 'success');
+              await this.showToast('Material removed & stock restored.', 'success');
               await this.loadTask();
               await this.loadInventory();
             } catch (e: any) {
-              this.showToast(e?.error?.message || 'Gagal menghapus material', 'danger');
+              this.showToast(e?.error?.message || 'Failed to remove material', 'danger');
             }
           }
         }
@@ -433,11 +433,11 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
 
   async saveSignature() {
     if (!this.isCanvasDrawn || !this.signatureCanvasRef) {
-      this.showToast('Silakan bubuhkan tanda tangan pelanggan terlebih dahulu', 'warning');
+      this.showToast('Please collect customer signature on screen first', 'warning');
       return;
     }
     if (!this.customerSignerName.trim()) {
-      this.showToast('Masukkan nama terang pelanggan', 'warning');
+      this.showToast('Please enter the customer signer full name', 'warning');
       return;
     }
 
@@ -447,44 +447,44 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
     this.isSavingSignature = true;
     try {
       await this.api.saveTaskSignature(this.taskId, dataUrl, this.customerSignerName);
-      await this.showToast('Tanda tangan pelanggan berhasil disimpan & disahkan!', 'success');
+      await this.showToast('Customer signature saved & verified!', 'success');
       await this.loadTask();
     } catch (e: any) {
-      this.showToast(e?.error?.message || 'Gagal menyimpan tanda tangan', 'danger');
+      this.showToast(e?.error?.message || 'Failed to save customer signature', 'danger');
     } finally {
       this.isSavingSignature = false;
     }
   }
 
-  // ─── TAHAP 4: SELESAIKAN TUGAS ─────────────────────────────────────────────────
+  // ─── STAGE 4: COMPLETE TASK ────────────────────────────────────────────────
   async completeTask() {
     if (this.isCompleting) return;
 
     const proofs = this.task?.proof_of_work || this.task?.proofs || [];
     if (proofs.length === 0) {
-      this.showToast('Wajib mengunggah minimal 1 foto bukti sebelum menyelesaikan tugas', 'warning');
+      this.showToast('At least 1 proof photo is required before completing task', 'warning');
       return;
     }
 
     const alert = await this.alertCtrl.create({
-      header: 'Konfirmasi Penyelesaian',
-      message: 'Apakah pekerjaan sudah dipastikan tuntas, material tercatat, dan tanda tangan pelanggan telah disimpan?',
+      header: 'Confirm Completion',
+      message: 'Have you verified the installation, recorded all materials, and captured the customer signature?',
       buttons: [
-        { text: 'Periksa Lagi', role: 'cancel' },
+        { text: 'Review Again', role: 'cancel' },
         {
-          text: 'Tandai Selesai',
+          text: 'Mark Complete',
           handler: async () => {
             this.isCompleting = true;
-            const loading = await this.loadingCtrl.create({ message: 'Memproses penyelesaian...' });
+            const loading = await this.loadingCtrl.create({ message: 'Processing task completion...' });
             await loading.present();
             try {
               await this.api.completeTask(this.taskId);
               await loading.dismiss();
-              await this.showToast('Selamat! Tugas berhasil diselesaikan. BAST siap dicetak. 🎉', 'success');
+              await this.showToast('Congratulations! Work order completed. BAST is ready to export. 🎉', 'success');
               await this.loadTask();
             } catch (e: any) {
               await loading.dismiss();
-              this.showToast(e?.error?.message || 'Gagal menyelesaikan tugas', 'danger');
+              this.showToast(e?.error?.message || 'Failed to complete task', 'danger');
             } finally {
               this.isCompleting = false;
             }
@@ -495,10 +495,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
     await alert.present();
   }
 
-  // ─── PINTASAN KOMUNIKASI, UBER-TRACKING & NAVIGASI 1-TAP ───────────────────────
+  // ─── 1-TAP COMMUNICATION, UBER-TRACKING & NAVIGATION SHORTCUTS ──────────────
   shareCustomerTracking() {
     if (!this.task?.customer_phone) {
-      this.showToast('Nomor telepon pelanggan tidak tersedia', 'warning');
+      this.showToast('Customer phone number is not available', 'warning');
       return;
     }
 
@@ -506,12 +506,12 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '62' + cleanPhone.substring(1);
     }
-    const customer = this.task.customer_name || 'Pelanggan';
-    const techName = this.user?.name || 'Teknisi FiberOps';
+    const customer = this.task.customer_name || 'Customer';
+    const techName = this.user?.name || 'FiberOps Specialist';
     const trackingUrl = this.task?.tracking_url || `http://127.0.0.1:8000/track/${this.task?.tracking_token}`;
     
     const text = encodeURIComponent(
-      `Halo Bapak/Ibu ${customer}, saya ${techName} dari tim teknisi FiberOps sedang meluncur ke lokasi Anda untuk tiket: ${this.task.title}.\n\nAnda dapat melacak pergerakan posisi armada kami secara real-time di:\n👉 ${trackingUrl}\n\nMohon pastikan ada orang di lokasi. Terima kasih!`
+      `Hello ${customer}, this is ${techName} from the FiberOps technical team en route to your location for ticket: ${this.task.title}.\n\nYou can track our service fleet live here:\n👉 ${trackingUrl}\n\nPlease ensure someone is on-site. Thank you!`
     );
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
   }
@@ -522,10 +522,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '62' + cleanPhone.substring(1);
     }
-    const customer = this.task.customer_name || 'Pelanggan';
-    const techName = this.user?.name || 'Teknisi FiberOps';
+    const customer = this.task.customer_name || 'Customer';
+    const techName = this.user?.name || 'FiberOps Specialist';
     const text = encodeURIComponent(
-      `Halo Bapak/Ibu ${customer}, saya ${techName} dari tim teknisi FiberOps sedang menuju ke lokasi Anda untuk pengerjaan tiket: ${this.task.title}. Mohon pastikan ada orang di lokasi. Terima kasih.`
+      `Hello ${customer}, this is ${techName} from FiberOps on the way to your location for work order: ${this.task.title}. Please ensure someone is available on-site. Thank you.`
     );
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
   }
@@ -539,7 +539,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
     const addr = this.task?.address || this.task?.location || this.task?.resolved_location;
     if (addr && navigator.clipboard) {
       await navigator.clipboard.writeText(addr);
-      this.showToast('Alamat berhasil disalin ke clipboard', 'success');
+      this.showToast('Address copied to clipboard', 'success');
     }
   }
 
@@ -551,7 +551,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
         this.task.customer_name ? `${this.task.customer_name} (${this.task.title})` : this.task.title
       );
     } else {
-      this.showToast('Koordinat GPS lokasi tugas tidak tersedia', 'warning');
+      this.showToast('GPS coordinates not available for this task', 'warning');
     }
   }
 
@@ -582,12 +582,12 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'pending': return 'Menunggu';
-      case 'assigned': return 'Ditugaskan';
-      case 'accepted': return 'Diterima';
-      case 'on-going': return 'Sedang Dikerjakan';
-      case 'completed': return 'Selesai';
-      case 'rejected': return 'Ditolak';
+      case 'pending': return 'Pending';
+      case 'assigned': return 'Assigned';
+      case 'accepted': return 'Accepted';
+      case 'on-going': return 'In Progress';
+      case 'completed': return 'Completed';
+      case 'rejected': return 'Declined';
       default: return status;
     }
   }
@@ -603,9 +603,9 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
 
   getPriorityLabel(priority: string): string {
     switch (priority) {
-      case 'high': return 'Prioritas Tinggi';
-      case 'medium': return 'Prioritas Sedang';
-      case 'low': return 'Prioritas Rendah';
+      case 'high': return 'High Priority';
+      case 'medium': return 'Medium Priority';
+      case 'low': return 'Low Priority';
       default: return priority;
     }
   }

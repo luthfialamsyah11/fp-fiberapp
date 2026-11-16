@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAST Tiket #{{ str_pad($task->id, 5, '0', STR_PAD_LEFT) }} - {{ $task->customer_name }}</title>
+    <title>Work Order Acceptance Certificate #{{ str_pad($task->id, 5, '0', STR_PAD_LEFT) }} - {{ $task->customer_name }}</title>
     
     <style>
         @page {
@@ -153,7 +153,7 @@
         }
 
         .info-label {
-            width: 100px;
+            width: 110px;
             color: #64748b;
             flex-shrink: 0;
         }
@@ -203,8 +203,7 @@
         .photo-box {
             border: 1px solid #cbd5e1;
             border-radius: 6px;
-            padding: 8px;
-            text-align: center;
+            overflow: hidden;
             background: #f8fafc;
         }
 
@@ -212,25 +211,26 @@
             width: 100%;
             height: 180px;
             object-fit: cover;
-            border-radius: 4px;
             display: block;
         }
 
         .photo-caption {
+            padding: 6px 10px;
             font-size: 11px;
-            color: #475569;
-            margin-top: 6px;
             font-weight: 600;
+            color: #475569;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
         }
 
-        /* Signature Section */
+        /* Dual Signatures */
         .signatures-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 40px;
             margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px dashed #cbd5e1;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
         }
 
         .sig-col {
@@ -238,33 +238,36 @@
         }
 
         .sig-role {
+            font-weight: 700;
             font-size: 12px;
-            color: #64748b;
-            margin-bottom: 10px;
+            color: #334155;
+            margin-bottom: 8px;
+            text-transform: uppercase;
         }
 
         .sig-box {
             height: 90px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 8px;
+            background: #fafafa;
         }
 
         .sig-box img {
-            max-height: 85px;
-            max-width: 180px;
-            object-fit: contain;
+            max-height: 80px;
+            max-width: 90%;
         }
 
         .sig-name {
             font-weight: 700;
             font-size: 13px;
             color: #0f172a;
-            border-top: 1px solid #94a3b8;
+            border-bottom: 1px solid #0f172a;
             display: inline-block;
-            padding-top: 4px;
-            min-width: 180px;
+            padding: 0 10px;
         }
 
         .sig-date {
@@ -294,10 +297,10 @@
 
     <!-- Web Action Bar -->
     <div class="no-print-bar">
-        <a href="javascript:history.back()" class="btn-back">&larr; Kembali ke Detail Tiket</a>
+        <a href="javascript:history.back()" class="btn-back">&larr; Back to Work Order Details</a>
         <button onclick="window.print()" class="btn-print">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-            Cetak / Simpan PDF
+            Print / Export PDF
         </button>
     </div>
 
@@ -308,75 +311,75 @@
         <div class="bast-header">
             <div class="brand-logo-title">
                 <h2>BENTENG SIBER FIBEROPS</h2>
-                <span>Field Service &amp; Network Infrastructure</span>
+                <span>Field Service &amp; Network Infrastructure Solutions</span>
             </div>
             <div class="doc-meta">
-                <div class="bast-badge">BERITA ACARA RESMI</div>
-                <div>No: BAST/FSM/{{ date('Y') }}/{{ str_pad($task->id, 5, '0', STR_PAD_LEFT) }}</div>
-                <div>Tanggal: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d/m/Y') : date('d/m/Y') }}</div>
+                <div class="bast-badge">OFFICIAL ACCEPTANCE CERTIFICATE</div>
+                <div>Certificate No: BAST/FSM/{{ date('Y') }}/{{ str_pad($task->id, 5, '0', STR_PAD_LEFT) }}</div>
+                <div>Date: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d/m/Y') : date('d/m/Y') }}</div>
             </div>
         </div>
 
         <!-- Document Title -->
         <div class="doc-title">
-            <h1>BERITA ACARA SERAH TERIMA PEKERJAAN (BAST)</h1>
-            <p>Pekerjaan Instalasi / Pemeliharaan Jaringan Fiber Optik</p>
+            <h1>WORK ORDER ACCEPTANCE CERTIFICATE (BAST)</h1>
+            <p>Fiber Optic Network Installation &amp; Maintenance Protocol</p>
         </div>
 
         <!-- Info Grid -->
         <div class="info-grid">
             <div class="info-card">
-                <h4>Data Pelanggan</h4>
+                <h4>Customer Information</h4>
                 <div class="info-row">
-                    <span class="info-label">Nama</span>
+                    <span class="info-label">Customer Name</span>
                     <span class="info-val">{{ $task->customer_name }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Telepon</span>
+                    <span class="info-label">Contact Phone</span>
                     <span class="info-val">{{ $task->customer_phone ?? '-' }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Alamat</span>
+                    <span class="info-label">Address</span>
                     <span class="info-val">{{ $task->address }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Koordinat</span>
+                    <span class="info-label">GPS Coordinates</span>
                     <span class="info-val">{{ $task->latitude }}, {{ $task->longitude }}</span>
                 </div>
             </div>
 
             <div class="info-card">
-                <h4>Detail Pekerjaan</h4>
+                <h4>Work Order Details</h4>
                 <div class="info-row">
-                    <span class="info-label">Judul Tugas</span>
-                    <span class="info-val">{{ $task->title }}</span>
+                    <span class="info-label">Ticket ID</span>
+                    <span class="info-val">#TSK-{{ $task->id }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Teknisi</span>
-                    <span class="info-val">{{ $task->technician?->name ?? 'Teknisi Lapangan' }}</span>
+                    <span class="info-label">Lead Technician</span>
+                    <span class="info-val">{{ $task->technician?->name ?? 'Field Specialist' }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Status</span>
+                    <span class="info-label">Execution Status</span>
                     <span class="info-val" style="color: #059669;">{{ strtoupper($task->status) }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Waktu Selesai</span>
+                    <span class="info-label">Completed Timestamp</span>
                     <span class="info-val">{{ $task->updated_at->format('d/m/Y H:i') }} WIB</span>
                 </div>
             </div>
         </div>
 
         <!-- Section Materials -->
-        <div class="section-heading">Rincian Material &amp; Perangkat Terpakai (BOM)</div>
+        <div class="section-heading">Bill of Materials &amp; Hardware Consumed (BOM)</div>
         <table class="material-table">
             <thead>
                 <tr>
                     <th style="width: 35px;">No</th>
-                    <th>Kode</th>
-                    <th>Nama Material / Alat</th>
+                    <th>SKU Code</th>
+                    <th>Material / Device Description</th>
                     <th>Qty</th>
-                    <th>Satuan</th>
-                    <th>Serial Number (SN) / Catatan</th>
+                    <th>Unit</th>
+                    <th>Serial Number (SN) / Batch Notes</th>
                 </tr>
             </thead>
             <tbody>
@@ -392,7 +395,7 @@
                 @empty
                     <tr>
                         <td colspan="6" style="text-align: center; color: #94a3b8; padding: 12px;">
-                            Tidak ada material logistik yang dicatat pada tiket ini.
+                            No materials or parts were consumed on this work order.
                         </td>
                     </tr>
                 @endforelse
@@ -400,41 +403,43 @@
         </table>
 
         <!-- Section Photos (Dual-Frame Before & After) -->
-        <div class="section-heading">Dokumentasi Bukti Pekerjaan Lapangan</div>
+        <div class="section-heading">Field Photographic Proof Documentation</div>
         <div class="photo-evidence-grid">
             @php
                 $beforeProof = $task->proofOfWork->first(function($p) {
                     return str_contains(strtolower($p->notes ?? $p->description ?? ''), 'sebelum') || 
+                           str_contains(strtolower($p->notes ?? $p->description ?? ''), 'before') ||
                            str_contains(strtolower($p->notes ?? $p->description ?? ''), 'slot 1');
                 }) ?? $task->proofOfWork->first();
 
                 $afterProof = $task->proofOfWork->first(function($p) {
                     return str_contains(strtolower($p->notes ?? $p->description ?? ''), 'sesudah') || 
+                           str_contains(strtolower($p->notes ?? $p->description ?? ''), 'after') ||
                            str_contains(strtolower($p->notes ?? $p->description ?? ''), 'slot 2');
                 }) ?? $task->proofOfWork->skip(1)->first();
             @endphp
 
             <div class="photo-box">
                 @if($beforeProof)
-                    <img src="{{ $beforeProof->image_url ?? asset('storage/' . $beforeProof->photo) }}" alt="Foto Sebelum">
-                    <div class="photo-caption">[Slot 1] Kondisi Sebelum / Kerusakan Awal</div>
+                    <img src="{{ $beforeProof->image_url ?? asset('storage/' . $beforeProof->photo) }}" alt="Before Photo">
+                    <div class="photo-caption">[Slot 1] Initial Condition / Fault Identification</div>
                 @else
                     <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8;">
-                        Tidak ada foto sebelum
+                        No initial photo attached
                     </div>
-                    <div class="photo-caption">Foto Sebelum Tidak Tersedia</div>
+                    <div class="photo-caption">Initial Condition Photo Not Available</div>
                 @endif
             </div>
 
             <div class="photo-box">
                 @if($afterProof)
-                    <img src="{{ $afterProof->image_url ?? asset('storage/' . $afterProof->photo) }}" alt="Foto Sesudah">
-                    <div class="photo-caption">[Slot 2] Kondisi Sesudah / Normal Selesai</div>
+                    <img src="{{ $afterProof->image_url ?? asset('storage/' . $afterProof->photo) }}" alt="After Photo">
+                    <div class="photo-caption">[Slot 2] Final State / Operational Verification</div>
                 @else
                     <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8;">
-                        Tidak ada foto sesudah
+                        No completion photo attached
                     </div>
-                    <div class="photo-caption">Foto Sesudah Tidak Tersedia</div>
+                    <div class="photo-caption">Completion Photo Not Available</div>
                 @endif
             </div>
         </div>
@@ -442,30 +447,30 @@
         <!-- Section Signatures -->
         <div class="signatures-grid">
             <div class="sig-col">
-                <div class="sig-role">Teknisi Pelaksana</div>
+                <div class="sig-role">Lead Field Technician</div>
                 <div class="sig-box">
                     <div style="font-family: cursive; font-size: 20px; color: #0284c7;">
-                        {{ $task->technician?->name ?? 'Alex Pratama' }}
+                        {{ $task->technician?->name ?? 'Alex Gunawan' }}
                     </div>
                 </div>
-                <div class="sig-name">{{ $task->technician?->name ?? 'Teknisi Lapangan' }}</div>
-                <div class="sig-date">Tgl: {{ date('d/m/Y') }}</div>
+                <div class="sig-name">{{ $task->technician?->name ?? 'Field Lead Technician' }}</div>
+                <div class="sig-date">Date: {{ date('d/m/Y') }}</div>
             </div>
 
             <div class="sig-col">
-                <div class="sig-role">Pelanggan yang Menyetujui</div>
+                <div class="sig-role">Customer Acceptance Sign-Off</div>
                 <div class="sig-box">
                     @if($task->customer_signature)
-                        <img src="{{ asset($task->customer_signature) }}" alt="Tanda Tangan Pelanggan">
+                        <img src="{{ asset($task->customer_signature) }}" alt="Customer Digital Signature">
                     @else
                         <div style="color: #94a3b8; font-style: italic; font-size: 11px;">
-                            (Tanda tangan digital belum dibubuhkan)
+                            (Digital signature pending verification)
                         </div>
                     @endif
                 </div>
                 <div class="sig-name">{{ $task->customer_signer_name ?? $task->customer_name }}</div>
                 <div class="sig-date">
-                    Tgl: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d/m/Y H:i') : date('d/m/Y') }} WIB
+                    Date: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d/m/Y H:i') : date('d/m/Y') }} WIB
                 </div>
             </div>
         </div>

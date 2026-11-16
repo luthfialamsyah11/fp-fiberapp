@@ -14,7 +14,7 @@
 
     <!-- Header -->
     <div class="prof-header-section">
-      <h1>Profil Saya</h1>
+      <h1>My Profile</h1>
     </div>
 
     <!-- VIEW MODE -->
@@ -26,11 +26,11 @@
             {{ name ? name.substring(0, 1).toUpperCase() : 'T' }}
           </div>
           <div class="user-meta">
-            <h3>{{ name || 'Teknisi' }}</h3>
+            <h3>{{ name || 'Field Specialist' }}</h3>
             <p>{{ email }}</p>
             <div class="role-badge">
               <ion-icon name="shield-checkmark"></ion-icon>
-              <span>Teknisi Premium</span>
+              <span>Verified Specialist</span>
             </div>
           </div>
         </div>
@@ -44,18 +44,18 @@
           <div class="stat-divider"></div>
           <div class="stat-box">
             <span class="stat-num">100%</span>
-            <span class="stat-lbl">Penerimaan</span>
+            <span class="stat-lbl">Acceptance</span>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-box">
-            <span class="stat-num">{{ completedTasks.length }}t</span>
-            <span class="stat-lbl">Tugas Selesai</span>
+            <span class="stat-num">{{ completedTasks.length }}</span>
+            <span class="stat-lbl">Completed</span>
           </div>
         </div>
       </div>
 
-      <!-- Riwayat Tugas Selesai (Integrated History) -->
-      <div class="fo-section-header">Riwayat Tugas Selesai ({{ completedTasks.length }})</div>
+      <!-- Completed History (Integrated History) -->
+      <div class="fo-section-header">Completed Work Orders ({{ completedTasks.length }})</div>
       <div class="fo-list-group" *ngIf="completedTasks.length > 0">
         <div class="fo-list-item history-item" *ngFor="let h of completedTasks.slice(0, 6)" (click)="goToDetail(h.id)">
           <div class="item-icon-wrap green">
@@ -64,26 +64,26 @@
           <div class="item-content">
             <div class="item-title truncate">{{ h.title }}</div>
             <div class="item-sub">
-              {{ h.customer_name || 'Pelanggan' }} • {{ h.updated_at | date:'dd MMM yyyy, HH:mm' }}
+              {{ h.customer_name || 'Customer' }} &bull; {{ h.updated_at | date:'dd MMM yyyy, HH:mm' }}
             </div>
           </div>
           <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
         </div>
       </div>
       <div class="empty-history-box" *ngIf="completedTasks.length === 0">
-        <p>Belum ada riwayat tugas yang diselesaikan.</p>
+        <p>No completed work orders yet.</p>
       </div>
 
-      <!-- Settings List Category: Akun -->
-      <div class="fo-section-header">Pengaturan Akun</div>
+      <!-- Settings List Category: Account -->
+      <div class="fo-section-header">Account Settings</div>
       <div class="fo-list-group">
         <div class="fo-list-item" (click)="isEditing = true">
           <div class="item-icon-wrap blue">
             <ion-icon name="person-outline"></ion-icon>
           </div>
           <div class="item-content">
-            <div class="item-title">Ubah Data Diri</div>
-            <div class="item-sub">Nama lengkap & Nomor telepon aktif</div>
+            <div class="item-title">Edit Personal Details</div>
+            <div class="item-sub">Full name &amp; active telephone number</div>
           </div>
           <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
         </div>
@@ -93,23 +93,23 @@
             <ion-icon name="key-outline"></ion-icon>
           </div>
           <div class="item-content">
-            <div class="item-title">Ubah Kata Sandi</div>
-            <div class="item-sub">Ganti kata sandi pengaman akun</div>
+            <div class="item-title">Security &amp; Password</div>
+            <div class="item-sub">Update enterprise security credentials</div>
           </div>
           <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
         </div>
       </div>
 
-      <!-- Settings List Category: Dukungan & Info -->
-      <div class="fo-section-header">Dukungan & Aplikasi</div>
+      <!-- Settings List Category: Support & App -->
+      <div class="fo-section-header">Support &amp; Application</div>
       <div class="fo-list-group">
         <div class="fo-list-item" (click)="helpCenter()">
           <div class="item-icon-wrap green">
             <ion-icon name="help-circle-outline"></ion-icon>
           </div>
           <div class="item-content">
-            <div class="item-title">Pusat Bantuan</div>
-            <div class="item-sub">Bantuan teknis lapangan & hubungi IT</div>
+            <div class="item-title">Help Center</div>
+            <div class="item-sub">24/7 Field technical support &amp; dispatch assistance</div>
           </div>
           <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
         </div>
@@ -119,8 +119,8 @@
             <ion-icon name="information-circle-outline"></ion-icon>
           </div>
           <div class="item-content">
-            <div class="item-title">Tentang FiberOps</div>
-            <div class="item-sub">Informasi versi aplikasi & hak cipta</div>
+            <div class="item-title">About FiberOps</div>
+            <div class="item-sub">Application version &amp; ecosystem copyright</div>
           </div>
           <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
         </div>
@@ -130,7 +130,7 @@
       <div class="logout-container">
         <button class="btn-logout-premium" (click)="doLogout()">
           <ion-icon name="log-out-outline"></ion-icon>
-          <span>Keluar dari Akun</span>
+          <span>Log Out of Account</span>
         </button>
       </div>
     </ng-container>
@@ -139,18 +139,18 @@
     <ng-container *ngIf="isEditing">
       <div class="edit-card">
         <div class="edit-header">
-          <h3>Edit Data Diri</h3>
-          <p>Ubah nama dan nomor telepon Anda di bawah ini</p>
+          <h3>Edit Personal Details</h3>
+          <p>Update your display name and cellular contact number</p>
         </div>
 
         <div class="input-group">
-          <label>Nama Lengkap</label>
+          <label>Full Name</label>
           <div class="input-container" [class.focused]="nameFocused">
             <ion-icon name="person-outline"></ion-icon>
             <input
               type="text"
               [(ngModel)]="name"
-              placeholder="Nama lengkap Anda..."
+              placeholder="Your full legal name..."
               [disabled]="isSaving"
               (focus)="nameFocused = true"
               (blur)="nameFocused = false"
@@ -159,13 +159,13 @@
         </div>
 
         <div class="input-group">
-          <label>Nomor Telepon</label>
+          <label>Phone Number</label>
           <div class="input-container" [class.focused]="phoneFocused">
             <ion-icon name="call-outline"></ion-icon>
             <input
               type="tel"
               [(ngModel)]="phone"
-              placeholder="Nomor telepon aktif..."
+              placeholder="Active phone number..."
               [disabled]="isSaving"
               (focus)="phoneFocused = true"
               (blur)="phoneFocused = false"
@@ -176,11 +176,11 @@
         <!-- Action Buttons -->
         <div class="edit-actions">
           <button class="btn-cancel" (click)="isEditing = false" [disabled]="isSaving">
-            Batal
+            Cancel
           </button>
           <button class="btn-save" (click)="saveProfile()" [disabled]="isSaving">
             <ion-spinner name="crescent" *ngIf="isSaving" class="btn-spinner"></ion-spinner>
-            <span>{{ isSaving ? 'Menyimpan...' : 'Simpan' }}</span>
+            <span>{{ isSaving ? 'Saving...' : 'Save Changes' }}</span>
           </button>
         </div>
       </div>

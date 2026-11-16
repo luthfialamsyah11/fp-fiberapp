@@ -61,21 +61,28 @@
 
             <!-- Desktop Navigation Menu -->
             <ul class="nav-center-menu">
-                <li><a href="#portals" class="nav-link"><ion-icon name="grid-outline"></ion-icon> Portals</a></li>
-                <li><a href="#demo" class="nav-link"><ion-icon name="flask-outline"></ion-icon> Live Sandbox</a></li>
-                <li><a href="#acquisition" class="nav-link nav-link-highlight"><ion-icon name="bag-handle-outline"></ion-icon> Acquire Asset</a></li>
-                <li><a href="#scanner-spotlight" class="nav-link"><ion-icon name="scan-outline"></ion-icon> Scanner</a></li>
-                <li><a href="#architecture" class="nav-link"><ion-icon name="git-network-outline"></ion-icon> Architecture</a></li>
-                <li><a href="#compliance" class="nav-link"><ion-icon name="lock-closed-outline"></ion-icon> Compliance</a></li>
+                <li><a href="#portals" class="nav-link"><ion-icon name="grid-outline"></ion-icon> <span data-i18n="nav.portals">Portals</span></a></li>
+                <li><a href="#simulator" class="nav-link nav-link-cyan"><ion-icon name="hardware-chip-outline"></ion-icon> <span data-i18n="nav.simulator">Live Simulator</span></a></li>
+                <li><a href="#demo" class="nav-link"><ion-icon name="flask-outline"></ion-icon> <span data-i18n="nav.sandbox">Live Sandbox</span></a></li>
+                <li><a href="#acquisition" class="nav-link nav-link-highlight"><ion-icon name="bag-handle-outline"></ion-icon> <span data-i18n="nav.pricing">Acquire Asset</span></a></li>
+                <li><a href="#scanner-spotlight" class="nav-link"><ion-icon name="scan-outline"></ion-icon> <span data-i18n="nav.scanner">Scanner</span></a></li>
+                <li><a href="#architecture" class="nav-link"><ion-icon name="git-network-outline"></ion-icon> <span data-i18n="nav.architecture">Architecture</span></a></li>
             </ul>
 
             <div class="nav-actions">
+                <!-- Global Language Switcher -->
+                <div class="lang-switcher-pill" id="lang-switcher-desktop" title="Switch Language">
+                    <button type="button" class="lang-btn active" data-lang="en">EN</button>
+                    <span class="lang-divider">/</span>
+                    <button type="button" class="lang-btn" data-lang="id">ID</button>
+                </div>
+
                 <div class="system-status-pill desktop-only">
                     <span class="status-dot"></span>
-                    <span>All Systems Operational</span>
+                    <span data-i18n="nav.operational">All Systems Operational</span>
                 </div>
                 <a href="#demo" class="btn-nav-portal desktop-only">
-                    <span>Live Sandbox</span>
+                    <span data-i18n="nav.sandbox">Live Sandbox</span>
                     <ion-icon name="arrow-forward-outline"></ion-icon>
                 </a>
                 <!-- Mobile Menu Hamburger Button -->
@@ -111,29 +118,41 @@
         <div class="drawer-status-wrap">
             <div class="system-status-pill">
                 <span class="status-dot"></span>
-                <span>All Systems Operational</span>
+                <span data-i18n="nav.operational">All Systems Operational</span>
+            </div>
+            <!-- Mobile Language Switcher Pill -->
+            <div class="lang-switcher-pill" id="lang-switcher-mobile">
+                <button type="button" class="lang-btn active" data-lang="en">EN</button>
+                <span class="lang-divider">/</span>
+                <button type="button" class="lang-btn" data-lang="id">ID</button>
             </div>
         </div>
 
         <nav class="drawer-nav">
-            <span class="drawer-nav-label">PORTALS &amp; SECTIONS</span>
+            <span class="drawer-nav-label" data-i18n="drawer.portals_label">PORTALS &amp; SECTIONS</span>
             <ul class="drawer-menu">
                 <li>
                     <a href="#portals" class="drawer-link">
                         <ion-icon name="grid-outline"></ion-icon>
-                        <span>Ecosystem Portals</span>
+                        <span data-i18n="drawer.portals">Ecosystem Portals</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#simulator" class="drawer-link drawer-link-cyan">
+                        <ion-icon name="hardware-chip-outline"></ion-icon>
+                        <span data-i18n="drawer.simulator">Interactive Simulator</span>
                     </a>
                 </li>
                 <li>
                     <a href="#demo" class="drawer-link">
                         <ion-icon name="flask-outline"></ion-icon>
-                        <span>Interactive Sandbox</span>
+                        <span data-i18n="drawer.sandbox">Interactive Sandbox</span>
                     </a>
                 </li>
                 <li>
                     <a href="#acquisition" class="drawer-link drawer-link-highlight">
                         <ion-icon name="bag-handle-outline"></ion-icon>
-                        <span>Acquire This Asset</span>
+                        <span data-i18n="drawer.acquire">Acquire This Asset</span>
                     </a>
                 </li>
                 <li>
@@ -199,20 +218,402 @@
             </p>
             
             <div class="hero-cta-group">
-                <a href="#portals" class="btn-primary-glow">
-                    <ion-icon name="apps-outline"></ion-icon>
-                    <span>Explore 4 Gateway Portals</span>
+                <a href="#simulator" class="btn-primary-glow">
+                    <ion-icon name="hardware-chip-outline"></ion-icon>
+                    <span data-i18n="hero.cta_sim">Test-Drive Live Simulator</span>
                 </a>
-                <a href="#demo" class="btn-secondary-outline">
-                    <ion-icon name="key-outline"></ion-icon>
-                    <span>Test Live Demo Sandbox</span>
+                <a href="#portals" class="btn-secondary-outline">
+                    <ion-icon name="apps-outline"></ion-icon>
+                    <span data-i18n="hero.cta_portals">Explore 4 Gateway Portals</span>
                 </a>
                 <a href="#acquisition" class="btn-amber-glow">
                     <ion-icon name="briefcase-outline"></ion-icon>
-                    <span>Asset Acquisition Inquiry</span>
+                    <span data-i18n="hero.cta_buyout">Asset Buyout &amp; Pricing</span>
                 </a>
             </div>
         </header>
+
+        <!-- ================================================================= -->
+        <!-- SECTION: INTERACTIVE LIVE PRODUCT SIMULATOR HUB -->
+        <!-- ================================================================= -->
+        <section class="simulator-section" id="simulator">
+            <div class="section-header">
+                <span class="section-tag tag-cyan" data-i18n="sim.tag">Interactive Product Experience</span>
+                <h2 class="section-title" data-i18n="sim.title">Hands-On Enterprise Feature Simulator</h2>
+                <p class="section-desc" data-i18n="sim.desc">
+                    Test-drive the core workflows that make FiberOps the highest-converting field service management platform for fiber ISPs and WISPs. Click the tabs below to interact directly with each module:
+                </p>
+            </div>
+
+            <!-- Tab Selection Bar -->
+            <div class="sim-tabs-bar">
+                <button type="button" class="sim-tab-btn active" data-tab="mobile">
+                    <div class="sim-tab-icon cyan">
+                        <ion-icon name="phone-portrait-outline"></ion-icon>
+                    </div>
+                    <div class="sim-tab-text">
+                        <strong data-i18n="sim.tab1_title">Technician Mobile App</strong>
+                        <span data-i18n="sim.tab1_sub">Progressive Stepper &amp; E-Sign</span>
+                    </div>
+                </button>
+
+                <button type="button" class="sim-tab-btn" data-tab="tracking">
+                    <div class="sim-tab-icon emerald">
+                        <ion-icon name="radio-outline"></ion-icon>
+                    </div>
+                    <div class="sim-tab-text">
+                        <strong data-i18n="sim.tab2_title">Customer Uber Tracking</strong>
+                        <span data-i18n="sim.tab2_sub">Live GPS Fleet Radar &amp; ETA</span>
+                    </div>
+                </button>
+
+                <button type="button" class="sim-tab-btn" data-tab="bast">
+                    <div class="sim-tab-icon purple">
+                        <ion-icon name="document-attach-outline"></ion-icon>
+                    </div>
+                    <div class="sim-tab-text">
+                        <strong data-i18n="sim.tab3_title">Automated BAST PDF</strong>
+                        <span data-i18n="sim.tab3_sub">Official Sign-Off Certificate</span>
+                    </div>
+                </button>
+
+                <button type="button" class="sim-tab-btn" data-tab="bom">
+                    <div class="sim-tab-icon amber">
+                        <ion-icon name="cube-outline"></ion-icon>
+                    </div>
+                    <div class="sim-tab-text">
+                        <strong data-i18n="sim.tab4_title">BOM &amp; Inventory Tracker</strong>
+                        <span data-i18n="sim.tab4_sub">Atomic Stock Deduction</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Simulator Interactive Stage Area -->
+            <div class="sim-stage-container">
+
+                <!-- ─── MODULE 1: TECHNICIAN MOBILE WORKFLOW SIMULATOR ─────────── -->
+                <div class="sim-panel active" id="sim-panel-mobile">
+                    <div class="sim-mobile-layout">
+                        <!-- Phone Mockup Frame -->
+                        <div class="phone-frame">
+                            <div class="phone-notch"><span class="camera-sensor"></span><span class="speaker-grill"></span></div>
+                            <div class="phone-screen" id="sim-phone-screen">
+                                <!-- Phone Header -->
+                                <div class="p-app-header">
+                                    <div class="p-status-pill" id="sim-step-badge">STAGE 1: ASSIGNED</div>
+                                    <h4 class="p-ticket-title">#TSK-1042: Fiber Cut &amp; ONT Swap</h4>
+                                    <span class="p-customer-meta">Robert Vance &bull; 742 Evergreen Terr.</span>
+                                </div>
+
+                                <!-- Dynamic Body per Step -->
+                                <div class="p-app-body" id="sim-mobile-body">
+                                    <!-- Step 1 View: Assigned -->
+                                    <div class="p-step-content" id="p-view-assigned">
+                                        <div class="p-alert-box blue">
+                                            <ion-icon name="notifications-outline"></ion-icon>
+                                            <div>
+                                                <strong>New Ticket Assigned</strong>
+                                                <p>Dispatch SLA: 45 Mins &bull; High Priority Customer</p>
+                                            </div>
+                                        </div>
+                                        <div class="p-btn-row">
+                                            <button type="button" class="p-btn p-btn-danger" id="sim-btn-decline">Decline</button>
+                                            <button type="button" class="p-btn p-btn-success" id="sim-btn-accept">Accept Ticket</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2 View: En Route -->
+                                    <div class="p-step-content hidden" id="p-view-enroute">
+                                        <div class="p-alert-box green">
+                                            <ion-icon name="car-outline"></ion-icon>
+                                            <div>
+                                                <strong>En Route to Location</strong>
+                                                <p>Live GPS Tracking link dispatched to customer.</p>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="p-btn p-btn-primary" id="sim-btn-arrive">Arrived on Site &bull; Start Work</button>
+                                    </div>
+
+                                    <!-- Step 3 View: In Progress (Photos & Signature) -->
+                                    <div class="p-step-content hidden" id="p-view-inprogress">
+                                        <div class="p-section-heading">Guided Photo Proof</div>
+                                        <div class="p-photo-grid">
+                                            <div class="p-photo-box done" id="sim-photo-before">
+                                                <ion-icon name="camera-outline"></ion-icon>
+                                                <span>Slot 1: Before (LOS Red)</span>
+                                                <span class="p-check-tag">&check; Attached</span>
+                                            </div>
+                                            <div class="p-photo-box done" id="sim-photo-after">
+                                                <ion-icon name="camera-outline"></ion-icon>
+                                                <span>Slot 2: After (PON Green)</span>
+                                                <span class="p-check-tag">&check; Attached</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-section-heading" style="margin-top: 10px;">Customer E-Signature Pad</div>
+                                        <div class="p-canvas-wrap">
+                                            <canvas id="sim-sig-canvas" width="280" height="90"></canvas>
+                                            <div class="p-canvas-watermark" id="sim-canvas-watermark">
+                                                <span>Sign with mouse/finger here</span>
+                                            </div>
+                                        </div>
+                                        <div class="p-canvas-ctrls">
+                                            <button type="button" class="p-btn-mini" id="sim-btn-clear-sig">Clear</button>
+                                            <button type="button" class="p-btn-mini primary" id="sim-btn-sample-sig">Autofill Signature</button>
+                                        </div>
+
+                                        <button type="button" class="p-btn p-btn-success" id="sim-btn-complete-task" style="margin-top: 10px;">
+                                            Complete Work Order &bull; Issue BAST
+                                        </button>
+                                    </div>
+
+                                    <!-- Step 4 View: Completed -->
+                                    <div class="p-step-content hidden" id="p-view-completed">
+                                        <div class="p-success-banner">
+                                            <ion-icon name="checkmark-circle"></ion-icon>
+                                            <h4>Mission 100% Completed!</h4>
+                                            <p>Cryptographic hash verified &bull; BAST Certificate generated and ready for export.</p>
+                                        </div>
+                                        <button type="button" class="p-btn p-btn-outline" id="sim-btn-reset-mobile">Restart Demo Simulation</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Side Explanation Box -->
+                        <div class="sim-info-box">
+                            <span class="sim-badge cyan">ELIMINATES SCREEN HOPPING</span>
+                            <h3>Progressive Stepper Architecture</h3>
+                            <p>
+                                Unlike complex enterprise tools requiring technicians to navigate across 5 different apps, FiberOps consolidates dispatch acceptance, GPS guidance, 2-slot photographic proof, and touchscreen customer acceptance into a single seamless linear workspace.
+                            </p>
+                            <ul class="sim-bullet-list">
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Touchscreen E-Signature:</strong> Captures high-res vector signatures on mobile glass.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Zero Store Download:</strong> PWA runs instantly in Chrome/Safari on iOS &amp; Android.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>1-Tap Communication:</strong> Direct WhatsApp &amp; cellular dialer shortcuts.</li>
+                            </ul>
+                            <div class="sim-cta-row">
+                                <a href="https://app.bentengsiber.com" target="_blank" rel="noopener" class="btn-primary-glow btn-sm">
+                                    <span>Launch Live PWA App</span>
+                                    <ion-icon name="open-outline"></ion-icon>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── MODULE 2: UBER-STYLE CUSTOMER LIVE TRACKING ────────────── -->
+                <div class="sim-panel" id="sim-panel-tracking">
+                    <div class="sim-tracking-layout">
+                        <div class="tracking-screen-card">
+                            <div class="tracking-top-bar">
+                                <div class="tracking-live-pulse">
+                                    <span class="pulse-point"></span>
+                                    <span>LIVE GPS DISPATCH TRACKER</span>
+                                </div>
+                                <span class="tracking-session-code">TOKEN: zNrtWKEIUrzx...</span>
+                            </div>
+
+                            <!-- Interactive Visual Map Container -->
+                            <div class="sim-map-viewport" id="sim-map-viewport">
+                                <div class="map-grid-pattern"></div>
+                                <!-- Road vectors -->
+                                <svg class="map-route-svg" viewBox="0 0 500 240">
+                                    <path d="M 40 180 Q 140 160 220 120 T 440 60" fill="none" stroke="#2563EB" stroke-width="4" stroke-dasharray="8 6" class="animated-route"></path>
+                                </svg>
+                                <!-- Destination Point -->
+                                <div class="map-poi destination-poi">
+                                    <ion-icon name="home"></ion-icon>
+                                    <span class="poi-label">Customer: 742 Evergreen</span>
+                                </div>
+                                <!-- Animated Moving Fleet Van -->
+                                <div class="map-poi vehicle-poi" id="sim-vehicle-marker">
+                                    <ion-icon name="car"></ion-icon>
+                                    <span class="poi-label">Technician Alex (FiberOps)</span>
+                                </div>
+                            </div>
+
+                            <!-- Live Fleet ETA Status Card -->
+                            <div class="tracking-info-grid">
+                                <div class="tech-card">
+                                    <div class="tech-avatar"><ion-icon name="person"></ion-icon></div>
+                                    <div class="tech-meta">
+                                        <h4>Alex Gunawan</h4>
+                                        <span>Senior Fiber Optic Specialist &bull; 4.9 &starf;</span>
+                                    </div>
+                                    <a href="https://wa.me/6281122334455?text=Hello%20Alex%2C%20I%20am%20tracking%20your%20arrival." target="_blank" rel="noopener" class="btn-tracking-wa">
+                                        <ion-icon name="logo-whatsapp"></ion-icon>
+                                        <span>WhatsApp</span>
+                                    </a>
+                                </div>
+
+                                <div class="eta-card">
+                                    <div class="eta-val" id="sim-eta-time">7 Mins</div>
+                                    <div class="eta-sub">Estimated Arrival &bull; 2.4 km remaining</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sim-info-box">
+                            <span class="sim-badge emerald">VIRAL CUSTOMER SATISFACTION</span>
+                            <h3>Uber-Style Transparency for Customers</h3>
+                            <p>
+                                Eliminate the dreaded "technician will arrive between 9 AM and 5 PM" customer complaints. Customers receive an encrypted live link allowing them to track the approaching service van on a live Leaflet map in real-time.
+                            </p>
+                            <ul class="sim-bullet-list">
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Cryptographic Token Security:</strong> 32-character random access tokens ensure zero enumeration leaks.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Zero Login Required:</strong> Customers view their mission without installing an app or registering.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Reduced No-Show Rate:</strong> Customers stay on-site when they see the technician arriving.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── MODULE 3: AUTOMATED BAST PDF CERTIFICATE ───────────────── -->
+                <div class="sim-panel" id="sim-panel-bast">
+                    <div class="sim-bast-layout">
+                        <!-- Simulated Official A4 Letterhead Certificate -->
+                        <div class="bast-document-frame">
+                            <div class="bast-doc-header">
+                                <div class="bast-brand">
+                                    <ion-icon name="shield-checkmark"></ion-icon>
+                                    <div>
+                                        <strong>FIBEROPS NETWORK INFRASTRUCTURE SOLUTIONS</strong>
+                                        <span>OFFICIAL WORK ORDER ACCEPTANCE CERTIFICATE (BAST)</span>
+                                    </div>
+                                </div>
+                                <div class="bast-doc-no">DOC NO: BAST/FO/2026/11/0491</div>
+                            </div>
+
+                            <div class="bast-meta-grid">
+                                <div><strong>Ticket ID:</strong> #TSK-1042</div>
+                                <div><strong>Date:</strong> 16 Nov 2026, 14:35 WIB</div>
+                                <div><strong>Customer:</strong> Robert Vance</div>
+                                <div><strong>Location:</strong> 742 Evergreen Terr. (-6.2088, 106.8456)</div>
+                            </div>
+
+                            <div class="bast-table-wrap">
+                                <table class="bast-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Part Code</th>
+                                            <th>Material Description</th>
+                                            <th>Qty</th>
+                                            <th>Serial Number / Batch</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>MAT-DC-1C</code></td>
+                                            <td>Dropcore Fiber Optic Cable 1-Core</td>
+                                            <td>45 Meter</td>
+                                            <td>Lot #DC-2026-B</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>DEV-ONT-HW</code></td>
+                                            <td>Modem ONT Huawei EchoLife HG8245H5 Dual-Band</td>
+                                            <td>1 Unit</td>
+                                            <td><code>HW-GPON-99214A</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>MAT-FC-SCUPC</code></td>
+                                            <td>Fast Connector SC/UPC Quick Assembly</td>
+                                            <td>2 Pcs</td>
+                                            <td>Pass</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="bast-dual-sig-grid">
+                                <div class="bast-sig-box">
+                                    <span>Field Lead Technician</span>
+                                    <div class="sig-image-placeholder"><em>[Alex Gunawan - Verified ID #2]</em></div>
+                                    <strong>Alex Gunawan</strong>
+                                </div>
+                                <div class="bast-sig-box">
+                                    <span>Customer Acceptance</span>
+                                    <div class="sig-image-placeholder"><span class="sig-signed-badge">&check; Digitally Signed via Screen</span></div>
+                                    <strong>Robert Vance (Customer)</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sim-info-box">
+                            <span class="sim-badge purple">ZERO PAPERWORK DISPUTES</span>
+                            <h3>Automated Official BAST Generator</h3>
+                            <p>
+                                The system generates an official legal Work Order Acceptance Certificate (BAST) the moment the customer signs the touchscreen. Contains dual Before-After photo proof, exact GPS coordinate stamps, installed serial numbers, and bilateral digital signatures.
+                            </p>
+                            <ul class="sim-bullet-list">
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Instant Printable A4:</strong> Print or export to PDF directly from admin panel or mobile.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Tamper-Proof Audit:</strong> Stores hardware serial numbers directly onto the ticket record.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Eliminates Warranty Fraud:</strong> Proves operational internet before leaving the premises.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── MODULE 4: BOM & INVENTORY STOCK TRACKER ────────────────── -->
+                <div class="sim-panel" id="sim-panel-bom">
+                    <div class="sim-bom-layout">
+                        <div class="bom-terminal-card">
+                            <div class="bom-terminal-header">
+                                <ion-icon name="cube-outline"></ion-icon>
+                                <span>LIVE WAREHOUSE INVENTORY &amp; STOCK LEDGER</span>
+                            </div>
+
+                            <div class="bom-inventory-grid">
+                                <div class="bom-stat-item">
+                                    <span class="bom-stat-label">Huawei ONT HG8245H5</span>
+                                    <div class="bom-stat-val" id="sim-stock-ont">35 <small>units</small></div>
+                                </div>
+                                <div class="bom-stat-item">
+                                    <span class="bom-stat-label">Dropcore 1-Core Cable</span>
+                                    <div class="bom-stat-val" id="sim-stock-cable">1,240 <small>meters</small></div>
+                                </div>
+                                <div class="bom-stat-item">
+                                    <span class="bom-stat-label">SC/UPC Fast Connectors</span>
+                                    <div class="bom-stat-val" id="sim-stock-fc">250 <small>pcs</small></div>
+                                </div>
+                                <div class="bom-stat-item">
+                                    <span class="bom-stat-label">ZTE ONT F609 GPON</span>
+                                    <div class="bom-stat-val">25 <small>units</small></div>
+                                </div>
+                            </div>
+
+                            <div class="bom-interactive-action">
+                                <h4>Simulate Field Technician Dispatch Consumption:</h4>
+                                <div class="bom-action-row">
+                                    <button type="button" class="btn-sim-action" id="sim-btn-deduct-bom">
+                                        <ion-icon name="cart-outline"></ion-icon>
+                                        <span>Dispatch: 1x ONT + 45m Cable + 2x Connectors</span>
+                                    </button>
+                                    <button type="button" class="btn-sim-reset" id="sim-btn-reset-bom">Reset Stock</button>
+                                </div>
+                                <div class="bom-console-log" id="sim-bom-log">
+                                    [LEDGER] Ready. Awaiting field technician consumption input...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sim-info-box">
+                            <span class="sim-badge amber">ELIMINATE LOGISTIC LEAKS</span>
+                            <h3>Real-Time Material &amp; BOM Tracker</h3>
+                            <p>
+                                Never lose track of expensive optical hardware again. When a technician attaches an ONT modem, patchcord, or cable meters to a work order, the database executes an atomic transaction with row-level locks, updating warehouse inventory in real-time.
+                            </p>
+                            <ul class="sim-bullet-list">
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Atomic Consistency:</strong> Uses <code>lockForUpdate</code> to eliminate race conditions.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Automatic Reversion:</strong> Deleting a mistaken item automatically restores warehouse stock.</li>
+                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Serial Number Tracking:</strong> Links exact router MAC/SN to the customer's permanent account.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
 
         <!-- 4-Card Unified Gateway Grid -->
         <section class="portal-grid-section" id="portals">
@@ -407,50 +808,107 @@
         <!-- Turnkey Asset Acquisition Package Section -->
         <section class="asset-sale-section" id="acquisition">
             <div class="section-header" style="margin-bottom: var(--space-6);">
-                <span class="section-tag tag-amber">Turnkey Digital Asset Sale</span>
-                <h2 class="section-title">Acquire Full Ownership: Domain &amp; 100% Tech Stack</h2>
-                <p class="section-desc">
-                    The entire <strong>bentengsiber.com</strong> ecosystem is prepared for complete ownership transfer to telecommunication ISPs, fiber infrastructure contractors, or tech investors.
+                <span class="section-tag tag-amber" data-i18n="pricing.tag">Commercial Acquisition &amp; Licensing</span>
+                <h2 class="section-title" data-i18n="pricing.title">Enterprise Pricing &amp; Asset Buyout Hub</h2>
+                <p class="section-desc" data-i18n="pricing.desc">
+                    Whether you are an ISP seeking an immediate operational field tool or a tech investor acquiring the entire intellectual property, we offer flexible, transparent commercial terms:
                 </p>
             </div>
 
-            <div class="asset-features-grid">
-                <div class="asset-feature-box">
-                    <h4><ion-icon name="globe-outline"></ion-icon> Domain bentengsiber.com</h4>
-                    <p>Highly authoritative, memorable brand domain for telecommunication, fiber networking, and cyber defense industries. Instant EPP authorization transfer code.</p>
+            <!-- Dual-Option Pricing Cards -->
+            <div class="pricing-cards-grid">
+                
+                <!-- Card 1: Turnkey Asset Buyout (Full IP Transfer) -->
+                <div class="pricing-card featured-buyout">
+                    <div class="pricing-badge-popular">
+                        <ion-icon name="sparkles"></ion-icon>
+                        <span>FULL ASSET BUYOUT &bull; 100% IP TRANSFER</span>
+                    </div>
+
+                    <div class="pricing-head">
+                        <h3 class="tier-name">Complete Ecosystem Buyout</h3>
+                        <p class="tier-desc">Acquire 100% ownership of domain <code>bentengsiber.com</code>, all source codes, and deployment infrastructure.</p>
+                        <div class="price-wrap">
+                            <span class="price-currency">$</span>
+                            <span class="price-amount">18,500</span>
+                            <span class="price-period">one-time investment</span>
+                        </div>
+                        <div class="price-sub-note">&bull; Escrow.com Protected &bull; Valuation Range: $18,500 &ndash; $35,000 based on transition scope</div>
+                    </div>
+
+                    <ul class="pricing-features">
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Premium Domain Transfer:</strong> bentengsiber.com with instant EPP auth code.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>100% Source Code Handover:</strong> Laravel 10 API, Angular 17 PWA, Next.js 14 Scanner.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Android Studio Native Repo:</strong> Complete native app project ready for Google Play.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Production Schemas &amp; Migrations:</strong> Automated CI/CD deployment pipelines.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Zero Royalties or Platform Fees:</strong> Complete commercial exploitation rights.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>30-Day Technical Onboarding:</strong> Architecture transition assistance directly with the author.</span></li>
+                    </ul>
+
+                    <div class="pricing-cta-wrap">
+                        <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20am%20interested%20in%20acquiring%20full%20ownership%20of%20bentengsiber.com%20and%20the%20tech%20stack%20for%20USD%2018500." target="_blank" rel="noopener" class="btn-buyout-primary">
+                            <ion-icon name="logo-whatsapp"></ion-icon>
+                            <span>Inquire Buyout via WhatsApp</span>
+                        </a>
+                        <a href="mailto:owner@bentengsiber.com?subject=Acquisition%20Inquiry%20for%20bentengsiber.com%20Asset%20Buyout" class="btn-buyout-secondary">
+                            <ion-icon name="mail-outline"></ion-icon>
+                            <span>Official Escrow Buyout Offer</span>
+                        </a>
+                    </div>
                 </div>
 
-                <div class="asset-feature-box">
-                    <h4><ion-icon name="code-slash-outline"></ion-icon> 100% Full Source Code</h4>
-                    <p>Includes Laravel 10 Sanctum API backend, Angular 17/Ionic PWA frontend, Next.js 14 SaaS scanner, and native Android Studio project repository.</p>
+                <!-- Card 2: White-Label ISP Monthly License -->
+                <div class="pricing-card white-label-card">
+                    <div class="pricing-badge-standard">
+                        <ion-icon name="business-outline"></ion-icon>
+                        <span>MANAGED WHITE-LABEL SAAS</span>
+                    </div>
+
+                    <div class="pricing-head">
+                        <h3 class="tier-name">White-Label ISP Fleet License</h3>
+                        <p class="tier-desc">Deploy FiberOps immediately under your own brand without managing servers or codebases.</p>
+                        <div class="price-wrap">
+                            <span class="price-currency">$</span>
+                            <span class="price-amount">499</span>
+                            <span class="price-period">/ month billed annually</span>
+                        </div>
+                        <div class="price-sub-note">&bull; Or $599 billed monthly &bull; Cancel anytime &bull; Zero setup fee</div>
+                    </div>
+
+                    <ul class="pricing-features">
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Dedicated Custom Subdomain:</strong> yourisp.bentengsiber.com or custom CNAME.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Unlimited Technicians &amp; Fleets:</strong> No per-seat penalty or user surcharges.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Full Enterprise Suite:</strong> Digital Signature &amp; BAST PDF, BOM Tracker, Live Tracking.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Fully Managed Cloud Hosting:</strong> 99.98% SLA with daily automated off-site backups.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Continuous Security Hardening:</strong> Regular vulnerability updates &amp; patches.</span></li>
+                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>24/7 Priority Support:</strong> Direct technical assistance via dedicated Slack/WhatsApp channel.</span></li>
+                    </ul>
+
+                    <div class="pricing-cta-wrap">
+                        <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20would%20like%20to%20subscribe%20to%20the%20FiberOps%20White-Label%20License%20at%20USD%20499%2Fmo." target="_blank" rel="noopener" class="btn-whitelabel-primary">
+                            <ion-icon name="flash-outline"></ion-icon>
+                            <span>Start White-Label Onboarding</span>
+                        </a>
+                        <a href="#demo" class="btn-buyout-secondary">
+                            <ion-icon name="key-outline"></ion-icon>
+                            <span>Test Live Demo First</span>
+                        </a>
+                    </div>
                 </div>
 
-                <div class="asset-feature-box">
-                    <h4><ion-icon name="server-outline"></ion-icon> Production Database &amp; Hosting Ready</h4>
-                    <p>Active MySQL schema, cPanel/VPS deployment configurations, database migration history, and documented production API gateway routes.</p>
-                </div>
-
-                <div class="asset-feature-box">
-                    <h4><ion-icon name="shield-checkmark-outline"></ion-icon> Hardened &amp; Zero Known Bugs</h4>
-                    <p>Comprehensively audited: immune to IDOR, Mass-Assignment, and SSRF attacks, equipped with tamper-proof photo verification hash controls.</p>
-                </div>
             </div>
 
-            <!-- Contact Box for Direct WhatsApp & Email -->
-            <div class="acquisition-contact-box">
-                <h3>Interested in Acquiring This Complete Ecosystem?</h3>
-                <p>
-                    Contact the asset owner directly to discuss valuation, escrow transfer process, and complete Git source code repository handover.
-                </p>
-                <div class="acquisition-btn-group">
-                    <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20am%20interested%20in%20acquiring%20the%20bentengsiber.com%20domain%20and%20tech%20stack." target="_blank" rel="noopener" class="btn-whatsapp-buy">
-                        <ion-icon name="logo-whatsapp"></ion-icon>
-                        <span>Inquire via WhatsApp</span>
-                    </a>
-                    <a href="mailto:owner@bentengsiber.com?subject=Acquisition%20Inquiry%20for%20bentengsiber.com%20Digital%20Asset" class="btn-email-buy">
-                        <ion-icon name="mail-outline"></ion-icon>
-                        <span>Inquire via Official Email</span>
-                    </a>
+            <!-- Escrow Trust Assurance Bar -->
+            <div class="escrow-trust-bar">
+                <div class="trust-shield">
+                    <ion-icon name="shield-checkmark"></ion-icon>
+                    <span>SECURE TRANSACTION GUARANTEE</span>
+                </div>
+                <div class="trust-badges-list">
+                    <span><ion-icon name="checkmark-done-circle"></ion-icon> Escrow.com Inspection Period</span>
+                    <span><ion-icon name="checkmark-done-circle"></ion-icon> International Wire Transfer &bull; USD / EUR</span>
+                    <span><ion-icon name="checkmark-done-circle"></ion-icon> Verified EPP Domain Authorization</span>
+                    <span><ion-icon name="checkmark-done-circle"></ion-icon> Non-Disclosure Agreement (NDA) Available</span>
                 </div>
             </div>
         </section>

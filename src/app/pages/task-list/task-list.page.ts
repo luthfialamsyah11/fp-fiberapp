@@ -26,10 +26,10 @@ export class TaskListPage implements OnInit {
   searchQuery = '';
 
   filters = [
-    { value: 'all', label: 'Semua Tugas' },
-    { value: 'assigned', label: 'Tugas Baru' },
-    { value: 'accepted', label: 'Diterima' },
-    { value: 'on-going', label: 'Dikerjakan' },
+    { value: 'all', label: 'All Tasks' },
+    { value: 'assigned', label: 'Assigned' },
+    { value: 'accepted', label: 'Accepted' },
+    { value: 'on-going', label: 'In Progress' },
   ];
 
   ngOnInit() {}
@@ -174,12 +174,12 @@ export class TaskListPage implements OnInit {
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'pending': return 'Menunggu';
-      case 'assigned': return 'Ditugaskan';
-      case 'accepted': return 'Diterima';
-      case 'on-going': return 'Dikerjakan';
-      case 'completed': return 'Selesai';
-      case 'rejected': return 'Ditolak';
+      case 'pending': return 'Pending';
+      case 'assigned': return 'Assigned';
+      case 'accepted': return 'Accepted';
+      case 'on-going': return 'In Progress';
+      case 'completed': return 'Completed';
+      case 'rejected': return 'Declined';
       default: return status;
     }
   }

@@ -122,12 +122,12 @@ class Task extends Model
     public function getStatusLabelAttribute(): string
     {
         return match($this->status) {
-            'pending'     => 'Menunggu',
-            'assigned'    => 'Ditugaskan',
-            'accepted'    => 'Diterima',
-            'on-going'    => 'On-Going',
-            'completed'   => 'Selesai',
-            'rejected'    => 'Ditolak',
+            'pending'     => 'Pending',
+            'assigned'    => 'Assigned',
+            'accepted'    => 'Accepted',
+            'on-going'    => 'In Progress',
+            'completed'   => 'Completed',
+            'rejected'    => 'Declined',
             default       => ucfirst($this->status),
         };
     }

@@ -20,7 +20,7 @@
     </div>
     <div class="flex items-center gap-2">
         <a href="{{ route('admin.tasks.bast', $task->id) }}" target="_blank" class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-100 transition-all flex items-center gap-1.5 shadow-sm">
-            <ion-icon name="print-outline"></ion-icon> Cetak BAST Resmi (PDF)
+            <ion-icon name="print-outline"></ion-icon> Print Official BAST (PDF)
         </a>
         <a href="{{ route('admin.tasks.edit', $task->id) }}" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition-all flex items-center gap-1.5">
             <ion-icon name="create-outline"></ion-icon> Edit Task Details

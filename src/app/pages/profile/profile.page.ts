@@ -72,11 +72,11 @@ export class ProfilePage implements OnInit {
 
   async saveProfile() {
     if (!this.name.trim()) {
-      this.showToast('Nama lengkap tidak boleh kosong', 'warning');
+      this.showToast('Full name cannot be empty', 'warning');
       return;
     }
 
-    const loading = await this.loadingCtrl.create({ message: 'Menyimpan profil...' });
+    const loading = await this.loadingCtrl.create({ message: 'Saving profile...' });
     await loading.present();
     this.isSaving = true;
 
@@ -86,7 +86,6 @@ export class ProfilePage implements OnInit {
         phone: this.phone,
       });
 
-
       const updatedUser = res?.data || res;
       if (updatedUser) {
         await this.storage.set('user', updatedUser);
@@ -94,12 +93,12 @@ export class ProfilePage implements OnInit {
 
       await loading.dismiss();
       this.isEditing = false;
-      this.showToast('Profil berhasil diperbarui', 'success');
+      this.showToast('Profile updated successfully', 'success');
     } catch (e: any) {
       await loading.dismiss();
       const errMsg = e?.message || e?.error?.message || JSON.stringify(e);
       const status = e?.status !== undefined ? e.status : 'N/A';
-      this.showToast(`Gagal memperbarui profil: ${errMsg} (Status: ${status})`, 'danger');
+      this.showToast(`Failed to update profile: ${errMsg} (Status: ${status})`, 'danger');
     } finally {
       this.isSaving = false;
     }
@@ -107,12 +106,12 @@ export class ProfilePage implements OnInit {
 
   async doLogout() {
     const alert = await this.alertCtrl.create({
-      header: 'Keluar',
-      message: 'Apakah Anda yakin ingin keluar dari akun?',
+      header: 'Log Out',
+      message: 'Are you sure you want to log out of your technician account?',
       buttons: [
-        { text: 'Batal', role: 'cancel' },
+        { text: 'Cancel', role: 'cancel' },
         {
-          text: 'Keluar',
+          text: 'Log Out',
           role: 'destructive',
           handler: () => this.auth.logout()
         }
@@ -123,27 +122,27 @@ export class ProfilePage implements OnInit {
 
   async changePassword() {
     const alert = await this.alertCtrl.create({
-      header: 'Ubah Kata Sandi',
-      message: 'Demi keamanan data, silakan hubungi Tim IT Administrator FiberOps untuk mereset atau mengganti kata sandi Anda.',
-      buttons: ['Mengerti']
+      header: 'Change Password',
+      message: 'For enterprise security compliance, please contact your FiberOps IT Administrator to reset or update your credentials.',
+      buttons: ['Understood']
     });
     await alert.present();
   }
 
   async helpCenter() {
     const alert = await this.alertCtrl.create({
-      header: 'Pusat Bantuan',
-      message: 'Layanan Bantuan Lapangan FiberOps:\n\nEmail: field-support@fiberops.com\nTelepon: (021) 8062-8888\nJam Kerja: 24/7',
-      buttons: ['Tutup']
+      header: 'Help Center',
+      message: 'FiberOps Field Support Services:\n\nEmail: field-support@fiberops.com\nPhone: +62 21 8062-8888\nService Hours: 24/7 Enterprise Support',
+      buttons: ['Close']
     });
     await alert.present();
   }
 
   async appInfo() {
     const alert = await this.alertCtrl.create({
-      header: 'Tentang FiberOps',
-      message: 'FiberOps Technician App\nVersi: 1.0.4-premium\nBuild: 2026.06.10\n\nSistem manajemen lapangan terpadu ISP & WiFi.',
-      buttons: ['Selesai']
+      header: 'About FiberOps',
+      message: 'FiberOps Technician PWA\nVersion: 1.0.4-premium\nBuild: 2026.11.16\n\nEnterprise ISP Field Workforce & Infrastructure Management Platform.',
+      buttons: ['Close']
     });
     await alert.present();
   }

@@ -115,7 +115,7 @@
 
             <a href="{{ route('admin.inventory.index') }}" class="nav-item flex items-center px-3 py-2.5 rounded-xl transition-all text-slate-300 text-sm {{ request()->routeIs('admin.inventory.*') ? 'active text-white' : '' }}">
                 <ion-icon name="cube-outline" class="text-lg mr-3 flex-shrink-0"></ion-icon>
-                <span>Inventaris &amp; Material</span>
+                <span>Inventory &amp; Materials</span>
             </a>
 
             <a href="{{ route('admin.assignments') }}" class="nav-item flex items-center px-3 py-2.5 rounded-xl transition-all text-slate-300 text-sm {{ request()->routeIs('admin.assignments') ? 'active text-white' : '' }}">
@@ -155,7 +155,7 @@
 
             <a href="{{ route('admin.guide') }}" class="nav-item flex items-center px-3 py-2.5 rounded-xl transition-all text-slate-300 text-sm {{ request()->routeIs('admin.guide') ? 'active text-white' : '' }}">
                 <ion-icon name="book-outline" class="text-lg mr-3 flex-shrink-0 text-amber-400"></ion-icon>
-                <span>Panduan Web Admin</span>
+                <span>Admin Operations Guide</span>
             </a>
         </nav>
         
@@ -170,7 +170,7 @@
                     <p class="text-[10px] text-slate-400 truncate">Administrator</p>
                 </div>
             </div>
-            <form action="{{ route('admin.logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin keluar?')">
+            <form action="{{ route('admin.logout') }}" method="POST" onsubmit="return confirm('Are you sure you want to log out?')">
                 @csrf
                 <button type="submit" class="flex items-center px-3 py-2 w-full text-left rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs font-medium">
                     <ion-icon name="log-out-outline" class="text-sm mr-2"></ion-icon>

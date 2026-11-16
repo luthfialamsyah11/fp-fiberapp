@@ -7,8 +7,8 @@
   <!-- Top Greeting & Online Status Bar -->
   <div class="tech-top-bar">
     <div class="tech-info">
-      <span class="greeting-sub">Halo, Selamat Bekerja</span>
-      <h2 class="tech-name">{{ user?.name || 'Teknisi FiberOps' }}</h2>
+      <span class="greeting-sub">Welcome back</span>
+      <h2 class="tech-name">{{ user?.name || 'FiberOps Specialist' }}</h2>
     </div>
     <button class="status-pill" [class.online]="isOnline" (click)="toggleOnlineStatus()">
       <span class="status-dot"></span>
@@ -21,10 +21,10 @@
     <div class="mission-badge-row">
       <span class="mission-tag">
         <span class="pulse-dot"></span>
-        MISI AKTIF ({{ getStatusLabel(activeMission.status) }})
+        ACTIVE MISSION ({{ getStatusLabel(activeMission.status) }})
       </span>
       <span class="mission-priority" [style.color]="getPriorityColor(activeMission.priority)">
-        ● Prioritas {{ activeMission.priority | uppercase }}
+        ● Priority {{ activeMission.priority | uppercase }}
       </span>
     </div>
 
@@ -46,7 +46,7 @@
     <div class="mission-actions-row">
       <button class="btn-quick btn-gps" *ngIf="activeMission.latitude && activeMission.longitude" (click)="openNavigation(activeMission, $event)">
         <ion-icon name="navigate-outline"></ion-icon>
-        <span>Rute GPS</span>
+        <span>GPS Route</span>
       </button>
 
       <button class="btn-quick btn-wa" *ngIf="activeMission.customer_phone" (click)="openWhatsApp(activeMission, $event)">
@@ -55,7 +55,7 @@
       </button>
 
       <button class="btn-quick btn-open" (click)="goToDetail(activeMission.id)">
-        <span>Buka Tugas</span>
+        <span>Open Task</span>
         <ion-icon name="arrow-forward-outline"></ion-icon>
       </button>
     </div>
@@ -64,8 +64,8 @@
   <!-- Main Section Header -->
   <div class="tl-header-section">
     <div class="tl-title-row">
-      <h1>Antrean Tugas</h1>
-      <span class="task-count" *ngIf="!isLoading">{{ filteredTasks.length }} tugas</span>
+      <h1>Task Queue</h1>
+      <span class="task-count" *ngIf="!isLoading">{{ filteredTasks.length }} tasks</span>
     </div>
 
     <!-- Search Bar -->
@@ -73,7 +73,7 @@
       <ion-icon name="search-outline"></ion-icon>
       <input
         type="text"
-        placeholder="Cari tugas, pelanggan, atau lokasi..."
+        placeholder="Search tasks, customer, or address..."
         (input)="onSearch($event)"
       />
     </div>
@@ -101,8 +101,8 @@
     <div class="empty-icon-wrap">
       <ion-icon name="clipboard-outline"></ion-icon>
     </div>
-    <h3>Tidak ada tugas</h3>
-    <p>Tidak ada tugas yang sesuai dengan filter ini</p>
+    <h3>No tasks found</h3>
+    <p>There are no tasks matching this filter criteria</p>
   </div>
 
   <!-- Task Cards -->

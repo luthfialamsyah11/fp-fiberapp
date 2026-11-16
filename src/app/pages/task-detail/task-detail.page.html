@@ -42,7 +42,7 @@
           <span>WhatsApp</span>
         </button>
 
-        <button class="btn-tool btn-tool-tracking" *ngIf="task.customer_phone" (click)="shareCustomerTracking()" title="Bagikan Live Tracking ke Pelanggan">
+        <button class="btn-tool btn-tool-tracking" *ngIf="task.customer_phone" (click)="shareCustomerTracking()" title="Share Live Uber-Style Tracking to Customer">
           <div class="icon-circle tracking">
             <ion-icon name="radio-outline"></ion-icon>
           </div>
@@ -53,21 +53,21 @@
           <div class="icon-circle call">
             <ion-icon name="call-outline"></ion-icon>
           </div>
-          <span>Telepon</span>
+          <span>Call</span>
         </button>
 
         <button class="btn-tool btn-tool-nav" *ngIf="task.latitude && task.longitude" (click)="openMaps()">
           <div class="icon-circle nav">
             <ion-icon name="navigate-outline"></ion-icon>
           </div>
-          <span>Rute GPS</span>
+          <span>GPS Route</span>
         </button>
 
         <button class="btn-tool btn-tool-copy" (click)="copyAddress()">
           <div class="icon-circle copy">
             <ion-icon name="copy-outline"></ion-icon>
           </div>
-          <span>Salin</span>
+          <span>Copy</span>
         </button>
       </div>
     </div>
@@ -75,7 +75,7 @@
     <div class="workspace-body">
 
       <!-- =================================================================== -->
-      <!-- TAHAP 1: ASSIGNED (Penerimaan / Penolakan Tiket) -->
+      <!-- STAGE 1: ASSIGNED (Accept / Decline Work Order) -->
       <!-- =================================================================== -->
       <div class="stage-card stage-assigned" *ngIf="task.status === 'assigned'">
         <div class="stage-header">
@@ -83,26 +83,26 @@
             <ion-icon name="notifications-outline"></ion-icon>
           </div>
           <div class="stage-title-wrap">
-            <span class="stage-tag">TAHAP 1</span>
-            <h3>Tugas Baru Ditugaskan</h3>
+            <span class="stage-tag">STAGE 1</span>
+            <h3>New Work Order Assigned</h3>
           </div>
         </div>
-        <p class="stage-desc">Periksa lokasi dan rincian masalah pelanggan di bawah, lalu terima tiket untuk memulai rute perjalanan.</p>
+        <p class="stage-desc">Review the customer location and reported fault below, then accept the ticket to start dispatch.</p>
 
         <div class="action-grid-dual">
           <button class="btn-action-lg btn-reject" (click)="rejectTask()" [disabled]="isActioning">
             <ion-icon name="close-circle-outline"></ion-icon>
-            <span>Tolak Tugas</span>
+            <span>Decline</span>
           </button>
           <button class="btn-action-lg btn-accept" (click)="acceptTask()" [disabled]="isActioning">
             <ion-icon name="checkmark-circle-outline"></ion-icon>
-            <span>Terima Tugas</span>
+            <span>Accept Work Order</span>
           </button>
         </div>
       </div>
 
       <!-- =================================================================== -->
-      <!-- TAHAP 2: ACCEPTED (Menuju Lokasi Pelanggan) -->
+      <!-- STAGE 2: ACCEPTED (En Route to Customer Site) -->
       <!-- =================================================================== -->
       <div class="stage-card stage-accepted" *ngIf="task.status === 'accepted'">
         <div class="stage-header">
@@ -110,50 +110,50 @@
             <ion-icon name="car-outline"></ion-icon>
           </div>
           <div class="stage-title-wrap">
-            <span class="stage-tag green">TAHAP 2</span>
-            <h3>Dalam Perjalanan ke Lokasi</h3>
+            <span class="stage-tag green">STAGE 2</span>
+            <h3>En Route to Location</h3>
           </div>
         </div>
-        <p class="stage-desc">Gunakan navigasi GPS di atas untuk panduan jalan. Tekan tombol di bawah saat Anda telah tiba di lokasi pelanggan.</p>
+        <p class="stage-desc">Use the GPS route navigation above. Tap the button below once you have arrived at the customer premises.</p>
 
         <!-- Live Tracking Share Banner -->
         <div class="tracking-share-box" *ngIf="task.customer_phone">
           <div class="ts-info">
             <div class="pulse-radar-dot"></div>
             <div>
-              <strong>Kirim Link Live Tracking</strong>
-              <p>Pelanggan dapat memantau pergerakan armada Anda di peta secara live ala Uber.</p>
+              <strong>Share Live Fleet Tracking</strong>
+              <p>Customer can track your approaching vehicle on a live GPS map in real-time.</p>
             </div>
           </div>
           <button class="btn-share-wa" (click)="shareCustomerTracking()">
             <ion-icon name="logo-whatsapp"></ion-icon>
-            <span>Kirim Link via WhatsApp</span>
+            <span>Send Live Link via WhatsApp</span>
           </button>
         </div>
 
         <button class="btn-action-lg btn-start" (click)="startTask()" [disabled]="isStarting">
           <ion-icon name="play-circle-outline"></ion-icon>
-          <span>Tiba di Lokasi & Mulai Kerjakan</span>
+          <span>Arrived On-Site &bull; Begin Work</span>
         </button>
       </div>
 
       <!-- =================================================================== -->
-      <!-- TAHAP 3: ON-GOING (Eksekusi, Slot Bukti Foto & Slider Progres) -->
+      <!-- STAGE 3: ON-GOING (Execution, Guided Proof Slots & Progress Slider) -->
       <!-- =================================================================== -->
       <div class="stage-workspace" *ngIf="task.status === 'on-going'">
 
-        <!-- Slot 1: Foto Sebelum (Before) -->
+        <!-- Slot 1: Photo Before -->
         <div class="stage-card slot-card">
           <div class="slot-header">
             <div class="slot-badge-wrap">
               <span class="slot-pill amber">SLOT 1</span>
-              <span class="slot-title">Foto Sebelum (Before / Kondisi Awal)</span>
+              <span class="slot-title">Photo Before (Initial Loss / Damage)</span>
             </div>
             <span class="status-indicator-badge" [class.done]="slotPreviews['before']">
-              {{ slotPreviews['before'] ? 'Foto Dipilih' : 'Wajib' }}
+              {{ slotPreviews['before'] ? 'Selected' : 'Required' }}
             </span>
           </div>
-          <p class="slot-hint">Ambil foto kabel yang rusak, redaman tinggi, atau lampu LOS merah sebelum mulai diperbaiki.</p>
+          <p class="slot-hint">Capture optical cut, high dB attenuation reading, or red LOS indicator before beginning repairs.</p>
 
           <!-- Hidden Input Fallback -->
           <input #fileInputBefore type="file" accept="image/*" (change)="onFileSelected($event, 'before')" style="display: none;" />
@@ -162,30 +162,30 @@
             <img *ngIf="slotPreviews['before']" [src]="slotPreviews['before']" class="preview-img" alt="Before Preview" />
             <div *ngIf="!slotPreviews['before']" class="slot-placeholder">
               <ion-icon name="camera-outline"></ion-icon>
-              <span>Tap untuk Ambil Foto Sebelum</span>
+              <span>Tap to Capture Photo Before</span>
             </div>
           </div>
 
           <div class="slot-actions" *ngIf="slotPreviews['before']">
             <button class="btn-slot-upload" (click)="uploadSlotProof('before')" [disabled]="isUploadingSlot['before']">
               <ion-icon name="cloud-upload-outline"></ion-icon>
-              <span>{{ isUploadingSlot['before'] ? 'Mengunggah...' : 'Unggah Foto Sebelum' }}</span>
+              <span>{{ isUploadingSlot['before'] ? 'Uploading...' : 'Upload Photo Before' }}</span>
             </button>
           </div>
         </div>
 
-        <!-- Slot 2: Foto Sesudah (After) -->
+        <!-- Slot 2: Photo After -->
         <div class="stage-card slot-card">
           <div class="slot-header">
             <div class="slot-badge-wrap">
               <span class="slot-pill emerald">SLOT 2</span>
-              <span class="slot-title">Foto Sesudah (After / Hasil Normal)</span>
+              <span class="slot-title">Photo After (Normal / Resolved State)</span>
             </div>
             <span class="status-indicator-badge" [class.done]="slotPreviews['after']">
-              {{ slotPreviews['after'] ? 'Foto Dipilih' : 'Wajib' }}
+              {{ slotPreviews['after'] ? 'Selected' : 'Required' }}
             </span>
           </div>
-          <p class="slot-hint">Ambil foto router online lampu hijau, hasil sambungan rapi, atau tes speedtest.</p>
+          <p class="slot-hint">Capture clean fusion splice, solid green PON light on ONT modem, or verified speedtest.</p>
 
           <!-- Hidden Input Fallback -->
           <input #fileInputAfter type="file" accept="image/*" (change)="onFileSelected($event, 'after')" style="display: none;" />
@@ -194,14 +194,14 @@
             <img *ngIf="slotPreviews['after']" [src]="slotPreviews['after']" class="preview-img" alt="After Preview" />
             <div *ngIf="!slotPreviews['after']" class="slot-placeholder">
               <ion-icon name="camera-outline"></ion-icon>
-              <span>Tap untuk Ambil Foto Sesudah</span>
+              <span>Tap to Capture Photo After</span>
             </div>
           </div>
 
           <div class="slot-actions" *ngIf="slotPreviews['after']">
             <button class="btn-slot-upload btn-emerald" (click)="uploadSlotProof('after')" [disabled]="isUploadingSlot['after']">
               <ion-icon name="cloud-upload-outline"></ion-icon>
-              <span>{{ isUploadingSlot['after'] ? 'Mengunggah...' : 'Unggah Foto Sesudah' }}</span>
+              <span>{{ isUploadingSlot['after'] ? 'Uploading...' : 'Upload Photo After' }}</span>
             </button>
           </div>
         </div>
@@ -213,14 +213,14 @@
               <ion-icon name="bar-chart-outline"></ion-icon>
             </div>
             <div class="stage-title-wrap">
-              <span class="stage-tag purple">PROGRES KERJA</span>
-              <h3>Tingkat Penyelesaian</h3>
+              <span class="stage-tag purple">TASK PROGRESS</span>
+              <h3>Completion Rate</h3>
             </div>
           </div>
 
           <div class="progress-bar-wrap">
             <div class="progress-labels">
-              <span>Progres Pengerjaan</span>
+              <span>Execution Progress</span>
               <span class="progress-val">{{ progressPercent }}%</span>
             </div>
             <div class="progress-track">
@@ -230,18 +230,18 @@
           </div>
 
           <div class="input-group">
-            <label>Catatan Perkembangan Pekerjaan</label>
-            <textarea [(ngModel)]="progressNote" placeholder="Tulis catatan (misal: penyambungan kabel selesai, tes ping stabil)..." rows="2"></textarea>
+            <label>Field Progress Notes</label>
+            <textarea [(ngModel)]="progressNote" placeholder="Write progress note (e.g., fiber splicing complete, ping stable at 3ms)..." rows="2"></textarea>
           </div>
 
           <button class="btn-action-lg btn-save-progress" (click)="updateProgress()" [disabled]="isUpdatingProgress">
             <ion-icon name="save-outline"></ion-icon>
-            <span>{{ isUpdatingProgress ? 'Menyimpan...' : 'Simpan Progres' }}</span>
+            <span>{{ isUpdatingProgress ? 'Saving...' : 'Save Progress' }}</span>
           </button>
         </div>
 
         <!-- =================================================================== -->
-        <!-- FITUR ENTERPRISE 1: MATERIAL & SUKU CADANG TERPAKAI (BOM TRACKER) -->
+        <!-- ENTERPRISE FEATURE 1: BOM & MATERIAL CONSUMPTION TRACKER -->
         <!-- =================================================================== -->
         <div class="stage-card bom-card">
           <div class="stage-header">
@@ -249,51 +249,51 @@
               <ion-icon name="cube-outline"></ion-icon>
             </div>
             <div class="stage-title-wrap">
-              <span class="stage-tag blue">LOGISTIK & INVENTARIS</span>
-              <h3>Material & Suku Cadang Terpakai (BOM)</h3>
+              <span class="stage-tag blue">LOGISTICS &amp; BOM</span>
+              <h3>Materials &amp; Hardware Consumed (BOM)</h3>
             </div>
           </div>
-          <p class="stage-desc">Catat kabel, ONT, atau konektor yang dipasang pada tiket ini. Stok gudang akan otomatis dipotong.</p>
+          <p class="stage-desc">Record cable length, ONT modems, or connectors installed. Warehouse stock is deducted in real-time.</p>
 
           <!-- Input Form Material -->
           <div class="bom-form">
             <div class="bom-input-group">
-              <label>Pilih Barang dari Gudang</label>
+              <label>Select Item from Warehouse Catalog</label>
               <select [(ngModel)]="selectedInventoryId" class="bom-select">
-                <option [ngValue]="null">-- Pilih Material / Perangkat --</option>
+                <option [ngValue]="null">-- Select Material or Device --</option>
                 <option *ngFor="let item of inventoryItems" [ngValue]="item.id">
-                  [{{ item.code || item.sku }}] {{ item.name }} (Stok: {{ item.stock }} {{ item.unit }})
+                  [{{ item.code || item.sku }}] {{ item.name }} (Stock: {{ item.stock }} {{ item.unit }})
                 </option>
               </select>
             </div>
 
             <div class="bom-grid-row">
               <div class="bom-input-group half">
-                <label>Jumlah (Qty)</label>
+                <label>Quantity (Qty)</label>
                 <input type="number" min="0.1" step="any" [(ngModel)]="materialQuantity" placeholder="1" class="bom-input" />
               </div>
               <div class="bom-input-group half">
-                <label>Nomor Seri / SN (Opsional)</label>
-                <input type="text" [(ngModel)]="materialSerialNumber" placeholder="Misal: SN-ZTE-1029" class="bom-input" />
+                <label>Serial Number / SN (Optional)</label>
+                <input type="text" [(ngModel)]="materialSerialNumber" placeholder="e.g. SN-ZTE-1029" class="bom-input" />
               </div>
             </div>
 
             <div class="bom-input-group">
-              <label>Catatan Penggunaan (Opsional)</label>
-              <input type="text" [(ngModel)]="materialNotes" placeholder="Misal: Dari ODP-04 ke roset pelanggan" class="bom-input" />
+              <label>Usage Notes (Optional)</label>
+              <input type="text" [(ngModel)]="materialNotes" placeholder="e.g. Drop cable from ODP-04 to rosette" class="bom-input" />
             </div>
 
             <button class="btn-action-bom-add" (click)="addMaterial()" [disabled]="isAddingMaterial || !selectedInventoryId">
               <ion-icon name="add-circle-outline"></ion-icon>
-              <span>{{ isAddingMaterial ? 'Menambahkan...' : 'Catat Pemakaian Material' }}</span>
+              <span>{{ isAddingMaterial ? 'Recording...' : 'Record Material Consumption' }}</span>
             </button>
           </div>
 
-          <!-- Daftar Material Terpakai -->
+          <!-- Consumed Material List -->
           <div class="bom-list" *ngIf="task.materials && task.materials.length > 0">
             <div class="bom-list-title">
-              <span>Item Terpakai Pada Tiket Ini</span>
-              <span class="bom-count-pill">{{ task.materials.length }} Item</span>
+              <span>Items Consumed for This Work Order</span>
+              <span class="bom-count-pill">{{ task.materials.length }} Items</span>
             </div>
             <div class="bom-item-row" *ngFor="let m of task.materials">
               <div class="bom-item-info">
@@ -304,18 +304,18 @@
                   <span *ngIf="m.notes" class="bom-notes-txt">{{ m.notes }}</span>
                 </div>
               </div>
-              <button class="btn-del-bom" (click)="removeMaterial(m)" title="Hapus & Kembalikan Stok">
+              <button class="btn-del-bom" (click)="removeMaterial(m)" title="Delete & Restore Stock">
                 <ion-icon name="trash-outline"></ion-icon>
               </button>
             </div>
           </div>
           <div class="bom-empty" *ngIf="!task.materials || task.materials.length === 0">
-            <span>Belum ada material yang dicatat untuk tiket ini.</span>
+            <span>No materials recorded yet for this work order.</span>
           </div>
         </div>
 
         <!-- =================================================================== -->
-        <!-- FITUR ENTERPRISE 2: TANDA TANGAN DIGITAL PELANGGAN (BAST DIGITAL) -->
+        <!-- ENTERPRISE FEATURE 2: CUSTOMER DIGITAL E-SIGNATURE (BAST) -->
         <!-- =================================================================== -->
         <div class="stage-card signature-card">
           <div class="stage-header">
@@ -323,120 +323,120 @@
               <ion-icon name="pencil-outline"></ion-icon>
             </div>
             <div class="stage-title-wrap">
-              <span class="stage-tag emerald">SERAH TERIMA (BAST)</span>
-              <h3>Tanda Tangan Digital Pelanggan</h3>
+              <span class="stage-tag emerald">OFFICIAL BAST SIGN-OFF</span>
+              <h3>Customer Digital E-Signature</h3>
             </div>
             <span class="status-indicator-badge" [class.done]="task.customer_signature">
-              {{ task.customer_signature ? 'Sudah Ditandatangani' : 'Diperlukan' }}
+              {{ task.customer_signature ? 'Signed & Verified' : 'Required' }}
             </span>
           </div>
-          <p class="stage-desc">Mintalah tanda tangan pelanggan langsung di layar ini sebagai bukti verifikasi sah serah terima pekerjaan (BAST).</p>
+          <p class="stage-desc">Collect customer signature directly on this glass screen as legally verified acceptance of work.</p>
 
-          <!-- Preview Jika Sudah Pernah Ditandatangani -->
+          <!-- Preview If Signed -->
           <div class="signed-preview-box" *ngIf="task.customer_signature">
             <div class="signed-preview-header">
               <ion-icon name="checkmark-circle"></ion-icon>
-              <span>Tanda Tangan Tersimpan</span>
+              <span>Stored Digital Signature</span>
             </div>
             <div class="signed-img-frame">
-              <img [src]="task.customer_signature" alt="Tanda Tangan Pelanggan" class="signed-img" />
+              <img [src]="task.customer_signature" alt="Customer Signature" class="signed-img" />
             </div>
             <div class="signed-meta">
-              <div><strong>Nama Penerima:</strong> {{ task.customer_signer_name || task.customer_name }}</div>
-              <div *ngIf="task.customer_signed_at"><strong>Waktu Tanda Tangan:</strong> {{ task.customer_signed_at | date:'dd MMM yyyy, HH:mm' }} WIB</div>
+              <div><strong>Signer Name:</strong> {{ task.customer_signer_name || task.customer_name }}</div>
+              <div *ngIf="task.customer_signed_at"><strong>Timestamp:</strong> {{ task.customer_signed_at | date:'dd MMM yyyy, HH:mm' }} WIB</div>
             </div>
           </div>
 
           <!-- Drawing Canvas Box -->
           <div class="signature-canvas-wrap">
             <div class="signer-name-field">
-              <label>Nama Lengkap Penerima / Pelanggan:</label>
-              <input type="text" [(ngModel)]="customerSignerName" placeholder="Contoh: Bpk. Ahmad Dahlan" class="signer-input" />
+              <label>Customer Signer Full Name:</label>
+              <input type="text" [(ngModel)]="customerSignerName" placeholder="e.g. Robert Vance" class="signer-input" />
             </div>
 
             <div class="canvas-container">
               <canvas #signatureCanvas id="signature-canvas" class="signature-pad"></canvas>
               <div class="canvas-watermark" *ngIf="!isCanvasDrawn">
                 <ion-icon name="finger-print-outline"></ion-icon>
-                <span>Tanda tangan di sini menggunakan jari atau stylus</span>
+                <span>Sign here using finger or stylus</span>
               </div>
             </div>
 
             <div class="canvas-actions">
               <button class="btn-canvas-clear" (click)="clearCanvas()" type="button">
                 <ion-icon name="refresh-outline"></ion-icon>
-                <span>Hapus & Ulangi</span>
+                <span>Clear</span>
               </button>
               <button class="btn-canvas-save" (click)="saveSignature()" [disabled]="!isCanvasDrawn || isSavingSignature" type="button">
                 <ion-icon name="checkmark-done-outline"></ion-icon>
-                <span>{{ isSavingSignature ? 'Menyimpan...' : 'Simpan Tanda Tangan' }}</span>
+                <span>{{ isSavingSignature ? 'Saving...' : 'Save Signature' }}</span>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Selesaikan Tugas Card -->
+        <!-- Complete Task Card -->
         <div class="stage-card complete-action-card">
           <div class="stage-header">
             <div class="stage-icon-circle green">
               <ion-icon name="checkmark-done-circle-outline"></ion-icon>
             </div>
             <div class="stage-title-wrap">
-              <span class="stage-tag green">TAHAP AKHIR</span>
-              <h3>Selesaikan Tugas</h3>
+              <span class="stage-tag green">FINAL STEP</span>
+              <h3>Complete Work Order</h3>
             </div>
           </div>
-          <p class="stage-desc">Pastikan foto bukti telah diunggah dan perangkat pelanggan sudah berfungsi normal sebelum menyelesaikan tugas.</p>
+          <p class="stage-desc">Ensure proof photos are uploaded, materials recorded, and customer signature captured before concluding.</p>
 
           <button class="btn-action-lg btn-complete-task" (click)="completeTask()" [disabled]="isCompleting">
             <ion-icon name="checkmark-circle"></ion-icon>
-            <span>{{ isCompleting ? 'Menyelesaikan...' : 'Tandai Tugas Selesai' }}</span>
+            <span>{{ isCompleting ? 'Completing...' : 'Mark Work Order Complete' }}</span>
           </button>
         </div>
 
       </div>
 
       <!-- =================================================================== -->
-      <!-- TAHAP 4: COMPLETED (Status Selesai) -->
+      <!-- STAGE 4: COMPLETED (Done Banner) -->
       <!-- =================================================================== -->
       <div class="done-banner-card" *ngIf="task.status === 'completed'">
         <div class="done-icon-box">
           <ion-icon name="checkmark-circle"></ion-icon>
         </div>
-        <h3>Tugas Telah Selesai 100%</h3>
-        <p>Pekerjaan telah diverifikasi dan foto bukti tersimpan aman di sistem pusat.</p>
+        <h3>Work Order 100% Completed!</h3>
+        <p>Execution verified, photos archived securely, and BAST sign-off issued.</p>
       </div>
 
       <!-- =================================================================== -->
-      <!-- TAHAP 5: REJECTED (Status Ditolak) -->
+      <!-- STAGE 5: REJECTED (Declined Banner) -->
       <!-- =================================================================== -->
       <div class="rejected-banner-card" *ngIf="task.status === 'rejected'">
         <div class="rejected-icon-box">
           <ion-icon name="close-circle"></ion-icon>
         </div>
-        <h3>Tugas Ditolak</h3>
-        <p>Tiket pekerjaan ini telah ditolak dan dialihkan kembali ke dispatcher.</p>
+        <h3>Work Order Declined</h3>
+        <p>This ticket was declined and returned to the dispatcher pool.</p>
       </div>
 
       <!-- =================================================================== -->
-      <!-- INFORMASI TUGAS & PELANGGAN -->
+      <!-- WORK ORDER & CUSTOMER INFORMATION CARDS -->
       <!-- =================================================================== -->
       <div class="info-section">
-        <!-- Deskripsi Pekerjaan -->
+        <!-- Work Description -->
         <div class="info-card" *ngIf="task.description">
           <div class="info-label">
             <ion-icon name="document-text-outline"></ion-icon>
-            <span>Rincian Masalah & Permintaan</span>
+            <span>Issue Details &amp; Request</span>
           </div>
           <p class="info-value">{{ task.description }}</p>
         </div>
 
-        <!-- Pelanggan & Jadwal -->
+        <!-- Customer & Schedule -->
         <div class="info-row">
           <div class="info-card half" *ngIf="task.customer_name">
             <div class="info-label">
               <ion-icon name="person-outline"></ion-icon>
-              <span>Pelanggan</span>
+              <span>Customer</span>
             </div>
             <p class="info-value">{{ task.customer_name }}</p>
             <p class="info-sub" *ngIf="task.customer_phone">{{ task.customer_phone }}</p>
@@ -445,31 +445,31 @@
           <div class="info-card half" *ngIf="task.scheduled_at">
             <div class="info-label">
               <ion-icon name="calendar-outline"></ion-icon>
-              <span>Jadwal</span>
+              <span>Scheduled</span>
             </div>
             <p class="info-value">{{ task.scheduled_at | date:'dd MMM yyyy' }}</p>
             <p class="info-sub">{{ task.scheduled_at | date:'HH:mm' }} WIB</p>
           </div>
         </div>
 
-        <!-- Alamat Lokasi -->
+        <!-- Address Location -->
         <div class="info-card" *ngIf="task.location || task.address">
           <div class="info-label">
             <ion-icon name="location-outline"></ion-icon>
-            <span>Lokasi / Alamat Pemasangan</span>
+            <span>Installation Address</span>
           </div>
           <p class="info-value">{{ task.location || task.address }}</p>
         </div>
 
-        <!-- Bukti Foto Terunggah (Gallery) -->
+        <!-- Attached Proof Gallery -->
         <div class="info-card" *ngIf="(task.proof_of_work && task.proof_of_work.length > 0) || (task.proofs && task.proofs.length > 0)">
           <div class="info-label">
             <ion-icon name="images-outline"></ion-icon>
-            <span>Bukti Foto Terlampir ({{ (task.proof_of_work || task.proofs).length }})</span>
+            <span>Proof Photos Attached ({{ (task.proof_of_work || task.proofs).length }})</span>
           </div>
           <div class="proof-detail-grid">
             <div class="proof-detail-card" *ngFor="let p of (task.proof_of_work || task.proofs); let i = index">
-              <img [src]="p.image_url" alt="Bukti #{{ i + 1 }}" loading="lazy" />
+              <img [src]="p.image_url" alt="Proof #{{ i + 1 }}" loading="lazy" />
               <div class="proof-detail-caption" *ngIf="p.description">
                 <span class="proof-tag">#{{ i + 1 }}</span>
                 <span>{{ p.description }}</span>
@@ -478,11 +478,11 @@
           </div>
         </div>
 
-        <!-- Riwayat Progres Timeline -->
+        <!-- Progress Timeline -->
         <div class="info-card" *ngIf="task.progress_updates && task.progress_updates.length > 0">
           <div class="info-label">
             <ion-icon name="time-outline"></ion-icon>
-            <span>Riwayat Progres ({{ task.progress_updates.length }})</span>
+            <span>Progress History ({{ task.progress_updates.length }})</span>
           </div>
           <div class="timeline-list">
             <div class="timeline-item" *ngFor="let pu of task.progress_updates">
@@ -498,20 +498,20 @@
           </div>
         </div>
 
-        <!-- Tombol BAST PDF Resmi & Info Tanda Tangan (Khusus Status Selesai / Arsip) -->
+        <!-- Official BAST PDF Document Shortcut (When Completed) -->
         <div class="info-card bast-shortcut-card" *ngIf="task.status === 'completed'">
           <div class="bast-banner-content">
             <div class="bast-icon">
               <ion-icon name="document-attach-outline"></ion-icon>
             </div>
             <div class="bast-text">
-              <h4>Dokumen BAST Digital Resmi</h4>
-              <p>Berita Acara Serah Terima lengkap dengan foto before-after, koordinat GPS, dan tanda tangan digital pelanggan.</p>
+              <h4>Official Digital BAST Certificate</h4>
+              <p>Official Work Order Acceptance Certificate complete with before-after photos, GPS coordinates, and verified customer e-signature.</p>
             </div>
           </div>
           <a [href]="'http://127.0.0.1:8000/tasks/' + task.id + '/bast?token=' + task.tracking_token" target="_blank" class="btn-open-bast">
             <ion-icon name="print-outline"></ion-icon>
-            <span>Buka & Cetak Dokumen BAST (PDF)</span>
+            <span>Open &amp; Print BAST Certificate (PDF)</span>
           </a>
         </div>
 
@@ -525,8 +525,8 @@
     <div class="empty-icon-wrap">
       <ion-icon name="alert-circle-outline"></ion-icon>
     </div>
-    <h3>Tugas tidak ditemukan</h3>
-    <button class="btn-go-back" (click)="goBack()">Kembali ke Daftar Tugas</button>
+    <h3>Work Order Not Found</h3>
+    <button class="btn-go-back" (click)="goBack()">Return to Task List</button>
   </div>
 
   <div class="footer-space"></div>

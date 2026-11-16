@@ -42,11 +42,11 @@
           <ion-icon [name]="locationError ? 'warning-outline' : 'radio-outline'"></ion-icon>
         </div>
         <div class="loc-info">
-          <h3 *ngIf="!locationError">GPS Aktif</h3>
-          <h3 *ngIf="locationError">GPS Tidak Tersedia</h3>
-          <p *ngIf="accuracy">Akurasi: ±{{ accuracy }}m</p>
-          <p *ngIf="lastUpdated">Update: {{ lastUpdated | date:'HH:mm:ss' }}</p>
-          <p *ngIf="!lastUpdated && !locationError">Mencari lokasi...</p>
+          <h3 *ngIf="!locationError">GPS Active</h3>
+          <h3 *ngIf="locationError">GPS Unavailable</h3>
+          <p *ngIf="accuracy">Accuracy: ±{{ accuracy }}m</p>
+          <p *ngIf="lastUpdated">Updated: {{ lastUpdated | date:'HH:mm:ss' }}</p>
+          <p *ngIf="!lastUpdated && !locationError">Acquiring satellite fix...</p>
         </div>
         <button class="refresh-btn" (click)="refreshLocation()" [disabled]="isLocating">
           <ion-icon name="refresh-outline" [class.spin]="isLocating"></ion-icon>
@@ -60,7 +60,7 @@
         <div class="pulse-dot"></div>
       </div>
       <div class="task-info">
-        <span class="task-label">Tugas Aktif</span>
+        <span class="task-label">Active Mission</span>
         <h4>{{ activeTask.title }}</h4>
         <p *ngIf="activeTask.location">
           <ion-icon name="location-outline"></ion-icon>
@@ -73,13 +73,13 @@
     <!-- No Active Task -->
     <div class="no-task-card" *ngIf="!activeTask">
       <ion-icon name="checkmark-circle-outline"></ion-icon>
-      <p>Tidak ada tugas aktif saat ini</p>
+      <p>No active missions at the moment</p>
     </div>
 
     <!-- Quick Navigate Button -->
     <button class="btn-navigate" (click)="openInMaps()">
       <ion-icon name="navigate-outline"></ion-icon>
-      Buka di Google Maps
+      Open in Google Maps
     </button>
   </div>
 

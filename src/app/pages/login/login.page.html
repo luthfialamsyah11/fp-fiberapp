@@ -3,7 +3,7 @@
 
     <!-- Top Navigation / Status -->
     <div class="top-bar">
-      <a href="http://127.0.0.1:8085" class="back-link">
+      <a [href]="landingUrl" class="back-link">
         <ion-icon name="arrow-back-outline"></ion-icon>
         <span>Portal</span>
       </a>
@@ -123,7 +123,7 @@
       </button>
 
       <div class="admin-portal-link">
-        <p>Login sebagai Administrator? <a href="http://127.0.0.1:8000/login" target="_blank">Buka Web Admin</a></p>
+        <p>Login sebagai Administrator? <a [href]="adminUrl" target="_blank" rel="noopener noreferrer">Buka Web Admin</a></p>
       </div>
     </div>
 

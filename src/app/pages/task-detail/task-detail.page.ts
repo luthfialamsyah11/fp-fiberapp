@@ -27,6 +27,12 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
   isActioning = false;
   taskId!: number;
 
+  getBastUrl(): string {
+    if (!this.task) return '#';
+    const base = this.api.getBaseUrl();
+    return `${base}/tasks/${this.task.id}/bast?token=${this.task.tracking_token || ''}`;
+  }
+
   // Progressive Execution State
   isStarting = false;
   isCompleting = false;

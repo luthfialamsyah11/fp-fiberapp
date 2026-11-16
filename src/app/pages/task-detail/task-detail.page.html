@@ -509,7 +509,7 @@
               <p>Official Work Order Acceptance Certificate complete with before-after photos, GPS coordinates, and verified customer e-signature.</p>
             </div>
           </div>
-          <a [href]="'http://127.0.0.1:8000/tasks/' + task.id + '/bast?token=' + task.tracking_token" target="_blank" class="btn-open-bast">
+          <a [href]="getBastUrl()" target="_blank" rel="noopener noreferrer" class="btn-open-bast">
             <ion-icon name="print-outline"></ion-icon>
             <span>Open &amp; Print BAST Certificate (PDF)</span>
           </a>

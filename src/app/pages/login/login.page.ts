@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { StorageService } from '../../services/storage.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,9 @@ export class LoginPage {
   private router = inject(Router);
   private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
+
+  adminUrl = environment.adminUrl ? `${environment.adminUrl}/login` : 'https://admin.bentengsiber.com/login';
+  landingUrl = environment.landingUrl || 'https://bentengsiber.com';
 
   email = '';
   password = '';

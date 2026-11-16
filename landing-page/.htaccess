@@ -1,15 +1,44 @@
-# Prevent aggressive caching of HTML and force immediate revalidation
+# ==============================================================================
+# BENTENG SIBER ECOSYSTEM — ENTERPRISE SECURITY & CACHE POLICIES
+# ==============================================================================
+
 <IfModule mod_headers.c>
-    # HTML must always be revalidated immediately
+    # ─── 1. OWASP RECOMMENDED SECURITY HEADERS ────────────────────────────────
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(self), camera=(self), microphone=()"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # ─── 2. CACHE-CONTROL & IMMEDIATE REVALIDATION ────────────────────────────
+    # HTML documents: must never be stale
     <FilesMatch "\.(html|htm)$">
         Header set Cache-Control "no-cache, no-store, must-revalidate"
         Header set Pragma "no-cache"
         Header set Expires "0"
     </FilesMatch>
 
-    # CSS and JS files: must revalidate with server on change
+    # CSS & JS assets: revalidate on update
     <FilesMatch "\.(css|js)$">
         Header set Cache-Control "no-cache, must-revalidate"
         Header set Pragma "no-cache"
     </FilesMatch>
 </IfModule>
+
+# ─── 3. DEFENSIVE ACCESS CONTROLS (BLOCK SENSITIVE DIRECTORIES & FILES) ───────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Deny access to dotfiles & dotdirectories (.env, .git, etc.)
+    RewriteRule (^|/)\.(?!well-known) - [F,L]
+
+    # Block direct HTTP access to laravel-core codebase from the root domain
+    RewriteRule ^laravel-core/ - [F,L]
+
+    # Block log, sql, pem, and config files
+    RewriteRule \.(log|sql|pem|key|crt|ini|bak|env)$ - [F,L]
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes

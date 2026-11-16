@@ -13,6 +13,10 @@ export class ApiService {
 
   private baseUrl = environment.apiUrl;
 
+  getBaseUrl(): string {
+    return this.baseUrl.replace(/\/api$/, '');
+  }
+
   // Auth
   async login(email: string, password: string) {
     const url = `${this.baseUrl}/login`;

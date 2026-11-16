@@ -423,7 +423,7 @@
                 <h3 id="modal-task-title" class="text-sm sm:text-base font-bold text-textPrimary truncate max-w-[280px] sm:max-w-md">Detail Bukti Pekerjaan</h3>
             </div>
             <div class="flex items-center gap-2">
-                <a id="modal-download-btn" href="#" target="_blank" download class="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-primary hover:border-blue-300 transition-all text-sm flex items-center gap-1" title="Unduh foto resolusi penuh">
+                <a id="modal-download-btn" href="#" target="_blank" rel="noopener noreferrer" download class="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-primary hover:border-blue-300 transition-all text-sm flex items-center gap-1" title="Unduh foto resolusi penuh">
                     <ion-icon name="download-outline"></ion-icon>
                 </a>
                 <button type="button" onclick="closeInspectorModal()" class="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 transition-all text-lg">

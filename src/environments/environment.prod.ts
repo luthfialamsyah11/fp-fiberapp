@@ -14,7 +14,33 @@ function resolveApiUrl(): string {
   return `${window.location.origin}/admin/api`;
 }
 
+function resolveAdminUrl(): string {
+  if (typeof window === 'undefined') return 'https://admin.bentengsiber.com';
+  const hostname = window.location.hostname || '';
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+    return 'http://127.0.0.1:8000';
+  }
+  if (hostname.startsWith('app.')) {
+    return `https://${hostname.replace(/^app\./, 'admin.')}`;
+  }
+  return `${window.location.origin}/admin`;
+}
+
+function resolveLandingUrl(): string {
+  if (typeof window === 'undefined') return 'https://bentengsiber.com';
+  const hostname = window.location.hostname || '';
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '') {
+    return 'http://127.0.0.1:8085';
+  }
+  if (hostname.startsWith('app.')) {
+    return `https://${hostname.replace(/^app\./, '')}`;
+  }
+  return window.location.origin;
+}
+
 export const environment = {
   production: true,
-  apiUrl: resolveApiUrl()
+  apiUrl: resolveApiUrl(),
+  adminUrl: resolveAdminUrl(),
+  landingUrl: resolveLandingUrl()
 };

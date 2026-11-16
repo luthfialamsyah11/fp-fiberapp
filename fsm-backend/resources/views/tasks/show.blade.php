@@ -334,7 +334,7 @@
                         $cleanPhone = preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $task->customer_phone));
                         $waMsg = "Halo Bpk/Ibu " . $task->customer_name . ", teknisi kami sedang meluncur ke lokasi Anda untuk tiket: " . $task->title . ". Lacak posisi live teknisi secara langsung di: " . $task->tracking_url;
                     @endphp
-                    <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode($waMsg) }}" target="_blank" class="py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all" title="Share via WhatsApp">
+                    <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode($waMsg) }}" target="_blank" rel="noopener noreferrer" class="py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all" title="Share via WhatsApp">
                         <ion-icon name="logo-whatsapp"></ion-icon> Share
                     </a>
                 @endif

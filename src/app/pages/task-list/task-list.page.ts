@@ -39,24 +39,24 @@ export class TaskListPage {
   async loadInitialData() {
     this.isLoading = true;
     try {
-      // 1. Load User Profile & Online status
-      try {
-        const uRes: any = await this.api.getMe();
-        this.user = uRes?.data ?? uRes;
-        if (this.user) {
-          this.isOnline = this.user.is_online !== undefined ? !!this.user.is_online : true;
-          if (this.isOnline) {
-            this.locationService.startTracking();
-          } else {
-            this.locationService.stopTracking();
-          }
-        }
-      } catch (err) {
-        console.warn('Could not load user profile in task list', err);
-      }
+      const [meRes] = await Promise.all([
+        this.api.getMe().catch((err) => {
+          console.warn('Could not load user profile in task list', err);
+          return null;
+        }),
+        this.loadTasks(),
+      ]);
 
-      // 2. Load Tasks
-      await this.loadTasks();
+      const uRes: any = meRes;
+      this.user = uRes?.data ?? uRes;
+      if (this.user) {
+        this.isOnline = this.user.is_online !== undefined ? !!this.user.is_online : true;
+        if (this.isOnline) {
+          this.locationService.startTracking();
+        } else {
+          this.locationService.stopTracking();
+        }
+      }
     } finally {
       this.isLoading = false;
     }

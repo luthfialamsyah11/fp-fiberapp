@@ -39,7 +39,14 @@ export class ProfilePage {
   async loadProfile() {
     this.isLoading = true;
     try {
-      const res: any = await this.api.getMe();
+      const [res, hRes]: [any, any] = await Promise.all([
+        this.api.getMe(),
+        this.api.getHistory().catch((hErr) => {
+          console.warn('Failed to load history in profile', hErr);
+          return [];
+        }),
+      ]);
+
       this.user = res?.data || res;
       if (this.user) {
         this.name = this.user.name || '';
@@ -48,13 +55,7 @@ export class ProfilePage {
         this.role = this.user.role || '';
       }
 
-      // Load completed history
-      try {
-        const hRes: any = await this.api.getHistory();
-        this.completedTasks = Array.isArray(hRes) ? hRes : (hRes?.data ?? []);
-      } catch (hErr) {
-        console.warn('Failed to load history in profile', hErr);
-      }
+      this.completedTasks = Array.isArray(hRes) ? hRes : (hRes?.data ?? []);
     } catch (e: any) {
       const errMsg = e?.error?.message || 'Gagal memuat profil';
       const status = e?.status !== undefined ? e.status : 'N/A';

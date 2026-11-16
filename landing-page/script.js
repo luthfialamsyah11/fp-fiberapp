@@ -178,6 +178,8 @@ function switchSimTab(tabIndex) {
     function startRadarTimer() {
       if (radarAutoInterval) clearInterval(radarAutoInterval);
       radarAutoInterval = setInterval(() => {
+        const panel2 = document.getElementById('sim-panel-2');
+        if (document.hidden || (panel2 && panel2.classList.contains('hidden'))) return;
         if (radarProgress < 100) {
           updateRadarProgress(radarProgress + 5);
         } else {

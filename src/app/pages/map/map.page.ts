@@ -26,8 +26,7 @@ export class MapPage implements OnDestroy {
   private locationInterval: any = null;
 
   async ionViewWillEnter() {
-    await this.loadActiveTask();
-    await this.getCurrentLocation();
+    await Promise.all([this.loadActiveTask(), this.getCurrentLocation()]);
     this.startLocationPolling();
   }
 

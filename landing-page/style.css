@@ -176,6 +176,8 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all 0.2s ease;
     box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
 }
@@ -201,12 +203,13 @@ body {
 }
 
 .nav-container {
-    max-width: 1200px;
+    max-width: 1360px;
     margin: 0 auto;
     padding: 0 var(--space-6);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
 }
 
 .brand-lockup {
@@ -215,6 +218,8 @@ body {
     gap: var(--space-3);
     text-decoration: none;
     color: var(--text-main);
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .brand-icon-shield {
@@ -265,23 +270,32 @@ body {
 .nav-center-menu {
     display: flex;
     align-items: center;
-    gap: var(--space-5);
+    gap: clamp(12px, 1.3vw, 22px);
     list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .nav-link {
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.84rem;
     font-weight: 500;
     transition: color 0.2s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .nav-link:hover {
     color: var(--primary);
+}
+
+.nav-link.nav-link-cyan {
+    color: var(--primary);
+    font-weight: 600;
 }
 
 .nav-link.nav-link-highlight {
@@ -296,7 +310,8 @@ body {
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 /* System Status Pill */
@@ -304,13 +319,15 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 14px;
+    padding: 6px 12px;
     background: rgba(16, 185, 129, 0.08);
     border: 1px solid var(--border-glow-emerald);
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     font-weight: 600;
     color: var(--emerald);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .status-dot {
@@ -331,7 +348,7 @@ body {
     background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(139, 92, 246, 0.15));
     border: 1px solid var(--border-glow-cyan);
     color: var(--text-main);
-    padding: 8px 18px;
+    padding: 8px 16px;
     border-radius: var(--radius-full);
     text-decoration: none;
     font-size: 0.82rem;
@@ -339,6 +356,8 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1855,7 +1874,16 @@ footer {
     }
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1280px) {
+    .system-status-pill.desktop-only {
+        display: none !important;
+    }
+    .nav-center-menu .nav-link ion-icon {
+        display: none;
+    }
+}
+
+@media (max-width: 1080px) {
     .nav-center-menu {
         display: none !important;
     }

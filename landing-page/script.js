@@ -271,6 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'drawer.simulator': 'Interactive Simulator',
             'drawer.sandbox': 'Interactive Sandbox',
             'drawer.acquire': 'Acquire This Asset',
+            'hero.kicker': 'Enterprise Field Operations & Autonomous Cyber Defense',
+            'hero.title': 'Synergizing Smart Field Operations & <br><span class="gradient-highlight">Unified Cyber Defense</span>',
+            'hero.subtitle': 'Benteng Siber Ecosystem converges intelligent fiber optics field workforce management (FiberOps FSM) with automated threat posture diagnostics (Security Scanner) into an all-in-one, turnkey digital asset ready for enterprise ownership.',
             'hero.cta_sim': 'Test-Drive Live Simulator',
             'hero.cta_portals': 'Explore 4 Gateway Portals',
             'hero.cta_buyout': 'Asset Buyout & Pricing',
@@ -285,6 +288,21 @@ document.addEventListener('DOMContentLoaded', () => {
             'sim.tab3_sub': 'Official Sign-Off Certificate',
             'sim.tab4_title': 'BOM & Inventory Tracker',
             'sim.tab4_sub': 'Atomic Stock Deduction',
+            'portals.tag': 'Unified Gateway Hub',
+            'portals.title': 'Single Sign-On Access to All Modules',
+            'portals.desc': 'Unified authentication and operational gateway for executives, dispatchers, field engineers, and cybersecurity analysts.',
+            'demo.tag': 'Instant Sandbox Preview',
+            'demo.title': 'Test-Drive Live Demo Accounts',
+            'demo.desc': 'Experience both the dispatcher administration portal and field technician workspace using our active sandbox credentials:',
+            'scanner.tag': 'Interactive Diagnostic Tool',
+            'scanner.title': 'Quick Domain Security Posture Audit',
+            'scanner.desc': 'Benchmark your domain against SSL/TLS certificate expirations, missing security headers (HSTS, CSP), and public DNS misconfigurations in seconds.',
+            'arch.tag': 'System Topology',
+            'arch.title': 'Unified Data Pipeline & Architecture',
+            'arch.desc': 'How real-time field workforce dispatching and cyber protection telemetry communicate synchronously.',
+            'compliance.tag': 'Enterprise Hardening',
+            'compliance.title': 'Security Standards & Compliance',
+            'compliance.desc': 'Every line of code is structured to satisfy rigorous data governance and protection criteria.',
             'pricing.tag': 'Commercial Acquisition & Licensing',
             'pricing.title': 'Flexible Ownership & Licensing Models',
             'pricing.desc': 'Whether you want full asset acquisition with complete intellectual property or an enterprise managed subscription, Benteng Siber offers flexible, escrow-protected options.'
@@ -302,6 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'drawer.simulator': 'Simulator Interaktif',
             'drawer.sandbox': 'Demo Interaktif',
             'drawer.acquire': 'Beli Aset Ini',
+            'hero.kicker': 'Operasional Lapangan & Pertahanan Siber Cerdas',
+            'hero.title': 'Sinergi Operasional Lapangan Cerdas & <br><span class="gradient-highlight">Pertahanan Siber Terpadu</span>',
+            'hero.subtitle': 'Ekosistem Benteng Siber memadukan manajemen teknisi serat optik cerdas (FiberOps FSM) dengan pemindaian postur ancaman siber otomatis menjadi satu aset digital siap pakai enterprise.',
             'hero.cta_sim': 'Coba Simulator Langsung',
             'hero.cta_portals': 'Jelajahi 4 Portal Gateway',
             'hero.cta_buyout': 'Akuisisi Aset & Harga',
@@ -316,6 +337,21 @@ document.addEventListener('DOMContentLoaded', () => {
             'sim.tab3_sub': 'Sertifikat Serah Terima Sah',
             'sim.tab4_title': 'Pelacak BOM & Inventaris',
             'sim.tab4_sub': 'Pemotongan Stok Atomik',
+            'portals.tag': 'Pusat Gateway Terpadu',
+            'portals.title': 'Akses Terpusat ke Seluruh Modul Sistem',
+            'portals.desc': 'Gateway autentikasi operasional terpadu bagi pimpinan, dispatcher, teknisi lapangan, dan analis keamanan siber.',
+            'demo.tag': 'Demo Interaktif Langsung',
+            'demo.title': 'Uji Coba Langsung Akun Demo',
+            'demo.desc': 'Rasakan kemampuan ekosistem Benteng Siber secara langsung. Klik di bawah untuk menyalin kredensial dan masuk ke portal:',
+            'scanner.tag': 'Alat Diagnostik Interaktif',
+            'scanner.title': 'Audit Postur Keamanan Domain Kilat',
+            'scanner.desc': 'Pindai domain target secara instan untuk deteksi sertifikat SSL/TLS kedaluwarsa, celah header keamanan (HSTS, CSP), dan konfigurasi DNS dalam hitungan detik.',
+            'arch.tag': 'Cetak Biru Arsitektur',
+            'arch.title': 'Pipeline Data & Topologi Terpadu',
+            'arch.desc': 'Bagaimana sistem dispatch teknisi lapangan dan telemetri perlindungan siber berkomunikasi secara sinkron dan aman.',
+            'compliance.tag': 'Standar Enterprise Internasional',
+            'compliance.title': 'Kepatuhan Keamanan & Operasional',
+            'compliance.desc': 'Setiap baris kode dibangun untuk memenuhi kriteria ketat tata kelola data, waktu aktif tinggi (uptime), dan ketahanan operasional.',
             'pricing.tag': 'Akuisisi Komersial & Lisensi',
             'pricing.title': 'Model Kepemilikan & Lisensi Fleksibel',
             'pricing.desc': 'Baik pembelian aset penuh dengan seluruh hak kekayaan intelektual (IP) maupun langganan terkelola, Benteng Siber menyediakan opsi fleksibel dengan jaminan Escrow.'
@@ -344,7 +380,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (langData[key]) {
-                el.textContent = langData[key];
+                if (langData[key].includes('<')) {
+                    el.innerHTML = langData[key];
+                } else {
+                    el.textContent = langData[key];
+                }
             }
         });
 
@@ -418,15 +458,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function getCanvasCoords(e) {
             const rect = sigCanvas.getBoundingClientRect();
+            const scaleX = sigCanvas.width / (rect.width || sigCanvas.width);
+            const scaleY = sigCanvas.height / (rect.height || sigCanvas.height);
             if (e.touches && e.touches[0]) {
                 return {
-                    x: e.touches[0].clientX - rect.left,
-                    y: e.touches[0].clientY - rect.top
+                    x: (e.touches[0].clientX - rect.left) * scaleX,
+                    y: (e.touches[0].clientY - rect.top) * scaleY
                 };
             }
             return {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
             };
         }
 
@@ -554,17 +596,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // ─── Module 2: Uber-Style Live Fleet Tracking Simulation ──────────────────
     const vehicleMarker = document.getElementById('sim-vehicle-marker');
     const etaBadge = document.getElementById('sim-eta-time');
+    const etaDist = document.getElementById('sim-eta-dist');
 
     if (vehicleMarker && etaBadge) {
-        let etaMinutes = 7;
-        const etaInterval = setInterval(() => {
-            // Check if tracking tab is visible
+        const waypoints = [
+            { top: 155, left: 60, eta: '7 Mins', dist: 'Estimated Arrival • 2.4 km remaining' },
+            { top: 140, left: 120, eta: '6 Mins', dist: 'Estimated Arrival • 1.9 km remaining' },
+            { top: 120, left: 180, eta: '5 Mins', dist: 'Estimated Arrival • 1.4 km remaining' },
+            { top: 105, left: 240, eta: '3 Mins', dist: 'Estimated Arrival • 850 m remaining' },
+            { top: 90, left: 300, eta: '2 Mins', dist: 'Approaching Turn • 400 m remaining' },
+            { top: 75, left: 360, eta: '1 Min', dist: 'Entering Street • 150 m remaining' },
+            { top: 60, left: 410, eta: 'Arrived', dist: 'Van arrived at customer location' }
+        ];
+
+        let wpIndex = 0;
+
+        function applyWaypoint(wp) {
+            vehicleMarker.style.top = `${wp.top}px`;
+            vehicleMarker.style.left = `${wp.left}px`;
+            etaBadge.textContent = wp.eta;
+            if (etaDist) etaDist.textContent = wp.dist;
+        }
+
+        setInterval(() => {
             const trackingPanel = document.getElementById('sim-panel-tracking');
             if (trackingPanel && trackingPanel.classList.contains('active')) {
-                etaMinutes = etaMinutes <= 1 ? 7 : etaMinutes - 1;
-                etaBadge.textContent = `${etaMinutes} Mins`;
+                wpIndex = (wpIndex + 1) % waypoints.length;
+                applyWaypoint(waypoints[wpIndex]);
             }
-        }, 4000);
+        }, 3400);
     }
 
     // ─── Module 4: BOM & Inventory Live Stock Deduction ───────────────────────

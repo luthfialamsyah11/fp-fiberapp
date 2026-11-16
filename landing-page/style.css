@@ -2254,10 +2254,10 @@ footer {
 .destination-poi ion-icon { background: #EF4444; color: #FFFFFF; }
 
 .vehicle-poi {
-    top: 130px;
-    left: 120px;
+    top: 155px;
+    left: 60px;
     color: #2563EB;
-    transition: all 0.5s ease;
+    transition: top 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), left 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .vehicle-poi ion-icon { background: #2563EB; color: #FFFFFF; }
 
@@ -2783,7 +2783,7 @@ footer {
     .pricing-cards-grid {
         grid-template-columns: 1fr;
     }
-}
+
     .top-acquisition-bar {
         flex-direction: column;
         gap: 8px;

@@ -600,3 +600,74 @@ window.refreshHeroTelemetry = function() {
     while (logEl.children.length > 8) logEl.removeChild(logEl.lastElementChild);
   }
 };
+
+// =========================================================================
+// SCROLL REVEAL, INTERACTIVE CARD LIFT & PANEL TRANSITIONS
+// =========================================================================
+(function() {
+  function initMotionPolish() {
+    // 1. Add subtle Hero ambient glow wrapper
+    const heroSection = document.querySelector('main > section:first-of-type');
+    if (heroSection) heroSection.classList.add('hero-ambient-glow');
+
+    // 2. Add tactile hover lift to portal, sandbox, pricing, and architecture cards
+    document.querySelectorAll('#portals .grid > div, #demo .grid > div, #acquisition .grid > div, #architecture .grid > div').forEach((card, idx) => {
+      card.classList.add('card-interactive', 'reveal-on-scroll');
+      card.style.transitionDelay = `${(idx % 4) * 75}ms`;
+    });
+
+    // 3. Tag major sections for smooth scroll reveal
+    document.querySelectorAll('#portals, #simulator, #demo, #acquisition, #scanner-spotlight, #architecture, footer').forEach(sec => {
+      sec.classList.add('reveal-on-scroll');
+    });
+
+    const targets = document.querySelectorAll('.reveal-on-scroll');
+    if ('IntersectionObserver' in window && targets.length) {
+      const revealObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+      targets.forEach(el => revealObserver.observe(el));
+    } else {
+      targets.forEach(el => el.classList.add('is-visible'));
+    }
+
+    // 4. Wrap switchSimTab & goToStep with smooth panel-animate-in entrance
+    const origSwitch = window.switchSimTab;
+    if (typeof origSwitch === 'function') {
+      window.switchSimTab = function(tabIndex) {
+        origSwitch(tabIndex);
+        const panel = document.getElementById(`sim-panel-${tabIndex}`);
+        if (panel) {
+          panel.classList.remove('panel-animate-in');
+          void panel.offsetWidth;
+          panel.classList.add('panel-animate-in');
+        }
+      };
+    }
+
+    const origStep = window.goToStep;
+    if (typeof origStep === 'function') {
+      window.goToStep = function(step) {
+        origStep(step);
+        const stepEl = document.getElementById(`step-content-${step}`);
+        if (stepEl) {
+          stepEl.classList.remove('panel-animate-in');
+          void stepEl.offsetWidth;
+          stepEl.classList.add('panel-animate-in');
+        }
+      };
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMotionPolish);
+  } else {
+    initMotionPolish();
+  }
+})();

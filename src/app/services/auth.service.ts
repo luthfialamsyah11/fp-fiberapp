@@ -19,6 +19,16 @@ export class AuthService {
       const res: any = await this.api.login(email, password);
       
       if (res.user && res.user.role !== 'technician') {
+        // Revoke the issued token so it does not remain orphaned in personal_access_tokens
+        if (res.token) {
+          fetch(`${environment.apiUrl}/logout`, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${res.token}`,
+            },
+          }).catch(() => {});
+        }
         throw { error: { message: 'Aplikasi ini khusus untuk teknisi. Admin harap login melalui Web.' } };
       }
 

@@ -33,10 +33,52 @@ foreach ($coreCandidates as $candidate) {
 // ─── DEFENSIVE FALLBACK & DIAGNOSTIC PORTAL ──────────────────────────────────
 // Prevent blank HTTP 500 when vendor packages or bootstrap are pending setup
 $autoloadPath = $laravelCore ? $laravelCore . '/vendor/autoload.php' : null;
+$envMissing = $laravelCore && !file_exists($laravelCore . '/.env');
 
-if (!$laravelCore || !file_exists($autoloadPath)) {
+if (!$laravelCore || !file_exists($autoloadPath) || $envMissing) {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    $allowedOrigins = [
+        'https://app.bentengsiber.com',
+        'https://admin.bentengsiber.com',
+        'https://bentengsiber.com',
+        'http://localhost:8100',
+        'http://127.0.0.1:8100',
+        'http://localhost:4200',
+    ];
+    if (in_array($origin, $allowedOrigins, true)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Vary: Origin');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, Accept, X-Requested-With, ngrok-skip-browser-warning');
+    }
+
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
+
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+    $acceptHeader = $_SERVER['HTTP_ACCEPT'] ?? '';
+    $isApiRequest = str_starts_with($requestUri, '/api') || str_contains($acceptHeader, 'application/json');
+
     http_response_code(503);
     header('Retry-After: 300');
+
+    if ($isApiRequest) {
+        header('Content-Type: application/json; charset=utf-8');
+        $reason = !$laravelCore
+            ? 'Direktori laravel-core tidak ditemukan.'
+            : (!file_exists($autoloadPath)
+                ? 'Dependensi Laravel (vendor/autoload.php) belum terpasang di cPanel.'
+                : 'Konfigurasi .env & database Laravel belum dibuat di cPanel.');
+        echo json_encode([
+            'message' => 'Backend API sedang dalam provisioning: ' . $reason,
+            'code' => 'BACKEND_NOT_PROVISIONED',
+        ]);
+        exit;
+    }
+
     header('Content-Type: text/html; charset=utf-8');
     ?>
     <!DOCTYPE html>

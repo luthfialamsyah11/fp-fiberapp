@@ -6,8 +6,8 @@ import {
   HttpInterceptor,
   HttpErrorResponse
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, from, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { StorageService } from './storage.service';
 import { environment } from '../../environments/environment';
@@ -34,11 +34,17 @@ export class HttpErrorInterceptor implements HttpInterceptor {
             errorMessage = 'Gagal terhubung ke server. Periksa URL API dan koneksi internet.';
             if (isDebug) console.error('Network Error - Cannot reach server:', error);
           } else if (error.status === 401) {
-            errorMessage = error.error?.message || 'Email atau password salah';
+            errorMessage = error.error?.message || (
+              request.url.includes('/login')
+                ? 'Email atau password salah'
+                : 'Sesi telah berakhir. Silakan login kembali.'
+            );
           } else if (error.status === 403) {
             errorMessage = error.error?.message || 'Akses ditolak';
           } else if (error.status === 404) {
             errorMessage = 'Endpoint tidak ditemukan';
+          } else if (error.status === 503) {
+            errorMessage = error.error?.message || 'Server backend sedang dalam pemeliharaan atau belum dikonfigurasi.';
           } else if (error.status === 500) {
             errorMessage = 'Terjadi kesalahan di server';
           } else {
@@ -46,13 +52,28 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           }
           if (isDebug) console.error(`Server Error [${error.status}]:`, error);
 
-          if (error.status === 401) {
-            if (!request.url.includes('/login') && !request.url.includes('/logout')) {
-              if (isDebug) console.warn('[HttpErrorInterceptor] Session expired (401), clearing storage and redirecting to login...');
-              this.storage.remove('token');
-              this.storage.remove('user');
-              this.router.navigate(['/login'], { replaceUrl: true });
+          const buildError = () => ({
+            status: error.status,
+            statusText: error.statusText,
+            error: {
+              message: errorMessage,
+              details: error.error
             }
+          });
+
+          if (error.status === 401 && !request.url.includes('/login') && !request.url.includes('/logout')) {
+            if (isDebug) console.warn('[HttpErrorInterceptor] Session expired (401), clearing storage and redirecting to login...');
+            return from(
+              Promise.all([
+                this.storage.remove('token'),
+                this.storage.remove('user'),
+              ])
+            ).pipe(
+              switchMap(() => {
+                this.router.navigate(['/login'], { replaceUrl: true });
+                return throwError(buildError);
+              })
+            );
           }
         }
 

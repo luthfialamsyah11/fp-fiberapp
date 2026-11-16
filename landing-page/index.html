@@ -1,1171 +1,1717 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benteng Siber Ecosystem | Enterprise Field Operations (FiberOps FSM) &amp; Cyber Defense</title>
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Benteng Siber — FiberOps FSM &amp; Cyber Defense Architecture</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Geist & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline-variant": "#3c494c",
+            "surface-dim": "#131316",
+            "tertiary": "#c8e88d",
+            "on-secondary-fixed-variant": "#005236",
+            "error-container": "#93000a",
+            "on-primary-container": "#005763",
+            "on-tertiary-container": "#3e560b",
+            "surface-container": "#201f22",
+            "secondary": "#4edea3",
+            "on-tertiary-fixed-variant": "#364e03",
+            "on-primary-fixed": "#001f25",
+            "on-tertiary-fixed": "#131f00",
+            "surface": "#131316",
+            "on-tertiary": "#243600",
+            "primary-fixed-dim": "#2fd9f4",
+            "inverse-primary": "#006877",
+            "on-surface": "#e5e1e5",
+            "surface-tint": "#2fd9f4",
+            "on-secondary-container": "#00311f",
+            "on-error-container": "#ffdad6",
+            "on-error": "#690005",
+            "inverse-surface": "#e5e1e5",
+            "on-secondary": "#003824",
+            "surface-container-high": "#2a2a2d",
+            "tertiary-fixed": "#ceee93",
+            "on-background": "#e5e1e5",
+            "secondary-fixed-dim": "#4edea3",
+            "primary-fixed": "#a2eeff",
+            "on-primary-fixed-variant": "#004e5a",
+            "surface-container-low": "#1c1b1e",
+            "primary-container": "#22d3ee",
+            "error": "#ffb4ab",
+            "tertiary-fixed-dim": "#b3d17a",
+            "surface-container-highest": "#353438",
+            "on-primary": "#00363e",
+            "surface-variant": "#353438",
+            "primary": "#8aebff",
+            "on-surface-variant": "#bbc9cd",
+            "secondary-container": "#00a572",
+            "secondary-fixed": "#6ffbbe",
+            "surface-bright": "#39393c",
+            "background": "#131316",
+            "on-secondary-fixed": "#002113",
+            "outline": "#859397",
+            "surface-container-lowest": "#0e0e11",
+            "inverse-on-surface": "#313033",
+            "tertiary-container": "#adcb74"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "0.75rem",
+            "space-lg": "1.25rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "gutter-desktop": "1.25rem",
+            "margin": "1rem",
+            "margin-desktop": "2rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Geist", "sans-serif"],
+            "body-md": ["Geist", "sans-serif"],
+            "title-sm": ["Geist", "sans-serif"],
+            "headline-md": ["Geist", "sans-serif"],
+            "headline-lg": ["Geist", "sans-serif"],
+            "headline-lg-mobile": ["Geist", "sans-serif"],
+            "display-lg": ["Geist", "sans-serif"],
+            "label-mono-xs": ["JetBrains Mono", "monospace"],
+            "label-mono-sm": ["JetBrains Mono", "monospace"],
+            "label-mono-md": ["JetBrains Mono", "monospace"]
+          },
+          "fontSize": {
+            "label-mono-xs": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "label-mono-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-mono-md": ["13px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "title-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "500" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+            "headline-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Mission-Critical Precision Hairlines & Custom Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0e0e11; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2d; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3c494c; }
+
+    .hairline-border { border: 1px solid rgba(255, 255, 255, 0.08); }
+    .hairline-b { border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    .hairline-t { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+    .hairline-r { border-right: 1px solid rgba(255, 255, 255, 0.08); }
+    .hairline-l { border-left: 1px solid rgba(255, 255, 255, 0.08); }
     
-    <!-- Meta SEO -->
-    <meta name="description" content="Benteng Siber Ecosystem: Turnkey platform integrating smart fiber optics field service management (FiberOps FSM) and automated enterprise cyber threat posture diagnostics. Premium domain and 100% full tech stack available for immediate acquisition.">
-    <meta name="theme-color" content="#070a10">
+    .pulse-bead-active {
+      box-shadow: 0 0 8px rgba(34, 211, 238, 0.65);
+    }
+    .pulse-bead-green {
+      box-shadow: 0 0 8px rgba(78, 222, 163, 0.65);
+    }
+    .pulse-bead-amber {
+      box-shadow: 0 0 8px rgba(200, 232, 141, 0.65);
+    }
 
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://bentengsiber.com/">
-    <meta property="og:title" content="Benteng Siber Ecosystem — Turnkey Field Ops &amp; Cyber Defense Suite">
-    <meta property="og:description" content="Unified operational command center for fiber network engineers and enterprise cybersecurity posture scanning. Domain &amp; full tech stack ready for acquisition.">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Ionicons Script (Edge CDN via jsDelivr with unpkg fallback) -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.2/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.2/dist/ionicons/ionicons.js"></script>
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=5.0">
+    /* Radar scan animation */
+    @keyframes radar-sweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .radar-beam {
+      animation: radar-sweep 4s linear infinite;
+      transform-origin: center center;
+    }
+  </style>
 </head>
-<body>
-    
-    <!-- Background Ambient Overlays -->
-    <div class="mouse-glow" id="mouse-glow"></div>
-    <div class="grid-overlay"></div>
-    <div class="blob blob-cyan"></div>
-    <div class="blob blob-purple"></div>
+<body class="bg-surface-container-lowest text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col font-body-sm" data-new-gr-c-s-check-loaded="14.1347.0" data-gr-ext-installed="">
+<!-- =====================================================================
+       1. Top Asset Announcement Strip (#sale-announcement)
+  ====================================================================== -->
+<div class="w-full bg-surface-container-low hairline-b py-1.5 px-space-md flex items-center justify-between z-50 text-on-surface-variant font-label-mono-xs text-label-mono-xs" id="sale-announcement">
+<div class="flex items-center gap-space-sm mx-auto md:mx-0">
+<span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green inline-block"></span>
+<span class="text-on-surface tracking-wider uppercase font-semibold text-primary">COMMERCIAL NOTICE:</span>
+<span class="hidden sm:inline text-on-surface-variant">Complete Intellectual Property, BAST Engine &amp; Domain [bentengsiber.com] Available for Immediate Acquisition.</span>
+<span class="sm:hidden text-on-surface-variant">IP &amp; Domain Buyout Available.</span>
+</div>
+<div class="hidden md:flex items-center gap-space-md">
+<span class="text-outline">Escrow Verified • BAST v4.2 Certified</span>
+<a class="text-primary hover:text-white flex items-center gap-1 transition-colors duration-150" href="#acquisition">
+        Inquire Price &amp; Terms →
+      </a>
+</div>
+</div>
+<!-- =====================================================================
+       2. Top Navigation Bar (Shared Component: TopNavBar Anchor)
+  ====================================================================== -->
+<header class="top-nav docked full-width top-0 sticky z-50 bg-surface-container-lowest hairline-b shadow-none transition-all">
+<div class="flex justify-between items-center w-full px-space-lg md:px-margin-desktop h-14 max-w-full">
+<!-- Brand Lockup -->
+<a class="flex items-center gap-2 group" href="index.html">
+<div class="w-7 h-7 bg-surface-container-high border border-outline-variant/40 rounded flex items-center justify-center text-primary group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">shield_with_house</span>
+</div>
+<div class="flex flex-col">
+<span class="text-headline-md font-headline-md font-semibold text-primary tracking-tight leading-none">Benteng Siber</span>
+<span class="font-label-mono-xs text-[9px] text-outline tracking-widest uppercase mt-0.5">FiberOps FSM • v4.2</span>
+</div>
+</a>
+<!-- Desktop Navigation Links (6 Exact Items) -->
+<nav class="hidden lg:flex items-center space-x-6">
+<a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" href="#portals">Portals</a>
+<a class="text-primary font-medium border-b border-primary pb-0.5" href="#simulator">Live Simulator</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" href="#demo">Live Sandbox</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" href="#acquisition">Acquire Asset</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" href="#scanner-spotlight">Scanner</a>
+<a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" href="#architecture">Architecture</a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-space-sm">
+<!-- Bilingual Switcher (EN / ID) -->
+<button class="flex items-center gap-1 px-2 py-1 bg-surface-container border border-outline-variant/40 rounded text-on-surface-variant hover:text-primary font-label-mono-xs text-label-mono-xs transition-colors" id="lang-toggle-btn">
+<span class="material-symbols-outlined text-[14px]">translate</span>
+<span id="lang-label">EN / ID</span>
+</button>
+<!-- Trailing Icon Actions -->
+<a class="p-1.5 text-on-surface-variant hover:text-primary transition-colors hidden sm:flex" href="#telemetry-terminal" title="Terminal Console">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</a>
+<a class="p-1.5 text-on-surface-variant hover:text-secondary transition-colors hidden sm:flex" href="#scanner-spotlight" title="Security State">
+<span class="material-symbols-outlined text-[18px]">shield_with_house</span>
+</a>
+<!-- Sandbox Secondary Action Button -->
+<a class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high border border-outline-variant/50 hover:border-primary/50 text-primary rounded font-label-mono-sm text-label-mono-sm transition-all duration-150" href="#demo">
+<span>Deploy Sandbox</span>
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+</a>
+<!-- Primary CTA: Acquire Asset -->
+<a class="inline-flex items-center gap-1 px-3.5 py-1.5 bg-white text-surface-container-lowest hover:bg-slate-200 font-body-sm font-medium rounded transition-all duration-150 active:scale-[0.99] shadow-sm" href="#acquisition">
+<span>Acquire Asset</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+<!-- Mobile Menu Toggle -->
+<button class="lg:hidden p-1.5 bg-surface-container border border-outline-variant/40 rounded text-on-surface-variant hover:text-primary transition-colors" id="mobile-menu-btn" type="button" aria-label="Toggle Menu" aria-expanded="false">
+<span class="material-symbols-outlined text-[20px]">menu</span>
+</button>
+</div>
+</div>
 
-    <!-- Top Announcement Bar (Asset For Sale) -->
-    <div class="top-acquisition-bar" id="sale-announcement">
-        <span>🚀 <strong>DIGITAL ASSET FOR SALE:</strong> Premium Domain <strong>bentengsiber.com</strong> + Full Tech Stack (Laravel 10 API, Angular 17 PWA, Next.js 14 Scanner, Native Android) Ready for Transfer.</span>
-        <a href="#acquisition" class="acquisition-bar-btn">
-            <span>Inquire Price &amp; Terms</span>
-            <ion-icon name="arrow-forward-outline"></ion-icon>
-        </a>
-    </div>
-
-    <!-- Top Sticky Navigation -->
-    <nav class="top-nav">
-        <div class="nav-container">
-            <a href="index.html" class="brand-lockup">
-                <div class="brand-icon-shield">
-                    <ion-icon name="shield-checkmark"></ion-icon>
-                </div>
-                <div class="brand-text">
-                    <div class="brand-title">
-                        Benteng Siber <span class="badge-sub">ECOSYSTEM</span>
-                    </div>
-                    <div class="brand-subtitle">Defense &amp; Field Operations</div>
-                </div>
-            </a>
-
-            <!-- Desktop Navigation Menu -->
-            <ul class="nav-center-menu">
-                <li><a href="#portals" class="nav-link"><ion-icon name="grid-outline"></ion-icon> <span data-i18n="nav.portals">Portals</span></a></li>
-                <li><a href="#simulator" class="nav-link nav-link-cyan"><ion-icon name="hardware-chip-outline"></ion-icon> <span data-i18n="nav.simulator">Live Simulator</span></a></li>
-                <li><a href="#demo" class="nav-link"><ion-icon name="flask-outline"></ion-icon> <span data-i18n="nav.sandbox">Live Sandbox</span></a></li>
-                <li><a href="#acquisition" class="nav-link nav-link-highlight"><ion-icon name="bag-handle-outline"></ion-icon> <span data-i18n="nav.pricing">Acquire Asset</span></a></li>
-                <li><a href="#scanner-spotlight" class="nav-link"><ion-icon name="scan-outline"></ion-icon> <span data-i18n="nav.scanner">Scanner</span></a></li>
-                <li><a href="#architecture" class="nav-link"><ion-icon name="git-network-outline"></ion-icon> <span data-i18n="nav.architecture">Architecture</span></a></li>
-            </ul>
-
-            <div class="nav-actions">
-                <!-- Global Language Switcher -->
-                <div class="lang-switcher-pill" id="lang-switcher-desktop" title="Switch Language">
-                    <button type="button" class="lang-btn active" data-lang="en">EN</button>
-                    <span class="lang-divider">/</span>
-                    <button type="button" class="lang-btn" data-lang="id">ID</button>
-                </div>
-
-                <div class="system-status-pill desktop-only">
-                    <span class="status-dot"></span>
-                    <span data-i18n="nav.operational">All Systems Operational</span>
-                </div>
-                <a href="#demo" class="btn-nav-portal desktop-only">
-                    <span data-i18n="nav.sandbox">Live Sandbox</span>
-                    <ion-icon name="arrow-forward-outline"></ion-icon>
-                </a>
-                <!-- Mobile Menu Hamburger Button -->
-                <button type="button" class="btn-mobile-toggle" id="btn-mobile-toggle" aria-label="Toggle navigation drawer" aria-expanded="false">
-                    <ion-icon name="menu-outline" id="menu-icon-state"></ion-icon>
-                </button>
+<!-- Mobile Collapsible Navigation -->
+<div class="hidden lg:hidden bg-surface-container-lowest border-t border-outline-variant/30 px-space-lg py-4 space-y-2" id="mobile-nav-menu">
+  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" href="#portals">Portals</a>
+  <a class="block py-2 text-body-sm text-primary font-medium" href="#simulator">Live Simulator</a>
+  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" href="#demo">Live Sandbox</a>
+  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" href="#acquisition">Acquire Asset</a>
+  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" href="#scanner-spotlight">Scanner</a>
+  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" href="#architecture">Architecture</a>
+  <div class="pt-2 border-t border-outline-variant/20 flex gap-2">
+    <a class="flex-1 text-center py-2 bg-surface-container-high border border-outline-variant/50 text-primary rounded font-label-mono-xs" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Tech PWA (Demo)</a>
+    <a class="flex-1 text-center py-2 bg-primary-container text-surface-container-lowest rounded font-label-mono-xs font-semibold" href="https://admin.bentengsiber.com/" target="_blank" rel="noopener noreferrer">Admin Panel</a>
+  </div>
+</div>
+</header>
+<!-- =====================================================================
+       3. SECTION 1: HERO & INTEGRATED COMMAND DASHBOARD
+  ====================================================================== -->
+<section class="relative w-full pt-10 pb-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto flex flex-col items-center">
+<!-- Hero Badging -->
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-surface-container border border-outline-variant/30 mb-6">
+<span class="w-2 h-2 rounded-full bg-primary-container pulse-bead-active"></span>
+<span class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest">TACTICAL TELEMETRY • FTTx AUTOMATION</span>
+<span class="text-outline-variant">|</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">KERNEL 4.2.1-SEC</span>
+</div>
+<!-- Main Headline -->
+<h1 class="text-display-lg font-display-lg text-center text-on-surface max-w-4xl tracking-tight leading-none mb-4">
+      The command platform for <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-container to-secondary">fiber field ops</span> &amp; cyber defense.
+    </h1>
+<!-- Subheadline -->
+<p class="text-body-md font-body-md text-on-surface-variant text-center max-w-2xl mb-8 leading-relaxed">
+      Surgical automation for ISP fiber deployments, dynamic technician dispatching, real-time optical power validation, and zero-trust perimeter auditing. Built for carrier-grade resilience.
+    </p>
+<!-- CTAs -->
+<div class="flex flex-wrap items-center justify-center gap-space-md mb-12">
+<a class="px-5 py-2.5 bg-primary-container text-on-primary-fixed font-body-md font-medium rounded flex items-center gap-2 hover:bg-primary transition-all duration-150 shadow-[0_0_20px_-3px_rgba(34,211,238,0.4)]" href="#simulator">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+<span>Launch Interactive Simulator</span>
+</a>
+<a class="px-5 py-2.5 bg-surface-container-high border border-outline-variant text-on-surface font-body-md font-medium rounded flex items-center gap-2 hover:border-primary/60 transition-all duration-150" href="#acquisition">
+<span class="material-symbols-outlined text-[18px]">shopping_cart_checkout</span>
+<span>Acquire Full IP ($18.5k)</span>
+</a>
+<a class="px-4 py-2.5 text-on-surface-variant hover:text-white font-label-mono-sm text-label-mono-sm flex items-center gap-1.5" href="#scanner-spotlight">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>Run Security Audit</span>
+</a>
+</div>
+<!-- Bento Dashboard Component (Floor 1 Paneling) -->
+<div class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-md md:p-space-lg shadow-2xl relative overflow-hidden">
+<!-- Top Instrument Header -->
+<div class="flex flex-wrap items-center justify-between pb-space-md hairline-b gap-3 mb-space-md">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary pulse-bead-green"></span>
+<span class="font-label-mono-sm text-label-mono-sm text-on-surface font-semibold tracking-wider">CLUSTER-JAKARTA-01</span>
+</div>
+<span class="px-2 py-0.5 bg-surface-container border border-outline-variant/30 text-outline font-label-mono-xs text-label-mono-xs rounded">99.98% SLA ACTIVE</span>
+<span class="hidden sm:inline text-outline font-label-mono-xs text-label-mono-xs">UPTIME: 142d 08h 12m</span>
+</div>
+<div class="flex items-center gap-2">
+<!-- Switcher -->
+<div class="inline-flex p-0.5 bg-surface-container border border-outline-variant/40 rounded text-label-mono-xs font-label-mono-xs">
+<button class="px-2 py-0.5 bg-surface-container-high text-primary rounded font-medium">1H REALTIME</button>
+<button class="px-2 py-0.5 text-on-surface-variant hover:text-white">24H</button>
+<button class="px-2 py-0.5 text-on-surface-variant hover:text-white">7D</button>
+</div>
+<button class="p-1 text-on-surface-variant hover:text-primary" title="Refresh Feed">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Bento Grid: 3 Columns -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
+<!-- Left: Telemetry Sparklines (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- Card 1 -->
+<div class="bg-surface-container-low border border-outline-variant/20 p-space-md rounded">
+<div class="flex justify-between items-start mb-2">
+<div>
+<div class="text-label-mono-xs font-label-mono-xs text-outline uppercase">ODN Optical Loss Average</div>
+<div class="text-headline-md font-headline-md text-on-surface font-semibold mt-0.5">-17.84 <span class="text-label-mono-xs text-outline font-normal">dBm</span></div>
+</div>
+<span class="px-1.5 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded">OPTIMAL</span>
+</div>
+<!-- SVG Sparkline -->
+<svg class="w-full h-10 stroke-primary fill-none" viewBox="0 0 200 40">
+<path d="M0,25 Q20,10 40,22 T80,18 T120,28 T160,15 T200,20" stroke-linecap="round" stroke-width="1.75"></path>
+<path d="M0,25 Q20,10 40,22 T80,18 T120,28 T160,15 T200,20 L200,40 L0,40 Z" fill="url(#sparkline-grad-1)" opacity="0.15"></path>
+<defs>
+<linearGradient id="sparkline-grad-1" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#8aebff"></stop>
+<stop offset="100%" stop-color="transparent"></stop>
+</linearGradient>
+</defs>
+</svg>
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline mt-1">
+<span>Threshold: -24.0 dBm</span>
+<span class="text-secondary font-semibold">Δ 0.02 dBm / hr</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-low border border-outline-variant/20 p-space-md rounded">
+<div class="flex justify-between items-start mb-2">
+<div>
+<div class="text-label-mono-xs font-label-mono-xs text-outline uppercase">Active Technician Fleet Dispatches</div>
+<div class="text-headline-md font-headline-md text-on-surface font-semibold mt-0.5">38 <span class="text-label-mono-xs text-outline font-normal">Nodes Assigned</span></div>
+</div>
+<span class="px-1.5 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs text-label-mono-xs rounded">LIVE DISPATCH</span>
+</div>
+<!-- SVG Sparkline -->
+<svg class="w-full h-10 stroke-secondary fill-none" viewBox="0 0 200 40">
+<path d="M0,32 Q30,35 60,18 T120,22 T170,8 T200,14" stroke-linecap="round" stroke-width="1.75"></path>
+<path d="M0,32 Q30,35 60,18 T120,22 T170,8 T200,14 L200,40 L0,40 Z" fill="url(#sparkline-grad-2)" opacity="0.15"></path>
+<defs>
+<linearGradient id="sparkline-grad-2" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4edea3"></stop>
+<stop offset="100%" stop-color="transparent"></stop>
+</linearGradient>
+</defs>
+</svg>
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline mt-1">
+<span>Mean Repair Time: 34m</span>
+<span class="text-primary font-semibold">94.2% On-Route</span>
+</div>
+</div>
+</div>
+<!-- Center: Primary Cyan Spline Chart & Telemetry (5 cols) -->
+<div class="lg:col-span-5 bg-surface-container-low border border-outline-variant/20 p-space-md rounded flex flex-col justify-between">
+<div class="flex justify-between items-center mb-2">
+<div>
+<span class="text-label-mono-xs font-label-mono-xs text-outline uppercase">FTTx Signal Quality &amp; Zero-Trust Handshakes</span>
+<div class="text-title-sm font-title-sm text-on-surface font-medium">Core Ring Traffic vs Mitigation Events</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-label-mono-xs font-label-mono-xs text-on-surface-variant">420 Gbps Aggregate</span>
+</div>
+</div>
+<!-- Main Visual SVG Curve Graph -->
+<div class="relative w-full h-44 my-2">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 160">
+<!-- Grid lines -->
+<line stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,4" x1="0" x2="400" y1="40" y2="40"></line>
+<line stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,4" x1="0" x2="400" y1="80" y2="80"></line>
+<line stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,4" x1="0" x2="400" y1="120" y2="120"></line>
+<!-- Baseline Filled Gradient -->
+<path d="M0,130 C70,110 120,140 180,70 C240,10 310,95 400,45 L400,160 L0,160 Z" fill="url(#telemetry-fill)" opacity="0.2"></path>
+<!-- Cyan Spline Path -->
+<path d="M0,130 C70,110 120,140 180,70 C240,10 310,95 400,45" fill="none" stroke="#22d3ee" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Secondary Lime Warning Spline -->
+<path d="M0,145 C60,150 140,120 220,135 C300,150 350,115 400,120" fill="none" stroke="#c8e88d" stroke-dasharray="2,2" stroke-width="1.5"></path>
+<!-- Target Active Point Node -->
+<circle class="pulse-bead-active" cx="180" cy="70" fill="#22d3ee" r="4" stroke="#0e0e11" stroke-width="2"></circle>
+<circle cx="310" cy="95" fill="#4edea3" r="3"></circle>
+<defs>
+<linearGradient id="telemetry-fill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#22d3ee"></stop>
+<stop offset="100%" stop-color="#22d3ee" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+</svg>
+<div class="absolute top-6 left-[42%] bg-surface-container-high/90 border border-primary/40 px-2 py-0.5 rounded font-label-mono-xs text-label-mono-xs text-primary shadow-lg backdrop-blur">
+              PEAK: 394.8 Gbps (100% OK)
             </div>
-        </div>
-    </nav>
-
-    <!-- Mobile Sidebar Drawer Backdrop -->
-    <div class="drawer-backdrop" id="drawer-backdrop"></div>
-
-    <!-- Mobile Responsive Sidebar Drawer -->
-    <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile Navigation Sidebar">
-        <div class="drawer-header">
-            <a href="index.html" class="brand-lockup">
-                <div class="brand-icon-shield">
-                    <ion-icon name="shield-checkmark"></ion-icon>
-                </div>
-                <div class="brand-text">
-                    <div class="brand-title">
-                        Benteng Siber <span class="badge-sub">ECOSYSTEM</span>
-                    </div>
-                    <div class="brand-subtitle">Defense &amp; Field Operations</div>
-                </div>
-            </a>
-            <button type="button" class="btn-drawer-close" id="drawer-close" aria-label="Close navigation drawer">
-                <ion-icon name="close-outline"></ion-icon>
-            </button>
-        </div>
-
-        <div class="drawer-status-wrap">
-            <div class="system-status-pill">
-                <span class="status-dot"></span>
-                <span data-i18n="nav.operational">All Systems Operational</span>
+</div>
+<!-- Bottom Telemetry Status Row -->
+<div class="grid grid-cols-3 gap-2 pt-2 hairline-t text-label-mono-xs font-label-mono-xs">
+<div>
+<span class="text-outline block">SYN/ACK Handshake</span>
+<span class="text-on-surface font-semibold">1.4ms Latency</span>
+</div>
+<div>
+<span class="text-outline block">WAF Inspection</span>
+<span class="text-secondary font-semibold">0.00% Bypass</span>
+</div>
+<div>
+<span class="text-outline block">ODN Auto-Attenuate</span>
+<span class="text-primary font-semibold">Active Sync</span>
+</div>
+</div>
+</div>
+<!-- Right: Live Monospace Decision Log Stream (3 cols) -->
+<div class="lg:col-span-3 bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded flex flex-col font-label-mono-xs text-label-mono-xs" id="telemetry-terminal">
+<div class="flex items-center justify-between pb-2 hairline-b mb-2">
+<span class="text-outline uppercase font-semibold">DECISION STREAM • LIVE</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+</div>
+<div class="space-y-2 overflow-y-auto max-h-[190px] pr-1 font-label-mono-xs" id="hero-log-stream">
+<div class="text-on-surface-variant">
+<span class="text-outline">[14:32:01]</span> <span class="text-secondary">AUTH_OK</span> tech.id=9412 verified GPS geo-fence (-6.2088, 106.8456).
             </div>
-            <!-- Mobile Language Switcher Pill -->
-            <div class="lang-switcher-pill" id="lang-switcher-mobile">
-                <button type="button" class="lang-btn active" data-lang="en">EN</button>
-                <span class="lang-divider">/</span>
-                <button type="button" class="lang-btn" data-lang="id">ID</button>
+<div class="text-on-surface-variant">
+<span class="text-outline">[14:32:19]</span> <span class="text-primary">BAST_PDF</span> generated sha256:7f4a... e-sign captured.
             </div>
-        </div>
-
-        <nav class="drawer-nav">
-            <span class="drawer-nav-label" data-i18n="drawer.portals_label">PORTALS &amp; SECTIONS</span>
-            <ul class="drawer-menu">
-                <li>
-                    <a href="#portals" class="drawer-link">
-                        <ion-icon name="grid-outline"></ion-icon>
-                        <span data-i18n="drawer.portals">Ecosystem Portals</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#simulator" class="drawer-link drawer-link-cyan">
-                        <ion-icon name="hardware-chip-outline"></ion-icon>
-                        <span data-i18n="drawer.simulator">Interactive Simulator</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#demo" class="drawer-link">
-                        <ion-icon name="flask-outline"></ion-icon>
-                        <span data-i18n="drawer.sandbox">Interactive Sandbox</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#acquisition" class="drawer-link drawer-link-highlight">
-                        <ion-icon name="bag-handle-outline"></ion-icon>
-                        <span data-i18n="drawer.acquire">Acquire This Asset</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#scanner-spotlight" class="drawer-link">
-                        <ion-icon name="scan-outline"></ion-icon>
-                        <span>Security Scanner</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#telemetry" class="drawer-link">
-                        <ion-icon name="speedometer-outline"></ion-icon>
-                        <span>Live Telemetry</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#architecture" class="drawer-link">
-                        <ion-icon name="git-network-outline"></ion-icon>
-                        <span>Architecture Topology</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#compliance" class="drawer-link">
-                        <ion-icon name="shield-checkmark-outline"></ion-icon>
-                        <span>Compliance &amp; Specs</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <div class="drawer-footer">
-            <a href="#demo" class="btn-primary-glow drawer-action-btn">
-                <ion-icon name="key-outline"></ion-icon>
-                <span>Access Live Sandbox</span>
-            </a>
-            <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20am%20interested%20in%20acquiring%20the%20bentengsiber.com%20digital%20asset%20and%20tech%20stack." target="_blank" rel="noopener" class="btn-whatsapp-buy drawer-action-btn">
-                <ion-icon name="logo-whatsapp"></ion-icon>
-                <span>WhatsApp Acquisition Inquiry</span>
-            </a>
-            <div class="drawer-meta-foot">
-                <span>Domain: <strong>bentengsiber.com</strong></span>
-                <span>Laravel 10 &bull; Angular 17 &bull; Next.js 14</span>
+<div class="text-on-surface-variant">
+<span class="text-outline">[14:32:44]</span> <span class="text-tertiary">INV_DEDUCT</span> Patchcord SC-UPC 3m (-1) SKU-8829.
             </div>
-        </div>
-    </aside>
-
-    <!-- Main Container -->
-    <main class="container">
-        
-        <!-- Hero Section -->
-        <header class="hero">
-            <div class="kicker-tag">
-                <ion-icon name="shield-half-outline"></ion-icon>
-                <span data-i18n="hero.kicker">Enterprise Field Operations &amp; Autonomous Cyber Defense</span>
+<div class="text-on-surface-variant">
+<span class="text-outline">[14:33:02]</span> <span class="text-secondary">TLS_SCAN</span> RFC 9116 security.txt verified on edge node.
             </div>
-            
-            <h1 class="title" data-i18n="hero.title">
-                Synergizing Smart Field Operations &amp; <br>
-                <span class="gradient-highlight">Unified Cyber Defense</span>
-            </h1>
-            
-            <p class="subtitle" data-i18n="hero.subtitle">
-                Benteng Siber Ecosystem converges intelligent fiber optics field workforce management (FiberOps FSM) with automated threat posture diagnostics (Security Scanner) into an all-in-one, turnkey digital asset ready for enterprise ownership.
-            </p>
-            
-            <div class="hero-cta-group">
-                <a href="#simulator" class="btn-primary-glow">
-                    <ion-icon name="hardware-chip-outline"></ion-icon>
-                    <span data-i18n="hero.cta_sim">Test-Drive Live Simulator</span>
-                </a>
-                <a href="#portals" class="btn-secondary-outline">
-                    <ion-icon name="apps-outline"></ion-icon>
-                    <span data-i18n="hero.cta_portals">Explore 4 Gateway Portals</span>
-                </a>
-                <a href="#acquisition" class="btn-amber-glow">
-                    <ion-icon name="briefcase-outline"></ion-icon>
-                    <span data-i18n="hero.cta_buyout">Asset Buyout &amp; Pricing</span>
-                </a>
+<div class="text-on-surface-variant">
+<span class="text-outline">[14:33:15]</span> <span class="text-primary">OTDR_SYNC</span> Loop test pass 0.18 dB/km.
             </div>
-        </header>
-
-        <!-- ================================================================= -->
-        <!-- SECTION: INTERACTIVE LIVE PRODUCT SIMULATOR HUB -->
-        <!-- ================================================================= -->
-        <section class="simulator-section" id="simulator">
-            <div class="section-header">
-                <span class="section-tag tag-cyan" data-i18n="sim.tag">Interactive Product Experience</span>
-                <h2 class="section-title" data-i18n="sim.title">Hands-On Enterprise Feature Simulator</h2>
-                <p class="section-desc" data-i18n="sim.desc">
-                    Test-drive the core workflows that make FiberOps the highest-converting field service management platform for fiber ISPs and WISPs. Click the tabs below to interact directly with each module:
-                </p>
-            </div>
-
-            <!-- Tab Selection Bar -->
-            <div class="sim-tabs-bar">
-                <button type="button" class="sim-tab-btn active" data-tab="mobile">
-                    <div class="sim-tab-icon cyan">
-                        <ion-icon name="phone-portrait-outline"></ion-icon>
-                    </div>
-                    <div class="sim-tab-text">
-                        <strong data-i18n="sim.tab1_title">Technician Mobile App</strong>
-                        <span data-i18n="sim.tab1_sub">Progressive Stepper &amp; E-Sign</span>
-                    </div>
-                </button>
-
-                <button type="button" class="sim-tab-btn" data-tab="tracking">
-                    <div class="sim-tab-icon emerald">
-                        <ion-icon name="radio-outline"></ion-icon>
-                    </div>
-                    <div class="sim-tab-text">
-                        <strong data-i18n="sim.tab2_title">Customer Uber Tracking</strong>
-                        <span data-i18n="sim.tab2_sub">Live GPS Fleet Radar &amp; ETA</span>
-                    </div>
-                </button>
-
-                <button type="button" class="sim-tab-btn" data-tab="bast">
-                    <div class="sim-tab-icon purple">
-                        <ion-icon name="document-attach-outline"></ion-icon>
-                    </div>
-                    <div class="sim-tab-text">
-                        <strong data-i18n="sim.tab3_title">Automated BAST PDF</strong>
-                        <span data-i18n="sim.tab3_sub">Official Sign-Off Certificate</span>
-                    </div>
-                </button>
-
-                <button type="button" class="sim-tab-btn" data-tab="bom">
-                    <div class="sim-tab-icon amber">
-                        <ion-icon name="cube-outline"></ion-icon>
-                    </div>
-                    <div class="sim-tab-text">
-                        <strong data-i18n="sim.tab4_title">BOM &amp; Inventory Tracker</strong>
-                        <span data-i18n="sim.tab4_sub">Atomic Stock Deduction</span>
-                    </div>
-                </button>
-            </div>
-
-            <!-- Simulator Interactive Stage Area -->
-            <div class="sim-stage-container">
-
-                <!-- ─── MODULE 1: TECHNICIAN MOBILE WORKFLOW SIMULATOR ─────────── -->
-                <div class="sim-panel active" id="sim-panel-mobile">
-                    <div class="sim-mobile-layout">
-                        <!-- Phone Mockup Frame -->
-                        <div class="phone-frame">
-                            <div class="phone-notch"><span class="camera-sensor"></span><span class="speaker-grill"></span></div>
-                            <div class="phone-screen" id="sim-phone-screen">
-                                <!-- Phone Header -->
-                                <div class="p-app-header">
-                                    <div class="p-status-pill" id="sim-step-badge">STAGE 1: ASSIGNED</div>
-                                    <h4 class="p-ticket-title">#TSK-1042: Fiber Cut &amp; ONT Swap</h4>
-                                    <span class="p-customer-meta">Robert Vance &bull; 742 Evergreen Terr.</span>
-                                </div>
-
-                                <!-- Dynamic Body per Step -->
-                                <div class="p-app-body" id="sim-mobile-body">
-                                    <!-- Step 1 View: Assigned -->
-                                    <div class="p-step-content" id="p-view-assigned">
-                                        <div class="p-alert-box blue">
-                                            <ion-icon name="notifications-outline"></ion-icon>
-                                            <div>
-                                                <strong>New Ticket Assigned</strong>
-                                                <p>Dispatch SLA: 45 Mins &bull; High Priority Customer</p>
-                                            </div>
-                                        </div>
-                                        <div class="p-btn-row">
-                                            <button type="button" class="p-btn p-btn-danger" id="sim-btn-decline">Decline</button>
-                                            <button type="button" class="p-btn p-btn-success" id="sim-btn-accept">Accept Ticket</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Step 2 View: En Route -->
-                                    <div class="p-step-content hidden" id="p-view-enroute">
-                                        <div class="p-alert-box green">
-                                            <ion-icon name="car-outline"></ion-icon>
-                                            <div>
-                                                <strong>En Route to Location</strong>
-                                                <p>Live GPS Tracking link dispatched to customer.</p>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="p-btn p-btn-primary" id="sim-btn-arrive">Arrived on Site &bull; Start Work</button>
-                                    </div>
-
-                                    <!-- Step 3 View: In Progress (Photos & Signature) -->
-                                    <div class="p-step-content hidden" id="p-view-inprogress">
-                                        <div class="p-section-heading">Guided Photo Proof</div>
-                                        <div class="p-photo-grid">
-                                            <div class="p-photo-box done" id="sim-photo-before">
-                                                <ion-icon name="camera-outline"></ion-icon>
-                                                <span>Slot 1: Before (LOS Red)</span>
-                                                <span class="p-check-tag">&check; Attached</span>
-                                            </div>
-                                            <div class="p-photo-box done" id="sim-photo-after">
-                                                <ion-icon name="camera-outline"></ion-icon>
-                                                <span>Slot 2: After (PON Green)</span>
-                                                <span class="p-check-tag">&check; Attached</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="p-section-heading" style="margin-top: 10px;">Customer E-Signature Pad</div>
-                                        <div class="p-canvas-wrap">
-                                            <canvas id="sim-sig-canvas" width="280" height="90"></canvas>
-                                            <div class="p-canvas-watermark" id="sim-canvas-watermark">
-                                                <span>Sign with mouse/finger here</span>
-                                            </div>
-                                        </div>
-                                        <div class="p-canvas-ctrls">
-                                            <button type="button" class="p-btn-mini" id="sim-btn-clear-sig">Clear</button>
-                                            <button type="button" class="p-btn-mini primary" id="sim-btn-sample-sig">Autofill Signature</button>
-                                        </div>
-
-                                        <button type="button" class="p-btn p-btn-success" id="sim-btn-complete-task" style="margin-top: 10px;">
-                                            Complete Work Order &bull; Issue BAST
-                                        </button>
-                                    </div>
-
-                                    <!-- Step 4 View: Completed -->
-                                    <div class="p-step-content hidden" id="p-view-completed">
-                                        <div class="p-success-banner">
-                                            <ion-icon name="checkmark-circle"></ion-icon>
-                                            <h4>Mission 100% Completed!</h4>
-                                            <p>Cryptographic hash verified &bull; BAST Certificate generated and ready for export.</p>
-                                        </div>
-                                        <button type="button" class="p-btn p-btn-outline" id="sim-btn-reset-mobile">Restart Demo Simulation</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Side Explanation Box -->
-                        <div class="sim-info-box">
-                            <span class="sim-badge cyan">ELIMINATES SCREEN HOPPING</span>
-                            <h3>Progressive Stepper Architecture</h3>
-                            <p>
-                                Unlike complex enterprise tools requiring technicians to navigate across 5 different apps, FiberOps consolidates dispatch acceptance, GPS guidance, 2-slot photographic proof, and touchscreen customer acceptance into a single seamless linear workspace.
-                            </p>
-                            <ul class="sim-bullet-list">
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Touchscreen E-Signature:</strong> Captures high-res vector signatures on mobile glass.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Zero Store Download:</strong> PWA runs instantly in Chrome/Safari on iOS &amp; Android.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>1-Tap Communication:</strong> Direct WhatsApp &amp; cellular dialer shortcuts.</li>
-                            </ul>
-                            <div class="sim-cta-row">
-                                <a href="https://app.bentengsiber.com" target="_blank" rel="noopener" class="btn-primary-glow btn-sm">
-                                    <span>Launch Live PWA App</span>
-                                    <ion-icon name="open-outline"></ion-icon>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ─── MODULE 2: UBER-STYLE CUSTOMER LIVE TRACKING ────────────── -->
-                <div class="sim-panel" id="sim-panel-tracking">
-                    <div class="sim-tracking-layout">
-                        <div class="tracking-screen-card">
-                            <div class="tracking-top-bar">
-                                <div class="tracking-live-pulse">
-                                    <span class="pulse-point"></span>
-                                    <span>LIVE GPS DISPATCH TRACKER</span>
-                                </div>
-                                <span class="tracking-session-code">TOKEN: zNrtWKEIUrzx...</span>
-                            </div>
-
-                            <!-- Interactive Visual Map Container -->
-                            <div class="sim-map-viewport" id="sim-map-viewport">
-                                <div class="map-grid-pattern"></div>
-                                <!-- Road vectors -->
-                                <svg class="map-route-svg" viewBox="0 0 500 240">
-                                    <path d="M 40 180 Q 140 160 220 120 T 440 60" fill="none" stroke="#2563EB" stroke-width="4" stroke-dasharray="8 6" class="animated-route"></path>
-                                </svg>
-                                <!-- Destination Point -->
-                                <div class="map-poi destination-poi">
-                                    <ion-icon name="home"></ion-icon>
-                                    <span class="poi-label">Customer: 742 Evergreen</span>
-                                </div>
-                                <!-- Animated Moving Fleet Van -->
-                                <div class="map-poi vehicle-poi" id="sim-vehicle-marker">
-                                    <ion-icon name="car"></ion-icon>
-                                    <span class="poi-label">Technician Alex (FiberOps)</span>
-                                </div>
-                            </div>
-
-                            <!-- Live Fleet ETA Status Card -->
-                            <div class="tracking-info-grid">
-                                <div class="tech-card">
-                                    <div class="tech-avatar"><ion-icon name="person"></ion-icon></div>
-                                    <div class="tech-meta">
-                                        <h4>Alex Gunawan</h4>
-                                        <span>Senior Fiber Optic Specialist &bull; 4.9 &starf;</span>
-                                    </div>
-                                    <a href="https://wa.me/6281122334455?text=Hello%20Alex%2C%20I%20am%20tracking%20your%20arrival." target="_blank" rel="noopener" class="btn-tracking-wa">
-                                        <ion-icon name="logo-whatsapp"></ion-icon>
-                                        <span>WhatsApp</span>
-                                    </a>
-                                </div>
-
-                                <div class="eta-card">
-                                    <div class="eta-val" id="sim-eta-time">7 Mins</div>
-                                    <div class="eta-sub" id="sim-eta-dist">Estimated Arrival &bull; 2.4 km remaining</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sim-info-box">
-                            <span class="sim-badge emerald">VIRAL CUSTOMER SATISFACTION</span>
-                            <h3>Uber-Style Transparency for Customers</h3>
-                            <p>
-                                Eliminate the dreaded "technician will arrive between 9 AM and 5 PM" customer complaints. Customers receive an encrypted live link allowing them to track the approaching service van on a live Leaflet map in real-time.
-                            </p>
-                            <ul class="sim-bullet-list">
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Cryptographic Token Security:</strong> 32-character random access tokens ensure zero enumeration leaks.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Zero Login Required:</strong> Customers view their mission without installing an app or registering.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Reduced No-Show Rate:</strong> Customers stay on-site when they see the technician arriving.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ─── MODULE 3: AUTOMATED BAST PDF CERTIFICATE ───────────────── -->
-                <div class="sim-panel" id="sim-panel-bast">
-                    <div class="sim-bast-layout">
-                        <!-- Simulated Official A4 Letterhead Certificate -->
-                        <div class="bast-document-frame">
-                            <div class="bast-doc-header">
-                                <div class="bast-brand">
-                                    <ion-icon name="shield-checkmark"></ion-icon>
-                                    <div>
-                                        <strong>FIBEROPS NETWORK INFRASTRUCTURE SOLUTIONS</strong>
-                                        <span>OFFICIAL WORK ORDER ACCEPTANCE CERTIFICATE (BAST)</span>
-                                    </div>
-                                </div>
-                                <div class="bast-doc-no">DOC NO: BAST/FO/2026/11/0491</div>
-                            </div>
-
-                            <div class="bast-meta-grid">
-                                <div><strong>Ticket ID:</strong> #TSK-1042</div>
-                                <div><strong>Date:</strong> 16 Nov 2026, 14:35 WIB</div>
-                                <div><strong>Customer:</strong> Robert Vance</div>
-                                <div><strong>Location:</strong> 742 Evergreen Terr. (-6.2088, 106.8456)</div>
-                            </div>
-
-                            <div class="bast-table-wrap">
-                                <table class="bast-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Part Code</th>
-                                            <th>Material Description</th>
-                                            <th>Qty</th>
-                                            <th>Serial Number / Batch</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><code>MAT-DC-1C</code></td>
-                                            <td>Dropcore Fiber Optic Cable 1-Core</td>
-                                            <td>45 Meter</td>
-                                            <td>Lot #DC-2026-B</td>
-                                        </tr>
-                                        <tr>
-                                            <td><code>DEV-ONT-HW</code></td>
-                                            <td>Modem ONT Huawei EchoLife HG8245H5 Dual-Band</td>
-                                            <td>1 Unit</td>
-                                            <td><code>HW-GPON-99214A</code></td>
-                                        </tr>
-                                        <tr>
-                                            <td><code>MAT-FC-SCUPC</code></td>
-                                            <td>Fast Connector SC/UPC Quick Assembly</td>
-                                            <td>2 Pcs</td>
-                                            <td>Pass</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="bast-dual-sig-grid">
-                                <div class="bast-sig-box">
-                                    <span>Field Lead Technician</span>
-                                    <div class="sig-image-placeholder"><em>[Alex Gunawan - Verified ID #2]</em></div>
-                                    <strong>Alex Gunawan</strong>
-                                </div>
-                                <div class="bast-sig-box">
-                                    <span>Customer Acceptance</span>
-                                    <div class="sig-image-placeholder"><span class="sig-signed-badge">&check; Digitally Signed via Screen</span></div>
-                                    <strong>Robert Vance (Customer)</strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sim-info-box">
-                            <span class="sim-badge purple">ZERO PAPERWORK DISPUTES</span>
-                            <h3>Automated Official BAST Generator</h3>
-                            <p>
-                                The system generates an official legal Work Order Acceptance Certificate (BAST) the moment the customer signs the touchscreen. Contains dual Before-After photo proof, exact GPS coordinate stamps, installed serial numbers, and bilateral digital signatures.
-                            </p>
-                            <ul class="sim-bullet-list">
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Instant Printable A4:</strong> Print or export to PDF directly from admin panel or mobile.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Tamper-Proof Audit:</strong> Stores hardware serial numbers directly onto the ticket record.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Eliminates Warranty Fraud:</strong> Proves operational internet before leaving the premises.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ─── MODULE 4: BOM & INVENTORY STOCK TRACKER ────────────────── -->
-                <div class="sim-panel" id="sim-panel-bom">
-                    <div class="sim-bom-layout">
-                        <div class="bom-terminal-card">
-                            <div class="bom-terminal-header">
-                                <ion-icon name="cube-outline"></ion-icon>
-                                <span>LIVE WAREHOUSE INVENTORY &amp; STOCK LEDGER</span>
-                            </div>
-
-                            <div class="bom-inventory-grid">
-                                <div class="bom-stat-item">
-                                    <span class="bom-stat-label">Huawei ONT HG8245H5</span>
-                                    <div class="bom-stat-val" id="sim-stock-ont">35 <small>units</small></div>
-                                </div>
-                                <div class="bom-stat-item">
-                                    <span class="bom-stat-label">Dropcore 1-Core Cable</span>
-                                    <div class="bom-stat-val" id="sim-stock-cable">1,240 <small>meters</small></div>
-                                </div>
-                                <div class="bom-stat-item">
-                                    <span class="bom-stat-label">SC/UPC Fast Connectors</span>
-                                    <div class="bom-stat-val" id="sim-stock-fc">250 <small>pcs</small></div>
-                                </div>
-                                <div class="bom-stat-item">
-                                    <span class="bom-stat-label">ZTE ONT F609 GPON</span>
-                                    <div class="bom-stat-val">25 <small>units</small></div>
-                                </div>
-                            </div>
-
-                            <div class="bom-interactive-action">
-                                <h4>Simulate Field Technician Dispatch Consumption:</h4>
-                                <div class="bom-action-row">
-                                    <button type="button" class="btn-sim-action" id="sim-btn-deduct-bom">
-                                        <ion-icon name="cart-outline"></ion-icon>
-                                        <span>Dispatch: 1x ONT + 45m Cable + 2x Connectors</span>
-                                    </button>
-                                    <button type="button" class="btn-sim-reset" id="sim-btn-reset-bom">Reset Stock</button>
-                                </div>
-                                <div class="bom-console-log" id="sim-bom-log">
-                                    [LEDGER] Ready. Awaiting field technician consumption input...
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sim-info-box">
-                            <span class="sim-badge amber">ELIMINATE LOGISTIC LEAKS</span>
-                            <h3>Real-Time Material &amp; BOM Tracker</h3>
-                            <p>
-                                Never lose track of expensive optical hardware again. When a technician attaches an ONT modem, patchcord, or cable meters to a work order, the database executes an atomic transaction with row-level locks, updating warehouse inventory in real-time.
-                            </p>
-                            <ul class="sim-bullet-list">
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Atomic Consistency:</strong> Uses <code>lockForUpdate</code> to eliminate race conditions.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Automatic Reversion:</strong> Deleting a mistaken item automatically restores warehouse stock.</li>
-                                <li><ion-icon name="checkmark-circle"></ion-icon> <strong>Serial Number Tracking:</strong> Links exact router MAC/SN to the customer's permanent account.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- 4-Card Unified Gateway Grid -->
-        <section class="portal-grid-section" id="portals">
-            <div class="section-header">
-                <span class="section-tag" data-i18n="portals.tag">Unified Gateway Hub</span>
-                <h2 class="section-title" data-i18n="portals.title">Single Sign-On Access to All Modules</h2>
-                <p class="section-desc" data-i18n="portals.desc">Unified authentication and operational gateway for executives, dispatchers, field engineers, and cybersecurity analysts.</p>
-            </div>
-
-            <div class="portal-grid-4">
-                
-                <!-- Card 1: Clientzone Admin Portal -->
-                <a href="https://admin.bentengsiber.com/login" class="portal-card card-admin" target="_blank" rel="noopener">
-                    <div class="card-top-meta">
-                        <span class="card-category-tag">DESKTOP COMMAND</span>
-                        <ion-icon name="laptop-outline" style="color: var(--primary);"></ion-icon>
-                    </div>
-                    <div class="card-icon-box">
-                        <ion-icon name="terminal-outline"></ion-icon>
-                    </div>
-                    <h3 class="card-title">Clientzone Admin</h3>
-                    <p class="card-desc">
-                        Dispatcher &amp; executive command center. Monitor technician fleet movement in real-time, allocate repair tickets, validate proof-of-work SLA photos, and monitor server telemetry.
-                    </p>
-                    <div class="card-footer">
-                        <span>Open Command Portal</span>
-                        <ion-icon name="chevron-forward-outline"></ion-icon>
-                    </div>
-                </a>
-
-                <!-- Card 2: Technician PWA Web App -->
-                <a href="https://app.bentengsiber.com" class="portal-card card-pwa" target="_blank" rel="noopener">
-                    <div class="card-top-meta">
-                        <span class="card-category-tag">MOBILE &amp; WEB APP</span>
-                        <ion-icon name="globe-outline" style="color: var(--emerald);"></ion-icon>
-                    </div>
-                    <div class="card-icon-box">
-                        <ion-icon name="construct-outline"></ion-icon>
-                    </div>
-                    <h3 class="card-title">Technician Web App</h3>
-                    <p class="card-desc">
-                        Instant Progressive Web App (PWA) for field crews. Runs directly in any mobile browser with zero app-store download, smart GPS dispatching, offline caching, and 1-tap customer shortcuts.
-                    </p>
-                    <div class="card-footer">
-                        <span>Access Web Portal</span>
-                        <ion-icon name="chevron-forward-outline"></ion-icon>
-                    </div>
-                </a>
-
-                <!-- Card 3: Technician Android Native & Private Build -->
-                <a href="playstore.html" class="portal-card card-apk">
-                    <div class="card-top-meta">
-                        <span class="card-category-tag">MOBILE &amp; ENTERPRISE</span>
-                        <ion-icon name="phone-portrait-outline" style="color: var(--accent);"></ion-icon>
-                    </div>
-                    <div class="card-icon-box">
-                        <ion-icon name="phone-portrait-outline"></ion-icon>
-                    </div>
-                    <h3 class="card-title">Technician Mobile App</h3>
-                    <p class="card-desc">
-                        Native Android private build for technicians. Includes complete Android Studio source code, tamper-proof mock location validation, and high-precision telemetry.
-                    </p>
-                    <div class="card-footer">
-                        <span>App Details &amp; Build Specs</span>
-                        <ion-icon name="chevron-forward-outline"></ion-icon>
-                    </div>
-                </a>
-
-                <!-- Card 4: Security Posture Scanner SaaS -->
-                <a href="https://scanner.bentengsiber.com" class="portal-card card-scanner" target="_blank" rel="noopener">
-                    <div class="card-top-meta">
-                        <span class="card-category-tag">SECURITY INTELLIGENCE</span>
-                        <ion-icon name="shield-half-outline" style="color: var(--amber);"></ion-icon>
-                    </div>
-                    <div class="card-icon-box">
-                        <ion-icon name="shield-checkmark-outline"></ion-icon>
-                    </div>
-                    <h3 class="card-title">Security Scanner</h3>
-                    <p class="card-desc">
-                        Automated cyber resilience diagnostic engine. Inspects SSL/TLS cipher suites, DNSSEC validation, HTTP security headers, and public port exposure with instant audit scoring.
-                    </p>
-                    <div class="card-footer">
-                        <span>Run Security Audit</span>
-                        <ion-icon name="chevron-forward-outline"></ion-icon>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
-        <!-- Live Demo Sandbox Credentials Section -->
-        <section class="demo-sandbox-section" id="demo">
-            <div class="section-header" style="margin-bottom: var(--space-6);">
-                <span class="section-tag" style="color: var(--emerald);" data-i18n="demo.tag">Instant Sandbox Preview</span>
-                <h2 class="section-title" data-i18n="demo.title">Test-Drive Live Demo Accounts</h2>
-                <p class="section-desc" data-i18n="demo.desc">
-                    Experience both the dispatcher administration portal and field technician workspace using our active sandbox credentials:
-                </p>
-            </div>
-
-            <div class="demo-credentials-grid">
-                
-                <!-- Demo 1: Admin Dispatcher -->
-                <div class="demo-card">
-                    <div>
-                        <div class="demo-card-header">
-                            <ion-icon name="desktop-outline" class="demo-card-icon"></ion-icon>
-                            <div>
-                                <h3 class="demo-card-title">Clientzone Admin Portal</h3>
-                                <span class="demo-card-sub">Role: Administrator &amp; Fleet Dispatcher</span>
-                            </div>
-                        </div>
-
-                        <div class="demo-data-box" style="margin-top: var(--space-4);">
-                            <div class="demo-row">
-                                <span class="demo-label">Login URL:</span>
-                                <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener" style="color: var(--primary); font-size: 0.8rem; text-decoration: none;">admin.bentengsiber.com/login</a>
-                            </div>
-                            <div class="demo-row">
-                                <span class="demo-label">Email:</span>
-                                <div class="demo-value-wrap">
-                                    <span class="demo-code" id="admin-email">admin@fsm.com</span>
-                                    <button type="button" class="btn-copy-code" data-copy="admin@fsm.com" title="Copy Email">
-                                        <ion-icon name="copy-outline"></ion-icon>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="demo-row">
-                                <span class="demo-label">Password:</span>
-                                <div class="demo-value-wrap">
-                                    <span class="demo-code" id="admin-pass">password123</span>
-                                    <button type="button" class="btn-copy-code" data-copy="password123" title="Copy Password">
-                                        <ion-icon name="copy-outline"></ion-icon>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener" class="btn-login-sandbox">
-                        <span>Launch &amp; Login to Admin Portal</span>
-                        <ion-icon name="open-outline"></ion-icon>
-                    </a>
-                </div>
-
-                <!-- Demo 2: Technician PWA -->
-                <div class="demo-card">
-                    <div>
-                        <div class="demo-card-header">
-                            <ion-icon name="phone-portrait-outline" class="demo-card-icon" style="color: var(--primary); background: rgba(0, 242, 254, 0.1);"></ion-icon>
-                            <div>
-                                <h3 class="demo-card-title">Technician Web App (PWA)</h3>
-                                <span class="demo-card-sub">Role: Field Engineer / Technician</span>
-                            </div>
-                        </div>
-
-                        <div class="demo-data-box" style="margin-top: var(--space-4);">
-                            <div class="demo-row">
-                                <span class="demo-label">Login URL:</span>
-                                <a href="https://app.bentengsiber.com" target="_blank" rel="noopener" style="color: var(--primary); font-size: 0.8rem; text-decoration: none;">app.bentengsiber.com</a>
-                            </div>
-                            <div class="demo-row">
-                                <span class="demo-label">Email:</span>
-                                <div class="demo-value-wrap">
-                                    <span class="demo-code" id="tech-email">alex@fsm.com</span>
-                                    <button type="button" class="btn-copy-code" data-copy="alex@fsm.com" title="Copy Email">
-                                        <ion-icon name="copy-outline"></ion-icon>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="demo-row">
-                                <span class="demo-label">Password:</span>
-                                <div class="demo-value-wrap">
-                                    <span class="demo-code" id="tech-pass">password123</span>
-                                    <button type="button" class="btn-copy-code" data-copy="password123" title="Copy Password">
-                                        <ion-icon name="copy-outline"></ion-icon>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <a href="https://app.bentengsiber.com" target="_blank" rel="noopener" class="btn-login-sandbox" style="border-color: var(--border-glow-cyan); color: var(--primary); background: rgba(0, 242, 254, 0.1);">
-                        <span>Launch &amp; Login to Technician App</span>
-                        <ion-icon name="open-outline"></ion-icon>
-                    </a>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Turnkey Asset Acquisition Package Section -->
-        <section class="asset-sale-section" id="acquisition">
-            <div class="section-header" style="margin-bottom: var(--space-6);">
-                <span class="section-tag tag-amber" data-i18n="pricing.tag">Commercial Acquisition &amp; Licensing</span>
-                <h2 class="section-title" data-i18n="pricing.title">Enterprise Pricing &amp; Asset Buyout Hub</h2>
-                <p class="section-desc" data-i18n="pricing.desc">
-                    Whether you are an ISP seeking an immediate operational field tool or a tech investor acquiring the entire intellectual property, we offer flexible, transparent commercial terms:
-                </p>
-            </div>
-
-            <!-- Dual-Option Pricing Cards -->
-            <div class="pricing-cards-grid">
-                
-                <!-- Card 1: Turnkey Asset Buyout (Full IP Transfer) -->
-                <div class="pricing-card featured-buyout">
-                    <div class="pricing-badge-popular">
-                        <ion-icon name="sparkles"></ion-icon>
-                        <span>FULL ASSET BUYOUT &bull; 100% IP TRANSFER</span>
-                    </div>
-
-                    <div class="pricing-head">
-                        <h3 class="tier-name">Complete Ecosystem Buyout</h3>
-                        <p class="tier-desc">Acquire 100% ownership of domain <code>bentengsiber.com</code>, all source codes, and deployment infrastructure.</p>
-                        <div class="price-wrap">
-                            <span class="price-currency">$</span>
-                            <span class="price-amount">18,500</span>
-                            <span class="price-period">one-time investment</span>
-                        </div>
-                        <div class="price-sub-note">&bull; Escrow.com Protected &bull; Valuation Range: $18,500 &ndash; $35,000 based on transition scope</div>
-                    </div>
-
-                    <ul class="pricing-features">
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Premium Domain Transfer:</strong> bentengsiber.com with instant EPP auth code.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>100% Source Code Handover:</strong> Laravel 10 API, Angular 17 PWA, Next.js 14 Scanner.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Android Studio Native Repo:</strong> Complete native app project ready for Google Play.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Production Schemas &amp; Migrations:</strong> Automated CI/CD deployment pipelines.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Zero Royalties or Platform Fees:</strong> Complete commercial exploitation rights.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>30-Day Technical Onboarding:</strong> Architecture transition assistance directly with the author.</span></li>
-                    </ul>
-
-                    <div class="pricing-cta-wrap">
-                        <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20am%20interested%20in%20acquiring%20full%20ownership%20of%20bentengsiber.com%20and%20the%20tech%20stack%20for%20USD%2018500." target="_blank" rel="noopener" class="btn-buyout-primary">
-                            <ion-icon name="logo-whatsapp"></ion-icon>
-                            <span>Inquire Buyout via WhatsApp</span>
-                        </a>
-                        <a href="mailto:owner@bentengsiber.com?subject=Acquisition%20Inquiry%20for%20bentengsiber.com%20Asset%20Buyout" class="btn-buyout-secondary">
-                            <ion-icon name="mail-outline"></ion-icon>
-                            <span>Official Escrow Buyout Offer</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Card 2: White-Label ISP Monthly License -->
-                <div class="pricing-card white-label-card">
-                    <div class="pricing-badge-standard">
-                        <ion-icon name="business-outline"></ion-icon>
-                        <span>MANAGED WHITE-LABEL SAAS</span>
-                    </div>
-
-                    <div class="pricing-head">
-                        <h3 class="tier-name">White-Label ISP Fleet License</h3>
-                        <p class="tier-desc">Deploy FiberOps immediately under your own brand without managing servers or codebases.</p>
-                        <div class="price-wrap">
-                            <span class="price-currency">$</span>
-                            <span class="price-amount">499</span>
-                            <span class="price-period">/ month billed annually</span>
-                        </div>
-                        <div class="price-sub-note">&bull; Or $599 billed monthly &bull; Cancel anytime &bull; Zero setup fee</div>
-                    </div>
-
-                    <ul class="pricing-features">
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Dedicated Custom Subdomain:</strong> yourisp.bentengsiber.com or custom CNAME.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Unlimited Technicians &amp; Fleets:</strong> No per-seat penalty or user surcharges.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Full Enterprise Suite:</strong> Digital Signature &amp; BAST PDF, BOM Tracker, Live Tracking.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Fully Managed Cloud Hosting:</strong> 99.98% SLA with daily automated off-site backups.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>Continuous Security Hardening:</strong> Regular vulnerability updates &amp; patches.</span></li>
-                        <li><ion-icon name="checkmark-circle"></ion-icon> <span><strong>24/7 Priority Support:</strong> Direct technical assistance via dedicated Slack/WhatsApp channel.</span></li>
-                    </ul>
-
-                    <div class="pricing-cta-wrap">
-                        <a href="https://wa.me/6281122334455?text=Hello%2C%20I%20would%20like%20to%20subscribe%20to%20the%20FiberOps%20White-Label%20License%20at%20USD%20499%2Fmo." target="_blank" rel="noopener" class="btn-whitelabel-primary">
-                            <ion-icon name="flash-outline"></ion-icon>
-                            <span>Start White-Label Onboarding</span>
-                        </a>
-                        <a href="#demo" class="btn-buyout-secondary">
-                            <ion-icon name="key-outline"></ion-icon>
-                            <span>Test Live Demo First</span>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Escrow Trust Assurance Bar -->
-            <div class="escrow-trust-bar">
-                <div class="trust-shield">
-                    <ion-icon name="shield-checkmark"></ion-icon>
-                    <span>SECURE TRANSACTION GUARANTEE</span>
-                </div>
-                <div class="trust-badges-list">
-                    <span><ion-icon name="checkmark-done-circle"></ion-icon> Escrow.com Inspection Period</span>
-                    <span><ion-icon name="checkmark-done-circle"></ion-icon> International Wire Transfer &bull; USD / EUR</span>
-                    <span><ion-icon name="checkmark-done-circle"></ion-icon> Verified EPP Domain Authorization</span>
-                    <span><ion-icon name="checkmark-done-circle"></ion-icon> Non-Disclosure Agreement (NDA) Available</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Live Quick Scanner Spotlight Section -->
-        <section class="scanner-spotlight-section" id="scanner-spotlight">
-            <div class="scanner-inner">
-                <span class="section-tag" data-i18n="scanner.tag">Interactive Diagnostic Tool</span>
-                <h2 class="section-title" data-i18n="scanner.title">Quick Domain Security Posture Audit</h2>
-                <p class="section-desc" data-i18n="scanner.desc">
-                    Benchmark your domain against SSL/TLS certificate expirations, missing security headers (HSTS, CSP), and public DNS misconfigurations in seconds.
-                </p>
-
-                <form id="quick-scan-form" class="scanner-input-container">
-                    <ion-icon name="globe-outline"></ion-icon>
-                    <input type="text" id="scan-domain-input" class="scanner-input" placeholder="Enter target domain (e.g. yourdomain.com)" required autocomplete="off" spellcheck="false">
-                    <button type="submit" class="btn-scan-trigger" id="btn-scan-submit">
-                        <span id="scan-btn-label">Scan Domain Now</span>
-                        <ion-icon name="flash-outline" id="scan-btn-icon"></ion-icon>
+</div>
+<div class="pt-2 hairline-t mt-auto text-outline flex items-center justify-between">
+<span>Filter: EVT_ALL</span>
+<span class="text-primary cursor-pointer hover:underline" onclick="clearHeroLog()">clear terminal</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- =====================================================================
+       4. SECTION 2: ECOSYSTEM GATEWAY PORTALS (FIG 0.1 - 0.4)
+  ====================================================================== -->
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="portals">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+<div>
+<div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">FIG 0.1 — FIG 0.4 MODULE BLUEPRINTS</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Ecosystem Gateway Portals</h2>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-md mt-2 md:mt-0">
+        Four sovereign access surfaces engineered with synchronized WebSockets, sub-second telemetry queues, and zero external runtime dependencies.
+      </p>
+</div>
+<!-- 4-Card Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- FIG 0.1 Clientzone Admin -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between hover:border-primary/50 transition-colors group">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-mono-xs text-label-mono-xs text-outline font-semibold">FIG 0.1</span>
+<span class="px-2 py-0.5 bg-surface-container border border-outline-variant/30 text-primary font-label-mono-xs text-label-mono-xs rounded">ADMIN CORE</span>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-primary mb-3">
+<span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1 group-hover:text-primary transition-colors">Clientzone Admin Control</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+            Unified billing orchestrator, real-time ticket escalation engine, OLT/ONU topology mapping, and automated customer notifications.
+          </p>
+</div>
+<div class="pt-3 hairline-t space-y-2">
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+<span>Stack: Laravel / Alpine.js</span>
+<span class="text-secondary font-medium">99.99% Uptime</span>
+</div>
+<a class="block w-full text-center py-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 rounded text-on-surface font-label-mono-sm text-label-mono-sm transition-colors" href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer">Launch Admin Demo →</a>
+</div>
+</div>
+<!-- FIG 0.2 Technician Web App (PWA) -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between hover:border-secondary/50 transition-colors group">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-mono-xs text-label-mono-xs text-outline font-semibold">FIG 0.2</span>
+<span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded">PWA / OFFLINE</span>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-secondary mb-3">
+<span class="material-symbols-outlined text-[22px]">devices</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1 group-hover:text-secondary transition-colors">Technician Web PWA</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+            Lightweight, low-bandwidth browser app for remote field contractors. Offline-first IndexedDB sync with auto-upload upon cellular reconnection.
+          </p>
+</div>
+<div class="pt-3 hairline-t space-y-2">
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+<span>Stack: ServiceWorker / IndexedDB</span>
+<span class="text-secondary font-medium">Zero-Drop Sync</span>
+</div>
+<a class="block w-full text-center py-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 rounded text-on-surface font-label-mono-sm text-label-mono-sm transition-colors" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Open PWA Simulator →</a>
+</div>
+</div>
+<!-- FIG 0.3 Technician Mobile Edition APK -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between hover:border-primary-container/50 transition-colors group">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-mono-xs text-label-mono-xs text-outline font-semibold">FIG 0.3</span>
+<span class="px-2 py-0.5 bg-surface-container border border-outline-variant/30 text-primary-fixed-dim font-label-mono-xs text-label-mono-xs rounded">ANDROID APK</span>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-primary-container mb-3">
+<span class="material-symbols-outlined text-[22px]">smartphone</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1 group-hover:text-primary-container transition-colors">Technician Mobile Edition</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+            Native hardware binding with optical power meter Bluetooth LE links, hardware GPS geo-stamping, and real-time EXIF camera tamper verification.
+          </p>
+</div>
+<div class="pt-3 hairline-t space-y-2">
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+<span>Binary: APK v4.2.0 Signed</span>
+<span class="text-primary font-medium">BLE Native</span>
+</div>
+<a class="block w-full text-center py-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 rounded text-on-surface font-label-mono-sm text-label-mono-sm transition-colors" href="playstore.html">APK Release Manifest →</a>
+</div>
+</div>
+<!-- FIG 0.4 Security Posture Scanner -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between hover:border-tertiary/50 transition-colors group">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-mono-xs text-label-mono-xs text-outline font-semibold">FIG 0.4</span>
+<span class="px-2 py-0.5 bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-mono-xs text-label-mono-xs rounded">RFC 9116</span>
+</div>
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-tertiary mb-3">
+<span class="material-symbols-outlined text-[22px]">security</span>
+</div>
+<h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1 group-hover:text-tertiary transition-colors">Security Posture Scanner</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+            Autonomous perimeter scanner analyzing SSL cipher suites, DNSSEC validation, RFC 9116 security.txt existence, and open management port leaks.
+          </p>
+</div>
+<div class="pt-3 hairline-t space-y-2">
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+<span>Grade: A+ Standard</span>
+<span class="text-tertiary font-medium">98/100 Score</span>
+</div>
+<a class="block w-full text-center py-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 rounded text-on-surface font-label-mono-sm text-label-mono-sm transition-colors" href="#scanner-spotlight">
+            Run Live Scanner →
+          </a>
+</div>
+</div>
+</div>
+</section>
+<!-- =====================================================================
+       5. SECTION 3: INTERACTIVE LIVE PRODUCT SIMULATOR HUB (#simulator)
+  ====================================================================== -->
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="simulator">
+<div class="text-center max-w-3xl mx-auto mb-10">
+<div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">TACTICAL EMULATOR • LIVE SANDBOX</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Interactive Product Simulator Hub</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-2">
+        Test mission-critical FSM workflows right now. Switch between the 4 real-time interactive engines below:
+      </p>
+</div>
+<!-- Simulator Container (Obsidian Surface 1) -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden shadow-2xl">
+<!-- Tab Headers -->
+<div class="flex flex-wrap items-center bg-surface-container-low hairline-b px-space-md pt-2 gap-2 text-label-mono-sm font-label-mono-sm overflow-x-auto"><button class="px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all" id="sim-tab-1" onclick="switchSimTab(1)"><span class="material-symbols-outlined text-[16px]">touch_app</span><span>1. Technician Mobile Stepper</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all" id="sim-tab-2" onclick="switchSimTab(2)"><span class="material-symbols-outlined text-[16px]">local_shipping</span><span>2. Customer Live Uber Radar &amp; GPS</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all" id="sim-tab-3" onclick="switchSimTab(3)"><span class="material-symbols-outlined text-[16px]">tune</span><span>3. Interactive OPM Calibrator &amp; BAST</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all" id="sim-tab-4" onclick="switchSimTab(4)"><span class="material-symbols-outlined text-[16px]">terminal</span><span>4. Tactical CLI &amp; Atomic BOM</span></button></div>
+<!-- Tab Content Canvas -->
+<div class="p-space-lg md:p-space-xl">
+<!-- ================= TAB 1: Technician Mobile Stepper ================= -->
+<div class="block" id="sim-panel-1">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Mobile Shell Preview (5 cols) -->
+<div class="lg:col-span-5 bg-surface-container border border-outline-variant/40 rounded-xl p-space-md max-w-sm mx-auto w-full shadow-inner">
+<!-- Mobile Header -->
+<div class="flex items-center justify-between pb-3 hairline-b mb-3 font-label-mono-xs text-label-mono-xs text-outline">
+<span>09:41 LTE • GPS LOCKED</span>
+<span class="text-secondary font-semibold">BAT: 94%</span>
+</div>
+<!-- Stepper Indicator -->
+<div class="flex items-center justify-between mb-4">
+<div class="flex flex-col items-center">
+<span class="w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold" id="step-bead-1">1</span>
+<span class="text-[10px] text-primary mt-1 font-label-mono-xs">Arrival</span>
+</div>
+<div class="h-0.5 flex-1 bg-outline-variant/30 mx-1"></div>
+<div class="flex flex-col items-center">
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center" id="step-bead-2">2</span>
+<span class="text-[10px] text-outline mt-1 font-label-mono-xs">Optical</span>
+</div>
+<div class="h-0.5 flex-1 bg-outline-variant/30 mx-1"></div>
+<div class="flex flex-col items-center">
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center" id="step-bead-3">3</span>
+<span class="text-[10px] text-outline mt-1 font-label-mono-xs">Sign BAST</span>
+</div>
+</div>
+<!-- Interactive Step Stages -->
+<div class="space-y-3" id="step-content-1">
+<div class="p-2.5 bg-surface-container-low rounded border border-outline-variant/20">
+<div class="text-label-mono-xs font-label-mono-xs text-outline">WORK ORDER #WO-88219</div>
+<div class="text-title-sm font-title-sm text-on-surface font-semibold">Fiber ONT Drop Repair</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant mt-1">Client: PT Solusi Graha Cyber</div>
+</div>
+<div class="p-3 bg-surface-container-low rounded border border-outline-variant/20 space-y-2">
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+<span>GPS Coordinates:</span>
+<span class="text-primary">-6.2088° S, 106.8456° E</span>
+</div>
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+<span>Geofence Status:</span>
+<span class="text-secondary font-semibold">INSIDE (12m to ONT)</span>
+</div>
+</div>
+<!-- Photo Verification Simulator -->
+<div class="border border-dashed border-outline-variant/40 rounded p-3 text-center bg-surface-container-lowest">
+<div class="flex flex-col items-center justify-center py-3" id="photo-box">
+<span class="material-symbols-outlined text-outline text-[28px] mb-1">photo_camera</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Tap to Simulate OTB Photo Capture</span>
+<button class="mt-2 px-3 py-1 bg-surface-container-high hover:bg-surface-bright text-primary rounded font-label-mono-xs text-label-mono-xs border border-primary/30" onclick="simulatePhotoCapture()" type="button">
+                      Snap Evidence Photo
                     </button>
-                </form>
-
-                <!-- Interactive In-Page Security Diagnostic Box -->
-                <div id="scan-results-box" class="scan-results-box hidden">
-                    <div class="scan-results-header">
-                        <div class="scan-target-badge">
-                            <ion-icon name="shield-checkmark"></ion-icon>
-                            <span>Target: <strong id="scan-target-host">bentengsiber.com</strong></span>
-                        </div>
-                        <div class="scan-score-badge" id="scan-overall-score">GRADE A &bull; 98/100</div>
-                    </div>
-                    <div class="scan-checks-grid">
-                        <div class="scan-check-item">
-                            <span class="scan-check-icon ok">✓</span>
-                            <div class="scan-check-info">
-                                <strong>SSL/TLS Handshake</strong>
-                                <span>TLS 1.3 Active &bull; 256-bit AES-GCM Strong Cipher</span>
-                            </div>
-                        </div>
-                        <div class="scan-check-item">
-                            <span class="scan-check-icon ok">✓</span>
-                            <div class="scan-check-info">
-                                <strong>Certificate Validity</strong>
-                                <span>Verified &bull; Automated Let's Encrypt / DigiCert Trust</span>
-                            </div>
-                        </div>
-                        <div class="scan-check-item">
-                            <span class="scan-check-icon ok">✓</span>
-                            <div class="scan-check-info">
-                                <strong>HSTS Security Policy</strong>
-                                <span>Enforced &bull; max-age=31536000; includeSubDomains</span>
-                            </div>
-                        </div>
-                        <div class="scan-check-item">
-                            <span class="scan-check-icon ok">✓</span>
-                            <div class="scan-check-info">
-                                <strong>Headers &amp; RFC 9116</strong>
-                                <span>X-Frame-Options, CSP, and security.txt Active</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="scan-footer-meta">
-                        <span>🛡️ Non-intrusive heuristic security audit completed in 0.4s.</span>
-                        <button type="button" class="btn-scan-dismiss" id="btn-scan-dismiss">Close Report</button>
-                    </div>
-                </div>
-
-                <div class="scanner-micro-tags">
-                    <span><ion-icon name="checkmark-circle-outline" style="color: var(--emerald);"></ion-icon> Non-Intrusive Scan</span>
-                    <span><ion-icon name="lock-closed-outline" style="color: var(--primary);"></ion-icon> Grade A SSL/TLS Analysis</span>
-                    <span><ion-icon name="shield-outline" style="color: var(--accent);"></ion-icon> DNSSEC &amp; Headers Validation</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Telemetry & Metrics Showcase -->
-        <section class="metrics-section" id="telemetry">
-            <div class="section-header">
-                <span class="section-tag">Reliability &amp; Scale</span>
-                <h2 class="section-title">Battle-Tested Performance &amp; Resilience</h2>
-                <p class="section-desc">Engineered for mission-critical telecommunications infrastructure with high-availability SLA standards.</p>
-            </div>
-
-            <div class="metrics-grid-4">
-                <div class="metric-card">
-                    <div class="metric-number">99.98%</div>
-                    <div class="metric-title">Platform Uptime</div>
-                    <div class="metric-detail">24/7 continuous operational availability</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">&lt;45ms</div>
-                    <div class="metric-title">Edge API Latency</div>
-                    <div class="metric-detail">Lightning-fast field synchronization response</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">100%</div>
-                    <div class="metric-title">Tamper-Proof Proofs</div>
-                    <div class="metric-detail">Cryptographic validation of job completion</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-number">0</div>
-                    <div class="metric-title">Zero-Day Breaches</div>
-                    <div class="metric-detail">Isolated architecture &amp; OWASP ASVS hardened</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Interactive Architecture Map -->
-        <section class="architecture-section" id="architecture">
-            <div class="section-header">
-                <span class="section-tag" data-i18n="arch.tag">System Topology</span>
-                <h2 class="section-title" data-i18n="arch.title">Unified Data Pipeline &amp; Architecture</h2>
-                <p class="section-desc" data-i18n="arch.desc">How real-time field workforce dispatching and cyber protection telemetry communicate synchronously.</p>
-            </div>
-
-            <div class="arch-flow-container">
-                <div class="arch-node">
-                    <div class="arch-node-icon"><ion-icon name="phone-portrait-outline"></ion-icon></div>
-                    <h4>Technician Clients</h4>
-                    <span>PWA &amp; Native Android</span>
-                </div>
-
-                <div class="arch-connector">
-                    <ion-icon name="arrow-forward-outline" class="connector-arrow"></ion-icon>
-                    <span>HTTPS / API</span>
-                </div>
-
-                <div class="arch-node">
-                    <div class="arch-node-icon"><ion-icon name="server-outline"></ion-icon></div>
-                    <h4>Sanctum Gateway</h4>
-                    <span>Laravel 10 Core Engine</span>
-                </div>
-
-                <div class="arch-connector">
-                    <ion-icon name="arrow-forward-outline" class="connector-arrow"></ion-icon>
-                    <span>Realtime Sync</span>
-                </div>
-
-                <div class="arch-node">
-                    <div class="arch-node-icon"><ion-icon name="desktop-outline"></ion-icon></div>
-                    <h4>Command Center</h4>
-                    <span>Clientzone Dispatcher</span>
-                </div>
-
-                <div class="arch-connector">
-                    <ion-icon name="arrow-forward-outline" class="connector-arrow"></ion-icon>
-                    <span>Threat Audit</span>
-                </div>
-
-                <div class="arch-node">
-                    <div class="arch-node-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></div>
-                    <h4>Security Scanner</h4>
-                    <span>Next.js 14 Audit Engine</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Compliance & Security Specifications -->
-        <section class="compliance-section" id="compliance">
-            <div class="section-header">
-                <span class="section-tag" data-i18n="compliance.tag">Enterprise Hardening</span>
-                <h2 class="section-title" data-i18n="compliance.title">Security Standards &amp; Compliance</h2>
-                <p class="section-desc" data-i18n="compliance.desc">Every line of code is structured to satisfy rigorous data governance and protection criteria.</p>
-            </div>
-
-            <div class="compliance-grid">
-                <div class="compliance-item">
-                    <ion-icon name="lock-closed" class="compliance-icon"></ion-icon>
-                    <div>
-                        <h4>OWASP ASVS Hardened</h4>
-                        <p>Defended against IDOR, Mass-Assignment, SQL Injection, and Cross-Site Scripting (XSS) vectors.</p>
-                    </div>
-                </div>
-
-                <div class="compliance-item">
-                    <ion-icon name="finger-print" class="compliance-icon"></ion-icon>
-                    <div>
-                        <h4>Token Auth &amp; Rate-Limiting</h4>
-                        <p>Encrypted authentication via Laravel Sanctum with dynamic anti-bruteforce request throttling.</p>
-                    </div>
-                </div>
-
-                <div class="compliance-item">
-                    <ion-icon name="shield-checkmark" class="compliance-icon"></ion-icon>
-                    <div>
-                        <h4>RFC 9116 Compliant</h4>
-                        <p>Complies with standardized coordinated vulnerability disclosure via <code>security.txt</code> specification.</p>
-                    </div>
-                </div>
-
-                <div class="compliance-item">
-                    <ion-icon name="key" class="compliance-icon"></ion-icon>
-                    <div>
-                        <h4>Tamper-Proof Work Verification</h4>
-                        <p>Mandatory 2-slot photographic proof requirements with anti-tamper client validation before SLA closure.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Enterprise Footer -->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-brand">
-                <div class="brand-title">
-                    Benteng Siber <span class="badge-sub">ECOSYSTEM</span>
-                </div>
-                <p>
-                    The leading unified ecosystem integrating intelligent fiber optics field workforce management (FiberOps FSM) and automated enterprise cyber posture intelligence.
+</div>
+<div class="hidden text-secondary font-label-mono-xs text-label-mono-xs py-2" id="photo-captured">
+                    ✓ Photo Tagged: EXIF_GEO_VALIDATED.jpg (1.2 MB)
+                  </div>
+</div>
+<button class="w-full py-2 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded hover:bg-primary transition-colors" onclick="goToStep(2)" type="button">
+                  Continue to Optical Power Check →
+                </button>
+</div>
+<!-- Step 2 (Hidden initially) -->
+<div class="space-y-3 hidden" id="step-content-2">
+<div class="p-3 bg-surface-container-low rounded border border-outline-variant/20">
+<div class="text-label-mono-xs font-label-mono-xs text-outline">CALIBRATION • BLUETOOTH OPM</div>
+<div class="text-title-sm font-title-sm text-on-surface font-semibold mt-1">Optical Transceiver Reading</div>
+<div class="mt-3 flex items-center justify-between p-2 bg-surface-container-lowest rounded border border-outline-variant/30">
+<span class="font-label-mono-xs text-label-mono-xs text-outline">1490nm Downstream:</span>
+<span class="font-label-mono-md text-label-mono-md font-bold text-secondary" id="opm-val">-18.42 dBm</span>
+</div>
+<div class="mt-2 text-label-mono-xs font-label-mono-xs text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>Within Spec Standard (-15 dBm to -25 dBm)</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-1/3 py-2 bg-surface-container-high text-on-surface font-body-sm rounded hover:bg-surface-bright" onclick="goToStep(1)" type="button">Back</button>
+<button class="w-2/3 py-2 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded hover:bg-primary transition-colors" onclick="goToStep(3)" type="button">Next: Customer Signature →</button>
+</div>
+</div>
+<!-- Step 3 (Hidden initially) -->
+<div class="space-y-3 hidden" id="step-content-3">
+<div class="p-2.5 bg-surface-container-low rounded border border-outline-variant/20">
+<div class="text-label-mono-xs font-label-mono-xs text-outline">FINAL CERTIFICATION</div>
+<div class="text-title-sm font-title-sm text-on-surface font-semibold">Customer Electronic Signature</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px] mt-0.5">Please sign on the canvas below to endorse the BAST handover.</p>
+</div>
+<!-- HTML5 Canvas for Signature Pad -->
+<div class="bg-surface-container-lowest border border-outline-variant/50 rounded p-1 relative">
+<canvas class="w-full bg-surface-container-lowest cursor-crosshair rounded" height="110" id="signature-canvas" width="280"></canvas>
+<div class="absolute bottom-1 right-2 flex gap-1">
+<button class="px-1.5 py-0.5 bg-surface-container-high text-outline hover:text-white rounded text-[10px] font-label-mono-xs" onclick="clearSignature()" type="button">Clear</button>
+<button class="px-1.5 py-0.5 bg-surface-container-high text-primary hover:text-white rounded text-[10px] font-label-mono-xs" onclick="autoSignature()" type="button">Autofill</button>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-1/3 py-2 bg-surface-container-high text-on-surface font-body-sm rounded hover:bg-surface-bright" onclick="goToStep(2)" type="button">Back</button>
+<button class="w-2/3 py-2 bg-secondary text-surface-container-lowest font-body-sm font-medium rounded hover:bg-secondary-fixed transition-colors" onclick="completeHandover()" type="button">Endorse &amp; Sync BAST ✓</button>
+</div>
+</div>
+</div>
+<!-- Right Telemetry & Architecture Explainer (7 cols) -->
+<div class="lg:col-span-7 flex flex-col justify-between">
+<div>
+<span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs text-label-mono-xs rounded">SUB-SECOND SYNC</span>
+<h3 class="text-headline-md font-headline-md text-on-surface mt-2 mb-2">Zero-Friction Offline Field Execution</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-4">
+                  Field technicians operate in basements, optical manholes, and remote nodes with intermittent carrier coverage. The Benteng Siber PWA &amp; Mobile client stores all telemetry in local SQLite / IndexedDB instances, encrypting biometric signatures before opportunistic multi-path dispatch.
                 </p>
-            </div>
-
-            <div class="footer-col">
-                <h5>Ecosystem Portals</h5>
-                <ul>
-                    <li><a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener">Clientzone Admin</a></li>
-                    <li><a href="https://app.bentengsiber.com" target="_blank" rel="noopener">Technician Web App</a></li>
-                    <li><a href="playstore.html">Technician Mobile Edition</a></li>
-                    <li><a href="https://scanner.bentengsiber.com" target="_blank" rel="noopener">Security Posture Scanner</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col">
-                <h5>Asset &amp; Legal</h5>
-                <ul>
-                    <li><a href="#acquisition">Acquire Domain &amp; Tech Stack</a></li>
-                    <li><a href="#demo">Live Sandbox Credentials</a></li>
-                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
-                    <li><a href="https://scanner.bentengsiber.com/.well-known/security.txt" target="_blank" rel="noopener">Security.txt (RFC 9116)</a></li>
-                </ul>
-            </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md mb-6">
+<div class="p-space-md bg-surface-container-low border border-outline-variant/20 rounded">
+<div class="text-secondary font-label-mono-sm text-label-mono-sm font-semibold mb-1">Hardware GPS Geofencing</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px]">Work orders cannot be marked completed if the phone coordinates deviate more than 50 meters from registered OTB fiber coordinates.</p>
+</div>
+<div class="p-space-md bg-surface-container-low border border-outline-variant/20 rounded">
+<div class="text-primary font-label-mono-sm text-label-mono-sm font-semibold mb-1">BLE Optical Power Pairing</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px]">Connects via Web Bluetooth API directly to EXFO, Grandway, and Tribrer power meters to prevent fabricated attenuation numbers.</p>
+</div>
+</div>
+</div>
+<!-- Live Simulator Event Feed -->
+<div class="p-space-md bg-surface-container border border-outline-variant/30 rounded font-label-mono-xs text-label-mono-xs">
+<div class="text-outline uppercase mb-1">EMULATOR TELEMETRY LOG:</div>
+<div class="text-primary" id="stepper-log-text">&gt; Ready. Tap mobile buttons on the left to simulate dispatcher interactions...</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= TAB 2: Customer Uber-Style Radar ================= -->
+<div class="hidden" id="sim-panel-2"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-7 bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-space-md relative overflow-hidden min-h-[380px] flex flex-col justify-between"><div class="absolute inset-0 flex items-center justify-center pointer-events-none"><div class="w-80 h-80 rounded-full border border-primary/20"></div><div class="w-60 h-60 rounded-full border border-primary/20 absolute"></div><div class="w-40 h-40 rounded-full border border-primary/30 absolute"></div><div class="w-20 h-20 rounded-full border border-primary/40 absolute"></div><div class="w-full h-px bg-primary/10 absolute"></div><div class="h-full w-px bg-primary/10 absolute"></div><div class="w-80 h-80 absolute flex items-center justify-center"><div class="w-1/2 h-1/2 origin-bottom-right radar-beam absolute top-0 left-0 bg-gradient-to-br from-primary/20 to-transparent"></div></div></div><div class="relative z-10 flex items-center justify-between pb-2 hairline-b font-label-mono-xs text-label-mono-xs"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span><span class="text-on-surface font-semibold">DISPATCH #DP-4402 LIVE TRACKING</span></div><div class="flex items-center gap-2 text-outline"><span>SPEED: <strong class="text-primary" id="radar-speed">38 km/h</strong></span><span>•</span><span>ROUTE: <strong class="text-secondary">SC-04 BYPASS</strong></span></div></div><div class="relative z-10 w-full flex-1 flex items-center justify-between px-6 my-4"><div class="flex flex-col items-center transition-all duration-300 ease-out" id="radar-van" style="transform: translateX(10px);"><div class="w-10 h-10 bg-primary-container text-surface-container-lowest rounded-full flex items-center justify-center shadow-[0_0_15px_#22d3ee]"><span class="material-symbols-outlined text-[22px]">local_shipping</span></div><span class="mt-1 px-1.5 py-0.5 bg-surface-container-high border border-primary/40 text-primary font-label-mono-xs text-[10px] rounded whitespace-nowrap">Tech: Budi S. (Van #04)</span></div><div class="flex flex-col items-center"><div class="w-10 h-10 bg-secondary text-surface-container-lowest rounded-full flex items-center justify-center shadow-[0_0_15px_#4edea3]"><span class="material-symbols-outlined text-[22px]">location_on</span></div><span class="mt-1 px-1.5 py-0.5 bg-surface-container-high border border-secondary/40 text-secondary font-label-mono-xs text-[10px] rounded whitespace-nowrap">Customer ONT Target</span></div></div><div class="relative z-10 bg-surface-container-high/95 border border-outline-variant/40 p-3 rounded backdrop-blur space-y-2"><div class="flex justify-between items-center text-label-mono-xs font-label-mono-xs"><div><span class="text-outline block">ESTIMATED TIME OF ARRIVAL</span><div class="text-title-sm font-title-sm text-primary font-bold" id="radar-eta">8 Minutes (2.4 km away)</div></div><div class="flex items-center gap-2"><button class="px-2.5 py-1 bg-surface-container hover:bg-surface-bright text-on-surface rounded border border-outline-variant/40 font-label-mono-xs text-label-mono-xs" onclick="simulateVehicleArrival()" type="button">Arrive Now</button><button class="px-3 py-1.5 bg-primary text-surface-container-lowest font-medium rounded hover:bg-primary-container transition-colors font-label-mono-xs text-label-mono-xs" id="radar-auto-btn" onclick="toggleRadarSimulation()" type="button">Auto Move: ON</button></div></div><div class="pt-1"><div class="flex justify-between text-[10px] font-label-mono-xs text-outline mb-1"><span>Route Progress: <strong class="text-on-surface" id="radar-percent-text">20%</strong></span><span>Waypoints: 4 / 6 Cleared</span></div><input class="w-full accent-cyan-400 bg-surface-container-low cursor-pointer" id="radar-progress-slider" max="100" min="0" oninput="updateRadarProgress(this.value)" type="range" value="20"></div></div></div><div class="lg:col-span-5 flex flex-col justify-between"><div><span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded">CUSTOMER EXPERIENCE</span><h3 class="text-headline-md font-headline-md text-on-surface mt-2 mb-2">Uber-Grade Live Field Radar</h3><p class="text-body-sm font-body-sm text-on-surface-variant mb-4">Eliminate blind wait times and frantic phone calls. Customers receive an SMS/WhatsApp tracking link with interactive leaf-map telemetry, photo verification of the assigned technician, and sub-minute ETA predictions.</p><div class="space-y-2.5"><div class="p-2.5 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between gap-3"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-[20px]">sms</span><div class="text-body-sm font-body-sm text-on-surface-variant text-[12px]"><span class="text-on-surface font-medium block">Automated Dispatch Ping</span>Sent via WhatsApp Business Cloud API with one-click live tracking URL.</div></div><button class="px-2 py-1 bg-surface-container-high hover:bg-surface-bright text-secondary text-label-mono-xs rounded border border-secondary/30 whitespace-nowrap" onclick="resendWhatsAppPing()" type="button">Resend Ping</button></div><div class="p-2.5 bg-surface-container-low border border-outline-variant/20 rounded flex items-center gap-3"><span class="material-symbols-outlined text-primary text-[20px]">security</span><div class="text-body-sm font-body-sm text-on-surface-variant text-[12px]"><span class="text-on-surface font-medium block">Zero-Spam Identity Shield</span>Masked VoIP routing prevents disclosure of customer or technician cell numbers.</div></div></div></div><div class="p-3 bg-surface-container border border-outline-variant/30 rounded font-label-mono-xs text-label-mono-xs mt-4"><div class="flex justify-between items-center mb-1"><span class="text-outline uppercase">TELEMETRY LATENCY:</span><span class="text-secondary font-semibold" id="radar-socket-status">Socket.io active • ping: 22ms</span></div><div class="text-on-surface-variant" id="radar-event-log">&gt; Live GPS broadcast synchronized with Jakarta Gateway cluster.</div></div></div></div></div>
+<!-- ================= TAB 3: Automated BAST PDF Certificate ================= -->
+<div class="hidden" id="sim-panel-3"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-7 bg-white text-slate-900 rounded p-6 shadow-2xl font-body-sm border border-slate-300"><div class="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4"><div><div class="font-headline-md text-slate-950 font-bold uppercase tracking-tight text-lg">BERITA ACARA SERAH TERIMA (BAST)</div><div class="text-[11px] text-slate-600 font-label-mono-xs">FIBER INSTALLATION &amp; ACCEPTANCE CERTIFICATE</div></div><div class="text-right"><div class="text-xs font-bold text-slate-900" id="bast-doc-no">NO: BAST/BS/2025/1109</div><div class="text-[10px] text-slate-500 font-label-mono-xs" id="bast-timestamp">TIMESTAMP: 2025-05-18 14:32:00 UTC</div></div></div><div class="grid grid-cols-2 gap-3 text-xs mb-4 p-2.5 bg-slate-50 rounded border border-slate-200"><div><span class="font-semibold text-slate-700">Customer:</span> PT Nusantara Graha Data</div><div><span class="font-semibold text-slate-700">Account ID:</span> BNT-782910-JKT</div><div><span class="font-semibold text-slate-700">Technician:</span> Budi Santoso (ID 9412)</div><div><span class="font-semibold text-slate-700">Circuit ID:</span> OLT-TB-02/PON4/ONU-18</div></div><table class="w-full text-left text-xs mb-4 border-collapse"><thead><tr class="bg-slate-200 text-slate-800 font-semibold border-b border-slate-300"><th class="p-1.5">Verification Metric</th><th class="p-1.5">Benchmark Target</th><th class="p-1.5">Measured Value</th><th class="p-1.5">Status</th></tr></thead><tbody class="divide-y divide-slate-200 font-label-mono-xs text-[11px]"><tr><td class="p-1.5" id="table-metric-label">Optical Loss (1490nm)</td><td class="p-1.5">&lt; -24.0 dBm</td><td class="p-1.5 font-bold text-emerald-700" id="bast-optical-val">-17.84 dBm</td><td class="p-1.5 font-bold text-emerald-700" id="bast-optical-status">PASSED</td></tr><tr><td class="p-1.5">Bandwidth Throughput</td><td class="p-1.5">≥ 100 Mbps Symmetrical</td><td class="p-1.5 font-bold text-emerald-700">104.2 / 102.8 Mbps</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr><tr><td class="p-1.5">Latency to Core Gateway</td><td class="p-1.5">&lt; 5.0 ms</td><td class="p-1.5 font-bold text-emerald-700">1.8 ms</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr></tbody></table><div class="grid grid-cols-2 gap-6 pt-2 border-t border-slate-300"><div class="text-center"><div class="text-[10px] uppercase font-bold text-slate-600 mb-1">Technician Signature</div><div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50"><span class="font-serif italic text-slate-800 text-sm">Budi Santoso</span></div><span class="text-[9px] text-slate-500 font-label-mono-xs mt-1 block">SHA256: 4f8a...c011</span></div><div class="text-center"><div class="text-[10px] uppercase font-bold text-slate-600 mb-1">Customer E-Endorsement</div><div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50"><span class="font-serif italic text-blue-900 text-sm font-bold">R. Hendrawan</span></div><span class="text-[9px] text-slate-500 font-label-mono-xs mt-1 block">STAMP: 2025-05-18T14:32:19Z</span></div></div></div><div class="lg:col-span-5 flex flex-col justify-between bg-surface-container-low border border-outline-variant/30 rounded p-space-md"><div><div class="flex items-center justify-between mb-3"><span class="px-2 py-0.5 bg-primary-container text-surface-container-lowest font-label-mono-xs text-label-mono-xs rounded font-semibold">OPM HARDWARE CALIBRATOR</span><span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold" id="opm-status-pill">OPTIMAL SPEC</span></div><div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded mb-4"><div class="flex justify-between items-center mb-1"><span class="text-outline text-label-mono-xs font-label-mono-xs uppercase">Optical Power Meter (OPM)</span><span class="text-primary font-label-mono-xs text-label-mono-xs" id="active-wl-label">λ 1490nm</span></div><div class="text-headline-lg font-headline-lg font-bold text-secondary" id="opm-live-display">-17.84 dBm</div><div class="text-body-sm font-body-sm text-outline mt-1" id="opm-spec-desc">Within ITU-T G.984 GPON Standard Range (-15 to -24 dBm).</div></div><div class="space-y-3 mb-4"><div><div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline mb-1"><span>Adjust Attenuation:</span><span class="text-on-surface font-semibold" id="opm-slider-val">-17.8 dBm</span></div><input class="w-full accent-cyan-400 bg-surface-container cursor-pointer" id="opm-slider" max="-10.0" min="-32.0" oninput="handleOpmSlider(this.value)" step="0.1" type="range" value="-17.8"></div><div><span class="text-label-mono-xs font-label-mono-xs text-outline block mb-1.5">Wavelength Selection:</span><div class="grid grid-cols-3 gap-2"><button class="py-1 bg-primary text-surface-container-lowest rounded font-label-mono-xs text-label-mono-xs font-semibold" id="wl-btn-1490" onclick="setWavelength('1490nm')" type="button">1490 nm</button><button class="py-1 bg-surface-container-high hover:bg-surface-bright text-on-surface rounded font-label-mono-xs text-label-mono-xs" id="wl-btn-1310" onclick="setWavelength('1310nm')" type="button">1310 nm</button><button class="py-1 bg-surface-container-high hover:bg-surface-bright text-on-surface rounded font-label-mono-xs text-label-mono-xs" id="wl-btn-1550" onclick="setWavelength('1550nm')" type="button">1550 nm</button></div></div><div><span class="text-label-mono-xs font-label-mono-xs text-outline block mb-1.5">Test Value Presets:</span><div class="flex gap-2"><button class="flex-1 py-1 bg-surface-container border border-secondary/40 text-secondary rounded text-label-mono-xs hover:bg-surface-bright" onclick="applyOpmPreset(-16.2)" type="button">Optimal (-16.2)</button><button class="flex-1 py-1 bg-surface-container border border-outline-variant text-outline rounded text-label-mono-xs hover:bg-surface-bright" onclick="applyOpmPreset(-24.8)" type="button">Marginal (-24.8)</button><button class="flex-1 py-1 bg-surface-container border border-error/40 text-error rounded text-label-mono-xs hover:bg-surface-bright" onclick="applyOpmPreset(-29.5)" type="button">Critical (-29.5)</button></div></div></div></div><div class="pt-3 hairline-t"><button class="w-full py-2.5 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded hover:bg-primary transition-colors flex items-center justify-center gap-1.5" onclick="stampTelemetryToBast()" type="button"><span class="material-symbols-outlined text-[18px]">verified</span><span>Commit Reading &amp; Stamp to BAST</span></button></div></div></div></div>
+<!-- ================= TAB 4: Atomic BOM Inventory Stock Engine ================= -->
+<div class="hidden" id="sim-panel-4"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between"><div class="flex items-center justify-between pb-3 hairline-b mb-3"><div class="text-title-sm font-title-sm text-on-surface font-semibold">Field Van 04 Mobile Stock (BOM)</div><span class="px-2 py-0.5 bg-surface-container text-primary font-label-mono-xs text-label-mono-xs rounded">ATOMIC ENGINE</span></div><div class="space-y-2 font-label-mono-xs text-label-mono-xs"><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fiber Patchcord SC-UPC 3m</span><span class="text-outline">SKU: FPC-SC-3M • Bin A-02</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-patchcord">24</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('patchcord', 'Fiber Patchcord SC-UPC 3m')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fast Connector SC-UPC 0.9mm</span><span class="text-outline">SKU: FCON-SC-09 • Bin B-01</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-connector">50</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('connector', 'Fast Connector SC-UPC')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">ONT GPON 1GE + 3FE + WiFi</span><span class="text-outline">SKU: ONT-GPON-WIFI • Serial Tracked</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-ont">6</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('ont', 'ONT GPON 1GE+3FE')" type="button">Use -1</button></div></div></div><div class="mt-4 pt-3 hairline-t"><div class="text-outline uppercase text-[10px] font-label-mono-xs mb-1.5">RECENT STOCK TRANSACTIONS</div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded text-label-mono-xs font-label-mono-xs space-y-1 max-h-24 overflow-y-auto" id="bom-log"><div>[09:12:00] Initial Van Stock Loaded (Audited by Warehouse).</div></div></div></div><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/40 rounded p-space-md flex flex-col justify-between font-label-mono-xs text-label-mono-xs"><div><div class="flex items-center justify-between pb-2 hairline-b mb-2"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">terminal</span><span class="text-on-surface font-semibold">TACTICAL TELEMETRY CLI TERMINAL</span></div><span class="text-secondary font-label-mono-xs text-[10px]">KERNEL v4.2-LIVE</span></div><div class="mb-2 flex flex-wrap gap-1"><span class="text-outline text-[10px] self-center mr-1">Quick Run:</span><button class="px-1.5 py-0.5 bg-surface-container hover:bg-surface-bright text-primary border border-primary/30 rounded text-[10px]" onclick="execQuickCli('help')" type="button">help</button><button class="px-1.5 py-0.5 bg-surface-container hover:bg-surface-bright text-primary border border-primary/30 rounded text-[10px]" onclick="execQuickCli('benteng probe --all')" type="button">benteng probe</button><button class="px-1.5 py-0.5 bg-surface-container hover:bg-surface-bright text-primary border border-primary/30 rounded text-[10px]" onclick="execQuickCli('fleet status')" type="button">fleet status</button><button class="px-1.5 py-0.5 bg-surface-container hover:bg-surface-bright text-primary border border-primary/30 rounded text-[10px]" onclick="execQuickCli('bast verify')" type="button">bast verify</button></div><div class="bg-surface-container-low border border-outline-variant/30 rounded p-2.5 h-60 overflow-y-auto space-y-1 font-label-mono-xs text-on-surface-variant leading-relaxed" id="cli-output-window"><div>Benteng Siber Tactical Console [Version 4.2.1-RELEASE]</div><div>Type <span class="text-primary">help</span> or click presets above to execute commands.</div></div></div><form class="mt-3 flex items-center gap-2 pt-2 hairline-t" onsubmit="handleCliCommand(event)"><span class="text-secondary font-bold">&gt;</span><input autocomplete="off" class="flex-1 bg-surface-container-low border border-outline-variant/40 rounded px-2.5 py-1.5 text-on-surface font-label-mono-xs text-label-mono-xs focus:border-primary focus:outline-none" id="cli-input" placeholder="e.g. benteng probe --all, fleet status, clear" type="text"><button class="px-3 py-1.5 bg-primary text-surface-container-lowest font-medium rounded hover:bg-primary-container text-label-mono-xs" type="submit">Execute</button></form></div></div></div>
+</div>
+</div>
+</section>
+<!-- =====================================================================
+       6. SECTION 4: LIVE SANDBOX & DEMO CREDENTIALS (#demo)
+  ====================================================================== -->
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="demo">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+<div>
+<div class="font-label-mono-xs text-label-mono-xs text-secondary uppercase tracking-widest mb-1">EVALUATION ENVIRONMENT</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Live Sandbox &amp; Demo Credentials</h2>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-md mt-2 md:mt-0">
+        Pre-seeded with 1,200 simulated FTTH/FTTB subscribers, active optical alarm alerts, and historical work orders. Test with one-tap clipboard copy.
+      </p>
+</div>
+<!-- Credentials Bento Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Card 1: Admin Dispatcher -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between hover:border-primary/40 transition-colors">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs text-label-mono-xs rounded">ROLE: NOC DISPATCHER</span>
+<span class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-secondary">
+<span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+              SANDBOX ONLINE
+            </span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface font-semibold mb-2">Clientzone Central NOC Portal</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-6">
+            Access fiber route maps, OLT optical power dashboards, real-time ticket escalation queues, and BAST approval workflows.
+          </p>
+<div class="space-y-3 font-label-mono-xs text-label-mono-xs">
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between">
+<div>
+<span class="text-outline block">TARGET URL</span>
+<span class="text-on-surface font-semibold">https://admin.bentengsiber.com/login</span>
+</div>
+<button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-primary rounded border border-outline-variant/40" onclick="copyToClipboard('https://admin.bentengsiber.com/login', this)" type="button">
+                Copy
+              </button>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between">
+<div>
+<span class="text-outline block">EMAIL IDENTIFIER</span>
+<span class="text-on-surface font-semibold">admin@fsm.com</span>
+</div>
+<button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-primary rounded border border-outline-variant/40" onclick="copyToClipboard('admin@fsm.com', this)" type="button">
+                Copy
+              </button>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between">
+<div>
+<span class="text-outline block">TEMPORARY TOKEN / PASS</span>
+<span class="text-on-surface font-semibold">password123</span>
+</div>
+<button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-primary rounded border border-outline-variant/40" onclick="copyToClipboard('password123', this)" type="button">
+                Copy
+              </button>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 hairline-t">
+<a class="w-full py-2.5 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded flex items-center justify-center gap-2 hover:bg-primary transition-colors" href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer">
+<span>Open NOC Console</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</a>
+</div>
+</div>
+<!-- Card 2: Field Technician -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between hover:border-secondary/40 transition-colors">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded">ROLE: LEAD FIELD TECH</span>
+<span class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-secondary">
+<span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+              SANDBOX ONLINE
+            </span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface font-semibold mb-2">Technician PWA Field Client</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-6">
+            Test offline work order fulfillment, camera photo attachments with geofence validation, and customer e-signature capture.
+          </p>
+<div class="space-y-3 font-label-mono-xs text-label-mono-xs">
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between">
+<div>
+<span class="text-outline block">TARGET PWA URL</span>
+<span class="text-on-surface font-semibold">https://app.bentengsiber.com/?demo=1</span>
+</div>
+<button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-secondary rounded border border-outline-variant/40" onclick="copyToClipboard('https://app.bentengsiber.com/?demo=1', this)" type="button">
+                Copy
+              </button>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between">
+<div>
+<span class="text-outline block">FIELD BADGE ID</span>
+<span class="text-on-surface font-semibold">alex@fsm.com</span>
+</div>
+<button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-secondary rounded border border-outline-variant/40" onclick="copyToClipboard('alex@fsm.com', this)" type="button">
+                Copy
+              </button>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between">
+<div>
+<span class="text-outline block">FIELD PIN CODE</span>
+<span class="text-on-surface font-semibold">password123</span>
+</div>
+<button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-secondary rounded border border-outline-variant/40" onclick="copyToClipboard('password123', this)" type="button">
+                Copy
+              </button>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 hairline-t">
+<a class="w-full py-2.5 bg-secondary text-surface-container-lowest font-body-sm font-medium rounded flex items-center justify-center gap-2 hover:bg-secondary-fixed transition-colors" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">
+<span>Launch Technician PWA (Demo)</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- =====================================================================
+       7. SECTION 5: COMMERCIAL ACQUISITION & LICENSING HUB (#acquisition)
+  ====================================================================== -->
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="acquisition">
+<div class="text-center max-w-3xl mx-auto mb-12">
+<div class="font-label-mono-xs text-label-mono-xs text-tertiary uppercase tracking-widest mb-1">M&amp;A ASSET SALE • COMMERCIAL TERMS</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Commercial Acquisition &amp; Licensing Hub</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-2">
+        Full sovereignty or managed operations. Choose between total intellectual property transfer or hosted white-label licensing.
+      </p>
+</div>
+<!-- Commercial Bento Pricing Cards -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-8">
+<!-- Card 1: Full Asset Buyout ($18,500) -->
+<div class="lg:col-span-7 bg-surface-container-lowest border-2 border-primary/50 rounded-lg p-space-lg flex flex-col justify-between relative shadow-[0_0_35px_-5px_rgba(34,211,238,0.15)]">
+<!-- Amber / Cyan Badge -->
+<div class="absolute -top-3 right-6 px-3 py-0.5 bg-tertiary text-surface-container-lowest font-label-mono-xs text-label-mono-xs font-bold uppercase rounded shadow">
+          RECOMMENDED BUYOUT
         </div>
+<div>
+<div class="flex items-center gap-2 font-label-mono-xs text-label-mono-xs text-primary mb-2">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>COMPLETE SOVEREIGN INTELLECTUAL PROPERTY</span>
+</div>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-display-lg font-display-lg font-bold text-on-surface">$18,500</span>
+<span class="text-outline font-label-mono-xs text-label-mono-xs uppercase">ONE-TIME SETTLEMENT • FULL TRANSFER</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-6">
+            Acquire 100% perpetual ownership of the Benteng Siber ecosystem. Zero recurring royalties. Complete sovereignty for regional ISPs, enterprise fiber telcos, or defense contractors.
+          </p>
+<!-- Deliverables Checklist -->
+<div class="space-y-3 font-body-sm text-on-surface mb-8">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<div>
+<span class="font-semibold">bentengsiber.com Domain Transfer:</span>
+<span class="text-on-surface-variant">Immediate authorization code push via Cloudflare Registrar.</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<div>
+<span class="font-semibold">Complete Git Repository &amp; Source Code:</span>
+<span class="text-on-surface-variant">Full backend (Laravel 11 / Go), Technician PWA, Android APK codebase, and Figma design tokens.</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<div>
+<span class="font-semibold">BAST Engine &amp; Posture Scanner Core:</span>
+<span class="text-on-surface-variant">Automated PDF generator with SHA-256 e-signature hashing and RFC 9116 audit suite.</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">check_circle</span>
+<div>
+<span class="font-semibold">60 Days Architecture Handover:</span>
+<span class="text-on-surface-variant">Direct technical consultation with original system architects for Kubernetes / Docker deployment.</span>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-3 pt-4 hairline-t">
+<div class="flex flex-wrap items-center gap-3">
+<a class="flex-1 py-3 bg-primary text-surface-container-lowest font-body-sm font-semibold rounded text-center hover:bg-primary-container transition-all flex items-center justify-center gap-2" href="https://wa.me/628123456789?text=Inquiry%20Benteng%20Siber%20Asset%20Buyout%2018.5k" target="_blank" rel="noopener noreferrer">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+<span>Inquire via WhatsApp Desk</span>
+</a>
+<a class="flex-1 py-3 bg-surface-container-high border border-outline-variant hover:border-primary text-on-surface font-body-sm font-semibold rounded text-center transition-all flex items-center justify-center gap-2" href="https://escrow.com" target="_blank" rel="noopener noreferrer">
+<span class="material-symbols-outlined text-[18px]">shield</span>
+<span>Initiate Escrow.com Buyout</span>
+</a>
+</div>
+<span class="text-[11px] font-label-mono-xs text-outline text-center block">
+            Escrow protection available worldwide • Standard BAST IP legal assignment contract included.
+          </span>
+</div>
+</div>
+<!-- Card 2: White-Label SaaS ($499/mo) -->
+<div class="lg:col-span-5 bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 font-label-mono-xs text-label-mono-xs text-secondary mb-2">
+<span class="material-symbols-outlined text-[16px]">cloud_sync</span>
+<span>MANAGED CLOUD INFRASTRUCTURE</span>
+</div>
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-display-lg font-display-lg font-bold text-on-surface">$499</span>
+<span class="text-outline font-label-mono-xs text-label-mono-xs uppercase">/ MONTH • CANCEL ANYTIME</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-6">
+            For growing ISPs needing turnkey deployment immediately without server administration overhead.
+          </p>
+<div class="space-y-3 font-body-sm text-on-surface mb-8">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">check</span>
+<div>
+<span class="font-semibold">Up to 50 Field Technicians:</span>
+<span class="text-on-surface-variant">Full PWA access with GPS geofencing.</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">check</span>
+<div>
+<span class="font-semibold">Unlimited BAST Generation:</span>
+<span class="text-on-surface-variant">Automated WhatsApp handover notifications.</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">check</span>
+<div>
+<span class="font-semibold">Custom Subdomain &amp; Logo:</span>
+<span class="text-on-surface-variant">Deploy on your-isp.bentengsiber.com.</span>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">check</span>
+<div>
+<span class="font-semibold">99.9% Uptime Guarantee:</span>
+<span class="text-on-surface-variant">Multi-region redundancy on AWS &amp; Cloudflare.</span>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-4 hairline-t">
+<a class="w-full py-3 bg-surface-container-high border border-outline-variant hover:border-secondary text-secondary font-body-sm font-semibold rounded text-center block transition-all" href="#demo">
+            Start 14-Day Free Evaluation
+          </a>
+</div>
+</div>
+</div>
+<!-- Escrow Trust Metrics Bar -->
+<div class="bg-surface-container-low border border-outline-variant/30 rounded p-space-md grid grid-cols-2 md:grid-cols-4 gap-4 text-center font-label-mono-xs text-label-mono-xs">
+<div>
+<span class="text-outline uppercase block">ESCROW SECURITY</span>
+<span class="text-on-surface font-semibold text-label-mono-sm">Escrow.com Certified Partner</span>
+</div>
+<div>
+<span class="text-outline uppercase block">LEGAL COMPLIANCE</span>
+<span class="text-on-surface font-semibold text-label-mono-sm">Indonesian Civil Code &amp; US Law</span>
+</div>
+<div>
+<span class="text-outline uppercase block">SETTLEMENT SPEED</span>
+<span class="text-on-surface font-semibold text-label-mono-sm">Same-Day Wire / USDT / BTC</span>
+</div>
+<div>
+<span class="text-outline uppercase block">CODE INTEGRITY</span>
+<span class="text-secondary font-semibold text-label-mono-sm">Zero Malware • Clean Audit</span>
+</div>
+</div>
+</section>
+<!-- =====================================================================
+       8. SECTION 6: INTERACTIVE DOMAIN SECURITY POSTURE AUDIT (#scanner-spotlight)
+  ====================================================================== -->
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="scanner-spotlight">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+<div>
+<div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">PERIMETER AUDIT TOOL • RFC 9116</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Interactive Domain Security Posture Audit</h2>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-md mt-2 md:mt-0">
+        Execute a quick live telemetry audit on any edge domain or run the benchmark diagnostic on bentengsiber.com.
+      </p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg shadow-2xl">
+<!-- Input Audit Form -->
+<form class="flex flex-wrap items-center gap-space-sm mb-6" id="audit-form" onsubmit="runDomainScan(event)">
+<div class="flex-1 min-w-[260px] relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">dns</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/40 rounded pl-9 pr-3 py-2 text-on-surface font-label-mono-sm text-label-mono-sm focus:border-primary focus:outline-none transition-colors" id="target-domain-input" placeholder="Enter target domain (e.g. your-isp.com)" type="text" value="bentengsiber.com">
+</div>
+<button class="px-5 py-2 bg-primary-container hover:bg-primary text-surface-container-lowest font-body-sm font-medium rounded flex items-center gap-2 transition-colors" id="audit-submit-btn" type="submit">
+<span class="material-symbols-outlined text-[18px]">security_update_good</span>
+<span>Execute Security Scan</span>
+</button>
+</form>
+<!-- Scan Progress Simulation Bar -->
+<div class="hidden mb-6" id="scan-progress-box">
+<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline mb-1">
+<span id="scan-stage-text">Connecting to authoritative nameservers...</span>
+<span id="scan-percent">0%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded overflow-hidden">
+<div class="h-full bg-primary transition-all duration-300 w-0" id="scan-progress-bar"></div>
+</div>
+</div>
+<!-- Report Card Output (Default Benchmark: Grade A 98/100) -->
+<div class="bg-surface-container-low border border-outline-variant/20 rounded p-space-md md:p-space-lg" id="audit-report-card">
+<div class="flex flex-wrap items-center justify-between gap-4 pb-space-md hairline-b mb-space-md">
+<div class="flex items-center gap-4">
+<!-- Score Ring -->
+<div class="w-16 h-16 rounded-full border-4 border-secondary flex flex-col items-center justify-center pulse-bead-green">
+<span class="text-title-sm font-title-sm font-bold text-secondary leading-none">98</span>
+<span class="text-[9px] font-label-mono-xs text-outline">/100</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md font-semibold text-on-surface">bentengsiber.com</span>
+<span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold">GRADE A+</span>
+</div>
+<p class="text-label-mono-xs font-label-mono-xs text-outline mt-0.5">Scanned via Edge Node JKT-02 • TLS 1.3 Strict-Transport-Security Valid</p>
+</div>
+</div>
+<div class="flex items-center gap-2 font-label-mono-xs text-label-mono-xs">
+<span class="text-outline">ACME CA: Let's Encrypt E6</span>
+<span class="text-secondary font-semibold">✓ DNSSEC ACTIVE</span>
+</div>
+</div>
+<!-- 4 Detailed Metric Tiles -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded">
+<div class="text-label-mono-xs font-label-mono-xs text-outline mb-1">TLS ENCRYPTION</div>
+<div class="text-title-sm font-title-sm text-secondary font-semibold">TLS 1.3 Only</div>
+<div class="text-[11px] font-label-mono-xs text-on-surface-variant mt-1">Legacy TLS 1.0 &amp; 1.1 strictly rejected. Forward secrecy enabled.</div>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded">
+<div class="text-label-mono-xs font-label-mono-xs text-outline mb-1">RFC 9116 SECURITY.TXT</div>
+<div class="text-title-sm font-title-sm text-secondary font-semibold">Present &amp; Valid</div>
+<div class="text-[11px] font-label-mono-xs text-on-surface-variant mt-1">/.well-known/security.txt discovered with PGP key &amp; bug bounty endpoint.</div>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded">
+<div class="text-label-mono-xs font-label-mono-xs text-outline mb-1">HTTP SECURITY HEADERS</div>
+<div class="text-title-sm font-title-sm text-secondary font-semibold">CSP &amp; HSTS 100%</div>
+<div class="text-[11px] font-label-mono-xs text-on-surface-variant mt-1">max-age=31536000; includeSubDomains; preload verified.</div>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded">
+<div class="text-label-mono-xs font-label-mono-xs text-outline mb-1">OPEN PORT EXPOSURE</div>
+<div class="text-title-sm font-title-sm text-secondary font-semibold">0 Management Leaks</div>
+<div class="text-[11px] font-label-mono-xs text-on-surface-variant mt-1">Port 22 (SSH), 8080 (MikroTik), and 80 (TR-069) shielded behind VPN.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- =====================================================================
+       9. SECTION 7: TELEMETRY STRIP, ARCHITECTURE & EDITORIAL BLOCKS (#architecture)
+  ====================================================================== -->
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="architecture">
+<!-- Telemetry Metrics Strip -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-md mb-16">
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">TOTAL ONT HANDSHAKES</span>
+<div class="text-headline-lg font-headline-lg font-bold text-primary mt-1">1.48M+</div>
+<span class="text-[11px] font-label-mono-xs text-secondary mt-1 block">↑ 14.2% Month-over-Month</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">MEAN FIELD CLOSURE TIME</span>
+<div class="text-headline-lg font-headline-lg font-bold text-on-surface mt-1">28.4m</div>
+<span class="text-[11px] font-label-mono-xs text-secondary mt-1 block">↓ 42% vs Manual Paper BAST</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">CONTRACTOR FRAUD RATE</span>
+<div class="text-headline-lg font-headline-lg font-bold text-secondary mt-1">0.00%</div>
+<span class="text-[11px] font-label-mono-xs text-outline mt-1 block">Hardware GPS + BLE Binding</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">DISPATCH CONCURRENCY</span>
+<div class="text-headline-lg font-headline-lg font-bold text-tertiary mt-1">10,000+</div>
+<span class="text-[11px] font-label-mono-xs text-outline mt-1 block">Parallel Field Nodes Supported</span>
+</div>
+</div>
+<!-- Architecture Flow Schematic -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg mb-16">
+<div class="flex items-center justify-between pb-3 hairline-b mb-6">
+<div>
+<span class="font-label-mono-xs text-label-mono-xs text-primary uppercase">SCHEMATIC 01 • END-TO-END TELEMETRY ROUTING</span>
+<h3 class="text-title-sm font-title-sm text-on-surface font-semibold">Zero-Trust Fiber Operations Pipeline</h3>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs text-outline">K8s • KAFKA • POSTGRES</span>
+</div>
+<!-- Linear Pipeline Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+<!-- Step 1 -->
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded relative">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-bold">STAGE 01</span>
+<h4 class="text-title-sm font-title-sm text-on-surface font-semibold mt-1">Incident / OLT Alarm</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px] mt-1">
+            SNMP trap / TR-069 informs Dying Gasp or optical threshold break (&gt; -25 dBm).
+          </p>
+</div>
+<!-- Step 2 -->
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded relative">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-bold">STAGE 02</span>
+<h4 class="text-title-sm font-title-sm text-on-surface font-semibold mt-1">Geo-Dispatcher</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px] mt-1">
+            Nearest certified van allocated via Dijkstra routing. Customer receives Uber-style tracking link.
+          </p>
+</div>
+<!-- Step 3 -->
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded relative">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-bold">STAGE 03</span>
+<h4 class="text-title-sm font-title-sm text-on-surface font-semibold mt-1">BLE Calibration &amp; Splice</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px] mt-1">
+            Technician connects optical meter, logs raw loss, takes EXIF-tagged photo inside geofence.
+          </p>
+</div>
+<!-- Step 4 -->
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded relative">
+<span class="font-label-mono-xs text-label-mono-xs text-secondary font-bold">STAGE 04</span>
+<h4 class="text-title-sm font-title-sm text-on-surface font-semibold mt-1">Immutable BAST Hash</h4>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px] mt-1">
+            Customer signs on glass. PDF compiled with SHA-256 seal. Inventory auto-deducted atomically.
+          </p>
+</div>
+</div>
+</div>
+<!-- 2-Column High-Contrast Editorial Blocks (Ice-Blue & Acid-Lime) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Ice Blue Card -->
+<div class="bg-[#DCEEF5] text-[#0A0B0F] p-space-lg md:p-space-xl rounded-lg border border-[#DCEEF5]/30 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-mono-xs text-label-mono-xs uppercase font-bold tracking-wider text-[#055763]">SYSTEM PHILOSOPHY</span>
+<span class="material-symbols-outlined text-[20px] text-[#055763]">terminal</span>
+</div>
+<h3 class="text-headline-lg font-headline-lg font-bold tracking-tight mb-3">
+            Eradicating manual paper BAST in Indonesian FTTx networks.
+          </h3>
+<p class="text-body-md font-body-md text-[#203239] leading-relaxed mb-6">
+            Traditional ISPs lose millions annually in fictitious technician dispatches, unreturned splice inventory, and uncollectible corporate subscriptions due to missing signed physical acceptance letters. Benteng Siber transforms every handover into a cryptographic event.
+          </p>
+</div>
+<div class="pt-4 border-t border-[#0A0B0F]/15 flex items-center justify-between font-label-mono-xs text-label-mono-xs text-[#055763] font-semibold">
+<span>SPECIFICATION: RFC 9116 / BAST-STD-v4</span>
+<a class="hover:underline flex items-center gap-1" href="#simulator">Inspect Flow →</a>
+</div>
+</div>
+<!-- Acid Lime Card -->
+<div class="bg-[#C8FA3C] text-[#0A0B0F] p-space-lg md:p-space-xl rounded-lg border border-[#C8FA3C]/30 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-mono-xs text-label-mono-xs uppercase font-bold tracking-wider text-[#2F4E02]">DEFENSE INTELLIGENCE</span>
+<span class="material-symbols-outlined text-[20px] text-[#2F4E02]">shield</span>
+</div>
+<h3 class="text-headline-lg font-headline-lg font-bold tracking-tight mb-3">
+            Zero-trust perimeters for mission-critical carrier backbones.
+          </h3>
+<p class="text-body-md font-body-md text-[#223903] leading-relaxed mb-6">
+            A compromised field technician terminal cannot be allowed to pivot into core BGP routers or OLT management VLANs. Our micro-segmented role-based perimeter ensures zero credential leakage, automated TLS rotation, and sub-minute session revocations.
+          </p>
+</div>
+<div class="pt-4 border-t border-[#0A0B0F]/15 flex items-center justify-between font-label-mono-xs text-label-mono-xs text-[#2F4E02] font-semibold">
+<span>CERTIFICATION: SOC2 COMPLIANT POSTURE</span>
+<a class="hover:underline flex items-center gap-1" href="#acquisition">Commercial Review →</a>
+</div>
+</div>
+</div>
+</section>
+<!-- =====================================================================
+       10. SECTION 8: MINIMALIST OBSIDIAN FOOTER (Shared Component: Footer)
+  ====================================================================== -->
+<footer class="w-full bg-surface-container-lowest hairline-t mt-auto">
+<div class="w-full px-space-lg md:px-margin-desktop py-space-xl max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md">
+<!-- Left Brand & Copyright -->
+<div class="flex flex-col items-center md:items-start text-center md:text-left">
+<a class="text-headline-md font-headline-md text-primary tracking-tight font-semibold flex items-center gap-2 mb-1" href="index.html">
+<span class="material-symbols-outlined text-[20px]">shield_with_house</span>
+<span>Benteng Siber</span>
+</a>
+<p class="text-body-sm font-body-sm text-outline max-w-md">
+          © 2025 Benteng Siber Ecosystem. Mission-Critical Defense &amp; Telemetry Architecture. All rights reserved.
+        </p>
+</div>
+<!-- Exact Shared Component Footer Links -->
+<div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-label-mono-xs font-label-mono-xs">
+<a class="text-outline hover:text-primary transition-colors duration-150" href="#scanner-spotlight">Security Posture</a>
+<a class="text-outline hover:text-primary transition-colors duration-150" href="#architecture">Documentation</a>
+<a class="text-outline hover:text-primary transition-colors duration-150" href="#demo">Sandbox API</a>
+<a class="text-outline hover:text-primary transition-colors duration-150" href="#simulator">BAST Compliance</a>
+<a class="text-outline hover:text-primary transition-colors duration-150" href="privacy-policy.html">Privacy &amp; Terms</a>
+<a class="text-outline hover:text-primary transition-colors duration-150" href="https://scanner.bentengsiber.com/.well-known/security.txt" target="_blank" rel="noopener noreferrer">Security.txt</a>
+</div>
+</div>
+</footer>
+<!-- =====================================================================
+       11. FLOATING DISMISSIBLE TESTING DOCK (#testing-dock)
+  ====================================================================== -->
+<aside class="fixed bottom-4 right-4 z-50 bg-surface-container-high/95 border border-primary/40 p-3 rounded-lg shadow-2xl backdrop-blur max-w-xs transition-transform duration-200" id="testing-dock">
+<div class="flex items-center justify-between pb-1.5 hairline-b mb-2">
+<div class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-primary font-semibold">
+<span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+<span>EVALUATION SUITE READY</span>
+</div>
+<button class="text-outline hover:text-white" onclick="dismissTestingDock()" title="Dismiss Dock" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<p class="text-[11px] font-body-sm text-on-surface-variant mb-2">
+      Quick test shortcuts for M&amp;A assessors &amp; technical auditors:
+    </p>
+<div class="flex flex-col gap-1.5 font-label-mono-xs text-label-mono-xs">
+<a class="px-2 py-1 bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between" href="#simulator" onclick="switchSimTab(1); goToStep(3);">
+<span>Test Sign-on-Glass</span>
+<span class="text-primary">→</span>
+</a>
+<a class="px-2 py-1 bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between" href="#acquisition">
+<span>Review $18.5k Buyout Terms</span>
+<span class="text-tertiary">→</span>
+</a>
+<button class="px-2 py-1 bg-primary text-surface-container-lowest font-medium rounded text-left flex items-center justify-between" onclick="triggerFastAudit()" type="button">
+<span>Run Live RFC 9116 Audit</span>
+<span>✓</span>
+</button>
+</div>
+</aside>
+<!-- =====================================================================
+       12. ROBUST VANILLA JAVASCRIPT CONTROLLERS
+  ====================================================================== -->
 
-        <div class="footer-bottom">
-            <span>&copy; 2026 Benteng Siber Ecosystem. All rights reserved.</span>
-            <span>FiberOps &copy; 2026 Powered by Benteng Siber. Turnkey Asset Ready.</span>
-        </div>
-    </footer>
 
-    <!-- Floating Testing Quick-Switch Bottom Bar (Role & Page Direct Navigator) -->
-    <div class="testing-dock" id="testing-dock" role="navigation" aria-label="Quick Role &amp; Page Navigator">
-        <span class="dock-badge">TEST NAV</span>
-        <a href="#portals" class="dock-btn"><ion-icon name="grid-outline"></ion-icon> <span>Portals</span></a>
-        <a href="#simulator" class="dock-btn"><ion-icon name="hardware-chip-outline"></ion-icon> <span>Simulator</span></a>
-        <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="dock-btn dock-btn-cyan">
-            <ion-icon name="phone-portrait-outline"></ion-icon> <span>Tech PWA (Direct)</span>
-        </a>
-        <a href="https://admin.bentengsiber.com/" target="_blank" rel="noopener noreferrer" class="dock-btn dock-btn-amber">
-            <ion-icon name="desktop-outline"></ion-icon> <span>Admin Panel</span>
-        </a>
-        <a href="playstore.html" class="dock-btn"><ion-icon name="logo-google-playstore"></ion-icon> <span>APK</span></a>
-        <button type="button" class="dock-close" id="btn-dock-close" title="Hide Testing Bar" aria-label="Hide Testing Bar">&times;</button>
-    </div>
 
-    <!-- Custom Script -->
-    <script src="script.js?v=5.0"></script>
-</body>
-</html>
+<span id="PING_CONTENT_PUSH_NOTIFICATION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><script id="simulator-interactive-runtime">
+    let currentLang = 'EN';
+    const langBtn = document.getElementById('lang-toggle-btn');
+    const langLabel = document.getElementById('lang-label');
+    if (langBtn && langLabel) {
+      langBtn.addEventListener('click', () => {
+        if (currentLang === 'EN') {
+          currentLang = 'ID';
+          langLabel.innerText = 'ID / EN';
+        } else {
+          currentLang = 'EN';
+          langLabel.innerText = 'EN / ID';
+        }
+      });
+    }
+
+    function switchSimTab(tabIndex) {
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`sim-tab-${i}`);
+        const panel = document.getElementById(`sim-panel-${i}`);
+        if (!btn || !panel) continue;
+        if (i === tabIndex) {
+          btn.className = 'px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all';
+          panel.classList.remove('hidden');
+          panel.classList.add('block');
+        } else {
+          btn.className = 'px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all';
+          panel.classList.remove('block');
+          panel.classList.add('hidden');
+        }
+      }
+      if (tabIndex === 1) {
+        initSignaturePad();
+      }
+    }
+
+    function goToStep(step) {
+      const c1 = document.getElementById('step-content-1');
+      const c2 = document.getElementById('step-content-2');
+      const c3 = document.getElementById('step-content-3');
+      if (c1) c1.classList.add('hidden');
+      if (c2) c2.classList.add('hidden');
+      if (c3) c3.classList.add('hidden');
+      
+      const bead1 = document.getElementById('step-bead-1');
+      const bead2 = document.getElementById('step-bead-2');
+      const bead3 = document.getElementById('step-bead-3');
+      const logText = document.getElementById('stepper-log-text');
+
+      if (step === 1 && c1 && bead1 && bead2 && bead3) {
+        c1.classList.remove('hidden');
+        bead1.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead2.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        bead3.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        if (logText) logText.innerText = '> Step 1: Work order acknowledged. Geofence valid.';
+      } else if (step === 2 && c2 && bead1 && bead2 && bead3) {
+        c2.classList.remove('hidden');
+        bead1.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead2.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead3.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        if (logText) logText.innerText = '> Step 2: Web Bluetooth OPM connected. Signal -18.42 dBm captured.';
+      } else if (step === 3 && c3 && bead1 && bead2 && bead3) {
+        c3.classList.remove('hidden');
+        bead1.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead2.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead3.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        if (logText) logText.innerText = '> Step 3: Prompting customer signature for digital BAST endorsement...';
+        initSignaturePad();
+      }
+    }
+
+    function simulatePhotoCapture() {
+      const box = document.getElementById('photo-box');
+      const cap = document.getElementById('photo-captured');
+      const log = document.getElementById('stepper-log-text');
+      if (box) box.classList.add('hidden');
+      if (cap) cap.classList.remove('hidden');
+      if (log) log.innerText = '> Photo taken: EXIF coordinates match (-6.2088, 106.8456). Integrity PASS.';
+    }
+
+    let canvas, ctx, isDrawing = false;
+    function initSignaturePad() {
+      canvas = document.getElementById('signature-canvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+
+      canvas.onmousedown = (e) => {
+        isDrawing = true;
+        ctx.beginPath();
+        const rect = canvas.getBoundingClientRect();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      };
+      canvas.onmousemove = (e) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+      };
+      window.onmouseup = () => { isDrawing = false; };
+
+      canvas.ontouchstart = (e) => {
+        isDrawing = true;
+        ctx.beginPath();
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        e.preventDefault();
+      };
+      canvas.ontouchmove = (e) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+        e.preventDefault();
+      };
+      canvas.ontouchend = () => { isDrawing = false; };
+    }
+
+    function clearSignature() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function autoSignature() {
+      if (!ctx || !canvas) return;
+      clearSignature();
+      ctx.beginPath();
+      ctx.moveTo(40, 60);
+      ctx.bezierCurveTo(70, 20, 90, 80, 120, 40);
+      ctx.bezierCurveTo(150, 70, 180, 30, 220, 55);
+      ctx.moveTo(90, 65);
+      ctx.lineTo(240, 65);
+      ctx.stroke();
+      const log = document.getElementById('stepper-log-text');
+      if (log) log.innerText = '> Auto-signature vector captured. Ready to commit.';
+    }
+
+    function completeHandover() {
+      alert('BAST Handover endorsed! Hash generated: SHA256-4F8A902C118B. PDF synced to dispatch ledger.');
+      const log = document.getElementById('stepper-log-text');
+      if (log) log.innerText = '> Handover complete. Status changed to RESOLVED. Notification dispatched.';
+    }
+
+    let radarProgress = 20;
+    let radarAutoInterval = null;
+    let radarIsAuto = true;
+
+    function updateRadarProgress(val) {
+      radarProgress = Number(val);
+      const van = document.getElementById('radar-van');
+      const etaText = document.getElementById('radar-eta');
+      const speedText = document.getElementById('radar-speed');
+      const percentText = document.getElementById('radar-percent-text');
+      const slider = document.getElementById('radar-progress-slider');
+      const log = document.getElementById('radar-event-log');
+
+      if (slider) slider.value = radarProgress;
+      if (percentText) percentText.innerText = `${radarProgress}%`;
+
+      const maxOffset = 210;
+      const currentOffset = Math.round((radarProgress / 100) * maxOffset);
+      if (van) van.style.transform = `translateX(${currentOffset}px)`;
+
+      if (radarProgress >= 100) {
+        if (etaText) etaText.innerText = 'Arrived at customer premises!';
+        if (speedText) speedText.innerText = '0 km/h';
+        if (log) log.innerText = '> Van #04 has reached target ONT. Geofence lock initiated.';
+      } else {
+        const remainingDistance = ((100 - radarProgress) * 0.03).toFixed(1);
+        const remainingMinutes = Math.max(1, Math.round((100 - radarProgress) * 0.1));
+        const randomSpeed = Math.round(34 + Math.random() * 8);
+        if (etaText) etaText.innerText = `${remainingMinutes} Minutes (${remainingDistance} km away)`;
+        if (speedText) speedText.innerText = `${randomSpeed} km/h`;
+        if (log) log.innerText = `> Van in transit. Waypoint ${Math.min(6, Math.floor(radarProgress / 18) + 1)} verified via GPS.`;
+      }
+    }
+
+    function toggleRadarSimulation() {
+      const btn = document.getElementById('radar-auto-btn');
+      radarIsAuto = !radarIsAuto;
+      if (radarIsAuto) {
+        if (btn) btn.innerText = 'Auto Move: ON';
+        startRadarTimer();
+      } else {
+        if (btn) btn.innerText = 'Auto Move: OFF';
+        if (radarAutoInterval) clearInterval(radarAutoInterval);
+      }
+    }
+
+    function startRadarTimer() {
+      if (radarAutoInterval) clearInterval(radarAutoInterval);
+      radarAutoInterval = setInterval(() => {
+        if (radarProgress < 100) {
+          updateRadarProgress(radarProgress + 5);
+        } else {
+          updateRadarProgress(10);
+        }
+      }, 3500);
+    }
+
+    function simulateVehicleArrival() {
+      updateRadarProgress(100);
+    }
+
+    function resendWhatsAppPing() {
+      const log = document.getElementById('radar-event-log');
+      const status = document.getElementById('radar-socket-status');
+      if (log) log.innerText = '> WhatsApp template triggered: "Teknisi Budi menuju lokasi Anda..."';
+      if (status) status.innerText = 'WhatsApp Cloud API: 200 OK • MessageID: wamid.HBgL';
+    }
+
+    let currentWavelength = '1490nm';
+    function handleOpmSlider(val) {
+      const numVal = parseFloat(val);
+      const display = document.getElementById('opm-live-display');
+      const sliderVal = document.getElementById('opm-slider-val');
+      const pill = document.getElementById('opm-status-pill');
+      const desc = document.getElementById('opm-spec-desc');
+
+      if (sliderVal) sliderVal.innerText = `${numVal.toFixed(1)} dBm`;
+      if (display) display.innerText = `${numVal.toFixed(2)} dBm`;
+
+      if (numVal >= -24.0 && numVal <= -15.0) {
+        if (pill) {
+          pill.className = 'px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold';
+          pill.innerText = 'OPTIMAL SPEC';
+        }
+        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-secondary';
+        if (desc) desc.innerText = 'Within ITU-T G.984 GPON Standard Range (-15 to -24 dBm).';
+      } else if (numVal < -24.0 && numVal >= -27.0) {
+        if (pill) {
+          pill.className = 'px-2 py-0.5 bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-mono-xs text-label-mono-xs rounded font-bold';
+          pill.innerText = 'MARGINAL SIGNAL';
+        }
+        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-tertiary';
+        if (desc) desc.innerText = 'Marginal sensitivity. May experience micro-burst packet loss.';
+      } else {
+        if (pill) {
+          pill.className = 'px-2 py-0.5 bg-error/10 border border-error/30 text-error font-label-mono-xs text-label-mono-xs rounded font-bold';
+          pill.innerText = 'CRITICAL ATTENUATION';
+        }
+        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-error';
+        if (desc) desc.innerText = 'Signal out of bounds! High probability of ONT LOS alarm.';
+      }
+    }
+
+    function setWavelength(wl) {
+      currentWavelength = wl;
+      const label = document.getElementById('active-wl-label');
+      const tableLabel = document.getElementById('table-metric-label');
+      if (label) label.innerText = `λ ${wl}`;
+      if (tableLabel) tableLabel.innerText = `Optical Loss (${wl})`;
+
+      ['1490', '1310', '1550'].forEach(id => {
+        const btn = document.getElementById(`wl-btn-${id}`);
+        if (btn) {
+          if (wl.includes(id)) {
+            btn.className = 'py-1 bg-primary text-surface-container-lowest rounded font-label-mono-xs text-label-mono-xs font-semibold';
+          } else {
+            btn.className = 'py-1 bg-surface-container-high hover:bg-surface-bright text-on-surface rounded font-label-mono-xs text-label-mono-xs';
+          }
+        }
+      });
+    }
+
+    function applyOpmPreset(val) {
+      const slider = document.getElementById('opm-slider');
+      if (slider) {
+        slider.value = val;
+        handleOpmSlider(val);
+      }
+    }
+
+    function stampTelemetryToBast() {
+      const slider = document.getElementById('opm-slider');
+      const val = slider ? parseFloat(slider.value).toFixed(2) : '-17.84';
+      const bastVal = document.getElementById('bast-optical-val');
+      const bastStatus = document.getElementById('bast-optical-status');
+      const timestamp = document.getElementById('bast-timestamp');
+      const docNo = document.getElementById('bast-doc-no');
+
+      const now = new Date();
+      if (timestamp) timestamp.innerText = `TIMESTAMP: ${now.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
+      if (docNo) docNo.innerText = `NO: BAST/BS/${now.getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
+
+      if (bastVal) bastVal.innerText = `${val} dBm`;
+      const numVal = parseFloat(val);
+      if (numVal <= -24.0) {
+        if (bastStatus) {
+          bastStatus.innerText = 'FAIL (ATTENUATION)';
+          bastStatus.className = 'p-1.5 font-bold text-red-600';
+        }
+        if (bastVal) bastVal.className = 'p-1.5 font-bold text-red-600';
+      } else {
+        if (bastStatus) {
+          bastStatus.innerText = 'PASSED';
+          bastStatus.className = 'p-1.5 font-bold text-emerald-700';
+        }
+        if (bastVal) bastVal.className = 'p-1.5 font-bold text-emerald-700';
+      }
+      alert(`OPM Telemetry (${val} dBm, ${currentWavelength}) stamped into BAST digital certificate.`);
+    }
+
+    function execQuickCli(cmd) {
+      const input = document.getElementById('cli-input');
+      if (input) input.value = cmd;
+      executeCli(cmd);
+    }
+
+    function handleCliCommand(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('cli-input');
+      if (!input) return;
+      const cmd = input.value.trim();
+      if (cmd) {
+        executeCli(cmd);
+        input.value = '';
+      }
+    }
+
+    function executeCli(cmd) {
+      const win = document.getElementById('cli-output-window');
+      if (!win) return;
+
+      const userRow = document.createElement('div');
+      userRow.className = 'text-primary font-semibold';
+      userRow.innerText = `> ${cmd}`;
+      win.appendChild(userRow);
+
+      const cleanCmd = cmd.toLowerCase().trim();
+      const resp = document.createElement('div');
+      resp.className = 'text-on-surface pl-2';
+
+      if (cleanCmd === 'clear') {
+        win.innerHTML = '<div>Benteng Siber Tactical Console [Version 4.2.1-RELEASE]</div>';
+        return;
+      } else if (cleanCmd === 'help') {
+        resp.innerHTML = '<span class="text-secondary">Available CLI Commands:</span><br/>' +
+          '&bull; <strong class="text-primary">help</strong> - List available terminal operations<br/>' +
+          '&bull; <strong class="text-primary">benteng probe --all</strong> - Audit active GPON OLT links &amp; dying gasps<br/>' +
+          '&bull; <strong class="text-primary">fleet status</strong> - Display active field vans, GPS geofences, and tickets<br/>' +
+          '&bull; <strong class="text-primary">bast verify</strong> - Cryptographic checksum validation on newest BAST PDF<br/>' +
+          '&bull; <strong class="text-primary">bom stock</strong> - Query current van atomic stock levels<br/>' +
+          '&bull; <strong class="text-primary">clear</strong> - Purge terminal window buffer';
+      } else if (cleanCmd.includes('probe')) {
+        resp.innerHTML = '<span class="text-secondary">[OLT-CORE-JKT-01] PROBE RUNNING...</span><br/>' +
+          '&bull; PON 01: 64/64 ONT Online (Loss: -17.2 dBm) <span class="text-secondary">[OK]</span><br/>' +
+          '&bull; PON 02: 59/64 ONT Online (Loss: -19.4 dBm) <span class="text-secondary">[OK]</span><br/>' +
+          '&bull; PON 03: 62/64 ONT Online (Loss: -21.1 dBm) <span class="text-secondary">[OK]</span><br/>' +
+          '&bull; Zero Dying-Gasp alarms registered in last 60 minutes.';
+      } else if (cleanCmd.includes('fleet')) {
+        resp.innerHTML = '<span class="text-secondary">FLEET DISPATCH MATRIX:</span><br/>' +
+          '&bull; Van #01: Budi Santoso [WO-88219] &bull; Status: ON-ROUTE (GPS: Inside geofence)<br/>' +
+          '&bull; Van #02: Agus Wirawan [WO-88217] &bull; Status: SPLICING &bull; Loss: -18.2 dBm<br/>' +
+          '&bull; Van #03: Dimas Aditya [IDLE] &bull; Assigned to Standby Hub Senayan';
+      } else if (cleanCmd.includes('bast')) {
+        resp.innerHTML = '<span class="text-secondary">BAST CERTIFICATE INTEGRITY VERIFICATION:</span><br/>' +
+          '&bull; Certificate ID: BAST/BS/2025/1109<br/>' +
+          '&bull; SHA-256 Checksum: 4f8a902c118bfa923d8819ef3420<br/>' +
+          '&bull; Timestamp Authority: R2 S3 Object Lock &bull; Signature: 2/2 Valid <span class="text-secondary">[PASS]</span>';
+      } else if (cleanCmd.includes('bom')) {
+        resp.innerHTML = `Stock Patchcord: ${stockCounts.patchcord} | Connectors: ${stockCounts.connector} | ONT Units: ${stockCounts.ont}`;
+      } else {
+        resp.innerHTML = `<span class="text-error">Command not found: '${cmd}'. Type 'help' for command directory.</span>`;
+      }
+
+      win.appendChild(resp);
+      win.scrollTop = win.scrollHeight;
+    }
+
+    const stockCounts = { patchcord: 24, connector: 50, ont: 6 };
+    function deductStock(itemKey, itemName) {
+      if (stockCounts[itemKey] > 0) {
+        stockCounts[itemKey]--;
+        const badge = document.getElementById(`stock-${itemKey}`);
+        if (badge) badge.innerText = stockCounts[itemKey];
+        
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0];
+        const logBox = document.getElementById('bom-log');
+        if (logBox) {
+          const entry = document.createElement('div');
+          entry.className = 'text-secondary';
+          entry.innerHTML = `[${timeStr}] DEDUCT: ${itemName} (-1) &bull; Remainder: ${stockCounts[itemKey]} &bull; WO-88219`;
+          logBox.prepend(entry);
+        }
+      } else {
+        alert('Stock depleted for this item in Mobile Van 04!');
+      }
+    }
+
+    function copyToClipboard(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btnElement.innerText;
+        btnElement.innerText = 'Copied!';
+        btnElement.classList.add('bg-primary', 'text-surface-container-lowest');
+        setTimeout(() => {
+          btnElement.innerText = originalText;
+          btnElement.classList.remove('bg-primary', 'text-surface-container-lowest');
+        }, 1800);
+      });
+    }
+
+    function runDomainScan(e) {
+      if (e) e.preventDefault();
+      const inputEl = document.getElementById('target-domain-input');
+      const domain = (inputEl && inputEl.value.trim()) || 'bentengsiber.com';
+      const progressBox = document.getElementById('scan-progress-box');
+      const progressBar = document.getElementById('scan-progress-bar');
+      const stageText = document.getElementById('scan-stage-text');
+      const percentText = document.getElementById('scan-percent');
+      const reportCard = document.getElementById('audit-report-card');
+      const submitBtn = document.getElementById('audit-submit-btn');
+
+      if (progressBox) progressBox.classList.remove('hidden');
+      if (reportCard) reportCard.classList.add('opacity-40');
+      if (submitBtn) submitBtn.disabled = true;
+
+      let progress = 0;
+      const stages = [
+        'Resolving DNSSEC & authoritative NS...',
+        'Handshaking TLS 1.3 cipher negotiation...',
+        'Querying /.well-known/security.txt (RFC 9116)...',
+        'Inspecting CSP, HSTS, and X-Content headers...',
+        'Compiling vulnerability index & generating score...'
+      ];
+
+      const interval = setInterval(() => {
+        progress += 20;
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (percentText) percentText.innerText = `${progress}%`;
+        if (stageText) stageText.innerText = stages[Math.min(Math.floor(progress / 20) - 1, stages.length - 1)];
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            if (progressBox) progressBox.classList.add('hidden');
+            if (reportCard) reportCard.classList.remove('opacity-40');
+            if (submitBtn) submitBtn.disabled = false;
+          }, 400);
+        }
+      }, 300);
+    }
+
+    function triggerFastAudit() {
+      const scannerEl = document.getElementById('scanner-spotlight');
+      if (scannerEl) {
+        scannerEl.scrollIntoView({ behavior: 'smooth' });
+        runDomainScan();
+      }
+    }
+
+    function dismissTestingDock() {
+      const dock = document.getElementById('testing-dock');
+      if (dock) dock.style.display = 'none';
+    }
+
+    function clearHeroLog() {
+      const log = document.getElementById('hero-log-stream');
+      if (log) {
+        log.innerHTML = '<div class="text-outline">[CLEARED] Stream listening for inbound WebSockets...</div>';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSignaturePad();
+      startRadarTimer();
+    });
+  </script>
+<script>
+  (function() {
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-nav-menu');
+    if (mobileBtn && mobileMenu) {
+      mobileBtn.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.contains('hidden');
+        mobileMenu.classList.toggle('hidden');
+        mobileBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+      });
+      mobileMenu.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+      });
+    }
+  })();
+</script>
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true" style="visibility: visible !important;"></grammarly-desktop-integration></html>

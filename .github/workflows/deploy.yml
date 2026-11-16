@@ -27,7 +27,7 @@ jobs:
       - name: 🏗️ Install & Build Frontend
         run: |
           npm ci
-          npx ng build --configuration production --base-href /
+          npx ng build --configuration production --base-href ./
 
       # 3.5 Verify FTP Secrets Existence
       - name: 🔍 Verify FTP Secrets Configuration
@@ -38,48 +38,52 @@ jobs:
           fi
           echo "FTP Secrets are populated and ready for deployment."
 
-      # 4. Deploy Compiled Frontend PWA to /public_html/app/
-      - name: 🚀 Deploy PWA Client
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./www/
-          server-dir: /public_html/app/
-          dry-run: false
-
-      # 4.5 Deploy Landing Page to /public_html/ (Root)
+      # 4. Deploy Root Landing Page to ./ (public_html root)
       - name: 🚀 Deploy Root Landing Page
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
           local-dir: ./landing-page/
-          server-dir: /public_html/
+          server-dir: ${{ vars.FTP_LANDING_DIR || './' }}
           dry-run: false
 
-      # 5. Deploy Admin Public bootstrap assets to /public_html/admin/
+      # 5. Deploy Compiled Frontend PWA to app/ (public_html/app)
+      - name: 🚀 Deploy PWA Client
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          local-dir: ./www/
+          server-dir: ${{ vars.FTP_APP_DIR || 'app/' }}
+          dry-run: false
+
+      # 6. Deploy Admin Public bootstrap assets to admin/ (public_html/admin)
       - name: 🚀 Deploy Admin Public
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
           local-dir: ./admin-public/
-          server-dir: /public_html/admin/
+          server-dir: ${{ vars.FTP_ADMIN_DIR || 'admin/' }}
           dry-run: false
 
-      # 6. Deploy Backend Core Laravel (exclude vendor, node_modules, tests, local .env) to /laravel-core/
+      # 7. Deploy Backend Core Laravel to laravel-core/ (public_html/laravel-core)
       - name: 🚀 Deploy Laravel Backend Core
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
           local-dir: ./fsm-backend/
-          server-dir: /laravel-core/
+          server-dir: ${{ vars.FTP_CORE_DIR || 'laravel-core/' }}
           dry-run: false
           exclude: |
             **/node_modules/**

@@ -18,35 +18,43 @@ define('LARAVEL_START', microtime(true));
 |
 */
 
-if (file_exists($maintenance = __DIR__.'/../../laravel-core/storage/framework/maintenance.php')) {
+/*
+|--------------------------------------------------------------------------
+| Locate Laravel Core Bootstrap
+|--------------------------------------------------------------------------
+|
+| Dynamically detect whether Laravel core is placed inside public_html
+| (/public_html/laravel-core) or above it (/home/username/laravel-core).
+|
+*/
+
+$coreCandidates = [
+    __DIR__ . '/../laravel-core',
+    __DIR__ . '/../../laravel-core',
+    dirname(__DIR__) . '/laravel-core',
+    dirname(__DIR__, 2) . '/laravel-core',
+];
+
+$laravelCore = null;
+foreach ($coreCandidates as $candidate) {
+    if (file_exists($candidate . '/bootstrap/app.php')) {
+        $laravelCore = $candidate;
+        break;
+    }
+}
+
+if (!$laravelCore) {
+    http_response_code(500);
+    die('Critical Error: Laravel core bootstrap not found. Please verify laravel-core deployment path.');
+}
+
+if (file_exists($maintenance = $laravelCore . '/storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
-*/
+require $laravelCore . '/vendor/autoload.php';
 
-require __DIR__.'/../../laravel-core/vendor/autoload.php';
-
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
-*/
-
-$app = require_once __DIR__.'/../../laravel-core/bootstrap/app.php';
+$app = require_once $laravelCore . '/bootstrap/app.php';
 
 $kernel = $app->make(Kernel::class);
 

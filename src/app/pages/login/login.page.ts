@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { StorageService } from '../../services/storage.service';
@@ -15,6 +15,7 @@ export class LoginPage {
   private auth = inject(AuthService);
   private storage = inject(StorageService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
 
@@ -41,11 +42,24 @@ export class LoginPage {
       return;
     }
 
+    const demoParam = this.route.snapshot.queryParamMap.get('demo')
+      || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('demo') : null);
+    if (demoParam === '1' || demoParam === 'true') {
+      await this.enterDemoMode();
+      return;
+    }
+
     // Auto-populate remembered email
     const savedEmail = await this.storage.get('remembered_email');
     if (savedEmail) {
       this.email = savedEmail;
     }
+  }
+
+  async enterDemoMode() {
+    await this.auth.loginDemo(this.email || undefined);
+    this.showToast('Demo Testing Mode aktif (Data Simulasi Lokal)', 'success');
+    this.router.navigate(['/task-list'], { replaceUrl: true });
   }
 
   fillDemo(email: string) {

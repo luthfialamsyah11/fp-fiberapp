@@ -122,6 +122,11 @@
         <ion-spinner *ngIf="isLoading" name="crescent" class="btn-spinner"></ion-spinner>
       </button>
 
+      <button type="button" class="demo-direct-btn" (click)="enterDemoMode()">
+        <ion-icon name="flash-outline"></ion-icon>
+        <span>Direct Demo Dashboard (Testing Mode)</span>
+      </button>
+
       <div class="admin-portal-link">
         <p>Login sebagai Administrator? <a [href]="adminUrl" target="_blank" rel="noopener noreferrer">Buka Web Admin</a></p>
       </div>

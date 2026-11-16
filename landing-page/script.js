@@ -711,3 +711,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+// Testing Quick-Switch Bottom Bar Dismiss
+document.addEventListener('DOMContentLoaded', () => {
+    const testingDock = document.getElementById('testing-dock');
+    const btnDockClose = document.getElementById('btn-dock-close');
+    if (testingDock && btnDockClose) {
+        btnDockClose.addEventListener('click', () => {
+            testingDock.classList.add('hidden');
+        });
+    }
+});

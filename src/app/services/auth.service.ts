@@ -4,6 +4,7 @@ import { ApiService } from './api.service';
 import { Router } from '@angular/router';
 import { LocationService } from './location.service';
 import { environment } from '../../environments/environment';
+import { DEMO_USER } from './demo-mock.data';
 
 const isDebug = !environment.production;
 
@@ -32,6 +33,7 @@ export class AuthService {
         throw { error: { message: 'Aplikasi ini khusus untuk teknisi. Admin harap login melalui Web.' } };
       }
 
+      await this.storage.remove('demo_mode');
       await this.storage.set('token', res.token);
       await this.storage.set('user', res.user);
       return res;
@@ -52,6 +54,22 @@ export class AuthService {
     }
   }
 
+  async loginDemo(email?: string): Promise<any> {
+    const demoUser = {
+      ...DEMO_USER,
+      email: email || DEMO_USER.email,
+      name: email?.startsWith('budi')
+        ? 'Budi Santoso'
+        : email?.startsWith('citra')
+          ? 'Citra Lestari'
+          : DEMO_USER.name,
+    };
+    await this.storage.set('demo_mode', true);
+    await this.storage.set('token', 'demo-mock-token');
+    await this.storage.set('user', demoUser);
+    return { token: 'demo-mock-token', user: demoUser };
+  }
+
   async logout() {
     try {
       this.locationService.stopTracking();
@@ -59,6 +77,7 @@ export class AuthService {
     } catch (e) {
       console.warn('[AuthService] Logout API failed, continuing local logout:', e);
     }
+    await this.storage.remove('demo_mode');
     await this.storage.remove('token');
     await this.storage.remove('user');
     this.router.navigate(['/login']);

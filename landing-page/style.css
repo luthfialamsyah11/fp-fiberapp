@@ -3075,3 +3075,98 @@ ion-icon {
         justify-content: center;
     }
 }
+
+/* =========================================================================
+   FLOATING TESTING QUICK-SWITCH BOTTOM BAR
+   ========================================================================= */
+.testing-dock {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 950;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(11, 17, 30, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    border-radius: 999px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 242, 254, 0.15);
+    max-width: 95vw;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.testing-dock.hidden {
+    display: none !important;
+}
+
+.dock-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #070a10;
+    background: #10b981;
+    padding: 3px 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.dock-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.dock-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.dock-btn-cyan {
+    color: #00f2fe;
+    border-color: rgba(0, 242, 254, 0.35);
+    background: rgba(0, 242, 254, 0.1);
+}
+
+.dock-btn-cyan:hover {
+    background: rgba(0, 242, 254, 0.22);
+}
+
+.dock-btn-amber {
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.dock-btn-amber:hover {
+    background: rgba(245, 158, 11, 0.22);
+}
+
+.dock-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 2px 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.dock-close:hover {
+    color: #ffffff;
+}

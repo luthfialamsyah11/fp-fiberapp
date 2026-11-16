@@ -1,724 +1,602 @@
-/**
- * BENTENG SIBER ECOSYSTEM — INTERACTION CONTROLLER v4.5 (GLOBAL BILINGUAL EDITION)
- * 60 FPS Ambient Mouse Glow | Mobile Sidebar Drawer | Clipboard Handler |
- * Interactive Product Simulator Hub | Bilingual Language Switcher (EN/ID)
- */
+function switchSimTab(tabIndex) {
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`sim-tab-${i}`);
+        const panel = document.getElementById(`sim-panel-${i}`);
+        if (!btn || !panel) continue;
+        if (i === tabIndex) {
+          btn.className = 'px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all';
+          panel.classList.remove('hidden');
+          panel.classList.add('block');
+        } else {
+          btn.className = 'px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all';
+          panel.classList.remove('block');
+          panel.classList.add('hidden');
+        }
+      }
+      if (tabIndex === 1) {
+        initSignaturePad();
+      }
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // =========================================================================
-    // 0. Automatic Localhost / Production Link Adaptor
-    // =========================================================================
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalhost) {
-        console.log('[BentengSiber Gateway] Localhost detected. Mapping portal links to active local services...');
+    function goToStep(step) {
+      const c1 = document.getElementById('step-content-1');
+      const c2 = document.getElementById('step-content-2');
+      const c3 = document.getElementById('step-content-3');
+      if (c1) c1.classList.add('hidden');
+      if (c2) c2.classList.add('hidden');
+      if (c3) c3.classList.add('hidden');
+      
+      const bead1 = document.getElementById('step-bead-1');
+      const bead2 = document.getElementById('step-bead-2');
+      const bead3 = document.getElementById('step-bead-3');
+      const logText = document.getElementById('stepper-log-text');
+
+      if (step === 1 && c1 && bead1 && bead2 && bead3) {
+        c1.classList.remove('hidden');
+        bead1.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead2.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        bead3.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        if (logText) logText.innerText = '> Step 1: Work order acknowledged. Geofence valid.';
+      } else if (step === 2 && c2 && bead1 && bead2 && bead3) {
+        c2.classList.remove('hidden');
+        bead1.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead2.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead3.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        if (logText) logText.innerText = '> Step 2: Web Bluetooth OPM connected. Signal -18.42 dBm captured.';
+      } else if (step === 3 && c3 && bead1 && bead2 && bead3) {
+        c3.classList.remove('hidden');
+        bead1.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead2.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead3.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        if (logText) logText.innerText = '> Step 3: Prompting customer signature for digital BAST endorsement...';
+        initSignaturePad();
+      }
+    }
+
+    function simulatePhotoCapture() {
+      const box = document.getElementById('photo-box');
+      const cap = document.getElementById('photo-captured');
+      const log = document.getElementById('stepper-log-text');
+      if (box) box.classList.add('hidden');
+      if (cap) cap.classList.remove('hidden');
+      if (log) log.innerText = '> Photo taken: EXIF coordinates match (-6.2088, 106.8456). Integrity PASS.';
+    }
+
+    let canvas, ctx, isDrawing = false;
+    function initSignaturePad() {
+      canvas = document.getElementById('signature-canvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+
+      canvas.onmousedown = (e) => {
+        isDrawing = true;
+        ctx.beginPath();
+        const rect = canvas.getBoundingClientRect();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      };
+      canvas.onmousemove = (e) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+      };
+      window.onmouseup = () => { isDrawing = false; };
+
+      canvas.ontouchstart = (e) => {
+        isDrawing = true;
+        ctx.beginPath();
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        e.preventDefault();
+      };
+      canvas.ontouchmove = (e) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+        e.preventDefault();
+      };
+      canvas.ontouchend = () => { isDrawing = false; };
+    }
+
+    function clearSignature() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function autoSignature() {
+      if (!ctx || !canvas) return;
+      clearSignature();
+      ctx.beginPath();
+      ctx.moveTo(40, 60);
+      ctx.bezierCurveTo(70, 20, 90, 80, 120, 40);
+      ctx.bezierCurveTo(150, 70, 180, 30, 220, 55);
+      ctx.moveTo(90, 65);
+      ctx.lineTo(240, 65);
+      ctx.stroke();
+      const log = document.getElementById('stepper-log-text');
+      if (log) log.innerText = '> Auto-signature vector captured. Ready to commit.';
+    }
+
+    function completeHandover() {
+      alert('BAST Handover endorsed! Hash generated: SHA256-4F8A902C118B. PDF synced to dispatch ledger.');
+      const log = document.getElementById('stepper-log-text');
+      if (log) log.innerText = '> Handover complete. Status changed to RESOLVED. Notification dispatched.';
+    }
+
+    let radarProgress = 20;
+    let radarAutoInterval = null;
+    let radarIsAuto = true;
+
+    function updateRadarProgress(val) {
+      radarProgress = Number(val);
+      const van = document.getElementById('radar-van');
+      const etaText = document.getElementById('radar-eta');
+      const speedText = document.getElementById('radar-speed');
+      const percentText = document.getElementById('radar-percent-text');
+      const slider = document.getElementById('radar-progress-slider');
+      const log = document.getElementById('radar-event-log');
+
+      if (slider) slider.value = radarProgress;
+      if (percentText) percentText.innerText = `${radarProgress}%`;
+
+      const maxOffset = 210;
+      const currentOffset = Math.round((radarProgress / 100) * maxOffset);
+      if (van) van.style.transform = `translateX(${currentOffset}px)`;
+
+      if (radarProgress >= 100) {
+        if (etaText) etaText.innerText = 'Arrived at customer premises!';
+        if (speedText) speedText.innerText = '0 km/h';
+        if (log) log.innerText = '> Van #04 has reached target ONT. Geofence lock initiated.';
+      } else {
+        const remainingDistance = ((100 - radarProgress) * 0.03).toFixed(1);
+        const remainingMinutes = Math.max(1, Math.round((100 - radarProgress) * 0.1));
+        const randomSpeed = Math.round(34 + Math.random() * 8);
+        if (etaText) etaText.innerText = `${remainingMinutes} Minutes (${remainingDistance} km away)`;
+        if (speedText) speedText.innerText = `${randomSpeed} km/h`;
+        if (log) log.innerText = `> Van in transit. Waypoint ${Math.min(6, Math.floor(radarProgress / 18) + 1)} verified via GPS.`;
+      }
+    }
+
+    function toggleRadarSimulation() {
+      const btn = document.getElementById('radar-auto-btn');
+      radarIsAuto = !radarIsAuto;
+      if (radarIsAuto) {
+        if (btn) btn.innerText = 'Auto Move: ON';
+        startRadarTimer();
+      } else {
+        if (btn) btn.innerText = 'Auto Move: OFF';
+        if (radarAutoInterval) clearInterval(radarAutoInterval);
+      }
+    }
+
+    function startRadarTimer() {
+      if (radarAutoInterval) clearInterval(radarAutoInterval);
+      radarAutoInterval = setInterval(() => {
+        if (radarProgress < 100) {
+          updateRadarProgress(radarProgress + 5);
+        } else {
+          updateRadarProgress(10);
+        }
+      }, 3500);
+    }
+
+    function simulateVehicleArrival() {
+      updateRadarProgress(100);
+    }
+
+    function resendWhatsAppPing() {
+      const log = document.getElementById('radar-event-log');
+      const status = document.getElementById('radar-socket-status');
+      if (log) log.innerText = '> WhatsApp template triggered: "Teknisi Budi menuju lokasi Anda..."';
+      if (status) status.innerText = 'WhatsApp Cloud API: 200 OK • MessageID: wamid.HBgL';
+    }
+
+    let currentWavelength = '1490nm';
+    function handleOpmSlider(val) {
+      const numVal = parseFloat(val);
+      const display = document.getElementById('opm-live-display');
+      const sliderVal = document.getElementById('opm-slider-val');
+      const pill = document.getElementById('opm-status-pill');
+      const desc = document.getElementById('opm-spec-desc');
+
+      if (sliderVal) sliderVal.innerText = `${numVal.toFixed(1)} dBm`;
+      if (display) display.innerText = `${numVal.toFixed(2)} dBm`;
+
+      if (numVal >= -24.0 && numVal <= -15.0) {
+        if (pill) {
+          pill.className = 'px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold';
+          pill.innerText = 'OPTIMAL SPEC';
+        }
+        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-secondary';
+        if (desc) desc.innerText = 'Within ITU-T G.984 GPON Standard Range (-15 to -24 dBm).';
+      } else if (numVal < -24.0 && numVal >= -27.0) {
+        if (pill) {
+          pill.className = 'px-2 py-0.5 bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-mono-xs text-label-mono-xs rounded font-bold';
+          pill.innerText = 'MARGINAL SIGNAL';
+        }
+        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-tertiary';
+        if (desc) desc.innerText = 'Marginal sensitivity. May experience micro-burst packet loss.';
+      } else {
+        if (pill) {
+          pill.className = 'px-2 py-0.5 bg-error/10 border border-error/30 text-error font-label-mono-xs text-label-mono-xs rounded font-bold';
+          pill.innerText = 'CRITICAL ATTENUATION';
+        }
+        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-error';
+        if (desc) desc.innerText = 'Signal out of bounds! High probability of ONT LOS alarm.';
+      }
+    }
+
+    function setWavelength(wl) {
+      currentWavelength = wl;
+      const label = document.getElementById('active-wl-label');
+      const tableLabel = document.getElementById('table-metric-label');
+      if (label) label.innerText = `λ ${wl}`;
+      if (tableLabel) tableLabel.innerText = `Optical Loss (${wl})`;
+
+      ['1490', '1310', '1550'].forEach(id => {
+        const btn = document.getElementById(`wl-btn-${id}`);
+        if (btn) {
+          if (wl.includes(id)) {
+            btn.className = 'py-1 bg-primary text-surface-container-lowest rounded font-label-mono-xs text-label-mono-xs font-semibold';
+          } else {
+            btn.className = 'py-1 bg-surface-container-high hover:bg-surface-bright text-on-surface rounded font-label-mono-xs text-label-mono-xs';
+          }
+        }
+      });
+    }
+
+    function applyOpmPreset(val) {
+      const slider = document.getElementById('opm-slider');
+      if (slider) {
+        slider.value = val;
+        handleOpmSlider(val);
+      }
+    }
+
+    function stampTelemetryToBast() {
+      const slider = document.getElementById('opm-slider');
+      const val = slider ? parseFloat(slider.value).toFixed(2) : '-17.84';
+      const bastVal = document.getElementById('bast-optical-val');
+      const bastStatus = document.getElementById('bast-optical-status');
+      const timestamp = document.getElementById('bast-timestamp');
+      const docNo = document.getElementById('bast-doc-no');
+
+      const now = new Date();
+      if (timestamp) timestamp.innerText = `TIMESTAMP: ${now.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
+      if (docNo) docNo.innerText = `NO: BAST/BS/${now.getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
+
+      if (bastVal) bastVal.innerText = `${val} dBm`;
+      const numVal = parseFloat(val);
+      if (numVal <= -24.0) {
+        if (bastStatus) {
+          bastStatus.innerText = 'FAIL (ATTENUATION)';
+          bastStatus.className = 'p-1.5 font-bold text-red-600';
+        }
+        if (bastVal) bastVal.className = 'p-1.5 font-bold text-red-600';
+      } else {
+        if (bastStatus) {
+          bastStatus.innerText = 'PASSED';
+          bastStatus.className = 'p-1.5 font-bold text-emerald-700';
+        }
+        if (bastVal) bastVal.className = 'p-1.5 font-bold text-emerald-700';
+      }
+      alert(`OPM Telemetry (${val} dBm, ${currentWavelength}) stamped into BAST digital certificate.`);
+    }
+
+    function execQuickCli(cmd) {
+      const input = document.getElementById('cli-input');
+      if (input) input.value = cmd;
+      executeCli(cmd);
+    }
+
+    function handleCliCommand(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('cli-input');
+      if (!input) return;
+      const cmd = input.value.trim();
+      if (cmd) {
+        executeCli(cmd);
+        input.value = '';
+      }
+    }
+
+    function executeCli(cmd) {
+      const win = document.getElementById('cli-output-window');
+      if (!win) return;
+
+      const userRow = document.createElement('div');
+      userRow.className = 'text-primary font-semibold';
+      userRow.innerText = `> ${cmd}`;
+      win.appendChild(userRow);
+
+      const cleanCmd = cmd.toLowerCase().trim();
+      const resp = document.createElement('div');
+      resp.className = 'text-on-surface pl-2';
+
+      if (cleanCmd === 'clear') {
+        win.innerHTML = '<div>Benteng Siber Tactical Console [Version 4.2.1-RELEASE]</div>';
+        return;
+      } else if (cleanCmd === 'help') {
+        resp.innerHTML = '<span class="text-secondary">Available CLI Commands:</span><br/>' +
+          '&bull; <strong class="text-primary">help</strong> - List available terminal operations<br/>' +
+          '&bull; <strong class="text-primary">benteng probe --all</strong> - Audit active GPON OLT links &amp; dying gasps<br/>' +
+          '&bull; <strong class="text-primary">fleet status</strong> - Display active field vans, GPS geofences, and tickets<br/>' +
+          '&bull; <strong class="text-primary">bast verify</strong> - Cryptographic checksum validation on newest BAST PDF<br/>' +
+          '&bull; <strong class="text-primary">bom stock</strong> - Query current van atomic stock levels<br/>' +
+          '&bull; <strong class="text-primary">clear</strong> - Purge terminal window buffer';
+      } else if (cleanCmd.includes('probe')) {
+        resp.innerHTML = '<span class="text-secondary">[OLT-CORE-JKT-01] PROBE RUNNING...</span><br/>' +
+          '&bull; PON 01: 64/64 ONT Online (Loss: -17.2 dBm) <span class="text-secondary">[OK]</span><br/>' +
+          '&bull; PON 02: 59/64 ONT Online (Loss: -19.4 dBm) <span class="text-secondary">[OK]</span><br/>' +
+          '&bull; PON 03: 62/64 ONT Online (Loss: -21.1 dBm) <span class="text-secondary">[OK]</span><br/>' +
+          '&bull; Zero Dying-Gasp alarms registered in last 60 minutes.';
+      } else if (cleanCmd.includes('fleet')) {
+        resp.innerHTML = '<span class="text-secondary">FLEET DISPATCH MATRIX:</span><br/>' +
+          '&bull; Van #01: Budi Santoso [WO-88219] &bull; Status: ON-ROUTE (GPS: Inside geofence)<br/>' +
+          '&bull; Van #02: Agus Wirawan [WO-88217] &bull; Status: SPLICING &bull; Loss: -18.2 dBm<br/>' +
+          '&bull; Van #03: Dimas Aditya [IDLE] &bull; Assigned to Standby Hub Senayan';
+      } else if (cleanCmd.includes('bast')) {
+        resp.innerHTML = '<span class="text-secondary">BAST CERTIFICATE INTEGRITY VERIFICATION:</span><br/>' +
+          '&bull; Certificate ID: BAST/BS/2025/1109<br/>' +
+          '&bull; SHA-256 Checksum: 4f8a902c118bfa923d8819ef3420<br/>' +
+          '&bull; Timestamp Authority: R2 S3 Object Lock &bull; Signature: 2/2 Valid <span class="text-secondary">[PASS]</span>';
+      } else if (cleanCmd.includes('bom')) {
+        resp.innerHTML = `Stock Patchcord: ${stockCounts.patchcord} | Connectors: ${stockCounts.connector} | ONT Units: ${stockCounts.ont}`;
+      } else {
+        resp.innerHTML = `<span class="text-error">Command not found: '${cmd}'. Type 'help' for command directory.</span>`;
+      }
+
+      win.appendChild(resp);
+      win.scrollTop = win.scrollHeight;
+    }
+
+    const stockCounts = { patchcord: 24, connector: 50, ont: 6 };
+    function deductStock(itemKey, itemName) {
+      if (stockCounts[itemKey] > 0) {
+        stockCounts[itemKey]--;
+        const badge = document.getElementById(`stock-${itemKey}`);
+        if (badge) badge.innerText = stockCounts[itemKey];
         
-        // Map Admin links to port 8000
-        document.querySelectorAll('a[href*="admin.bentengsiber.com"]').forEach(link => {
-            const currentHref = link.getAttribute('href');
-            const localHref = currentHref.replace(/https?:\/\/admin\.bentengsiber\.com/, 'http://127.0.0.1:8000');
-            link.setAttribute('href', localHref);
-            if (link.textContent.includes('admin.bentengsiber.com/login')) {
-                link.textContent = '127.0.0.1:8000/login (Local Live)';
-            }
-        });
-
-        // Map Technician App links to port 8100
-        document.querySelectorAll('a[href*="app.bentengsiber.com"]').forEach(link => {
-            const currentHref = link.getAttribute('href');
-            const localHref = currentHref.replace(/https?:\/\/app\.bentengsiber\.com/, 'http://127.0.0.1:8100');
-            link.setAttribute('href', localHref);
-            if (link.textContent.includes('app.bentengsiber.com')) {
-                link.textContent = '127.0.0.1:8100 (Local Live)';
-            }
-        });
-    }
-
-    // =========================================================================
-    // 1. Mobile Sidebar Drawer Controller (Collapsible / Toggleable)
-    // =========================================================================
-    const mobileToggleBtn = document.getElementById('btn-mobile-toggle');
-    const drawerCloseBtn = document.getElementById('drawer-close');
-    const mobileDrawer = document.getElementById('mobile-drawer');
-    const drawerBackdrop = document.getElementById('drawer-backdrop');
-    const drawerLinks = document.querySelectorAll('.drawer-link, .drawer-action-btn');
-
-    function openMobileDrawer() {
-        if (!mobileDrawer) return;
-        mobileDrawer.classList.add('active');
-        if (drawerBackdrop) drawerBackdrop.classList.add('active');
-        document.body.classList.add('drawer-open');
-        if (mobileToggleBtn) {
-            mobileToggleBtn.setAttribute('aria-expanded', 'true');
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0];
+        const logBox = document.getElementById('bom-log');
+        if (logBox) {
+          const entry = document.createElement('div');
+          entry.className = 'text-secondary';
+          entry.innerHTML = `[${timeStr}] DEDUCT: ${itemName} (-1) &bull; Remainder: ${stockCounts[itemKey]} &bull; WO-88219`;
+          logBox.prepend(entry);
         }
+      } else {
+        alert('Stock depleted for this item in Mobile Van 04!');
+      }
     }
 
-    function closeMobileDrawer() {
-        if (!mobileDrawer) return;
-        mobileDrawer.classList.remove('active');
-        if (drawerBackdrop) drawerBackdrop.classList.remove('active');
-        document.body.classList.remove('drawer-open');
-        if (mobileToggleBtn) {
-            mobileToggleBtn.setAttribute('aria-expanded', 'false');
+    function copyToClipboard(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btnElement.innerText;
+        btnElement.innerText = 'Copied!';
+        btnElement.classList.add('bg-primary', 'text-surface-container-lowest');
+        setTimeout(() => {
+          btnElement.innerText = originalText;
+          btnElement.classList.remove('bg-primary', 'text-surface-container-lowest');
+        }, 1800);
+      });
+    }
+
+    function runDomainScan(e) {
+      if (e) e.preventDefault();
+      const inputEl = document.getElementById('target-domain-input');
+      const domain = (inputEl && inputEl.value.trim()) || 'bentengsiber.com';
+      const progressBox = document.getElementById('scan-progress-box');
+      const progressBar = document.getElementById('scan-progress-bar');
+      const stageText = document.getElementById('scan-stage-text');
+      const percentText = document.getElementById('scan-percent');
+      const reportCard = document.getElementById('audit-report-card');
+      const submitBtn = document.getElementById('audit-submit-btn');
+
+      if (progressBox) progressBox.classList.remove('hidden');
+      if (reportCard) reportCard.classList.add('opacity-40');
+      if (submitBtn) submitBtn.disabled = true;
+
+      let progress = 0;
+      const stages = [
+        'Resolving DNSSEC & authoritative NS...',
+        'Handshaking TLS 1.3 cipher negotiation...',
+        'Querying /.well-known/security.txt (RFC 9116)...',
+        'Inspecting CSP, HSTS, and X-Content headers...',
+        'Compiling vulnerability index & generating score...'
+      ];
+
+      const interval = setInterval(() => {
+        progress += 20;
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (percentText) percentText.innerText = `${progress}%`;
+        if (stageText) stageText.innerText = stages[Math.min(Math.floor(progress / 20) - 1, stages.length - 1)];
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            if (progressBox) progressBox.classList.add('hidden');
+            if (reportCard) reportCard.classList.remove('opacity-40');
+            if (submitBtn) submitBtn.disabled = false;
+          }, 400);
         }
+      }, 300);
     }
 
-    if (mobileToggleBtn) {
-        mobileToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = mobileDrawer && mobileDrawer.classList.contains('active');
-            if (isOpen) {
-                closeMobileDrawer();
+    function triggerFastAudit() {
+      const scannerEl = document.getElementById('scanner-spotlight');
+      if (scannerEl) {
+        scannerEl.scrollIntoView({ behavior: 'smooth' });
+        runDomainScan();
+      }
+    }
+
+    function dismissTestingDock() {
+      const dock = document.getElementById('testing-dock');
+      if (dock) dock.style.display = 'none';
+    }
+
+    function clearHeroLog() {
+      const log = document.getElementById('hero-log-stream');
+      if (log) {
+        log.innerHTML = '<div class="text-outline">[CLEARED] Stream listening for inbound WebSockets...</div>';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSignaturePad();
+      startRadarTimer();
+    });
+
+(function() {
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-nav-menu');
+    if (mobileBtn && mobileMenu) {
+      mobileBtn.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.contains('hidden');
+        mobileMenu.classList.toggle('hidden');
+        mobileBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+      });
+      mobileMenu.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+      });
+    }
+  })();
+
+// =========================================================================
+// BILINGUAL ENGINE (EN / ID), SCROLLSPY & LIVE HERO TELEMETRY
+// =========================================================================
+(function() {
+  const translations = {
+    en: {
+      'nav.portals': 'Portals',
+      'nav.simulator': 'Live Simulator',
+      'nav.sandbox': 'Live Sandbox',
+      'nav.pricing': 'Acquire Asset',
+      'nav.scanner': 'Scanner',
+      'nav.architecture': 'Architecture',
+      'hero.title': 'The command platform for fiber field ops & cyber defense.',
+      'hero.desc': 'Benteng Siber turns scattered field dispatches, technician GPS telemetry, BAST sign-offs, and security posture audits into one calm, high-precision operating layer.',
+      'hero.cta1': 'Launch Interactive Simulator',
+      'hero.cta2': 'Acquire Full IP ($5,850)',
+      'hero.cta3': 'Run Security Audit',
+      'portals.title': 'Ecosystem Gateway Portals',
+      'sim.title': 'Interactive Product Simulator Hub',
+      'demo.title': 'Live Sandbox & Demo Credentials',
+      'pricing.title': 'Commercial Acquisition & Licensing Hub',
+      'scanner.title': 'Interactive Domain Security Posture Audit'
+    },
+    id: {
+      'nav.portals': 'Portal',
+      'nav.simulator': 'Simulator Live',
+      'nav.sandbox': 'Sandbox Demo',
+      'nav.pricing': 'Akuisisi Aset',
+      'nav.scanner': 'Scanner',
+      'nav.architecture': 'Arsitektur',
+      'hero.title': 'Platform komando operasional fiber & pertahanan siber.',
+      'hero.desc': 'Benteng Siber menyatukan dispatch teknisi lapangan, telemetri GPS real-time, tanda tangan BAST digital, dan audit keamanan domain dalam satu layar kendali presisi.',
+      'hero.cta1': 'Coba Simulator Interaktif',
+      'hero.cta2': 'Akuisisi Full IP ($5,850)',
+      'hero.cta3': 'Jalankan Audit Keamanan',
+      'portals.title': 'Gerbang Portal Ekosistem',
+      'sim.title': 'Hub Simulator Produk Interaktif',
+      'demo.title': 'Sandbox Live & Kredensial Demo',
+      'pricing.title': 'Hub Akuisisi Komersial & Lisensi',
+      'scanner.title': 'Audit Postur Keamanan Domain Interaktif'
+    }
+  };
+
+  let currentLang = localStorage.getItem('benteng_lang') || 'en';
+  const langBtn = document.getElementById('lang-toggle-btn');
+  const langLabel = document.getElementById('lang-label');
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('benteng_lang', lang);
+    if (langLabel) langLabel.textContent = lang === 'id' ? 'ID / EN' : 'EN / ID';
+    const dict = translations[lang] || translations.en;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key]) el.textContent = dict[key];
+    });
+  }
+
+  if (langBtn) {
+    langBtn.addEventListener('click', () => {
+      applyLanguage(currentLang === 'en' ? 'id' : 'en');
+    });
+  }
+  applyLanguage(currentLang);
+
+  // Scrollspy for top desktop navbar
+  const navLinks = document.querySelectorAll('header nav a[href^="#"]');
+  const sectionIds = Array.from(navLinks).map(a => a.getAttribute('href').slice(1));
+  const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+
+  if (sections.length && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const activeHref = '#' + entry.target.id;
+          navLinks.forEach(link => {
+            if (link.getAttribute('href') === activeHref) {
+              link.className = 'text-primary font-medium border-b border-primary pb-0.5 transition-colors duration-150';
             } else {
-                openMobileDrawer();
+              link.className = 'text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150';
             }
-        });
-    }
-
-    if (drawerCloseBtn) {
-        drawerCloseBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeMobileDrawer();
-        });
-    }
-
-    if (drawerBackdrop) {
-        drawerBackdrop.addEventListener('click', () => {
-            closeMobileDrawer();
-        });
-    }
-
-    drawerLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            closeMobileDrawer();
-        });
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && mobileDrawer && mobileDrawer.classList.contains('active')) {
-            closeMobileDrawer();
+          });
         }
-    });
-
-    // =========================================================================
-    // 2. 60 FPS Ambient Mouse Glow (RequestAnimationFrame debouncing)
-    // =========================================================================
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let currentX = mouseX;
-    let currentY = mouseY;
-    let ticking = false;
-
-    window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                currentX += (mouseX - currentX) * 0.15;
-                currentY += (mouseY - currentY) * 0.15;
-
-                document.documentElement.style.setProperty('--mouse-x', `${currentX}px`);
-                document.documentElement.style.setProperty('--mouse-y', `${currentY}px`);
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }, { passive: true });
-
-    // =========================================================================
-    // 3. High-Performance IntersectionObserver for Section & Card Transitions
-    // =========================================================================
-    const animatedElements = document.querySelectorAll(
-        '.hero, .portal-card, .simulator-section, .pricing-section, .demo-sandbox-section, .asset-sale-section, .scanner-spotlight-section, .metric-card, .arch-node, .compliance-item, .policy-block'
-    );
-
-    if ('IntersectionObserver' in window) {
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px 0px -40px 0px',
-            threshold: 0.08
-        };
-
-        const revealObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        animatedElements.forEach((el) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(24px)';
-            el.style.transition = `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)`;
-            revealObserver.observe(el);
-        });
-    }
-
-    // =========================================================================
-    // 4. One-Click Copy to Clipboard for Demo Credentials
-    // =========================================================================
-    const copyButtons = document.querySelectorAll('.btn-copy-code');
-    copyButtons.forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const textToCopy = btn.getAttribute('data-copy');
-            if (!textToCopy) return;
-
-            try {
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(textToCopy);
-                } else {
-                    const textArea = document.createElement('textarea');
-                    textArea.value = textToCopy;
-                    textArea.style.position = 'fixed';
-                    textArea.style.left = '-999999px';
-                    textArea.style.top = '-999999px';
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    document.execCommand('copy');
-                    textArea.remove();
-                }
-
-                // Visual feedback
-                const icon = btn.querySelector('ion-icon');
-                if (icon) {
-                    const originalName = icon.getAttribute('name');
-                    icon.setAttribute('name', 'checkmark-circle');
-                    btn.style.color = '#10b981';
-
-                    setTimeout(() => {
-                        icon.setAttribute('name', originalName);
-                        btn.style.color = '';
-                    }, 2000);
-                }
-            } catch (err) {
-                console.warn('Clipboard copy failed:', err);
-            }
-        });
-    });
-
-    // =========================================================================
-    // 5. Quick Security Scan Form Submission Handler
-    // =========================================================================
-    const scanForm = document.getElementById('quick-scan-form');
-    const scanInput = document.getElementById('scan-domain-input');
-    const scanBtnLabel = document.getElementById('scan-btn-label');
-    const scanResultsBox = document.getElementById('scan-results-box');
-    const scanTargetHost = document.getElementById('scan-target-host');
-    const btnScanDismiss = document.getElementById('btn-scan-dismiss');
-
-    if (scanForm && scanInput) {
-        scanForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            let domain = scanInput.value.trim();
-            if (!domain) return;
-
-            domain = domain.replace(/^https?:\/\//i, '').split('/')[0].split(':')[0];
-            if (domain.length < 3 || !domain.includes('.')) {
-                scanInput.style.borderColor = '#ef4444';
-                scanInput.focus();
-                return;
-            }
-
-            if (scanBtnLabel) scanBtnLabel.textContent = 'Auditing Target...';
-
-            setTimeout(() => {
-                if (scanBtnLabel) scanBtnLabel.textContent = 'Scan Domain Now';
-                if (scanTargetHost) scanTargetHost.textContent = domain;
-                if (scanResultsBox) {
-                    scanResultsBox.classList.remove('hidden');
-                    scanResultsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            }, 450);
-        });
-
-        if (btnScanDismiss && scanResultsBox) {
-            btnScanDismiss.addEventListener('click', () => {
-                scanResultsBox.classList.add('hidden');
-            });
-        }
-
-        scanInput.addEventListener('input', () => {
-            scanInput.style.borderColor = '';
-        });
-    }
-
-    // =========================================================================
-    // 6. Smooth Anchor Scrolling with Sticky Nav Offset
-    // =========================================================================
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                e.preventDefault();
-                const navHeight = 80;
-                const elementPosition = targetElement.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - navHeight;
-
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
-    // =========================================================================
-    // 7. GLOBAL BILINGUAL LANGUAGE MANAGER (EN / ID)
-    // =========================================================================
-    const translations = {
-        en: {
-            'nav.portals': 'Portals',
-            'nav.simulator': 'Live Simulator',
-            'nav.sandbox': 'Live Sandbox',
-            'nav.pricing': 'Acquire Asset',
-            'nav.scanner': 'Scanner',
-            'nav.architecture': 'Architecture',
-            'nav.operational': 'All Systems Operational',
-            'drawer.portals_label': 'PORTALS & SECTIONS',
-            'drawer.portals': 'Ecosystem Portals',
-            'drawer.simulator': 'Interactive Simulator',
-            'drawer.sandbox': 'Interactive Sandbox',
-            'drawer.acquire': 'Acquire This Asset',
-            'hero.kicker': 'Enterprise Field Operations & Autonomous Cyber Defense',
-            'hero.title': 'Synergizing Smart Field Operations & <br><span class="gradient-highlight">Unified Cyber Defense</span>',
-            'hero.subtitle': 'Benteng Siber Ecosystem converges intelligent fiber optics field workforce management (FiberOps FSM) with automated threat posture diagnostics (Security Scanner) into an all-in-one, turnkey digital asset ready for enterprise ownership.',
-            'hero.cta_sim': 'Test-Drive Live Simulator',
-            'hero.cta_portals': 'Explore 4 Gateway Portals',
-            'hero.cta_buyout': 'Asset Buyout & Pricing',
-            'sim.tag': 'Interactive Product Experience',
-            'sim.title': 'Hands-On Enterprise Feature Simulator',
-            'sim.desc': 'Test-drive the core workflows that make FiberOps the highest-converting field service management platform for fiber ISPs and WISPs. Click the tabs below to interact directly with each module:',
-            'sim.tab1_title': 'Technician Mobile App',
-            'sim.tab1_sub': 'Progressive Stepper & E-Sign',
-            'sim.tab2_title': 'Customer Uber Tracking',
-            'sim.tab2_sub': 'Live GPS Fleet Radar & ETA',
-            'sim.tab3_title': 'Automated BAST PDF',
-            'sim.tab3_sub': 'Official Sign-Off Certificate',
-            'sim.tab4_title': 'BOM & Inventory Tracker',
-            'sim.tab4_sub': 'Atomic Stock Deduction',
-            'portals.tag': 'Unified Gateway Hub',
-            'portals.title': 'Single Sign-On Access to All Modules',
-            'portals.desc': 'Unified authentication and operational gateway for executives, dispatchers, field engineers, and cybersecurity analysts.',
-            'demo.tag': 'Instant Sandbox Preview',
-            'demo.title': 'Test-Drive Live Demo Accounts',
-            'demo.desc': 'Experience both the dispatcher administration portal and field technician workspace using our active sandbox credentials:',
-            'scanner.tag': 'Interactive Diagnostic Tool',
-            'scanner.title': 'Quick Domain Security Posture Audit',
-            'scanner.desc': 'Benchmark your domain against SSL/TLS certificate expirations, missing security headers (HSTS, CSP), and public DNS misconfigurations in seconds.',
-            'arch.tag': 'System Topology',
-            'arch.title': 'Unified Data Pipeline & Architecture',
-            'arch.desc': 'How real-time field workforce dispatching and cyber protection telemetry communicate synchronously.',
-            'compliance.tag': 'Enterprise Hardening',
-            'compliance.title': 'Security Standards & Compliance',
-            'compliance.desc': 'Every line of code is structured to satisfy rigorous data governance and protection criteria.',
-            'pricing.tag': 'Commercial Acquisition & Licensing',
-            'pricing.title': 'Flexible Ownership & Licensing Models',
-            'pricing.desc': 'Whether you want full asset acquisition with complete intellectual property or an enterprise managed subscription, Benteng Siber offers flexible, escrow-protected options.'
-        },
-        id: {
-            'nav.portals': 'Portal Sistem',
-            'nav.simulator': 'Simulator Langsung',
-            'nav.sandbox': 'Demo Langsung',
-            'nav.pricing': 'Beli Aset',
-            'nav.scanner': 'Pemindai Siber',
-            'nav.architecture': 'Arsitektur',
-            'nav.operational': 'Semua Sistem Beroperasi Normal',
-            'drawer.portals_label': 'PORTAL & MENU UTAMA',
-            'drawer.portals': 'Portal Ekosistem',
-            'drawer.simulator': 'Simulator Interaktif',
-            'drawer.sandbox': 'Demo Interaktif',
-            'drawer.acquire': 'Beli Aset Ini',
-            'hero.kicker': 'Operasional Lapangan & Pertahanan Siber Cerdas',
-            'hero.title': 'Sinergi Operasional Lapangan Cerdas & <br><span class="gradient-highlight">Pertahanan Siber Terpadu</span>',
-            'hero.subtitle': 'Ekosistem Benteng Siber memadukan manajemen teknisi serat optik cerdas (FiberOps FSM) dengan pemindaian postur ancaman siber otomatis menjadi satu aset digital siap pakai enterprise.',
-            'hero.cta_sim': 'Coba Simulator Langsung',
-            'hero.cta_portals': 'Jelajahi 4 Portal Gateway',
-            'hero.cta_buyout': 'Akuisisi Aset & Harga',
-            'sim.tag': 'Pengalaman Produk Interaktif',
-            'sim.title': 'Simulator Fitur Enterprise Langsung',
-            'sim.desc': 'Uji coba langsung alur kerja inti yang menjadikan FiberOps platform manajemen teknisi lapangan terdepan untuk ISP serat optik. Klik tab di bawah untuk berinteraksi:',
-            'sim.tab1_title': 'Aplikasi Mobile Teknisi',
-            'sim.tab1_sub': 'Alur Bertahap & Tanda Tangan',
-            'sim.tab2_title': 'Pelacakan Ala Uber Pelanggan',
-            'sim.tab2_sub': 'Radar GPS Armada & Estimasi Waktu',
-            'sim.tab3_title': 'BAST PDF Otomatis',
-            'sim.tab3_sub': 'Sertifikat Serah Terima Sah',
-            'sim.tab4_title': 'Pelacak BOM & Inventaris',
-            'sim.tab4_sub': 'Pemotongan Stok Atomik',
-            'portals.tag': 'Pusat Gateway Terpadu',
-            'portals.title': 'Akses Terpusat ke Seluruh Modul Sistem',
-            'portals.desc': 'Gateway autentikasi operasional terpadu bagi pimpinan, dispatcher, teknisi lapangan, dan analis keamanan siber.',
-            'demo.tag': 'Demo Interaktif Langsung',
-            'demo.title': 'Uji Coba Langsung Akun Demo',
-            'demo.desc': 'Rasakan kemampuan ekosistem Benteng Siber secara langsung. Klik di bawah untuk menyalin kredensial dan masuk ke portal:',
-            'scanner.tag': 'Alat Diagnostik Interaktif',
-            'scanner.title': 'Audit Postur Keamanan Domain Kilat',
-            'scanner.desc': 'Pindai domain target secara instan untuk deteksi sertifikat SSL/TLS kedaluwarsa, celah header keamanan (HSTS, CSP), dan konfigurasi DNS dalam hitungan detik.',
-            'arch.tag': 'Cetak Biru Arsitektur',
-            'arch.title': 'Pipeline Data & Topologi Terpadu',
-            'arch.desc': 'Bagaimana sistem dispatch teknisi lapangan dan telemetri perlindungan siber berkomunikasi secara sinkron dan aman.',
-            'compliance.tag': 'Standar Enterprise Internasional',
-            'compliance.title': 'Kepatuhan Keamanan & Operasional',
-            'compliance.desc': 'Setiap baris kode dibangun untuk memenuhi kriteria ketat tata kelola data, waktu aktif tinggi (uptime), dan ketahanan operasional.',
-            'pricing.tag': 'Akuisisi Komersial & Lisensi',
-            'pricing.title': 'Model Kepemilikan & Lisensi Fleksibel',
-            'pricing.desc': 'Baik pembelian aset penuh dengan seluruh hak kekayaan intelektual (IP) maupun langganan terkelola, Benteng Siber menyediakan opsi fleksibel dengan jaminan Escrow.'
-        }
-    };
-
-    let currentLang = localStorage.getItem('benteng_lang') || 'en';
-
-    function setLanguage(lang) {
-        if (!translations[lang]) lang = 'en';
-        currentLang = lang;
-        localStorage.setItem('benteng_lang', lang);
-
-        // Update active state on all switcher buttons
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            const btnLang = btn.getAttribute('data-lang');
-            if (btnLang === lang) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-
-        // Apply translations
-        const langData = translations[lang];
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (langData[key]) {
-                if (langData[key].includes('<')) {
-                    el.innerHTML = langData[key];
-                } else {
-                    el.textContent = langData[key];
-                }
-            }
-        });
-
-        console.log(`[BentengSiber Gateway] Language set to: ${lang.toUpperCase()}`);
-    }
-
-    // Bind click events on all language switch buttons
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const lang = btn.getAttribute('data-lang');
-            setLanguage(lang);
-        });
-    });
-
-    // Initialize with stored or default language
-    setLanguage(currentLang);
-
-    // =========================================================================
-    // 8. INTERACTIVE PRODUCT SIMULATOR HUB CONTROLLER
-    // =========================================================================
-    
-    // Tab Switching
-    const simTabBtns = document.querySelectorAll('.sim-tab-btn');
-    const simPanels = document.querySelectorAll('.sim-panel');
-
-    simTabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTab = btn.getAttribute('data-tab');
-            simTabBtns.forEach(b => b.classList.remove('active'));
-            simPanels.forEach(p => p.classList.remove('active'));
-
-            btn.classList.add('active');
-            const targetPanel = document.getElementById(`sim-panel-${targetTab}`);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            }
-        });
-    });
-
-    // ─── Module 1: Mobile Technician Progressive Flow ─────────────────────────
-    const simStepBadge = document.getElementById('sim-step-badge');
-    const pViewAssigned = document.getElementById('p-view-assigned');
-    const pViewEnroute = document.getElementById('p-view-enroute');
-    const pViewInprogress = document.getElementById('p-view-inprogress');
-    const pViewCompleted = document.getElementById('p-view-completed');
-
-    const btnAccept = document.getElementById('sim-btn-accept');
-    const btnDecline = document.getElementById('sim-btn-decline');
-    const btnArrive = document.getElementById('sim-btn-arrive');
-    const btnCompleteTask = document.getElementById('sim-btn-complete-task');
-    const btnResetMobile = document.getElementById('sim-btn-reset-mobile');
-
-    // Canvas Signature Setup
-    const sigCanvas = document.getElementById('sim-sig-canvas');
-    const watermark = document.getElementById('sim-canvas-watermark');
-    const btnClearSig = document.getElementById('sim-btn-clear-sig');
-    const btnSampleSig = document.getElementById('sim-btn-sample-sig');
-
-    let isDrawing = false;
-    let canvasDrawn = false;
-    let ctx = null;
-
-    if (sigCanvas) {
-        ctx = sigCanvas.getContext('2d');
-        if (ctx) {
-            ctx.lineWidth = 2.5;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.strokeStyle = '#0284c7';
-        }
-
-        function getCanvasCoords(e) {
-            const rect = sigCanvas.getBoundingClientRect();
-            const scaleX = sigCanvas.width / (rect.width || sigCanvas.width);
-            const scaleY = sigCanvas.height / (rect.height || sigCanvas.height);
-            if (e.touches && e.touches[0]) {
-                return {
-                    x: (e.touches[0].clientX - rect.left) * scaleX,
-                    y: (e.touches[0].clientY - rect.top) * scaleY
-                };
-            }
-            return {
-                x: (e.clientX - rect.left) * scaleX,
-                y: (e.clientY - rect.top) * scaleY
-            };
-        }
-
-        function startDrawing(e) {
-            if (!ctx) return;
-            isDrawing = true;
-            canvasDrawn = true;
-            if (watermark) watermark.style.display = 'none';
-            const { x, y } = getCanvasCoords(e);
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            if (e.type === 'touchstart') e.preventDefault();
-        }
-
-        function draw(e) {
-            if (!isDrawing || !ctx) return;
-            const { x, y } = getCanvasCoords(e);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            if (e.type === 'touchmove') e.preventDefault();
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        sigCanvas.addEventListener('mousedown', startDrawing);
-        sigCanvas.addEventListener('mousemove', draw);
-        window.addEventListener('mouseup', stopDrawing);
-
-        sigCanvas.addEventListener('touchstart', startDrawing, { passive: false });
-        sigCanvas.addEventListener('touchmove', draw, { passive: false });
-        window.addEventListener('touchend', stopDrawing);
-    }
-
-    function clearSignaturePad() {
-        if (!ctx || !sigCanvas) return;
-        ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
-        canvasDrawn = false;
-        if (watermark) watermark.style.display = 'flex';
-    }
-
-    if (btnClearSig) {
-        btnClearSig.addEventListener('click', clearSignaturePad);
-    }
-
-    if (btnSampleSig) {
-        btnSampleSig.addEventListener('click', () => {
-            if (!ctx || !sigCanvas) return;
-            clearSignaturePad();
-            if (watermark) watermark.style.display = 'none';
-            canvasDrawn = true;
-
-            // Draw a realistic smooth cursive signature
-            ctx.beginPath();
-            ctx.moveTo(25, 55);
-            ctx.bezierCurveTo(45, 15, 65, 80, 85, 40);
-            ctx.bezierCurveTo(105, 10, 115, 70, 135, 45);
-            ctx.bezierCurveTo(155, 30, 175, 60, 200, 35);
-            ctx.bezierCurveTo(220, 20, 235, 65, 260, 48);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(35, 68);
-            ctx.lineTo(240, 64);
-            ctx.stroke();
-        });
-    }
-
-    // Step 1 -> Step 2
-    if (btnAccept) {
-        btnAccept.addEventListener('click', () => {
-            if (pViewAssigned) pViewAssigned.classList.add('hidden');
-            if (pViewEnroute) pViewEnroute.classList.remove('hidden');
-            if (simStepBadge) {
-                simStepBadge.textContent = 'STAGE 2: EN ROUTE (GPS ON)';
-                simStepBadge.className = 'p-status-pill green';
-            }
-        });
-    }
-
-    if (btnDecline) {
-        btnDecline.addEventListener('click', () => {
-            alert('Ticket declined. In production, this instantly returns the work order to the dispatcher pool.');
-        });
-    }
-
-    // Step 2 -> Step 3
-    if (btnArrive) {
-        btnArrive.addEventListener('click', () => {
-            if (pViewEnroute) pViewEnroute.classList.add('hidden');
-            if (pViewInprogress) pViewInprogress.classList.remove('hidden');
-            if (simStepBadge) {
-                simStepBadge.textContent = 'STAGE 3: IN PROGRESS';
-                simStepBadge.className = 'p-status-pill orange';
-            }
-        });
-    }
-
-    // Step 3 -> Step 4
-    if (btnCompleteTask) {
-        btnCompleteTask.addEventListener('click', () => {
-            if (pViewInprogress) pViewInprogress.classList.add('hidden');
-            if (pViewCompleted) pViewCompleted.classList.remove('hidden');
-            if (simStepBadge) {
-                simStepBadge.textContent = 'STAGE 4: COMPLETED (BAST SIGNED)';
-                simStepBadge.className = 'p-status-pill purple';
-            }
-        });
-    }
-
-    // Step 4 -> Step 1 (Restart)
-    if (btnResetMobile) {
-        btnResetMobile.addEventListener('click', () => {
-            if (pViewCompleted) pViewCompleted.classList.add('hidden');
-            if (pViewAssigned) pViewAssigned.classList.remove('hidden');
-            if (simStepBadge) {
-                simStepBadge.textContent = 'STAGE 1: ASSIGNED';
-                simStepBadge.className = 'p-status-pill blue';
-            }
-            clearSignaturePad();
-        });
-    }
-
-    // ─── Module 2: Uber-Style Live Fleet Tracking Simulation ──────────────────
-    const vehicleMarker = document.getElementById('sim-vehicle-marker');
-    const etaBadge = document.getElementById('sim-eta-time');
-    const etaDist = document.getElementById('sim-eta-dist');
-
-    if (vehicleMarker && etaBadge) {
-        const waypoints = [
-            { top: 155, left: 60, eta: '7 Mins', dist: 'Estimated Arrival • 2.4 km remaining' },
-            { top: 140, left: 120, eta: '6 Mins', dist: 'Estimated Arrival • 1.9 km remaining' },
-            { top: 120, left: 180, eta: '5 Mins', dist: 'Estimated Arrival • 1.4 km remaining' },
-            { top: 105, left: 240, eta: '3 Mins', dist: 'Estimated Arrival • 850 m remaining' },
-            { top: 90, left: 300, eta: '2 Mins', dist: 'Approaching Turn • 400 m remaining' },
-            { top: 75, left: 360, eta: '1 Min', dist: 'Entering Street • 150 m remaining' },
-            { top: 60, left: 410, eta: 'Arrived', dist: 'Van arrived at customer location' }
-        ];
-
-        let wpIndex = 0;
-
-        function applyWaypoint(wp) {
-            vehicleMarker.style.top = `${wp.top}px`;
-            vehicleMarker.style.left = `${wp.left}px`;
-            etaBadge.textContent = wp.eta;
-            if (etaDist) etaDist.textContent = wp.dist;
-        }
-
-        setInterval(() => {
-            const trackingPanel = document.getElementById('sim-panel-tracking');
-            if (trackingPanel && trackingPanel.classList.contains('active')) {
-                wpIndex = (wpIndex + 1) % waypoints.length;
-                applyWaypoint(waypoints[wpIndex]);
-            }
-        }, 3400);
-    }
-
-    // ─── Module 4: BOM & Inventory Live Stock Deduction ───────────────────────
-    const btnDeductBom = document.getElementById('sim-btn-deduct-bom');
-    const btnResetBom = document.getElementById('sim-btn-reset-bom');
-    const stockOntEl = document.getElementById('sim-stock-ont');
-    const stockCableEl = document.getElementById('sim-stock-cable');
-    const stockFcEl = document.getElementById('sim-stock-fc');
-    const bomLogEl = document.getElementById('sim-bom-log');
-
-    let currentOnt = 35;
-    let currentCable = 1240;
-    let currentFc = 250;
-    let dispatchCount = 0;
-
-    function updateBomDisplay(flash = false) {
-        if (stockOntEl) stockOntEl.innerHTML = `${currentOnt} <small>units</small>`;
-        if (stockCableEl) stockCableEl.innerHTML = `${currentCable.toLocaleString()} <small>meters</small>`;
-        if (stockFcEl) stockFcEl.innerHTML = `${currentFc} <small>pcs</small>`;
-
-        if (flash) {
-            [stockOntEl, stockCableEl, stockFcEl].forEach(el => {
-                if (el) {
-                    el.style.color = '#ef4444';
-                    setTimeout(() => { el.style.color = ''; }, 600);
-                }
-            });
-        }
-    }
-
-    if (btnDeductBom) {
-        btnDeductBom.addEventListener('click', () => {
-            if (currentOnt <= 0 || currentCable < 45 || currentFc < 2) {
-                if (bomLogEl) {
-                    bomLogEl.innerHTML += `<br><span style="color: #ef4444;">[ALERT] Stock depleted! Cannot fulfill further dispatches.</span>`;
-                    bomLogEl.scrollTop = bomLogEl.scrollHeight;
-                }
-                return;
-            }
-
-            dispatchCount++;
-            currentOnt -= 1;
-            currentCable -= 45;
-            currentFc -= 2;
-            updateBomDisplay(true);
-
-            if (bomLogEl) {
-                const now = new Date();
-                const timeStr = now.toTimeString().split(' ')[0];
-                const newLog = `[${timeStr}] ATOMIC TX #${dispatchCount}: Deducted 1x Huawei ONT, 45m Dropcore, 2x SC/UPC Connectors for #TSK-1042. Inventory locked & committed.`;
-                bomLogEl.innerHTML += `<br>${newLog}`;
-                bomLogEl.scrollTop = bomLogEl.scrollHeight;
-            }
-        });
-    }
-
-    if (btnResetBom) {
-        btnResetBom.addEventListener('click', () => {
-            currentOnt = 35;
-            currentCable = 1240;
-            currentFc = 250;
-            dispatchCount = 0;
-            updateBomDisplay(false);
-            if (bomLogEl) {
-                bomLogEl.innerHTML = `[LEDGER] Stock counts restored to warehouse baseline (ONT: 35 | Cable: 1,240m | FC: 250 pcs).`;
-            }
-        });
-    }
-
-});
-
-// Testing Quick-Switch Bottom Bar Dismiss
-document.addEventListener('DOMContentLoaded', () => {
-    const testingDock = document.getElementById('testing-dock');
-    const btnDockClose = document.getElementById('btn-dock-close');
-    if (testingDock && btnDockClose) {
-        btnDockClose.addEventListener('click', () => {
-            testingDock.classList.add('hidden');
-        });
-    }
-});
+      });
+    }, { rootMargin: '-25% 0px -60% 0px', threshold: 0.05 });
+
+    sections.forEach(sec => observer.observe(sec));
+  }
+})();
+
+// Hero Telemetry Controls (1H / 24H / 7D / Refresh)
+window.setHeroTimeframe = function(tf) {
+  const buttons = {
+    '1h': document.getElementById('hero-tf-1h'),
+    '24h': document.getElementById('hero-tf-24h'),
+    '7d': document.getElementById('hero-tf-7d')
+  };
+  Object.entries(buttons).forEach(([k, btn]) => {
+    if (!btn) return;
+    btn.className = k === tf
+      ? 'px-2 py-0.5 bg-surface-container-high text-primary rounded font-medium'
+      : 'px-2 py-0.5 text-on-surface-variant hover:text-white';
+  });
+
+  const odnEl = document.getElementById('hero-odn-val');
+  const deltaEl = document.getElementById('hero-odn-delta');
+  const presets = {
+    '1h': { val: '-17.84', delta: 'Δ 0.02 dBm / hr' },
+    '24h': { val: '-18.12', delta: 'Δ 0.08 dBm / 24h' },
+    '7d': { val: '-18.45', delta: 'Δ 0.14 dBm / 7d' }
+  };
+  const p = presets[tf] || presets['1h'];
+  if (odnEl) odnEl.innerHTML = `${p.val} <span class="text-label-mono-xs text-outline font-normal">dBm</span>`;
+  if (deltaEl) deltaEl.textContent = p.delta;
+};
+
+window.refreshHeroTelemetry = function() {
+  const odnEl = document.getElementById('hero-odn-val');
+  const logEl = document.getElementById('hero-log-stream');
+  const jitter = (-17.75 - Math.random() * 0.35).toFixed(2);
+  if (odnEl) odnEl.innerHTML = `${jitter} <span class="text-label-mono-xs text-outline font-normal">dBm</span>`;
+  if (logEl) {
+    const now = new Date().toTimeString().split(' ')[0];
+    const row = document.createElement('div');
+    row.className = 'text-primary font-label-mono-xs';
+    row.textContent = `[${now}] TELEMETRY_SYNC // ODN_AVG ${jitter} dBm • OK`;
+    logEl.prepend(row);
+    while (logEl.children.length > 8) logEl.removeChild(logEl.lastElementChild);
+  }
+};

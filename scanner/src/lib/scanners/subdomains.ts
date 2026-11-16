@@ -31,7 +31,7 @@ export async function discoverSubdomains(domain: string): Promise<SubdomainsResu
               if (part.startsWith('*.')) {
                 part = part.substring(2);
               }
-              if (part.endsWith(domain.toLowerCase()) && part !== domain.toLowerCase()) {
+              if (part.endsWith('.' + domain.toLowerCase())) {
                 subdomainsSet.add(part);
               }
             }

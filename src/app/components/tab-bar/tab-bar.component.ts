@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class TabBarComponent {
+  private router = inject(Router);
   @Input() activeTab: string = 'home';
 
   tabs = [
@@ -15,8 +16,6 @@ export class TabBarComponent {
     { key: 'map', label: 'Route Map', icon: 'map-outline', activeIcon: 'map', route: '/map' },
     { key: 'profile', label: 'Profile', icon: 'person-outline', activeIcon: 'person', route: '/profile' },
   ];
-
-  constructor(private router: Router) {}
 
   navigate(tab: any) {
     this.router.navigate([tab.route], { replaceUrl: true });

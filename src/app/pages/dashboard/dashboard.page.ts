@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
@@ -11,7 +11,7 @@ import { LocationService } from '../../services/location.service';
   styleUrls: ['./dashboard.page.scss'],
   standalone: false,
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private router = inject(Router);
@@ -78,8 +78,6 @@ export class DashboardPage implements OnInit {
   get nextTask() {
     return this.currentNextTask;
   }
-
-  async ngOnInit() {}
 
   async ionViewWillEnter() {
     await this.loadData();

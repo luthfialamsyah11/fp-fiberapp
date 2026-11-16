@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocationService } from '../../services/location.service';
 import { ApiService } from '../../services/api.service';
@@ -10,7 +10,7 @@ import { NavigationService } from '../../services/navigation.service';
   styleUrls: ['./map.page.scss'],
   standalone: false,
 })
-export class MapPage implements OnInit, OnDestroy {
+export class MapPage implements OnDestroy {
   private locationService = inject(LocationService);
   private api = inject(ApiService);
   private router = inject(Router);
@@ -24,10 +24,6 @@ export class MapPage implements OnInit, OnDestroy {
   activeTask: any = null;
   locationError = false;
   private locationInterval: any = null;
-
-  async ngOnInit() {
-    // Basic init
-  }
 
   async ionViewWillEnter() {
     await this.loadActiveTask();

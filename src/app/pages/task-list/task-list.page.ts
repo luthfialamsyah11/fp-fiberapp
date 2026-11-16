@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { LocationService } from '../../services/location.service';
@@ -10,7 +10,7 @@ import { NavigationService } from '../../services/navigation.service';
   styleUrls: ['./task-list.page.scss'],
   standalone: false,
 })
-export class TaskListPage implements OnInit {
+export class TaskListPage {
   private api = inject(ApiService);
   private router = inject(Router);
   private locationService = inject(LocationService);
@@ -31,8 +31,6 @@ export class TaskListPage implements OnInit {
     { value: 'accepted', label: 'Accepted' },
     { value: 'on-going', label: 'In Progress' },
   ];
-
-  ngOnInit() {}
 
   async ionViewWillEnter() {
     await this.loadInitialData();

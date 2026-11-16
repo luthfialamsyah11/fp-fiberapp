@@ -47,7 +47,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           if (isDebug) console.error(`Server Error [${error.status}]:`, error);
 
           if (error.status === 401) {
-            if (!request.url.includes('/login')) {
+            if (!request.url.includes('/login') && !request.url.includes('/logout')) {
               if (isDebug) console.warn('[HttpErrorInterceptor] Session expired (401), clearing storage and redirecting to login...');
               this.storage.remove('token');
               this.storage.remove('user');

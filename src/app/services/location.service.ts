@@ -18,6 +18,7 @@ export class LocationService {
     // 1. Immediate GPS sync on start
     try {
       const initialPos = await this.getCurrentPosition();
+      if (!this.isTracking) return;
       if (initialPos?.coords) {
         await this.api.updateLocation(
           initialPos.coords.latitude,
@@ -25,15 +26,22 @@ export class LocationService {
         );
         this.lastUpdateTime = Date.now();
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.status === 401 || err?.status === 403) {
+        this.stopTracking();
+        return;
+      }
       console.warn('[LocationService] Initial GPS sync warning:', err);
     }
 
+    if (!this.isTracking) return;
+
     // 2. Hardware Geolocation Watcher
     try {
-      this.watchId = await Geolocation.watchPosition(
+      const id = await Geolocation.watchPosition(
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 },
         async (position, err) => {
+          if (!this.isTracking) return;
           if (err) {
             console.error('[LocationService] GPS watch error:', err);
             return;
@@ -59,9 +67,16 @@ export class LocationService {
           }
         }
       );
+      if (!this.isTracking) {
+        await Geolocation.clearWatch({ id }).catch(() => {});
+        return;
+      }
+      this.watchId = id;
     } catch (e) {
       console.error('[LocationService] Failed to start Geolocation watch:', e);
     }
+
+    if (!this.isTracking) return;
 
     // 3. Stationary Heartbeat (every 15s) to keep online presence alive in Admin Dispatcher
     this.stopHeartbeat();
@@ -72,12 +87,16 @@ export class LocationService {
       if (now - this.lastUpdateTime >= 12000) {
         try {
           const pos = await this.getCurrentPosition();
+          if (!this.isTracking) return;
           if (pos?.coords) {
             this.lastUpdateTime = now;
             await this.api.updateLocation(pos.coords.latitude, pos.coords.longitude);
           }
-        } catch (e) {
-          // Fallback or permission check
+        } catch (e: any) {
+          if (e?.status === 401 || e?.status === 403) {
+            console.warn('[LocationService] Authorization expired during heartbeat, stopping tracking.');
+            this.stopTracking();
+          }
         }
       }
     }, 15000);

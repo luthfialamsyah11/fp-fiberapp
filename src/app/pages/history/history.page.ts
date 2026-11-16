@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 
@@ -8,14 +8,12 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./history.page.scss'],
   standalone: false,
 })
-export class HistoryPage implements OnInit {
+export class HistoryPage {
   private api = inject(ApiService);
   private router = inject(Router);
 
   histories: any[] = [];
   isLoading = true;
-
-  ngOnInit() {}
 
   async ionViewWillEnter() {
     await this.loadHistory();

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
@@ -11,7 +11,7 @@ import { StorageService } from '../../services/storage.service';
   styleUrls: ['./profile.page.scss'],
   standalone: false,
 })
-export class ProfilePage implements OnInit {
+export class ProfilePage {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private storage = inject(StorageService);
@@ -31,8 +31,6 @@ export class ProfilePage implements OnInit {
   isEditing = false;
   nameFocused = false;
   phoneFocused = false;
-
-  ngOnInit() {}
 
   async ionViewWillEnter() {
     await this.loadProfile();

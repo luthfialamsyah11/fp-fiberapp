@@ -126,3 +126,194 @@
     overflow-x: auto;
   }
 }
+
+
+/* =========================================================================
+   COMPREHENSIVE UTILITY ENGINE RECONCILIATION (/audit--fitur & /design standards)
+   Full restoration of all 176 missing Tailwind & responsive utility classes
+   ========================================================================= */
+
+/* 1. Spacing, Padding & Margins */
+.pt-8 { padding-top: 2rem; }
+.pt-10 { padding-top: 2.5rem; }
+.pt-14 { padding-top: 3.5rem; }
+.pt-16 { padding-top: 4rem; }
+.pb-12 { padding-bottom: 3rem; }
+.pb-14 { padding-bottom: 3.5rem; }
+.pb-20 { padding-bottom: 5rem; }
+.py-20 { padding-top: 5rem; padding-bottom: 5rem; }
+.py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+.p-5 { padding: 1.25rem; }
+.px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+.px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+.px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+.mb-1\.5 { margin-bottom: 0.375rem; }
+.mb-5 { margin-bottom: 1.25rem; }
+.mt-0\.5 { margin-top: 0.125rem; }
+.mt-1\.5 { margin-top: 0.375rem; }
+.gap-1\.5 { gap: 0.375rem; }
+.gap-2\.5 { gap: 0.625rem; }
+.gap-10 { gap: 2.5rem; }
+.space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.375rem; }
+.space-y-2\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.625rem; }
+.space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+.space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+.scroll-mt-20 { scroll-margin-top: 5rem; }
+.scroll-smooth { scroll-behavior: smooth; }
+
+/* 2. Sizing, Heights, Widths & Flex */
+.h-0\.5 { height: 0.125rem; }
+.h-1\.5 { height: 0.375rem; }
+.h-2\.5 { height: 0.625rem; }
+.h-11 { height: 2.75rem; }
+.h-36 { height: 9rem; }
+.h-1\/2 { height: 50%; }
+.w-1\.5 { width: 0.375rem; }
+.w-2\.5 { width: 0.625rem; }
+.w-11 { width: 2.75rem; }
+.w-1\/2 { width: 50%; }
+.w-1\/3 { width: 33.333333%; }
+.w-2\/3 { width: 66.666667%; }
+.w-3\/5 { width: 60%; }
+.min-h-\[380px\] { min-height: 380px; }
+.min-h-\[46px\] { min-height: 46px; }
+.min-h-\[48px\] { min-height: 48px; }
+.min-w-\[260px\] { min-width: 260px; }
+.max-h-\[150px\] { max-height: 150px; }
+.max-w-\[85vw\] { max-width: 85vw; }
+.items-stretch { align-items: stretch; }
+.flex-shrink-0 { flex-shrink: 0; }
+.overflow-x-hidden { overflow-x: hidden; }
+
+/* 3. Positioning & Z-Index */
+.z-40 { z-index: 40; }
+.right-0 { right: 0; }
+.top-4 { top: 1rem; }
+.inset-y-0 { top: 0; bottom: 0; }
+.left-\[42\%\] { left: 42%; }
+.translate-x-full { transform: translateX(100%); }
+.opacity-0 { opacity: 0; }
+.transition-opacity { transition-property: opacity; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+
+/* 4. Editorial Colors & Alpha Tokens */
+.bg-\[\#C8FA3C\] { background-color: #C8FA3C; }
+.bg-\[\#DCEEF5\] { background-color: #DCEEF5; }
+.text-\[\#055763\] { color: #055763; }
+.text-\[\#0A0B0F\] { color: #0A0B0F; }
+.text-\[\#203239\] { color: #203239; }
+.text-\[\#223903\] { color: #223903; }
+.text-\[\#2F4E02\] { color: #2F4E02; }
+.border-\[\#0A0B0F\]\/15 { border-color: rgba(10, 11, 15, 0.15); }
+.border-\[\#C8FA3C\]\/30 { border-color: rgba(200, 250, 60, 0.3); }
+.border-\[\#DCEEF5\]\/30 { border-color: rgba(220, 238, 245, 0.3); }
+
+.bg-black\/80 { background-color: rgba(0, 0, 0, 0.8); }
+.bg-outline-variant\/30 { background-color: rgba(60, 73, 76, 0.3); }
+.bg-primary\/10 { background-color: rgba(138, 235, 255, 0.1); }
+.bg-secondary\/10 { background-color: rgba(78, 222, 163, 0.1); }
+.bg-tertiary\/10 { background-color: rgba(200, 232, 141, 0.1); }
+.bg-surface-container-high\/80 { background-color: rgba(42, 42, 45, 0.8); }
+.bg-surface-container-high\/90 { background-color: rgba(42, 42, 45, 0.9); }
+.bg-surface-container-high\/95 { background-color: rgba(42, 42, 45, 0.95); }
+.bg-surface-container-low\/40 { background-color: rgba(28, 27, 30, 0.4); }
+.bg-surface-container-low\/50 { background-color: rgba(28, 27, 30, 0.5); }
+.bg-surface-container-lowest\/95 { background-color: rgba(14, 14, 17, 0.95); }
+.bg-surface-container-lowest\/98 { background-color: rgba(14, 14, 17, 0.98); }
+.bg-surface-container\/40 { background-color: rgba(32, 31, 34, 0.4); }
+.bg-surface-container\/60 { background-color: rgba(32, 31, 34, 0.6); }
+.bg-surface-container\/90 { background-color: rgba(32, 31, 34, 0.9); }
+
+.border-outline-variant\/20 { border-color: rgba(60, 73, 76, 0.2); }
+.border-outline-variant\/30 { border-color: rgba(60, 73, 76, 0.3); }
+.border-outline-variant\/40 { border-color: rgba(60, 73, 76, 0.4); }
+.border-outline-variant\/50 { border-color: rgba(60, 73, 76, 0.5); }
+.border-outline-variant\/60 { border-color: rgba(60, 73, 76, 0.6); }
+.border-primary\/20 { border-color: rgba(138, 235, 255, 0.2); }
+.border-primary\/30 { border-color: rgba(138, 235, 255, 0.3); }
+.border-primary\/40 { border-color: rgba(138, 235, 255, 0.4); }
+.border-primary\/50 { border-color: rgba(138, 235, 255, 0.5); }
+.border-secondary\/30 { border-color: rgba(78, 222, 163, 0.3); }
+.border-secondary\/40 { border-color: rgba(78, 222, 163, 0.4); }
+.border-tertiary\/30 { border-color: rgba(200, 232, 141, 0.3); }
+
+/* 5. Typography, Headings & Fonts */
+.font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; }
+.font-extrabold { font-weight: 800; }
+.leading-tight { line-height: 1.25; }
+.leading-\[1\.12\] { line-height: 1.12; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.text-\[9px\] { font-size: 9px; line-height: 12px; }
+.text-\[10px\] { font-size: 10px; line-height: 14px; }
+.text-\[11px\] { font-size: 11px; line-height: 15px; }
+.text-\[12px\] { font-size: 12px; line-height: 16px; }
+.text-\[14px\] { font-size: 14px; line-height: 20px; }
+.text-\[15px\] { font-size: 15px; line-height: 20px; }
+.text-\[16px\] { font-size: 16px; line-height: 22px; }
+.text-\[18px\] { font-size: 18px; line-height: 24px; }
+.text-\[20px\] { font-size: 20px; line-height: 28px; }
+.text-\[22px\] { font-size: 22px; line-height: 28px; }
+.text-\[28px\] { font-size: 28px; line-height: 34px; }
+
+/* 6. Blur, Shadows & Shimmers */
+.backdrop-blur-sm { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.backdrop-blur-md { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.backdrop-blur-xl { -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
+.backdrop-blur-2xl { -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); }
+.shadow-cyan-500\/20 { box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.2), 0 4px 6px -4px rgba(6, 182, 212, 0.2); }
+.shadow-\[0_0_25px_-4px_rgba\(34\,211\,238\,0\.5\)\] { box-shadow: 0 0 25px -4px rgba(34, 211, 238, 0.5); }
+.from-primary\/20 { --tw-gradient-from: rgba(138, 235, 255, 0.2) var(--tw-gradient-from-position); --tw-gradient-to: rgba(138, 235, 255, 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+
+/* 7. Responsive Breakpoint Utilities: Small (sm: >= 640px) */
+@media (min-width: 640px) {
+  .sm\:inline { display: inline; }
+  .sm\:inline-flex { display: inline-flex; }
+  .sm\:hidden { display: none; }
+  .sm\:flex-row { flex-direction: row; }
+  .sm\:items-center { align-items: center; }
+  .sm\:text-left { text-align: left; }
+  .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sm\:gap-3 { gap: 0.75rem; }
+  .sm\:gap-6 { gap: 1.5rem; }
+  .sm\:p-5 { padding: 1.25rem; }
+  .sm\:p-6 { padding: 1.5rem; }
+  .sm\:p-7 { padding: 1.75rem; }
+  .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .sm\:h-44 { height: 11rem; }
+  .sm\:w-96 { width: 24rem; }
+  .sm\:top-5 { top: 1.25rem; }
+  .sm\:right-6 { right: 1.5rem; }
+  .sm\:text-5xl { font-size: 3rem; line-height: 1; }
+  .sm\:text-body-md { font-size: 14px; line-height: 20px; }
+  .sm\:max-h-\[190px\] { max-height: 190px; }
+}
+
+/* 8. Responsive Breakpoint Utilities: Medium (md: >= 768px) */
+@media (min-width: 768px) {
+  .md\:flex { display: flex; }
+  .md\:flex-row { flex-direction: row; }
+  .md\:items-end { align-items: flex-end; }
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .md\:p-space-xl { padding: 2rem; }
+  .md\:mt-0 { margin-top: 0; }
+  .md\:mx-0 { margin-left: 0; margin-right: 0; }
+}
+
+/* 9. Responsive Breakpoint Utilities: Large Desktop (lg: >= 1024px) */
+@media (min-width: 1024px) {
+  .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lg\:col-span-2 { grid-column: span 2 / span 2; }
+  .lg\:col-span-3 { grid-column: span 3 / span 3; }
+  .lg\:col-span-4 { grid-column: span 4 / span 4; }
+  .lg\:col-span-5 { grid-column: span 5 / span 5; }
+  .lg\:col-span-6 { grid-column: span 6 / span 6; }
+  .lg\:col-span-7 { grid-column: span 7 / span 7; }
+  .lg\:gap-8 { gap: 2rem; }
+  .lg\:p-8 { padding: 2rem; }
+  .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+  .lg\:py-24 { padding-top: 6rem; padding-bottom: 6rem; }
+  .lg\:pt-16 { padding-top: 4rem; }
+  .lg\:pb-28 { padding-bottom: 7rem; }
+  .lg\:text-6xl { font-size: 3.75rem; line-height: 1; }
+}

@@ -602,8 +602,8 @@ window.refreshHeroTelemetry = function() {
       card.style.transitionDelay = `${(idx % 4) * 75}ms`;
     });
 
-    // 3. Tag major sections for smooth scroll reveal
-    document.querySelectorAll('#portals, #ecosystem-carousel, #simulator, #demo, #acquisition, #scanner-spotlight, #architecture, footer').forEach(sec => {
+    // 3. Tag major sections for smooth scroll reveal (footer excluded to prevent layout collisions)
+    document.querySelectorAll('#portals, #ecosystem-carousel, #simulator, #demo, #acquisition, #scanner-spotlight, #architecture').forEach(sec => {
       sec.classList.add('reveal-on-scroll');
     });
 
@@ -616,7 +616,7 @@ window.refreshHeroTelemetry = function() {
             obs.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+      }, { threshold: 0.02, rootMargin: '120px 0px 0px 0px' });
 
       targets.forEach(el => revealObserver.observe(el));
     } else {

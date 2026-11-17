@@ -142,35 +142,37 @@
 <!-- =====================================================================
        3. SECTION 1: HERO & INTEGRATED COMMAND DASHBOARD
   ====================================================================== -->
-<section class="relative w-full pt-10 pb-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto flex flex-col items-center">
-<!-- Hero Badging -->
-<div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-surface-container border border-outline-variant/30 mb-6">
-<span class="w-2 h-2 rounded-full bg-primary-container pulse-bead-active"></span>
-<span class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest">TACTICAL TELEMETRY • FTTx AUTOMATION</span>
+<section class="relative w-full pt-12 pb-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto flex flex-col items-center">
+<!-- Hero Tactical Badging -->
+<div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container/90 border border-outline-variant/40 backdrop-blur-md mb-6 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+<span class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest font-semibold">JAKARTA-01 ODN CLUSTER • ACTIVE SLA 99.98%</span>
 <span class="text-outline-variant">|</span>
-<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">KERNEL 4.2.1-SEC</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant font-mono">KERNEL 4.2.1-SEC</span>
 </div>
 <!-- Main Headline -->
-<h1 class="text-3xl sm:text-5xl lg:text-display-lg font-display-lg text-center text-on-surface max-w-4xl tracking-tight leading-tight sm:leading-none mb-4">
+<h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-center text-on-surface max-w-4xl tracking-tight leading-[1.12] mb-5">
       The command platform for <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-container to-secondary">fiber field ops</span> &amp; cyber defense.
     </h1>
 <!-- Subheadline -->
 <p class="text-body-sm sm:text-body-md font-body-md text-on-surface-variant text-center max-w-2xl mb-8 leading-relaxed px-2">
       Surgical automation for ISP fiber deployments, dynamic technician dispatching, real-time optical power validation, and zero-trust perimeter auditing. Built for carrier-grade resilience.
     </p>
-<!-- CTAs -->
-<div class="w-full max-w-md sm:max-w-none flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-space-md mb-12">
-<a class="px-5 py-3 sm:py-2.5 min-h-[48px] bg-primary-container text-on-primary-fixed font-body-md font-medium rounded-lg flex items-center justify-center gap-2 hover:bg-primary transition-all duration-150 shadow-[0_0_20px_-3px_rgba(34,211,238,0.4)] active:scale-[0.98]" href="#simulator">
-<span class="material-symbols-outlined text-[18px]">play_circle</span>
-<span data-i18n="hero.cta1">Launch Interactive Simulator</span>
+<!-- CTAs: High-Impact 3-Pillar Group -->
+<div class="w-full max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-3 mb-12">
+<a class="px-5 py-3 min-h-[48px] bg-primary-container text-surface-container-lowest font-body-md font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-primary transition-all duration-150 shadow-[0_0_25px_-4px_rgba(34,211,238,0.5)] active:scale-[0.98]" href="#simulator">
+<span class="material-symbols-outlined text-[20px]">play_circle</span>
+<span data-i18n="hero.cta1">Launch Live Simulator</span>
 </a>
-<a class="px-5 py-3 sm:py-2.5 min-h-[48px] bg-surface-container-high border border-outline-variant text-on-surface font-body-md font-medium rounded-lg flex items-center justify-center gap-2 hover:border-primary/60 transition-all duration-150 active:scale-[0.98]" href="#acquisition">
-<span class="material-symbols-outlined text-[18px]">shopping_cart_checkout</span>
-<span>Acquire Full IP ($5.85k)</span>
+<a class="px-5 py-3 min-h-[48px] bg-surface-container-high border border-outline-variant hover:border-primary text-on-surface font-body-md font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98]" href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer">
+<span class="material-symbols-outlined text-[18px] text-primary">shield_person</span>
+<span>Open Admin Console</span>
+<span class="material-symbols-outlined text-[14px] text-outline">open_in_new</span>
 </a>
-<a class="px-4 py-3 sm:py-2.5 min-h-[48px] text-on-surface-variant hover:text-white font-label-mono-sm text-label-mono-sm flex items-center justify-center gap-1.5 transition-colors" href="#scanner-spotlight">
-<span class="material-symbols-outlined text-[16px]">verified_user</span>
-<span data-i18n="hero.cta3">Run Security Audit</span>
+<a class="px-5 py-3 min-h-[48px] bg-surface-container border border-outline-variant/60 hover:border-secondary text-secondary font-body-md font-medium rounded-lg flex items-center justify-center gap-2 transition-all duration-150 active:scale-[0.98]" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">
+<span class="material-symbols-outlined text-[18px]">devices</span>
+<span>Tech Mobile PWA</span>
+<span class="material-symbols-outlined text-[14px] text-outline">open_in_new</span>
 </a>
 </div>
 <!-- Bento Dashboard Component (Floor 1 Paneling) -->
@@ -341,7 +343,7 @@
 <!-- =====================================================================
        4. SECTION 2: ECOSYSTEM GATEWAY PORTALS (FIG 0.1 - 0.4)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="portals">
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="portals">
 <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
 <div>
 <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">FIG 0.1 — FIG 0.4 MODULE BLUEPRINTS</div>
@@ -453,7 +455,7 @@
 <!-- =====================================================================
      4.5. SECTION 2B: SMOOTH INTERACTIVE ECOSYSTEM CAROUSEL (#ecosystem-carousel)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="ecosystem-carousel">
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="ecosystem-carousel">
   <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
     <div>
       <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">REAL-WORLD WORKFLOWS • 6 CORE SCREENS</div>
@@ -628,7 +630,7 @@
 <!-- =====================================================================
        5. SECTION 3: INTERACTIVE LIVE PRODUCT SIMULATOR HUB (#simulator)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="simulator">
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="simulator">
 <div class="text-center max-w-3xl mx-auto mb-10">
 <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">TACTICAL EMULATOR • LIVE SANDBOX</div>
 <h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight" data-i18n="sim.title">Interactive Product Simulator Hub</h2>
@@ -782,7 +784,7 @@
 <!-- =====================================================================
        6. SECTION 4: LIVE SANDBOX & DEMO CREDENTIALS (#demo)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="demo">
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="demo">
 <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
 <div>
 <div class="font-label-mono-xs text-label-mono-xs text-secondary uppercase tracking-widest mb-1">EVALUATION ENVIRONMENT</div>
@@ -901,7 +903,7 @@
 <!-- =====================================================================
        7. SECTION 5: COMMERCIAL ACQUISITION & LICENSING HUB (#acquisition)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="acquisition">
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="acquisition">
 <div class="text-center max-w-3xl mx-auto mb-12">
 <div class="font-label-mono-xs text-label-mono-xs text-tertiary uppercase tracking-widest mb-1">M&amp;A ASSET SALE • COMMERCIAL TERMS</div>
 <h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight" data-i18n="pricing.title">Commercial Acquisition &amp; Licensing Hub</h2>
@@ -913,8 +915,8 @@
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-8">
 <!-- Card 1: Full Asset Buyout ($5,850) -->
 <div class="lg:col-span-7 bg-surface-container-lowest border-2 border-primary/50 rounded-lg p-space-lg flex flex-col justify-between relative shadow-[0_0_35px_-5px_rgba(34,211,238,0.15)]">
-<!-- Amber / Cyan Badge -->
-<div class="absolute -top-3 right-6 px-3 py-0.5 bg-tertiary text-surface-container-lowest font-label-mono-xs text-label-mono-xs font-bold uppercase rounded shadow">
+<!-- Amber / Cyan Badge (Securely Inside Container) -->
+<div class="absolute top-4 right-4 sm:top-5 sm:right-6 px-3 py-1 bg-tertiary text-surface-container-lowest font-label-mono-xs text-label-mono-xs font-bold uppercase rounded shadow">
           RECOMMENDED BUYOUT
         </div>
 <div>
@@ -1052,7 +1054,7 @@
 <!-- =====================================================================
        8. SECTION 6: INTERACTIVE DOMAIN SECURITY POSTURE AUDIT (#scanner-spotlight)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="scanner-spotlight">
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="scanner-spotlight">
 <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
 <div>
 <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">PERIMETER AUDIT TOOL • RFC 9116</div>
@@ -1135,7 +1137,7 @@
 <!-- =====================================================================
        9. SECTION 7: TELEMETRY STRIP, ARCHITECTURE & EDITORIAL BLOCKS (#architecture)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t" id="architecture">
+<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="architecture">
 <!-- Telemetry Metrics Strip -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-space-md mb-16">
 <div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
@@ -1247,86 +1249,141 @@
 </div>
 </section>
 <!-- =====================================================================
-       10. SECTION 8: MINIMALIST OBSIDIAN FOOTER (Shared Component: Footer)
+       10. SECTION 8: WORLD-CLASS ENTERPRISE OBSIDIAN FOOTER
   ====================================================================== -->
-<footer class="w-full bg-surface-container-lowest hairline-t mt-auto">
-<div class="w-full px-space-lg md:px-margin-desktop py-space-xl max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md">
-<!-- Left Brand & Copyright -->
-<div class="flex flex-col items-center md:items-start text-center md:text-left">
-<a class="text-headline-md font-headline-md text-primary tracking-tight font-semibold flex items-center gap-2 mb-1" href="index.html">
-<span class="material-symbols-outlined text-[20px]">shield_with_house</span>
-<span>Benteng Siber</span>
-</a>
-<p class="text-body-sm font-body-sm text-outline max-w-md">
-          © 2025 Benteng Siber Ecosystem. Mission-Critical Defense &amp; Telemetry Architecture. All rights reserved.
+<footer class="w-full bg-surface-container-lowest border-t border-outline-variant/30 mt-auto pt-16 pb-14 text-on-surface">
+  <div class="w-full px-space-lg md:px-margin-desktop max-w-7xl mx-auto">
+    <!-- Top Grid: 4 Enterprise Columns -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 hairline-b">
+      
+      <!-- Col 1: Brand, Mission, Trust Status (4 cols) -->
+      <div class="lg:col-span-4 space-y-4">
+        <a class="flex items-center gap-2.5 group" href="index.html">
+          <div class="w-8 h-8 bg-surface-container-high border border-outline-variant/40 rounded flex items-center justify-center text-primary group-hover:border-primary/50 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">shield_with_house</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-headline-md font-headline-md font-bold text-primary tracking-tight leading-none">Benteng Siber</span>
+            <span class="font-label-mono-xs text-[9px] text-outline tracking-widest uppercase mt-0.5 font-mono">FiberOps FSM • v4.2.1-SEC</span>
+          </div>
+        </a>
+
+        <p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+          Carrier-grade field operations management and sovereign zero-trust telecommunication perimeter defense. Engineered for modern ISPs, dark fiber operators, and smart city infrastructure.
         </p>
-</div>
-<!-- Exact Shared Component Footer Links -->
-<div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-label-mono-xs font-label-mono-xs">
-<a class="text-outline hover:text-primary transition-colors duration-150" href="#scanner-spotlight">Security Posture</a>
-<a class="text-outline hover:text-primary transition-colors duration-150" href="#architecture">Documentation</a>
-<a class="text-outline hover:text-primary transition-colors duration-150" href="#demo">Sandbox API</a>
-<a class="text-outline hover:text-primary transition-colors duration-150" href="#simulator">BAST Compliance</a>
-<a class="text-outline hover:text-primary transition-colors duration-150" href="privacy-policy.html">Privacy &amp; Terms</a>
-<a class="text-outline hover:text-primary transition-colors duration-150" href="https://scanner.bentengsiber.com/.well-known/security.txt" target="_blank" rel="noopener noreferrer">Security.txt</a>
-</div>
-</div>
+
+        <!-- Live Trust Status Badge -->
+        <div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded-lg space-y-2">
+          <div class="flex items-center justify-between text-label-mono-xs font-label-mono-xs">
+            <span class="flex items-center gap-2 text-secondary font-semibold">
+              <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+              All Systems Operational
+            </span>
+            <span class="text-outline">99.98% SLA</span>
+          </div>
+          <div class="text-[11px] font-label-mono-xs text-outline flex items-center gap-2">
+            <span>RFC 9116 Verified</span>
+            <span>•</span>
+            <span>256-Bit SSL Encrypted</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 2: Portals & Field Applications (3 cols) -->
+      <div class="lg:col-span-3 space-y-3 font-body-sm">
+        <h3 class="text-label-mono-xs font-label-mono-xs text-primary font-bold uppercase tracking-wider">PORTALS &amp; APPS</h3>
+        <ul class="space-y-2 text-on-surface-variant">
+          <li>
+            <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors flex items-center gap-1.5">
+              <span>Admin Dispatcher Console</span>
+              <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="hover:text-secondary transition-colors flex items-center gap-1.5">
+              <span>Technician Web PWA</span>
+              <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+            </a>
+          </li>
+          <li>
+            <a href="playstore.html" class="hover:text-on-surface transition-colors flex items-center gap-1.5">
+              <span>Android Mobile Edition (APK)</span>
+            </a>
+          </li>
+          <li>
+            <a href="#simulator" onclick="switchSimTab(2)" class="hover:text-on-surface transition-colors">
+              Customer Live Uber Radar
+            </a>
+          </li>
+          <li>
+            <a href="#simulator" onclick="switchSimTab(4)" class="hover:text-on-surface transition-colors">
+              Atomic BOM Stock Tracker
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Architecture & Security Core (2 cols) -->
+      <div class="lg:col-span-2 space-y-3 font-body-sm">
+        <h3 class="text-label-mono-xs font-label-mono-xs text-secondary font-bold uppercase tracking-wider">SECURITY &amp; TECH</h3>
+        <ul class="space-y-2 text-on-surface-variant">
+          <li><a href="#architecture" class="hover:text-primary transition-colors">Zero-Trust Pipeline</a></li>
+          <li><a href="#scanner-spotlight" class="hover:text-primary transition-colors">RFC 9116 Posture Scanner</a></li>
+          <li><a href="#simulator" onclick="switchSimTab(3)" class="hover:text-primary transition-colors">Cryptographic BAST PDF</a></li>
+          <li><a href="#demo" class="hover:text-primary transition-colors">Live Sandbox &amp; REST APIs</a></li>
+          <li><a href="https://scanner.bentengsiber.com/.well-known/security.txt" target="_blank" rel="noopener noreferrer" class="hover:text-primary transition-colors">Security.txt Policy</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Commercial & Acquisition (3 cols) -->
+      <div class="lg:col-span-3 space-y-3 font-body-sm">
+        <h3 class="text-label-mono-xs font-label-mono-xs text-tertiary font-bold uppercase tracking-wider">ACQUISITION &amp; TERMS</h3>
+        <p class="text-[12px] text-on-surface-variant leading-relaxed">
+          Full intellectual property, Cloudflare domain push, and 60 days architect handover available for purchase.
+        </p>
+        <div class="pt-1 flex flex-col gap-2 font-label-mono-xs text-label-mono-xs">
+          <a href="#acquisition" class="px-3 py-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 hover:border-tertiary/60 text-tertiary rounded flex items-center justify-between transition-colors">
+            <span>Asset Buyout ($5,850)</span>
+            <span>&rarr;</span>
+          </a>
+          <a href="https://wa.me/628123456789?text=Inquiry%20Benteng%20Siber%20Asset%20Buyout%205.85k" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 hover:border-primary/60 text-primary rounded flex items-center justify-between transition-colors">
+            <span>WhatsApp Commercial Desk</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Bar: Metadata, Copyright & Back to Top -->
+    <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-label-mono-xs font-label-mono-xs text-outline">
+      <div class="flex items-center gap-3 flex-wrap text-center sm:text-left">
+        <span>&copy; 2026 Benteng Siber Ecosystem. All rights reserved.</span>
+        <span>•</span>
+        <span class="text-on-surface-variant">Edge Node: Jakarta (ID-JKT01 • 1.2ms)</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a href="privacy-policy.html" class="hover:text-primary transition-colors">Privacy &amp; Terms</a>
+        <span>•</span>
+        <a href="#top" class="hover:text-primary flex items-center gap-1 transition-colors" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+          <span>Back to Top</span>
+          <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+        </a>
+      </div>
+    </div>
+  </div>
 </footer>
-<!-- =====================================================================
-       11. FLOATING DISMISSIBLE TESTING DOCK (#testing-dock)
-  ====================================================================== -->
-<aside class="fixed bottom-16 sm:bottom-4 right-3 sm:right-4 z-40 bg-surface-container-high/95 border border-primary/40 p-3 rounded-lg shadow-2xl backdrop-blur max-w-xs transition-all duration-300 dock-collapsed" id="testing-dock">
-  <!-- Collapsed Minimal Floating Pill on Mobile -->
-  <div class="dock-collapsed-content items-center gap-2 font-label-mono-xs text-primary font-semibold cursor-pointer" onclick="toggleTestingDock(true)">
-    <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
-    <span>⚡ Quick Test</span>
-  </div>
-
-  <!-- Full Expanded Content -->
-  <div class="dock-full-content">
-    <div class="flex items-center justify-between pb-1.5 hairline-b mb-2">
-      <div class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-primary font-semibold">
-        <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
-        <span>EVALUATION SUITE READY</span>
-      </div>
-      <div class="flex items-center gap-1">
-        <button class="sm:hidden text-outline hover:text-white p-1" onclick="toggleTestingDock(false)" title="Minimize" type="button">
-          <span class="material-symbols-outlined text-[16px]">expand_more</span>
-        </button>
-        <button class="text-outline hover:text-white p-1" onclick="dismissTestingDock()" title="Dismiss Dock" type="button">
-          <span class="material-symbols-outlined text-[16px]">close</span>
-        </button>
-      </div>
-    </div>
-    <p class="text-[11px] font-body-sm text-on-surface-variant mb-2">
-      Quick test shortcuts for M&amp;A assessors &amp; technical auditors:
-    </p>
-    <div class="flex flex-col gap-1.5 font-label-mono-xs text-label-mono-xs">
-      <a class="px-2.5 py-1.5 min-h-[36px] bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between transition-colors active:scale-95" href="#simulator" onclick="switchSimTab(1); goToStep(3); toggleTestingDock(false);">
-        <span>Test Sign-on-Glass</span>
-        <span class="text-primary">&rarr;</span>
-      </a>
-      <a class="px-2.5 py-1.5 min-h-[36px] bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between transition-colors active:scale-95" href="#acquisition" onclick="toggleTestingDock(false);">
-        <span>Review $5.85k Buyout Terms</span>
-        <span class="text-tertiary">&rarr;</span>
-      </a>
-      <button class="px-2.5 py-1.5 min-h-[36px] bg-primary text-surface-container-lowest font-medium rounded text-left flex items-center justify-between transition-colors active:scale-95 cursor-pointer" onclick="triggerFastAudit(); toggleTestingDock(false);" type="button">
-        <span>Run Live RFC 9116 Audit</span>
-        <span>&check;</span>
-      </button>
-    </div>
-  </div>
-</aside>
 
 <!-- =====================================================================
-       11.5. STICKY MOBILE BOTTOM ACTION BAR (Viewport < 768px)
+       11. STICKY MOBILE BOTTOM ACTION BAR (Viewport < 768px)
   ====================================================================== -->
 <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest/90 border-t border-outline-variant/30 backdrop-blur-xl px-3 py-2 flex items-center justify-between gap-2 shadow-2xl mobile-sticky-action-bar" id="mobile-sticky-bar">
   <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="flex-1 min-h-[44px] px-3 py-2 bg-surface-container-high border border-outline-variant/40 hover:border-secondary/60 text-secondary rounded-lg font-label-mono-xs text-center flex items-center justify-center gap-1.5 transition-all active:scale-95">
     <span class="material-symbols-outlined text-[18px]">devices</span>
     <span class="font-semibold">Tech PWA</span>
   </a>
-  <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="flex-1 min-h-[44px] px-3 py-2 bg-primary-container text-surface-container-lowest rounded-lg font-label-mono-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 transition-all active:scale-95">
+  <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="flex-1 min-h-[44px] px-3 py-2 bg-primary-container text-surface-container-lowest rounded-lg font-label-mono-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 transition-all active:scale-[0.98]">
     <span class="material-symbols-outlined text-[18px]">shield_person</span>
     <span>Admin Login</span>
   </a>

@@ -454,6 +454,7 @@
         // Real-Time Polling Loop: Configured via settings (minimum 4000ms)
         const pollMs = Math.max(4000, Number(pollIntervalSec) * 1000);
         const livePollingInterval = setInterval(() => {
+            if (document.hidden) return;
             fetchLiveTrackingData(false);
         }, pollMs);
 

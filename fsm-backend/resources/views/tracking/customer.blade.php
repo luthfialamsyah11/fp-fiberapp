@@ -421,7 +421,10 @@
         map.fitBounds(bounds, { padding: [60, 60] });
 
         // Real-time Polling Engine (Every 5 seconds)
+        let pollingTimer = null;
+
         async function fetchLiveStatus() {
+            if (document.hidden) return;
             try {
                 const res = await fetch(`/api/public/track/${TOKEN}`);
                 if (!res.ok) return;
@@ -440,6 +443,10 @@
                 if (etaText) {
                     if (data.task.status === 'completed') {
                         etaText.innerHTML = '<ion-icon name="checkmark-circle" style="color: #10b981;"></ion-icon><span style="color: #10b981;">Pekerjaan telah selesai</span>';
+                        if (pollingTimer) {
+                            clearInterval(pollingTimer);
+                            pollingTimer = null;
+                        }
                     } else if (data.task.status === 'on-going') {
                         etaText.innerHTML = '<ion-icon name="navigate-outline"></ion-icon><span>Teknisi sedang dalam perjalanan / pengerjaan</span>';
                     }
@@ -458,7 +465,7 @@
             }
         }
 
-        setInterval(fetchLiveStatus, 5000);
+        pollingTimer = setInterval(fetchLiveStatus, 5000);
     </script>
 </body>
 </html>

@@ -196,166 +196,23 @@ function switchSimTab(tabIndex) {
       const log = document.getElementById('radar-event-log');
       const status = document.getElementById('radar-socket-status');
       if (log) log.innerText = '> WhatsApp template triggered: "Teknisi Budi menuju lokasi Anda..."';
-      if (status) status.innerText = 'WhatsApp Cloud API: 200 OK • MessageID: wamid.HBgL';
+      if (status) status.innerText = 'Webhook Triggered • Click-to-Chat (wa.me) Ready';
     }
 
-    let currentWavelength = '1490nm';
-    function handleOpmSlider(val) {
-      const numVal = parseFloat(val);
-      const display = document.getElementById('opm-live-display');
-      const sliderVal = document.getElementById('opm-slider-val');
-      const pill = document.getElementById('opm-status-pill');
-      const desc = document.getElementById('opm-spec-desc');
-
-      if (sliderVal) sliderVal.innerText = `${numVal.toFixed(1)} dBm`;
-      if (display) display.innerText = `${numVal.toFixed(2)} dBm`;
-
-      if (numVal >= -24.0 && numVal <= -15.0) {
-        if (pill) {
-          pill.className = 'px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold';
-          pill.innerText = 'OPTIMAL SPEC';
-        }
-        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-secondary';
-        if (desc) desc.innerText = 'Within ITU-T G.984 GPON Standard Range (-15 to -24 dBm).';
-      } else if (numVal < -24.0 && numVal >= -27.0) {
-        if (pill) {
-          pill.className = 'px-2 py-0.5 bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-mono-xs text-label-mono-xs rounded font-bold';
-          pill.innerText = 'MARGINAL SIGNAL';
-        }
-        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-tertiary';
-        if (desc) desc.innerText = 'Marginal sensitivity. May experience micro-burst packet loss.';
-      } else {
-        if (pill) {
-          pill.className = 'px-2 py-0.5 bg-error/10 border border-error/30 text-error font-label-mono-xs text-label-mono-xs rounded font-bold';
-          pill.innerText = 'CRITICAL ATTENUATION';
-        }
-        if (display) display.className = 'text-headline-lg font-headline-lg font-bold text-error';
-        if (desc) desc.innerText = 'Signal out of bounds! High probability of ONT LOS alarm.';
-      }
+    function printDemoBast() {
+      window.print();
     }
 
-    function setWavelength(wl) {
-      currentWavelength = wl;
-      const label = document.getElementById('active-wl-label');
-      const tableLabel = document.getElementById('table-metric-label');
-      if (label) label.innerText = `λ ${wl}`;
-      if (tableLabel) tableLabel.innerText = `Optical Loss (${wl})`;
-
-      ['1490', '1310', '1550'].forEach(id => {
-        const btn = document.getElementById(`wl-btn-${id}`);
-        if (btn) {
-          if (wl.includes(id)) {
-            btn.className = 'py-1 bg-primary text-surface-container-lowest rounded font-label-mono-xs text-label-mono-xs font-semibold';
-          } else {
-            btn.className = 'py-1 bg-surface-container-high hover:bg-surface-bright text-on-surface rounded font-label-mono-xs text-label-mono-xs';
-          }
-        }
+    function resetBomStock() {
+      stockCounts.patchcord = 24;
+      stockCounts.connector = 50;
+      stockCounts.ont = 6;
+      ['patchcord', 'connector', 'ont'].forEach(k => {
+        const el = document.getElementById('stock-' + k);
+        if (el) el.innerText = stockCounts[k];
       });
-    }
-
-    function applyOpmPreset(val) {
-      const slider = document.getElementById('opm-slider');
-      if (slider) {
-        slider.value = val;
-        handleOpmSlider(val);
-      }
-    }
-
-    function stampTelemetryToBast() {
-      const slider = document.getElementById('opm-slider');
-      const val = slider ? parseFloat(slider.value).toFixed(2) : '-17.84';
-      const bastVal = document.getElementById('bast-optical-val');
-      const bastStatus = document.getElementById('bast-optical-status');
-      const timestamp = document.getElementById('bast-timestamp');
-      const docNo = document.getElementById('bast-doc-no');
-
-      const now = new Date();
-      if (timestamp) timestamp.innerText = `TIMESTAMP: ${now.toISOString().replace('T', ' ').substring(0, 19)} UTC`;
-      if (docNo) docNo.innerText = `NO: BAST/BS/${now.getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
-
-      if (bastVal) bastVal.innerText = `${val} dBm`;
-      const numVal = parseFloat(val);
-      if (numVal <= -24.0) {
-        if (bastStatus) {
-          bastStatus.innerText = 'FAIL (ATTENUATION)';
-          bastStatus.className = 'p-1.5 font-bold text-red-600';
-        }
-        if (bastVal) bastVal.className = 'p-1.5 font-bold text-red-600';
-      } else {
-        if (bastStatus) {
-          bastStatus.innerText = 'PASSED';
-          bastStatus.className = 'p-1.5 font-bold text-emerald-700';
-        }
-        if (bastVal) bastVal.className = 'p-1.5 font-bold text-emerald-700';
-      }
-      alert(`OPM Telemetry (${val} dBm, ${currentWavelength}) stamped into BAST digital certificate.`);
-    }
-
-    function execQuickCli(cmd) {
-      const input = document.getElementById('cli-input');
-      if (input) input.value = cmd;
-      executeCli(cmd);
-    }
-
-    function handleCliCommand(e) {
-      if (e) e.preventDefault();
-      const input = document.getElementById('cli-input');
-      if (!input) return;
-      const cmd = input.value.trim();
-      if (cmd) {
-        executeCli(cmd);
-        input.value = '';
-      }
-    }
-
-    function executeCli(cmd) {
-      const win = document.getElementById('cli-output-window');
-      if (!win) return;
-
-      const userRow = document.createElement('div');
-      userRow.className = 'text-primary font-semibold';
-      userRow.innerText = `> ${cmd}`;
-      win.appendChild(userRow);
-
-      const cleanCmd = cmd.toLowerCase().trim();
-      const resp = document.createElement('div');
-      resp.className = 'text-on-surface pl-2';
-
-      if (cleanCmd === 'clear') {
-        win.innerHTML = '<div>Benteng Siber Tactical Console [Version 4.2.1-RELEASE]</div>';
-        return;
-      } else if (cleanCmd === 'help') {
-        resp.innerHTML = '<span class="text-secondary">Available CLI Commands:</span><br/>' +
-          '&bull; <strong class="text-primary">help</strong> - List available terminal operations<br/>' +
-          '&bull; <strong class="text-primary">benteng probe --all</strong> - Audit active GPON OLT links &amp; dying gasps<br/>' +
-          '&bull; <strong class="text-primary">fleet status</strong> - Display active field vans, GPS geofences, and tickets<br/>' +
-          '&bull; <strong class="text-primary">bast verify</strong> - Cryptographic checksum validation on newest BAST PDF<br/>' +
-          '&bull; <strong class="text-primary">bom stock</strong> - Query current van atomic stock levels<br/>' +
-          '&bull; <strong class="text-primary">clear</strong> - Purge terminal window buffer';
-      } else if (cleanCmd.includes('probe')) {
-        resp.innerHTML = '<span class="text-secondary">[OLT-CORE-JKT-01] PROBE RUNNING...</span><br/>' +
-          '&bull; PON 01: 64/64 ONT Online (Loss: -17.2 dBm) <span class="text-secondary">[OK]</span><br/>' +
-          '&bull; PON 02: 59/64 ONT Online (Loss: -19.4 dBm) <span class="text-secondary">[OK]</span><br/>' +
-          '&bull; PON 03: 62/64 ONT Online (Loss: -21.1 dBm) <span class="text-secondary">[OK]</span><br/>' +
-          '&bull; Zero Dying-Gasp alarms registered in last 60 minutes.';
-      } else if (cleanCmd.includes('fleet')) {
-        resp.innerHTML = '<span class="text-secondary">FLEET DISPATCH MATRIX:</span><br/>' +
-          '&bull; Van #01: Budi Santoso [WO-88219] &bull; Status: ON-ROUTE (GPS: Inside geofence)<br/>' +
-          '&bull; Van #02: Agus Wirawan [WO-88217] &bull; Status: SPLICING &bull; Loss: -18.2 dBm<br/>' +
-          '&bull; Van #03: Dimas Aditya [IDLE] &bull; Assigned to Standby Hub Senayan';
-      } else if (cleanCmd.includes('bast')) {
-        resp.innerHTML = '<span class="text-secondary">BAST CERTIFICATE INTEGRITY VERIFICATION:</span><br/>' +
-          '&bull; Certificate ID: BAST/BS/2025/1109<br/>' +
-          '&bull; SHA-256 Checksum: 4f8a902c118bfa923d8819ef3420<br/>' +
-          '&bull; Timestamp Authority: R2 S3 Object Lock &bull; Signature: 2/2 Valid <span class="text-secondary">[PASS]</span>';
-      } else if (cleanCmd.includes('bom')) {
-        resp.innerHTML = `Stock Patchcord: ${stockCounts.patchcord} | Connectors: ${stockCounts.connector} | ONT Units: ${stockCounts.ont}`;
-      } else {
-        resp.innerHTML = `<span class="text-error">Command not found: '${cmd}'. Type 'help' for command directory.</span>`;
-      }
-
-      win.appendChild(resp);
-      win.scrollTop = win.scrollHeight;
+      const logBox = document.getElementById('bom-log');
+      if (logBox) logBox.innerHTML = '<div>[RESET] Warehouse Van Stock restored to initial baseline.</div>';
     }
 
     const stockCounts = { patchcord: 24, connector: 50, ont: 6 };

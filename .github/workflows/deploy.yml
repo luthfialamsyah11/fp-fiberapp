@@ -52,7 +52,7 @@ jobs:
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 5
+        run: sleep 10
 
       # 5. Deploy Compiled Frontend PWA to app/ (public_html/app)
       - name: 🚀 Deploy PWA Client
@@ -67,7 +67,7 @@ jobs:
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 5
+        run: sleep 10
 
       # 6. Deploy Admin Public bootstrap assets to admin/ (public_html/admin)
       - name: 🚀 Deploy Admin Public
@@ -82,7 +82,7 @@ jobs:
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 5
+        run: sleep 10
 
       # 7. Deploy Backend Core Laravel to laravel-core/ (public_html/laravel-core)
       - name: 🚀 Deploy Laravel Backend Core

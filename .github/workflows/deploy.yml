@@ -48,6 +48,7 @@ jobs:
           port: 21
           local-dir: ./landing-page/
           server-dir: ${{ vars.FTP_LANDING_DIR || './' }}
+          log-level: verbose
           dry-run: false
 
       # 5. Deploy Compiled Frontend PWA to app/ (public_html/app)

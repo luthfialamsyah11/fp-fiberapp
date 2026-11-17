@@ -77,24 +77,65 @@
 <span>Acquire Asset</span>
 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
 </a>
-<!-- Mobile Menu Toggle -->
-<button class="lg:hidden p-1.5 bg-surface-container border border-outline-variant/40 rounded text-on-surface-variant hover:text-primary transition-colors" id="mobile-menu-btn" type="button" aria-label="Toggle Menu" aria-expanded="false">
-<span class="material-symbols-outlined text-[20px]">menu</span>
+<!-- Mobile Menu Toggle (44x44px Touch Target) -->
+<button class="lg:hidden touch-target-44 w-11 h-11 bg-surface-container border border-outline-variant/40 rounded-lg text-on-surface-variant hover:text-primary transition-all active:scale-90" id="mobile-menu-btn" type="button" aria-label="Toggle Menu" aria-expanded="false">
+<span class="material-symbols-outlined text-[22px]" id="mobile-menu-icon">menu</span>
 </button>
 </div>
 </div>
 
-<!-- Mobile Collapsible Navigation -->
-<div class="hidden lg:hidden bg-surface-container-lowest border-t border-outline-variant/30 px-space-lg py-4 space-y-2" id="mobile-nav-menu">
-  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" data-i18n="nav.portals" href="#portals">Portals</a>
-  <a class="block py-2 text-body-sm text-primary font-medium" data-i18n="nav.simulator" href="#simulator">Live Simulator</a>
-  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" data-i18n="nav.sandbox" href="#demo">Live Sandbox</a>
-  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" data-i18n="nav.pricing" href="#acquisition">Acquire Asset</a>
-  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" data-i18n="nav.scanner" href="#scanner-spotlight">Scanner</a>
-  <a class="block py-2 text-body-sm text-on-surface-variant hover:text-primary" data-i18n="nav.architecture" href="#architecture">Architecture</a>
-  <div class="pt-2 border-t border-outline-variant/20 flex gap-2">
-    <a class="flex-1 text-center py-2 bg-surface-container-high border border-outline-variant/50 text-primary rounded font-label-mono-xs" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Tech PWA (Demo)</a>
-    <a class="flex-1 text-center py-2 bg-primary-container text-surface-container-lowest rounded font-label-mono-xs font-semibold" href="https://admin.bentengsiber.com/" target="_blank" rel="noopener noreferrer">Admin Panel</a>
+<!-- Mobile Drawer Backdrop Overlay -->
+<div id="mobile-menu-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-200 lg:hidden"></div>
+
+<!-- Mobile Navigation Drawer Sheet -->
+<div class="fixed top-14 left-0 right-0 z-50 lg:hidden bg-surface-container-lowest/95 backdrop-blur-2xl border-b border-outline-variant/40 shadow-2xl px-space-md py-4 space-y-3 drawer-closed hidden" id="mobile-nav-menu">
+  <!-- System Status Banner inside Drawer -->
+  <div class="flex items-center justify-between pb-2 hairline-b text-label-mono-xs font-label-mono-xs text-outline">
+    <div class="flex items-center gap-1.5 text-secondary">
+      <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+      <span class="font-semibold">CORE ONLINE • v4.2</span>
+    </div>
+    <span class="text-outline uppercase">Navigation Drawer</span>
+  </div>
+
+  <!-- Links Grid -->
+  <div class="grid grid-cols-2 gap-2">
+    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.portals" href="#portals">
+      <span class="material-symbols-outlined text-[18px] text-primary">gate</span>
+      <span>Portals</span>
+    </a>
+    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container-high border border-primary/40 text-body-sm text-primary font-medium transition-colors" data-i18n="nav.simulator" href="#simulator">
+      <span class="material-symbols-outlined text-[18px] text-primary">play_circle</span>
+      <span>Live Simulator</span>
+    </a>
+    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.sandbox" href="#demo">
+      <span class="material-symbols-outlined text-[18px] text-secondary">terminal</span>
+      <span>Live Sandbox</span>
+    </a>
+    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.pricing" href="#acquisition">
+      <span class="material-symbols-outlined text-[18px] text-tertiary">monetization_on</span>
+      <span>Acquire Asset</span>
+    </a>
+    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.scanner" href="#scanner-spotlight">
+      <span class="material-symbols-outlined text-[18px] text-primary">verified_user</span>
+      <span>Scanner</span>
+    </a>
+    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.architecture" href="#architecture">
+      <span class="material-symbols-outlined text-[18px] text-outline">account_tree</span>
+      <span>Architecture</span>
+    </a>
+  </div>
+
+  <!-- Direct Portal Launch Cards in Drawer -->
+  <div class="pt-2 hairline-t flex flex-col gap-2">
+    <a class="w-full text-center py-2.5 min-h-[44px] bg-surface-container-high border border-outline-variant/50 hover:border-secondary/60 text-secondary rounded-lg font-label-mono-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98]" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">
+      <span class="material-symbols-outlined text-[18px]">devices</span>
+      <span class="font-semibold">Launch Technician PWA (Demo) &rarr;</span>
+    </a>
+    <a class="w-full text-center py-2.5 min-h-[44px] bg-primary-container text-surface-container-lowest rounded-lg font-label-mono-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 transition-all active:scale-[0.98]" href="https://admin.bentengsiber.com/" target="_blank" rel="noopener noreferrer">
+      <span class="material-symbols-outlined text-[18px]">shield_person</span>
+      <span>Open Admin Command Center &rarr;</span>
+    </a>
   </div>
 </div>
 </header>
@@ -110,24 +151,24 @@
 <span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">KERNEL 4.2.1-SEC</span>
 </div>
 <!-- Main Headline -->
-<h1 class="text-display-lg font-display-lg text-center text-on-surface max-w-4xl tracking-tight leading-none mb-4">
+<h1 class="text-3xl sm:text-5xl lg:text-display-lg font-display-lg text-center text-on-surface max-w-4xl tracking-tight leading-tight sm:leading-none mb-4">
       The command platform for <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-container to-secondary">fiber field ops</span> &amp; cyber defense.
     </h1>
 <!-- Subheadline -->
-<p class="text-body-md font-body-md text-on-surface-variant text-center max-w-2xl mb-8 leading-relaxed">
+<p class="text-body-sm sm:text-body-md font-body-md text-on-surface-variant text-center max-w-2xl mb-8 leading-relaxed px-2">
       Surgical automation for ISP fiber deployments, dynamic technician dispatching, real-time optical power validation, and zero-trust perimeter auditing. Built for carrier-grade resilience.
     </p>
 <!-- CTAs -->
-<div class="flex flex-wrap items-center justify-center gap-space-md mb-12">
-<a class="px-5 py-2.5 bg-primary-container text-on-primary-fixed font-body-md font-medium rounded flex items-center gap-2 hover:bg-primary transition-all duration-150 shadow-[0_0_20px_-3px_rgba(34,211,238,0.4)]" href="#simulator">
+<div class="w-full max-w-md sm:max-w-none flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-space-md mb-12">
+<a class="px-5 py-3 sm:py-2.5 min-h-[48px] bg-primary-container text-on-primary-fixed font-body-md font-medium rounded-lg flex items-center justify-center gap-2 hover:bg-primary transition-all duration-150 shadow-[0_0_20px_-3px_rgba(34,211,238,0.4)] active:scale-[0.98]" href="#simulator">
 <span class="material-symbols-outlined text-[18px]">play_circle</span>
 <span data-i18n="hero.cta1">Launch Interactive Simulator</span>
 </a>
-<a class="px-5 py-2.5 bg-surface-container-high border border-outline-variant text-on-surface font-body-md font-medium rounded flex items-center gap-2 hover:border-primary/60 transition-all duration-150" href="#acquisition">
+<a class="px-5 py-3 sm:py-2.5 min-h-[48px] bg-surface-container-high border border-outline-variant text-on-surface font-body-md font-medium rounded-lg flex items-center justify-center gap-2 hover:border-primary/60 transition-all duration-150 active:scale-[0.98]" href="#acquisition">
 <span class="material-symbols-outlined text-[18px]">shopping_cart_checkout</span>
 <span>Acquire Full IP ($5.85k)</span>
 </a>
-<a class="px-4 py-2.5 text-on-surface-variant hover:text-white font-label-mono-sm text-label-mono-sm flex items-center gap-1.5" href="#scanner-spotlight">
+<a class="px-4 py-3 sm:py-2.5 min-h-[48px] text-on-surface-variant hover:text-white font-label-mono-sm text-label-mono-sm flex items-center justify-center gap-1.5 transition-colors" href="#scanner-spotlight">
 <span class="material-symbols-outlined text-[16px]">verified_user</span>
 <span data-i18n="hero.cta3">Run Security Audit</span>
 </a>
@@ -224,7 +265,7 @@
 </div>
 </div>
 <!-- Main Visual SVG Curve Graph -->
-<div class="relative w-full h-44 my-2">
+<div class="relative w-full h-36 sm:h-44 my-2">
 <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 160">
 <!-- Grid lines -->
 <line stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,4" x1="0" x2="400" y1="40" y2="40"></line>
@@ -272,7 +313,7 @@
 <span class="text-outline uppercase font-semibold">DECISION STREAM • LIVE</span>
 <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
 </div>
-<div class="space-y-2 overflow-y-auto max-h-[190px] pr-1 font-label-mono-xs" id="hero-log-stream">
+<div class="space-y-2 overflow-y-auto max-h-[150px] sm:max-h-[190px] pr-1 font-label-mono-xs" id="hero-log-stream">
 <div class="text-on-surface-variant">
 <span class="text-outline">[14:32:01]</span> <span class="text-secondary">AUTH_OK</span> tech.id=9412 verified GPS geo-fence (-6.2088, 106.8456).
             </div>
@@ -597,8 +638,8 @@
 </div>
 <!-- Simulator Container (Obsidian Surface 1) -->
 <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden shadow-2xl">
-<!-- Tab Headers -->
-<div class="flex flex-wrap items-center bg-surface-container-low hairline-b px-space-md pt-2 gap-2 text-label-mono-sm font-label-mono-sm overflow-x-auto"><button class="px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all" id="sim-tab-1" onclick="switchSimTab(1)"><span class="material-symbols-outlined text-[16px]">touch_app</span><span>1. Technician Mobile Stepper</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all" id="sim-tab-2" onclick="switchSimTab(2)"><span class="material-symbols-outlined text-[16px]">local_shipping</span><span>2. Customer Live Uber Radar &amp; GPS</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all" id="sim-tab-3" onclick="switchSimTab(3)"><span class="material-symbols-outlined text-[16px]">verified</span><span>3. Official BAST PDF Certificate</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all" id="sim-tab-4" onclick="switchSimTab(4)"><span class="material-symbols-outlined text-[16px]">inventory_2</span><span>4. Atomic BOM &amp; Inventory Tracker</span></button></div>
+<!-- Tab Headers (Smooth Horizontal Scroll on Mobile) -->
+<div class="flex items-center bg-surface-container-low hairline-b px-space-md pt-2 gap-2 text-label-mono-sm font-label-mono-sm overflow-x-auto no-scrollbar scroll-smooth"><button class="px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-1" onclick="switchSimTab(1)"><span class="material-symbols-outlined text-[16px]">touch_app</span><span>1. Technician Mobile Stepper</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-2" onclick="switchSimTab(2)"><span class="material-symbols-outlined text-[16px]">local_shipping</span><span>2. Customer Live Uber Radar &amp; GPS</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-3" onclick="switchSimTab(3)"><span class="material-symbols-outlined text-[16px]">verified</span><span>3. Official BAST PDF Certificate</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-4" onclick="switchSimTab(4)"><span class="material-symbols-outlined text-[16px]">inventory_2</span><span>4. Atomic BOM &amp; Inventory Tracker</span></button></div>
 <!-- Tab Content Canvas -->
 <div class="p-space-lg md:p-space-xl">
 <!-- ================= TAB 1: Technician Mobile Stepper ================= -->
@@ -1234,34 +1275,65 @@
 <!-- =====================================================================
        11. FLOATING DISMISSIBLE TESTING DOCK (#testing-dock)
   ====================================================================== -->
-<aside class="fixed bottom-4 right-4 z-50 bg-surface-container-high/95 border border-primary/40 p-3 rounded-lg shadow-2xl backdrop-blur max-w-xs transition-transform duration-200" id="testing-dock">
-<div class="flex items-center justify-between pb-1.5 hairline-b mb-2">
-<div class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-primary font-semibold">
-<span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
-<span>EVALUATION SUITE READY</span>
-</div>
-<button class="text-outline hover:text-white" onclick="dismissTestingDock()" title="Dismiss Dock" type="button">
-<span class="material-symbols-outlined text-[16px]">close</span>
-</button>
-</div>
-<p class="text-[11px] font-body-sm text-on-surface-variant mb-2">
+<aside class="fixed bottom-16 sm:bottom-4 right-3 sm:right-4 z-40 bg-surface-container-high/95 border border-primary/40 p-3 rounded-lg shadow-2xl backdrop-blur max-w-xs transition-all duration-300 dock-collapsed" id="testing-dock">
+  <!-- Collapsed Minimal Floating Pill on Mobile -->
+  <div class="dock-collapsed-content items-center gap-2 font-label-mono-xs text-primary font-semibold cursor-pointer" onclick="toggleTestingDock(true)">
+    <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+    <span>⚡ Quick Test</span>
+  </div>
+
+  <!-- Full Expanded Content -->
+  <div class="dock-full-content">
+    <div class="flex items-center justify-between pb-1.5 hairline-b mb-2">
+      <div class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-primary font-semibold">
+        <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+        <span>EVALUATION SUITE READY</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <button class="sm:hidden text-outline hover:text-white p-1" onclick="toggleTestingDock(false)" title="Minimize" type="button">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+        <button class="text-outline hover:text-white p-1" onclick="dismissTestingDock()" title="Dismiss Dock" type="button">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      </div>
+    </div>
+    <p class="text-[11px] font-body-sm text-on-surface-variant mb-2">
       Quick test shortcuts for M&amp;A assessors &amp; technical auditors:
     </p>
-<div class="flex flex-col gap-1.5 font-label-mono-xs text-label-mono-xs">
-<a class="px-2 py-1 bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between" href="#simulator" onclick="switchSimTab(1); goToStep(3);">
-<span>Test Sign-on-Glass</span>
-<span class="text-primary">→</span>
-</a>
-<a class="px-2 py-1 bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between" href="#acquisition">
-<span>Review $5.85k Buyout Terms</span>
-<span class="text-tertiary">→</span>
-</a>
-<button class="px-2 py-1 bg-primary text-surface-container-lowest font-medium rounded text-left flex items-center justify-between" onclick="triggerFastAudit()" type="button">
-<span>Run Live RFC 9116 Audit</span>
-<span>✓</span>
-</button>
-</div>
+    <div class="flex flex-col gap-1.5 font-label-mono-xs text-label-mono-xs">
+      <a class="px-2.5 py-1.5 min-h-[36px] bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between transition-colors active:scale-95" href="#simulator" onclick="switchSimTab(1); goToStep(3); toggleTestingDock(false);">
+        <span>Test Sign-on-Glass</span>
+        <span class="text-primary">&rarr;</span>
+      </a>
+      <a class="px-2.5 py-1.5 min-h-[36px] bg-surface-container hover:bg-surface-container-highest text-on-surface rounded flex items-center justify-between transition-colors active:scale-95" href="#acquisition" onclick="toggleTestingDock(false);">
+        <span>Review $5.85k Buyout Terms</span>
+        <span class="text-tertiary">&rarr;</span>
+      </a>
+      <button class="px-2.5 py-1.5 min-h-[36px] bg-primary text-surface-container-lowest font-medium rounded text-left flex items-center justify-between transition-colors active:scale-95 cursor-pointer" onclick="triggerFastAudit(); toggleTestingDock(false);" type="button">
+        <span>Run Live RFC 9116 Audit</span>
+        <span>&check;</span>
+      </button>
+    </div>
+  </div>
 </aside>
+
+<!-- =====================================================================
+       11.5. STICKY MOBILE BOTTOM ACTION BAR (Viewport < 768px)
+  ====================================================================== -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest/90 border-t border-outline-variant/30 backdrop-blur-xl px-3 py-2 flex items-center justify-between gap-2 shadow-2xl mobile-sticky-action-bar" id="mobile-sticky-bar">
+  <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="flex-1 min-h-[44px] px-3 py-2 bg-surface-container-high border border-outline-variant/40 hover:border-secondary/60 text-secondary rounded-lg font-label-mono-xs text-center flex items-center justify-center gap-1.5 transition-all active:scale-95">
+    <span class="material-symbols-outlined text-[18px]">devices</span>
+    <span class="font-semibold">Tech PWA</span>
+  </a>
+  <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="flex-1 min-h-[44px] px-3 py-2 bg-primary-container text-surface-container-lowest rounded-lg font-label-mono-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 transition-all active:scale-95">
+    <span class="material-symbols-outlined text-[18px]">shield_person</span>
+    <span>Admin Login</span>
+  </a>
+  <a href="#simulator" class="touch-target-44 w-11 h-11 bg-surface-container border border-outline-variant/40 text-primary hover:text-white rounded-lg flex items-center justify-center transition-all active:scale-95" title="Buka Simulator Interaktif">
+    <span class="material-symbols-outlined text-[20px]">play_circle</span>
+  </a>
+</nav>
 <!-- =====================================================================
        12. ROBUST VANILLA JAVASCRIPT CONTROLLERS
   ====================================================================== -->

@@ -294,6 +294,7 @@
   background: #090D16;
   border-radius: 12px;
   padding: 0 12px;
+  min-height: 48px;
   border: 1.5px solid #1E293B;
   transition: all 0.2s ease;
 
@@ -320,13 +321,14 @@
     border: none;
     background: transparent;
     padding: 13px 0;
-    font-size: 14px;
+    font-size: 16px; // 16px prevents iOS Safari auto-zoom on focus
     color: #F8FAFC;
     outline: none;
     font-family: 'Inter', sans-serif;
 
     &::placeholder {
       color: #475569;
+      font-size: 14px;
     }
   }
 

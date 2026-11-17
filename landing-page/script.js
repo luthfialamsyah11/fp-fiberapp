@@ -4,11 +4,11 @@ function switchSimTab(tabIndex) {
         const panel = document.getElementById(`sim-panel-${i}`);
         if (!btn || !panel) continue;
         if (i === tabIndex) {
-          btn.className = 'px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all';
+          btn.className = 'px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all whitespace-nowrap flex-shrink-0';
           panel.classList.remove('hidden');
           panel.classList.add('block');
         } else {
-          btn.className = 'px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all';
+          btn.className = 'px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0';
           panel.classList.remove('block');
           panel.classList.add('hidden');
         }
@@ -71,16 +71,26 @@ function switchSimTab(tabIndex) {
       ctx.lineWidth = 2.5;
       ctx.lineCap = 'round';
 
+      function getCanvasPos(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / (rect.width || 1);
+        const scaleY = canvas.height / (rect.height || 1);
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY
+        };
+      }
+
       canvas.onmousedown = (e) => {
         isDrawing = true;
         ctx.beginPath();
-        const rect = canvas.getBoundingClientRect();
-        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        const pos = getCanvasPos(e.clientX, e.clientY);
+        ctx.moveTo(pos.x, pos.y);
       };
       canvas.onmousemove = (e) => {
         if (!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        const pos = getCanvasPos(e.clientX, e.clientY);
+        ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
       };
       window.onmouseup = () => { isDrawing = false; };
@@ -88,16 +98,16 @@ function switchSimTab(tabIndex) {
       canvas.ontouchstart = (e) => {
         isDrawing = true;
         ctx.beginPath();
-        const rect = canvas.getBoundingClientRect();
         const touch = e.touches[0];
-        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        const pos = getCanvasPos(touch.clientX, touch.clientY);
+        ctx.moveTo(pos.x, pos.y);
         e.preventDefault();
       };
       canvas.ontouchmove = (e) => {
         if (!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
         const touch = e.touches[0];
-        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        const pos = getCanvasPos(touch.clientX, touch.clientY);
+        ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
         e.preventDefault();
       };
@@ -145,7 +155,13 @@ function switchSimTab(tabIndex) {
       if (slider) slider.value = radarProgress;
       if (percentText) percentText.innerText = `${radarProgress}%`;
 
-      const maxOffset = 210;
+      const trackRow = van ? van.parentElement : null;
+      let maxOffset = 210;
+      if (trackRow) {
+        const rowWidth = trackRow.getBoundingClientRect().width;
+        // Keep van from overlapping target pin icon (approx 80-90px)
+        maxOffset = Math.max(70, rowWidth - 90);
+      }
       const currentOffset = Math.round((radarProgress / 100) * maxOffset);
       if (van) van.style.transform = `translateX(${currentOffset}px)`;
 
@@ -302,6 +318,18 @@ function switchSimTab(tabIndex) {
       if (dock) dock.style.display = 'none';
     }
 
+    function toggleTestingDock(expand) {
+      const dock = document.getElementById('testing-dock');
+      if (!dock) return;
+      if (typeof expand === 'boolean') {
+        dock.classList.toggle('dock-collapsed', !expand);
+      } else {
+        dock.classList.toggle('dock-collapsed');
+      }
+    }
+    window.dismissTestingDock = dismissTestingDock;
+    window.toggleTestingDock = toggleTestingDock;
+
     function clearHeroLog() {
       const log = document.getElementById('hero-log-stream');
       if (log) {
@@ -317,14 +345,67 @@ function switchSimTab(tabIndex) {
 (function() {
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-nav-menu');
+    const mobileBackdrop = document.getElementById('mobile-menu-backdrop');
+    const mobileIcon = document.getElementById('mobile-menu-icon');
+
+    function openMobileDrawer() {
+      if (!mobileMenu) return;
+      mobileMenu.classList.remove('hidden', 'drawer-closed');
+      mobileMenu.classList.add('drawer-open');
+      if (mobileBackdrop) {
+        mobileBackdrop.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          mobileBackdrop.classList.remove('opacity-0');
+          mobileBackdrop.classList.add('opacity-100');
+        });
+      }
+      if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'true');
+      if (mobileIcon) mobileIcon.textContent = 'close';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileDrawer() {
+      if (!mobileMenu) return;
+      mobileMenu.classList.remove('drawer-open');
+      mobileMenu.classList.add('drawer-closed');
+      if (mobileBackdrop) {
+        mobileBackdrop.classList.remove('opacity-100');
+        mobileBackdrop.classList.add('opacity-0');
+        setTimeout(() => mobileBackdrop.classList.add('hidden'), 220);
+      }
+      if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
+      if (mobileIcon) mobileIcon.textContent = 'menu';
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        if (mobileMenu.classList.contains('drawer-closed')) {
+          mobileMenu.classList.add('hidden');
+        }
+      }, 250);
+    }
+
     if (mobileBtn && mobileMenu) {
-      mobileBtn.addEventListener('click', () => {
-        const isHidden = mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden');
-        mobileBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+      mobileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = mobileMenu.classList.contains('drawer-open');
+        if (isOpen) {
+          closeMobileDrawer();
+        } else {
+          openMobileDrawer();
+        }
       });
+
+      if (mobileBackdrop) {
+        mobileBackdrop.addEventListener('click', closeMobileDrawer);
+      }
+
       mobileMenu.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        a.addEventListener('click', closeMobileDrawer);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('drawer-open')) {
+          closeMobileDrawer();
+        }
       });
     }
   })();

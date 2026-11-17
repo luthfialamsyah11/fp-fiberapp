@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Models\ProgressUpdate;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
 
@@ -66,7 +67,18 @@ class TaskController extends Controller
         }
 
         $task->update(['status' => 'on-going']);
-        return response()->json(['data' => $task]);
+
+        // Record initial start timeline log if none exists
+        if ($task->progressUpdates()->doesntExist()) {
+            ProgressUpdate::create([
+                'task_id'          => $task->id,
+                'user_id'          => auth()->id(),
+                'note'             => 'Teknisi tiba di lokasi dan memulai pengerjaan.',
+                'progress_percent' => 25,
+            ]);
+        }
+
+        return response()->json(['data' => $task->fresh(['progressUpdates', 'proofOfWork'])]);
     }
 
     public function complete(Task $task)
@@ -85,6 +97,16 @@ class TaskController extends Controller
         }
 
         $task->update(['status' => 'completed']);
+
+        // Ensure 100% progress update is recorded so timeline and meters show 100% completion
+        if ($task->progressUpdates()->where('progress_percent', 100)->doesntExist()) {
+            ProgressUpdate::create([
+                'task_id'          => $task->id,
+                'user_id'          => auth()->id(),
+                'note'             => 'Pekerjaan selesai dan telah diverifikasi normal.',
+                'progress_percent' => 100,
+            ]);
+        }
 
         // Dispatch real-time webhook alert if configured
         SettingService::dispatchWebhook('TASK_COMPLETED', [

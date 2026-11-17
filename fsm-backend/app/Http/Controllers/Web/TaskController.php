@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\ProgressUpdate;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
 
@@ -106,7 +107,17 @@ class TaskController extends Controller
             $validated['status'] = 'assigned';
         }
 
+        $oldStatus = $task->status;
         $task->update($validated);
+
+        if ($oldStatus !== $task->status) {
+            ProgressUpdate::create([
+                'task_id'          => $task->id,
+                'user_id'          => auth()->id(),
+                'note'             => "Dispatcher memperbarui status tiket dari {$oldStatus} ke {$task->status}",
+                'progress_percent' => $task->status === 'completed' ? 100 : ($task->progress_percent ?? 10),
+            ]);
+        }
 
         return redirect()->route('admin.tasks.index')->with('success', 'Tugas berhasil diperbarui.');
     }
@@ -128,7 +139,13 @@ class TaskController extends Controller
         // Simple assignment action if a technician was pre-selected but status is still pending
         if ($task->technician_id && $task->status === 'pending') {
             $task->update(['status' => 'assigned']);
-            return back()->with('success', 'Tugas berhasil ditugaskan dan notifikasi dikirim (simulasi).');
+            ProgressUpdate::create([
+                'task_id'          => $task->id,
+                'user_id'          => auth()->id(),
+                'note'             => 'Tiket ditugaskan kepada ' . ($task->technician ? $task->technician->name : 'teknisi'),
+                'progress_percent' => 10,
+            ]);
+            return back()->with('success', 'Tugas berhasil ditugaskan dan notifikasi dikirim.');
         }
         return back()->with('error', 'Tugas tidak memiliki teknisi atau status sudah berubah.');
     }

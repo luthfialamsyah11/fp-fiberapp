@@ -347,6 +347,7 @@ function switchSimTab(tabIndex) {
       'hero.cta2': 'Acquire Full IP ($5,850)',
       'hero.cta3': 'Run Security Audit',
       'portals.title': 'Ecosystem Gateway Portals',
+      'carousel.title': 'Ecosystem Screens & Real-Time Workflows',
       'sim.title': 'Interactive Product Simulator Hub',
       'demo.title': 'Live Sandbox & Demo Credentials',
       'pricing.title': 'Commercial Acquisition & Licensing Hub',
@@ -365,6 +366,7 @@ function switchSimTab(tabIndex) {
       'hero.cta2': 'Akuisisi Full IP ($5,850)',
       'hero.cta3': 'Jalankan Audit Keamanan',
       'portals.title': 'Gerbang Portal Ekosistem',
+      'carousel.title': 'Layar Ekosistem & Alur Kerja Real-Time',
       'sim.title': 'Hub Simulator Produk Interaktif',
       'demo.title': 'Sandbox Live & Kredensial Demo',
       'pricing.title': 'Hub Akuisisi Komersial & Lisensi',
@@ -476,7 +478,7 @@ window.refreshHeroTelemetry = function() {
     });
 
     // 3. Tag major sections for smooth scroll reveal
-    document.querySelectorAll('#portals, #simulator, #demo, #acquisition, #scanner-spotlight, #architecture, footer').forEach(sec => {
+    document.querySelectorAll('#portals, #ecosystem-carousel, #simulator, #demo, #acquisition, #scanner-spotlight, #architecture, footer').forEach(sec => {
       sec.classList.add('reveal-on-scroll');
     });
 
@@ -528,5 +530,168 @@ window.refreshHeroTelemetry = function() {
     document.addEventListener('DOMContentLoaded', initMotionPolish);
   } else {
     initMotionPolish();
+  }
+})();
+
+
+// =========================================================================
+// SMOOTH ECOSYSTEM CAROUSEL, SPOTLIGHT TRACKING & COUNT-UP METRICS
+// =========================================================================
+(function() {
+  function initCarouselAndMotion() {
+    // 1. Mouse-Tracking Radial Spotlight (60 FPS rAF throttled)
+    document.querySelectorAll('.card-interactive').forEach(card => {
+      let rafPending = false;
+      card.addEventListener('mousemove', (e) => {
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+          card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+          rafPending = false;
+        });
+      });
+    });
+
+    // 2. Smooth Count-Up for Telemetry Numbers (Hero ODN & Uptime)
+    const countTargets = document.querySelectorAll('#telemetry .font-headline-lg, #acquisition .text-display-lg');
+    if ('IntersectionObserver' in window && countTargets.length) {
+      const countObs = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          const raw = el.textContent.trim();
+          const match = raw.match(/^([^0-9.-]*)([0-9,.]+)(.*)$/);
+          if (match) {
+            const prefix = match[1];
+            const targetNum = parseFloat(match[2].replace(/,/g, ''));
+            const suffix = match[3];
+            const decimals = (match[2].split('.')[1] || '').length;
+            const hasComma = match[2].includes(',');
+            const duration = 700;
+            const start = performance.now();
+            function tick(now) {
+              const p = Math.min(1, (now - start) / duration);
+              const eased = 1 - Math.pow(1 - p, 3);
+              let val = (targetNum * eased).toFixed(decimals);
+              if (hasComma) val = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+              el.textContent = prefix + val + suffix;
+              if (p < 1) requestAnimationFrame(tick);
+              else el.textContent = raw;
+            }
+            requestAnimationFrame(tick);
+          }
+          obs.unobserve(el);
+        });
+      }, { threshold: 0.4 });
+      countTargets.forEach(el => countObs.observe(el));
+    }
+
+    // 3. Smooth Dual-Control Carousel (#ecosystem-carousel)
+    const viewport = document.getElementById('carousel-viewport');
+    const track = document.getElementById('carousel-track');
+    const prevBtn = document.getElementById('carousel-prev');
+    const nextBtn = document.getElementById('carousel-next');
+    const dotsWrap = document.getElementById('carousel-dots');
+    const statusText = document.getElementById('carousel-status-text');
+
+    if (!viewport || !track) return;
+    const slides = Array.from(track.children);
+    let currentIndex = 0;
+    let isPaused = false;
+    let autoTimer = null;
+
+    function getVisibleCount() {
+      if (window.innerWidth >= 1024) return 3;
+      if (window.innerWidth >= 768) return 2;
+      return 1;
+    }
+
+    function getMaxIndex() {
+      return Math.max(0, slides.length - getVisibleCount());
+    }
+
+    function renderDots() {
+      if (!dotsWrap) return;
+      const maxIdx = getMaxIndex();
+      dotsWrap.innerHTML = '';
+      for (let i = 0; i <= maxIdx; i++) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'carousel-dot' + (i === currentIndex ? ' active' : '');
+        dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsWrap.appendChild(dot);
+      }
+    }
+
+    function goToSlide(idx) {
+      const maxIdx = getMaxIndex();
+      if (idx < 0) currentIndex = maxIdx;
+      else if (idx > maxIdx) currentIndex = 0;
+      else currentIndex = idx;
+
+      const slideEl = slides[0];
+      const gap = 20;
+      const stepPx = (slideEl ? slideEl.getBoundingClientRect().width : 360) + gap;
+      track.style.transform = `translate3d(-${currentIndex * stepPx}px, 0, 0)`;
+
+      if (dotsWrap) {
+        Array.from(dotsWrap.children).forEach((d, i) => {
+          d.classList.toggle('active', i === currentIndex);
+        });
+      }
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+
+    viewport.addEventListener('mouseenter', () => {
+      isPaused = true;
+      if (statusText) statusText.textContent = 'PAUSED ON HOVER';
+    });
+    viewport.addEventListener('mouseleave', () => {
+      isPaused = false;
+      if (statusText) statusText.textContent = 'AUTO-PLAY • HOVER TO PAUSE';
+    });
+
+    // Touch / Mouse Drag Swipe
+    let dragStartX = null;
+    viewport.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('a, button')) return;
+      dragStartX = e.clientX;
+    });
+    viewport.addEventListener('pointerup', (e) => {
+      if (dragStartX === null) return;
+      const diff = e.clientX - dragStartX;
+      dragStartX = null;
+      if (Math.abs(diff) > 45) {
+        goToSlide(diff < 0 ? currentIndex + 1 : currentIndex - 1);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      renderDots();
+      goToSlide(Math.min(currentIndex, getMaxIndex()));
+    });
+
+    renderDots();
+    goToSlide(0);
+
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReduced) {
+      autoTimer = setInterval(() => {
+        if (!isPaused && !document.hidden) {
+          goToSlide(currentIndex + 1);
+        }
+      }, 4200);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCarouselAndMotion);
+  } else {
+    initCarouselAndMotion();
   }
 })();

@@ -713,104 +713,17 @@ window.refreshHeroTelemetry = function() {
       countTargets.forEach(el => countObs.observe(el));
     }
 
-    // 3. Smooth Dual-Control Carousel (#ecosystem-carousel)
+    // 3. Continuous Infinite Marquee Stream (#ecosystem-carousel)
     const viewport = document.getElementById('carousel-viewport');
-    const track = document.getElementById('carousel-track');
-    const prevBtn = document.getElementById('carousel-prev');
-    const nextBtn = document.getElementById('carousel-next');
-    const dotsWrap = document.getElementById('carousel-dots');
-    const statusText = document.getElementById('carousel-status-text');
+    const marqueeStatus = document.getElementById('marquee-badge-status') || document.getElementById('carousel-status-text');
 
-    if (!viewport || !track) return;
-    const slides = Array.from(track.children);
-    let currentIndex = 0;
-    let isPaused = false;
-    let autoTimer = null;
-
-    function getVisibleCount() {
-      if (window.innerWidth >= 1024) return 3;
-      if (window.innerWidth >= 768) return 2;
-      return 1;
-    }
-
-    function getMaxIndex() {
-      return Math.max(0, slides.length - getVisibleCount());
-    }
-
-    function renderDots() {
-      if (!dotsWrap) return;
-      const maxIdx = getMaxIndex();
-      dotsWrap.innerHTML = '';
-      for (let i = 0; i <= maxIdx; i++) {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'carousel-dot' + (i === currentIndex ? ' active' : '');
-        dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
-        dot.addEventListener('click', () => goToSlide(i));
-        dotsWrap.appendChild(dot);
-      }
-    }
-
-    function goToSlide(idx) {
-      const maxIdx = getMaxIndex();
-      if (idx < 0) currentIndex = maxIdx;
-      else if (idx > maxIdx) currentIndex = 0;
-      else currentIndex = idx;
-
-      const slideEl = slides[0];
-      const gap = 20;
-      const stepPx = (slideEl ? slideEl.getBoundingClientRect().width : 360) + gap;
-      track.style.transform = `translate3d(-${currentIndex * stepPx}px, 0, 0)`;
-
-      if (dotsWrap) {
-        Array.from(dotsWrap.children).forEach((d, i) => {
-          d.classList.toggle('active', i === currentIndex);
-        });
-      }
-    }
-
-    if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
-
-    viewport.addEventListener('mouseenter', () => {
-      isPaused = true;
-      if (statusText) statusText.textContent = 'PAUSED ON HOVER';
-    });
-    viewport.addEventListener('mouseleave', () => {
-      isPaused = false;
-      if (statusText) statusText.textContent = 'AUTO-PLAY • HOVER TO PAUSE';
-    });
-
-    // Touch / Mouse Drag Swipe
-    let dragStartX = null;
-    viewport.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('a, button')) return;
-      dragStartX = e.clientX;
-    });
-    viewport.addEventListener('pointerup', (e) => {
-      if (dragStartX === null) return;
-      const diff = e.clientX - dragStartX;
-      dragStartX = null;
-      if (Math.abs(diff) > 45) {
-        goToSlide(diff < 0 ? currentIndex + 1 : currentIndex - 1);
-      }
-    });
-
-    window.addEventListener('resize', () => {
-      renderDots();
-      goToSlide(Math.min(currentIndex, getMaxIndex()));
-    });
-
-    renderDots();
-    goToSlide(0);
-
-    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!prefersReduced) {
-      autoTimer = setInterval(() => {
-        if (!isPaused && !document.hidden) {
-          goToSlide(currentIndex + 1);
-        }
-      }, 4200);
+    if (viewport && marqueeStatus) {
+      viewport.addEventListener('mouseenter', () => {
+        marqueeStatus.textContent = 'STREAM PAUSED • INSPECTING MODULE';
+      });
+      viewport.addEventListener('mouseleave', () => {
+        marqueeStatus.textContent = 'CONTINUOUS STREAM • HOVER TO PAUSE';
+      });
     }
   }
 

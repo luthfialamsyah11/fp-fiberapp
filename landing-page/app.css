@@ -2,8 +2,30 @@
 
 
 /* =========================================================================
-   MOBILE ARCHITECTURE & ERGONOMICS ENHANCEMENTS (/design standards)
+   DESKTOP & MOBILE NAVIGATION ARCHITECTURE (/design standards)
    ========================================================================= */
+
+/* Desktop Navigation Links: explicitly spaced 1.75rem (28px) gap */
+.desktop-nav-links {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .desktop-nav-links {
+    display: flex !important;
+    align-items: center;
+    gap: 1.75rem !important;
+  }
+}
+
+/* Mobile Menu Toggle Button: strictly hidden on desktop (>= 1024px) */
+#mobile-menu-btn {
+  display: inline-flex !important;
+}
+@media (min-width: 1024px) {
+  #mobile-menu-btn {
+    display: none !important;
+  }
+}
 
 /* Mobile Touch Target 44px */
 .touch-target-44 {
@@ -54,53 +76,53 @@
   transition: opacity 0.28s ease;
 }
 
-/* Mobile Carousel Peek Viewport */
-@media (max-width: 639px) {
-  .carousel-viewport {
-    padding-left: 0.25rem;
-    padding-right: 1.5rem;
-    overflow-x: hidden;
-  }
-  .carousel-slide {
-    flex: 0 0 85vw !important;
-    max-width: 380px;
-    min-width: 0;
-  }
+/* =========================================================================
+   CONTINUOUS INFINITE MARQUEE (Ecosystem Screens & Real-Time Workflows)
+   Smooth non-stop hardware-accelerated 60 FPS loop with hover pause
+   ========================================================================= */
+.marquee-continuous-viewport {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
 }
-
-/* Floating Testing Dock Responsive Transformation */
-@media (max-width: 639px) {
-  #testing-dock.dock-collapsed {
-    padding: 8px 14px;
-    border-radius: 9999px;
-    max-width: max-content;
-    cursor: pointer;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px -2px rgba(34, 211, 238, 0.3);
-  }
-  #testing-dock.dock-collapsed .dock-full-content {
-    display: none !important;
-  }
-  #testing-dock.dock-collapsed .dock-collapsed-content {
-    display: flex !important;
-  }
-  #testing-dock:not(.dock-collapsed) {
-    right: 12px;
-    left: 12px;
-    max-width: calc(100vw - 24px);
-    border-radius: 16px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
-  }
-  #testing-dock:not(.dock-collapsed) .dock-collapsed-content {
-    display: none !important;
-  }
+.marquee-continuous-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: continuousMarqueeFlow 35s linear infinite;
+}
+.marquee-continuous-track:hover {
+  animation-play-state: paused;
+}
+.marquee-continuous-group {
+  display: flex;
+  align-items: stretch;
+  gap: 1.5rem;
+  padding-right: 1.5rem;
+  flex-shrink: 0;
+}
+.marquee-card {
+  width: 320px;
+  flex-shrink: 0;
 }
 @media (min-width: 640px) {
-  .dock-collapsed-content {
-    display: none !important;
+  .marquee-card {
+    width: 380px;
   }
 }
-
-/* Sticky Mobile Bottom Bar with Safe-Area Inset */
-.mobile-sticky-action-bar {
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+@keyframes continuousMarqueeFlow {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-continuous-track {
+    animation: none !important;
+    overflow-x: auto;
+  }
 }

@@ -47,7 +47,7 @@
 </div>
 </a>
 <!-- Desktop Navigation Links (6 Exact Items) -->
-<nav class="hidden lg:flex items-center space-x-7">
+<nav class="desktop-nav-links">
 <a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" data-i18n="nav.portals" href="#portals">Portals</a>
 <a class="text-primary font-medium border-b border-primary pb-0.5" data-i18n="nav.simulator" href="#simulator">Live Simulator</a>
 <a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" data-i18n="nav.sandbox" href="#demo">Live Sandbox</a>
@@ -62,11 +62,6 @@
 <span class="material-symbols-outlined text-[15px]">translate</span>
 <span id="lang-label">EN / ID</span>
 </button>
-<!-- Sandbox Secondary Action Button -->
-<a class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high border border-outline-variant/50 hover:border-primary/50 text-primary rounded-lg font-label-mono-sm text-label-mono-sm transition-all duration-150" href="#demo">
-<span>Deploy Sandbox</span>
-<span class="material-symbols-outlined text-[14px]">terminal</span>
-</a>
 <!-- Primary CTA: Acquire Asset -->
 <a class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-surface-container-lowest hover:bg-slate-200 font-body-sm font-semibold rounded-lg transition-all duration-150 active:scale-[0.99] shadow-sm" href="#acquisition">
 <span>Acquire Asset</span>
@@ -509,168 +504,315 @@
       <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">REAL-WORLD WORKFLOWS • 6 CORE SCREENS</div>
       <h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight" data-i18n="carousel.title">Ecosystem Screens &amp; Real-Time Workflows</h2>
       <p class="text-body-sm font-body-sm text-on-surface-variant max-w-xl mt-2">
-        Swipe or click through the verified production modules across Laravel 10, Angular 20 + Ionic 8 PWA, Capacitor 8 Android, and Next.js 14.
+        Continuous live stream across verified production modules in Laravel 10 Blade, Angular 20 + Ionic 8 PWA, Capacitor 8 Android, and Next.js 14.
       </p>
     </div>
     <div class="flex items-center gap-2 shrink-0">
-      <button type="button" id="carousel-prev" class="w-9 h-9 rounded-full bg-surface-container border border-outline-variant/40 hover:border-primary/60 text-on-surface hover:text-primary flex items-center justify-center" aria-label="Previous slide">
-        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-      </button>
-      <button type="button" id="carousel-next" class="w-9 h-9 rounded-full bg-surface-container border border-outline-variant/40 hover:border-primary/60 text-on-surface hover:text-primary flex items-center justify-center" aria-label="Next slide">
-        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-      </button>
-    </div>
-  </div>
-
-  <div class="carousel-viewport" id="carousel-viewport">
-    <div class="carousel-track" id="carousel-track">
-      <!-- Slide 1: NOC Dispatcher Command -->
-      <div class="carousel-slide bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">LARAVEL 10 • BLADE</span>
-            <span class="font-label-mono-xs text-outline">01 / 06</span>
-          </div>
-          <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
-            <div class="flex justify-between items-center text-[10px] font-label-mono-xs text-outline">
-              <span>ADMIN.BENTENGSIBER.COM</span>
-              <span class="text-secondary">RBAC: ADMIN</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1.5 text-center">
-              <div class="bg-surface-container p-1.5 rounded"><div class="text-primary font-bold text-sm">14</div><div class="text-[9px] text-outline">Active</div></div>
-              <div class="bg-surface-container p-1.5 rounded"><div class="text-secondary font-bold text-sm">6/8</div><div class="text-[9px] text-outline">Online</div></div>
-              <div class="bg-surface-container p-1.5 rounded"><div class="text-tertiary font-bold text-sm">99.9%</div><div class="text-[9px] text-outline">SLA</div></div>
-            </div>
-          </div>
-          <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">NOC Dispatcher Command</h3>
-          <p class="text-body-sm text-on-surface-variant mb-4">Central work order dispatch, technician assignment, live fleet map, CSV/report export, and webhook settings.</p>
-        </div>
-        <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline">
-          <span>Open Admin Portal</span><span class="material-symbols-outlined text-[15px]">open_in_new</span>
-        </a>
-      </div>
-
-      <!-- Slide 2: Technician PWA Stepper -->
-      <div class="carousel-slide bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs rounded">ANGULAR 20 + IONIC 8</span>
-            <span class="font-label-mono-xs text-outline">02 / 06</span>
-          </div>
-          <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
-            <div class="flex justify-between items-center text-[10px] font-label-mono-xs">
-              <span class="text-on-surface font-semibold">#TSK-1042</span>
-              <span class="text-primary">ON-GOING • 60%</span>
-            </div>
-            <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
-              <div class="bg-secondary h-full w-3/5 rounded-full"></div>
-            </div>
-            <div class="flex justify-between text-[9px] font-label-mono-xs text-outline">
-              <span>Assigned</span><span>En Route</span><span class="text-secondary">Proof &amp; Sign</span>
-            </div>
-          </div>
-          <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Technician PWA Stepper</h3>
-          <p class="text-body-sm text-on-surface-variant mb-4">Zero-install mobile PWA &amp; Capacitor 8 Android app with guided Before/After photo slots and e-signature pad.</p>
-        </div>
-        <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-secondary hover:underline">
-          <span>Launch Tech PWA (Demo)</span><span class="material-symbols-outlined text-[15px]">open_in_new</span>
-        </a>
-      </div>
-
-      <!-- Slide 3: Customer Uber-Style Tracking -->
-      <div class="carousel-slide bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">PUBLIC ROUTE • /TRACK</span>
-            <span class="font-label-mono-xs text-outline">03 / 06</span>
-          </div>
-          <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
-            <div class="flex justify-between items-center text-[10px] font-label-mono-xs text-outline">
-              <span>/track/{token}</span>
-              <span class="text-secondary">ETA: 6 MINS</span>
-            </div>
-            <svg class="w-full h-10 stroke-primary fill-none" viewBox="0 0 220 40">
-              <path class="svg-flow-line" d="M10,32 Q70,8 130,22 T210,10" stroke-width="2" stroke-linecap="round"></path>
-              <circle cx="10" cy="32" r="3.5" fill="#4edea3"></circle>
-              <circle cx="210" cy="10" r="3.5" fill="#22d3ee"></circle>
-            </svg>
-          </div>
-          <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Customer Uber-Style Tracking</h3>
-          <p class="text-body-sm text-on-surface-variant mb-4">Passwordless live GPS link for subscribers to watch technician arrival, progress %, and WhatsApp click-to-chat.</p>
-        </div>
-        <a href="#simulator" onclick="switchSimTab(2)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline">
-          <span>Test Radar Simulator</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-        </a>
-      </div>
-
-      <!-- Slide 4: Official BAST PDF Printout -->
-      <div class="carousel-slide bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="px-2 py-0.5 bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-mono-xs rounded">HASH_EQUALS GUARD</span>
-            <span class="font-label-mono-xs text-outline">04 / 06</span>
-          </div>
-          <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
-            <div class="text-on-surface font-semibold">BERITA ACARA SERAH TERIMA</div>
-            <div class="text-outline">Route: /tasks/{id}/bast?token=...</div>
-            <div class="text-secondary">✓ Photos + BOM + Customer E-Sign</div>
-          </div>
-          <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Official BAST PDF Printout</h3>
-          <p class="text-body-sm text-on-surface-variant mb-4">Tamper-resistant acceptance certificate aggregating work photos, BOM consumption, and customer e-signature.</p>
-        </div>
-        <a href="#simulator" onclick="switchSimTab(3)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-tertiary hover:underline">
-          <span>Preview BAST Certificate</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-        </a>
-      </div>
-
-      <!-- Slide 5: Atomic BOM Inventory Ledger -->
-      <div class="carousel-slide bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs rounded">DB::TRANSACTION</span>
-            <span class="font-label-mono-xs text-outline">05 / 06</span>
-          </div>
-          <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
-            <div class="flex justify-between"><span class="text-outline">InventoryItem::lockForUpdate()</span><span class="text-secondary">ACID</span></div>
-            <div class="text-on-surface">ONT -1 • Dropcore -45m • SC/UPC -2</div>
-            <div class="text-primary">HTTP 422 Guard on Insufficient Stock</div>
-          </div>
-          <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Atomic BOM Inventory Ledger</h3>
-          <p class="text-body-sm text-on-surface-variant mb-4">Pessimistic row-level locking prevents race conditions and restores exact stock quantities on material removal.</p>
-        </div>
-        <a href="#simulator" onclick="switchSimTab(4)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-secondary hover:underline">
-          <span>Test Atomic BOM</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-        </a>
-      </div>
-
-      <!-- Slide 6: Passive Domain Security Scanner -->
-      <div class="carousel-slide bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">NEXT.JS 14 • ANTI-SSRF</span>
-            <span class="font-label-mono-xs text-outline">06 / 06</span>
-          </div>
-          <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
-            <div class="flex justify-between"><span class="text-on-surface">TLS 1.3 • HSTS • DMARC</span><span class="text-secondary">GRADE A</span></div>
-            <div class="text-outline">crt.sh Subdomains &amp; RFC 9116 security.txt</div>
-            <div class="text-primary">Blocks Loopback &amp; Cloud Metadata IPs</div>
-          </div>
-          <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Passive Security Posture Scanner</h3>
-          <p class="text-body-sm text-on-surface-variant mb-4">Non-intrusive Next.js 14 auditor for SSL/TLS certificates, security headers, DNS/email spoofing defense, and remediation snippets.</p>
-        </div>
-        <a href="#scanner-spotlight" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline">
-          <span>Run Domain Audit</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
-        </a>
+      <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container border border-outline-variant/40 font-label-mono-xs text-label-mono-xs text-primary shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+        <span id="marquee-badge-status">CONTINUOUS STREAM • HOVER TO PAUSE</span>
       </div>
     </div>
   </div>
 
-  <!-- Carousel Dots & Auto-Play Status -->
-  <div class="flex items-center justify-between mt-6 pt-4 hairline-t">
-    <div class="flex items-center gap-2" id="carousel-dots" aria-label="Carousel slide indicators"></div>
-    <div class="font-label-mono-xs text-label-mono-xs text-outline flex items-center gap-2">
+  <div class="marquee-continuous-viewport" id="carousel-viewport">
+    <div class="marquee-continuous-track" id="carousel-track">
+      <!-- Set A: 6 Runtime Workflows -->
+      <div class="marquee-continuous-group">
+        <!-- Slide 1: NOC Dispatcher Command -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">LARAVEL 10 • BLADE</span>
+              <span class="font-label-mono-xs text-outline">01 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
+              <div class="flex justify-between items-center text-[10px] font-label-mono-xs text-outline">
+                <span>ADMIN.BENTENGSIBER.COM</span>
+                <span class="text-secondary">RBAC: ADMIN</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5 text-center">
+                <div class="bg-surface-container p-1.5 rounded"><div class="text-primary font-bold text-sm">14</div><div class="text-[9px] text-outline">Active</div></div>
+                <div class="bg-surface-container p-1.5 rounded"><div class="text-secondary font-bold text-sm">6/8</div><div class="text-[9px] text-outline">Online</div></div>
+                <div class="bg-surface-container p-1.5 rounded"><div class="text-tertiary font-bold text-sm">99.9%</div><div class="text-[9px] text-outline">SLA</div></div>
+              </div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">NOC Dispatcher Command</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Central work order dispatch, technician assignment, live fleet map, CSV/report export, and webhook settings.</p>
+          </div>
+          <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline">
+            <span>Open Admin Portal</span><span class="material-symbols-outlined text-[15px]">open_in_new</span>
+          </a>
+        </div>
+
+        <!-- Slide 2: Technician PWA Stepper -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs rounded">ANGULAR 20 + IONIC 8</span>
+              <span class="font-label-mono-xs text-outline">02 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
+              <div class="flex justify-between items-center text-[10px] font-label-mono-xs">
+                <span class="text-on-surface font-semibold">#TSK-1042</span>
+                <span class="text-primary">ON-GOING • 60%</span>
+              </div>
+              <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+                <div class="bg-secondary h-full w-3/5 rounded-full"></div>
+              </div>
+              <div class="flex justify-between text-[9px] font-label-mono-xs text-outline">
+                <span>Assigned</span><span>En Route</span><span class="text-secondary">Proof &amp; Sign</span>
+              </div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Technician PWA Stepper</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Zero-install mobile PWA &amp; Capacitor 8 Android app with guided Before/After photo slots and e-signature pad.</p>
+          </div>
+          <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-secondary hover:underline">
+            <span>Launch Tech PWA (Demo)</span><span class="material-symbols-outlined text-[15px]">open_in_new</span>
+          </a>
+        </div>
+
+        <!-- Slide 3: Customer Uber-Style Tracking -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">PUBLIC ROUTE • /TRACK</span>
+              <span class="font-label-mono-xs text-outline">03 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
+              <div class="flex justify-between items-center text-[10px] font-label-mono-xs text-outline">
+                <span>/track/{token}</span>
+                <span class="text-secondary">ETA: 6 MINS</span>
+              </div>
+              <svg class="w-full h-10 stroke-primary fill-none" viewBox="0 0 220 40">
+                <path class="svg-flow-line" d="M10,32 Q70,8 130,22 T210,10" stroke-width="2" stroke-linecap="round"></path>
+                <circle cx="10" cy="32" r="3.5" fill="#4edea3"></circle>
+                <circle cx="210" cy="10" r="3.5" fill="#22d3ee"></circle>
+              </svg>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Customer Uber-Style Tracking</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Passwordless live GPS link for subscribers to watch technician arrival, progress %, and WhatsApp click-to-chat.</p>
+          </div>
+          <a href="#simulator" onclick="switchSimTab(2)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline">
+            <span>Test Radar Simulator</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Slide 4: Official BAST PDF Printout -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-mono-xs rounded">HASH_EQUALS GUARD</span>
+              <span class="font-label-mono-xs text-outline">04 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
+              <div class="text-on-surface font-semibold">BERITA ACARA SERAH TERIMA</div>
+              <div class="text-outline">Route: /tasks/{id}/bast?token=...</div>
+              <div class="text-secondary">✓ Photos + BOM + Customer E-Sign</div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Official BAST PDF Printout</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Tamper-resistant acceptance certificate aggregating work photos, BOM consumption, and customer e-signature.</p>
+          </div>
+          <a href="#simulator" onclick="switchSimTab(3)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-tertiary hover:underline">
+            <span>Preview BAST Certificate</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Slide 5: Atomic BOM Inventory Ledger -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs rounded">DB::TRANSACTION</span>
+              <span class="font-label-mono-xs text-outline">05 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
+              <div class="flex justify-between"><span class="text-outline">InventoryItem::lockForUpdate()</span><span class="text-secondary">ACID</span></div>
+              <div class="text-on-surface">ONT -1 • Dropcore -45m • SC/UPC -2</div>
+              <div class="text-primary">HTTP 422 Guard on Insufficient Stock</div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Atomic BOM Inventory Ledger</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Pessimistic row-level locking prevents race conditions and restores exact stock quantities on material removal.</p>
+          </div>
+          <a href="#simulator" onclick="switchSimTab(4)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-secondary hover:underline">
+            <span>Test Atomic BOM</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Slide 6: Passive Domain Security Scanner -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">NEXT.JS 14 • ANTI-SSRF</span>
+              <span class="font-label-mono-xs text-outline">06 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
+              <div class="flex justify-between"><span class="text-on-surface">TLS 1.3 • HSTS • DMARC</span><span class="text-secondary">GRADE A</span></div>
+              <div class="text-outline">crt.sh Subdomains &amp; RFC 9116 security.txt</div>
+              <div class="text-primary">Blocks Loopback &amp; Cloud Metadata IPs</div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Passive Security Posture Scanner</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Non-intrusive Next.js 14 auditor for SSL/TLS certificates, security headers, DNS/email spoofing defense, and remediation snippets.</p>
+          </div>
+          <a href="#scanner-spotlight" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline">
+            <span>Run Domain Audit</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Set B: Seamless Infinite Loop Clone -->
+      <div class="marquee-continuous-group" aria-hidden="true">
+        <!-- Slide 1 Clone -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">LARAVEL 10 • BLADE</span>
+              <span class="font-label-mono-xs text-outline">01 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
+              <div class="flex justify-between items-center text-[10px] font-label-mono-xs text-outline">
+                <span>ADMIN.BENTENGSIBER.COM</span>
+                <span class="text-secondary">RBAC: ADMIN</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5 text-center">
+                <div class="bg-surface-container p-1.5 rounded"><div class="text-primary font-bold text-sm">14</div><div class="text-[9px] text-outline">Active</div></div>
+                <div class="bg-surface-container p-1.5 rounded"><div class="text-secondary font-bold text-sm">6/8</div><div class="text-[9px] text-outline">Online</div></div>
+                <div class="bg-surface-container p-1.5 rounded"><div class="text-tertiary font-bold text-sm">99.9%</div><div class="text-[9px] text-outline">SLA</div></div>
+              </div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">NOC Dispatcher Command</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Central work order dispatch, technician assignment, live fleet map, CSV/report export, and webhook settings.</p>
+          </div>
+          <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline" tabindex="-1">
+            <span>Open Admin Portal</span><span class="material-symbols-outlined text-[15px]">open_in_new</span>
+          </a>
+        </div>
+
+        <!-- Slide 2 Clone -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs rounded">ANGULAR 20 + IONIC 8</span>
+              <span class="font-label-mono-xs text-outline">02 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
+              <div class="flex justify-between items-center text-[10px] font-label-mono-xs">
+                <span class="text-on-surface font-semibold">#TSK-1042</span>
+                <span class="text-primary">ON-GOING • 60%</span>
+              </div>
+              <div class="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+                <div class="bg-secondary h-full w-3/5 rounded-full"></div>
+              </div>
+              <div class="flex justify-between text-[9px] font-label-mono-xs text-outline">
+                <span>Assigned</span><span>En Route</span><span class="text-secondary">Proof &amp; Sign</span>
+              </div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Technician PWA Stepper</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Zero-install mobile PWA &amp; Capacitor 8 Android app with guided Before/After photo slots and e-signature pad.</p>
+          </div>
+          <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-secondary hover:underline" tabindex="-1">
+            <span>Launch Tech PWA (Demo)</span><span class="material-symbols-outlined text-[15px]">open_in_new</span>
+          </a>
+        </div>
+
+        <!-- Slide 3 Clone -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">PUBLIC ROUTE • /TRACK</span>
+              <span class="font-label-mono-xs text-outline">03 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-2">
+              <div class="flex justify-between items-center text-[10px] font-label-mono-xs text-outline">
+                <span>/track/{token}</span>
+                <span class="text-secondary">ETA: 6 MINS</span>
+              </div>
+              <svg class="w-full h-10 stroke-primary fill-none" viewBox="0 0 220 40">
+                <path class="svg-flow-line" d="M10,32 Q70,8 130,22 T210,10" stroke-width="2" stroke-linecap="round"></path>
+                <circle cx="10" cy="32" r="3.5" fill="#4edea3"></circle>
+                <circle cx="210" cy="10" r="3.5" fill="#22d3ee"></circle>
+              </svg>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Customer Uber-Style Tracking</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Passwordless live GPS link for subscribers to watch technician arrival, progress %, and WhatsApp click-to-chat.</p>
+          </div>
+          <a href="#simulator" onclick="switchSimTab(2)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline" tabindex="-1">
+            <span>Test Radar Simulator</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Slide 4 Clone -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-tertiary/10 border border-tertiary/30 text-tertiary font-label-mono-xs rounded">HASH_EQUALS GUARD</span>
+              <span class="font-label-mono-xs text-outline">04 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
+              <div class="text-on-surface font-semibold">BERITA ACARA SERAH TERIMA</div>
+              <div class="text-outline">Route: /tasks/{id}/bast?token=...</div>
+              <div class="text-secondary">✓ Photos + BOM + Customer E-Sign</div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Official BAST PDF Printout</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Tamper-resistant acceptance certificate aggregating work photos, BOM consumption, and customer e-signature.</p>
+          </div>
+          <a href="#simulator" onclick="switchSimTab(3)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-tertiary hover:underline" tabindex="-1">
+            <span>Preview BAST Certificate</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Slide 5 Clone -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs rounded">DB::TRANSACTION</span>
+              <span class="font-label-mono-xs text-outline">05 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
+              <div class="flex justify-between"><span class="text-outline">InventoryItem::lockForUpdate()</span><span class="text-secondary">ACID</span></div>
+              <div class="text-on-surface">ONT -1 • Dropcore -45m • SC/UPC -2</div>
+              <div class="text-primary">HTTP 422 Guard on Insufficient Stock</div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Atomic BOM Inventory Ledger</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Pessimistic row-level locking prevents race conditions and restores exact stock quantities on material removal.</p>
+          </div>
+          <a href="#simulator" onclick="switchSimTab(4)" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-secondary hover:underline" tabindex="-1">
+            <span>Test Atomic BOM</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Slide 6 Clone -->
+        <div class="marquee-card bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between card-interactive">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 bg-primary/10 border border-primary/30 text-primary font-label-mono-xs rounded">NEXT.JS 14 • ANTI-SSRF</span>
+              <span class="font-label-mono-xs text-outline">06 / 06</span>
+            </div>
+            <div class="bg-surface-container-low border border-outline-variant/20 rounded p-3 mb-4 space-y-1.5 font-label-mono-xs text-[10px]">
+              <div class="flex justify-between"><span class="text-on-surface">TLS 1.3 • HSTS • DMARC</span><span class="text-secondary">GRADE A</span></div>
+              <div class="text-outline">crt.sh Subdomains &amp; RFC 9116 security.txt</div>
+              <div class="text-primary">Blocks Loopback &amp; Cloud Metadata IPs</div>
+            </div>
+            <h3 class="text-title-sm font-title-sm text-on-surface font-semibold mb-1.5">Passive Security Posture Scanner</h3>
+            <p class="text-body-sm text-on-surface-variant mb-4">Non-intrusive Next.js 14 auditor for SSL/TLS certificates, security headers, DNS/email spoofing defense, and remediation snippets.</p>
+          </div>
+          <a href="#scanner-spotlight" class="inline-flex items-center gap-1.5 text-label-mono-sm font-label-mono-sm text-primary hover:underline" tabindex="-1">
+            <span>Run Domain Audit</span><span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Continuous Stream Telemetry Footer -->
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-4 hairline-t text-label-mono-xs font-label-mono-xs text-outline">
+    <div class="flex items-center gap-2">
       <span class="w-2 h-2 rounded-full bg-primary pulse-bead-active"></span>
-      <span id="carousel-status-text">AUTO-PLAY • HOVER TO PAUSE</span>
+      <span>6 RUNTIME MODULES ONLINE • INFINITE PIPELINE STREAM</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-secondary font-semibold">100% HARDWARE-ACCELERATED 60 FPS</span>
+      <span>•</span>
+      <span>HOVER ANY CARD TO INSPECT</span>
     </div>
   </div>
 </section>
@@ -1424,23 +1566,7 @@
 </footer>
 
 <!-- =====================================================================
-       11. STICKY MOBILE BOTTOM ACTION BAR (Viewport < 768px)
-  ====================================================================== -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest/90 border-t border-outline-variant/30 backdrop-blur-xl px-3 py-2 flex items-center justify-between gap-2 shadow-2xl mobile-sticky-action-bar" id="mobile-sticky-bar">
-  <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="flex-1 min-h-[44px] px-3 py-2 bg-surface-container-high border border-outline-variant/40 hover:border-secondary/60 text-secondary rounded-lg font-label-mono-xs text-center flex items-center justify-center gap-1.5 transition-all active:scale-95">
-    <span class="material-symbols-outlined text-[18px]">devices</span>
-    <span class="font-semibold">Tech PWA</span>
-  </a>
-  <a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" class="flex-1 min-h-[44px] px-3 py-2 bg-primary-container text-surface-container-lowest rounded-lg font-label-mono-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 transition-all active:scale-[0.98]">
-    <span class="material-symbols-outlined text-[18px]">shield_person</span>
-    <span>Admin Login</span>
-  </a>
-  <a href="#simulator" class="touch-target-44 w-11 h-11 bg-surface-container border border-outline-variant/40 text-primary hover:text-white rounded-lg flex items-center justify-center transition-all active:scale-95" title="Buka Simulator Interaktif">
-    <span class="material-symbols-outlined text-[20px]">play_circle</span>
-  </a>
-</nav>
-<!-- =====================================================================
-       12. ROBUST VANILLA JAVASCRIPT CONTROLLERS
+       11. ROBUST VANILLA JAVASCRIPT CONTROLLERS
   ====================================================================== -->
 
 

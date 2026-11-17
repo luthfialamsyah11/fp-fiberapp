@@ -11,13 +11,21 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $taskStats = Task::selectRaw("
+            COUNT(*) as total,
+            COUNT(CASE WHEN status = 'assigned' THEN 1 END) as assigned,
+            COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted,
+            COUNT(CASE WHEN status = 'on-going' THEN 1 END) as ongoing,
+            COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed
+        ")->first();
+
         $stats = [
-            'total'       => Task::count(),
-            'assigned'    => Task::where('status', 'assigned')->count(),
-            'accepted'    => Task::where('status', 'accepted')->count(),
-            'ongoing'     => Task::where('status', 'on-going')->count(),
-            'completed'   => Task::where('status', 'completed')->count(),
-            'active_techs'=> User::where('role', 'technician')->where('is_active', true)->count(),
+            'total'        => (int) ($taskStats->total ?? 0),
+            'assigned'     => (int) ($taskStats->assigned ?? 0),
+            'accepted'     => (int) ($taskStats->accepted ?? 0),
+            'ongoing'      => (int) ($taskStats->ongoing ?? 0),
+            'completed'    => (int) ($taskStats->completed ?? 0),
+            'active_techs' => User::where('role', 'technician')->where('is_active', true)->count(),
         ];
 
         $recentTasks = Task::with('technician')

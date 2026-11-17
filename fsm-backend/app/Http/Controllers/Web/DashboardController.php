@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ProgressUpdate;
 use App\Models\ProofOfWork;
 use App\Models\Task;
-use App\Models\TechnicianLocation;
 use App\Models\User;
 use Illuminate\Http\Request;
 

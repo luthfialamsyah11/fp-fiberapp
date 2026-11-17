@@ -13,11 +13,13 @@ class BastController extends Controller
      */
     public function show(Request $request, Task $task)
     {
-        // Allow if user is logged in (admin/technician) OR valid tracking token provided
+        // Allow if Admin OR Assigned Technician OR valid timing-safe tracking token provided
         $token = $request->query('token');
         $isTokenValid = $token && $task->tracking_token && hash_equals($task->tracking_token, $token);
+        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+        $isAssignedTech = auth()->check() && $task->technician_id === auth()->id();
         
-        if (!auth()->check() && !$isTokenValid) {
+        if (!$isAdmin && !$isAssignedTech && !$isTokenValid) {
             return redirect()->route('admin.login');
         }
 

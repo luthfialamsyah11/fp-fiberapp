@@ -16,6 +16,11 @@ class TaskMaterialController extends Controller
      */
     public function index(Task $task)
     {
+        // Guard authorization against IDOR
+        if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $materials = $task->materials()->with('inventoryItem')->get();
         $totalCost = $materials->sum(function ($mat) {
             return ($mat->inventoryItem->unit_price ?? 0) * $mat->quantity;

@@ -9,7 +9,7 @@
 <link rel="canonical" href="https://bentengsiber.com/"/>
 <link rel="icon" type="image/png" href="favicon.png"/>
 <meta property="og:url" content="https://bentengsiber.com/"/>
-<link rel="stylesheet" href="app.css?v=5.5"/>
+<link rel="stylesheet" href="app.css?v=5.6"/>
 </head>
 <body id="top" class="bg-surface-container-lowest text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col font-body-sm overflow-x-hidden">
 <!-- =====================================================================
@@ -186,6 +186,48 @@
        3. SECTION 1: HERO & INTEGRATED COMMAND DASHBOARD
   ====================================================================== -->
 <section id="hero" class="relative w-full pt-14 pb-20 lg:pt-16 lg:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center">
+  <!-- Hero Cybernetic Background & Ambient Aura Engine -->
+  <div class="hero-bg-wrapper" aria-hidden="true">
+    <div class="hero-grid-mesh"></div>
+    <div class="hero-glow-orb-primary"></div>
+    <div class="hero-glow-orb-secondary"></div>
+    <div class="hero-glow-orb-tertiary"></div>
+
+    <!-- Left Gutter Desktop Telemetry Decor -->
+    <div class="hero-telemetry-decor left-gutter select-none" aria-hidden="true">
+      <div class="space-y-1">
+        <div class="text-[8px] text-outline font-mono">NODE_ROUTE</div>
+        <div class="text-secondary font-mono font-bold">LAT -06°12'S</div>
+        <div class="font-mono text-on-surface-variant">LON 106°49'E</div>
+      </div>
+      <div class="h-32 w-px bg-gradient-to-b from-primary/30 via-primary/80 to-transparent mx-auto relative my-4">
+        <div class="w-1.5 h-1.5 rounded-full bg-primary absolute -left-[2px] top-1/2 animate-ping"></div>
+      </div>
+      <div class="space-y-1">
+        <div class="text-[8px] text-outline font-mono">BACKBONE</div>
+        <div class="text-primary font-mono font-semibold">100G DWDM</div>
+        <div class="text-secondary font-mono">ONLINE</div>
+      </div>
+    </div>
+
+    <!-- Right Gutter Desktop Telemetry Decor -->
+    <div class="hero-telemetry-decor right-gutter select-none" aria-hidden="true">
+      <div class="space-y-1">
+        <div class="text-[8px] text-outline font-mono">SPECTRUM</div>
+        <div class="text-primary font-mono font-semibold">1490nm TX</div>
+        <div class="text-secondary font-mono">1310nm RX</div>
+      </div>
+      <div class="h-32 w-px bg-gradient-to-b from-secondary/30 via-secondary/80 to-transparent ml-auto relative my-4">
+        <div class="w-1.5 h-1.5 rounded-full bg-secondary absolute -left-[2px] top-1/3 animate-ping"></div>
+      </div>
+      <div class="space-y-1">
+        <div class="text-[8px] text-outline font-mono">SECURITY</div>
+        <div class="text-secondary font-mono font-bold">RFC 9116</div>
+        <div class="text-tertiary font-mono">SOC2 OK</div>
+      </div>
+    </div>
+  </div>
+
 <!-- Hero Tactical Badging -->
 <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container/90 border border-outline-variant/40 backdrop-blur-md mb-6 shadow-sm">
 <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
@@ -219,7 +261,11 @@
 </a>
 </div>
 <!-- Bento Dashboard Component (Floor 1 Paneling) -->
-<div class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-5 sm:p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+<div class="w-full hero-bento-hud rounded-xl p-5 sm:p-6 lg:p-8 relative overflow-hidden">
+  <div class="hud-corner hud-corner-tl" aria-hidden="true"></div>
+  <div class="hud-corner hud-corner-tr" aria-hidden="true"></div>
+  <div class="hud-corner hud-corner-bl" aria-hidden="true"></div>
+  <div class="hud-corner hud-corner-br" aria-hidden="true"></div>
 <!-- Top Instrument Header -->
 <div class="flex flex-wrap items-center justify-between pb-space-md hairline-b gap-3 mb-space-md">
 <div class="flex items-center gap-space-md">
@@ -822,118 +868,191 @@
   ====================================================================== -->
 <section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="simulator">
 <div class="text-center max-w-3xl mx-auto mb-10">
-<div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">TACTICAL EMULATOR • LIVE SANDBOX</div>
-<h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight" data-i18n="sim.title">Interactive Product Simulator Hub</h2>
-<p class="text-body-sm font-body-sm text-on-surface-variant mt-2">
-        Test mission-critical FSM workflows right now. Switch between the 4 real-time interactive engines below:
-      </p>
+  <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container/90 border border-primary/30 mb-3 backdrop-blur shadow-sm">
+    <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+    <span class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest font-semibold">TACTICAL EMULATOR • LIVE SANDBOX v4.2</span>
+    <span class="text-outline-variant">|</span>
+    <span class="font-label-mono-xs text-[10px] text-secondary font-mono">SIMULATION ACTIVE</span>
+  </div>
+  <h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight" data-i18n="sim.title">Interactive Product Simulator Hub</h2>
+  <p class="text-body-sm font-body-sm text-on-surface-variant mt-2 max-w-2xl mx-auto">
+    Test mission-critical FSM workflows right now. Switch between the 4 real-time interactive engines below:
+  </p>
 </div>
 <!-- Simulator Container (Obsidian Surface 1) -->
-<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden shadow-2xl">
+<div class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl overflow-hidden shadow-2xl relative sim-blueprint-bg">
 <!-- Tab Headers (Smooth Horizontal Scroll on Mobile) -->
-<div class="flex items-center bg-surface-container-low hairline-b px-4 sm:px-6 pt-2 gap-2 text-label-mono-sm font-label-mono-sm overflow-x-auto no-scrollbar scroll-smooth"><button class="px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-1" onclick="switchSimTab(1)"><span class="material-symbols-outlined text-[16px]">touch_app</span><span>1. Technician Mobile Stepper</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-2" onclick="switchSimTab(2)"><span class="material-symbols-outlined text-[16px]">local_shipping</span><span>2. Customer Live Uber Radar &amp; GPS</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-3" onclick="switchSimTab(3)"><span class="material-symbols-outlined text-[16px]">verified</span><span>3. Official BAST PDF Certificate</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-4" onclick="switchSimTab(4)"><span class="material-symbols-outlined text-[16px]">inventory_2</span><span>4. Atomic BOM &amp; Inventory Tracker</span></button></div>
+<div class="flex items-center bg-surface-container-low/80 hairline-b px-4 sm:px-6 pt-2 gap-2 text-label-mono-sm font-label-mono-sm overflow-x-auto no-scrollbar scroll-smooth">
+  <button class="sim-tab-btn active" id="sim-tab-1" onclick="switchSimTab(1)" type="button">
+    <span class="material-symbols-outlined text-[18px]">touch_app</span>
+    <span>1. Technician Mobile Stepper</span>
+    <span class="tab-badge">PWA v4.2</span>
+  </button>
+  <button class="sim-tab-btn" id="sim-tab-2" onclick="switchSimTab(2)" type="button">
+    <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+    <span>2. Customer Live Uber Radar &amp; GPS</span>
+    <span class="tab-badge">LIVE GPS</span>
+  </button>
+  <button class="sim-tab-btn" id="sim-tab-3" onclick="switchSimTab(3)" type="button">
+    <span class="material-symbols-outlined text-[18px]">verified</span>
+    <span>3. Official BAST PDF Certificate</span>
+    <span class="tab-badge">SHA-256</span>
+  </button>
+  <button class="sim-tab-btn" id="sim-tab-4" onclick="switchSimTab(4)" type="button">
+    <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+    <span>4. Atomic BOM &amp; Inventory Tracker</span>
+    <span class="tab-badge">ACID LOCK</span>
+  </button>
+</div>
 <!-- Tab Content Canvas -->
 <div class="p-space-lg md:p-space-xl">
 <!-- ================= TAB 1: Technician Mobile Stepper ================= -->
 <div class="block" id="sim-panel-1">
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
 <!-- Mobile Shell Preview (5 cols) -->
-<div class="lg:col-span-5 bg-surface-container border border-outline-variant/40 rounded-xl p-space-md max-w-sm mx-auto w-full shadow-inner">
-<!-- Mobile Header -->
-<div class="flex items-center justify-between pb-3 hairline-b mb-3 font-label-mono-xs text-label-mono-xs text-outline">
-<span>09:41 LTE • GPS LOCKED</span>
-<span class="text-secondary font-semibold">BAT: 94%</span>
-</div>
-<!-- Stepper Indicator -->
-<div class="flex items-center justify-between mb-4">
-<div class="flex flex-col items-center">
-<span class="w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold" id="step-bead-1">1</span>
-<span class="text-[10px] text-primary mt-1 font-label-mono-xs">Arrival</span>
-</div>
-<div class="h-0.5 flex-1 bg-outline-variant/30 mx-1"></div>
-<div class="flex flex-col items-center">
-<span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center" id="step-bead-2">2</span>
-<span class="text-[10px] text-outline mt-1 font-label-mono-xs">Optical</span>
-</div>
-<div class="h-0.5 flex-1 bg-outline-variant/30 mx-1"></div>
-<div class="flex flex-col items-center">
-<span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center" id="step-bead-3">3</span>
-<span class="text-[10px] text-outline mt-1 font-label-mono-xs">Sign BAST</span>
-</div>
-</div>
-<!-- Interactive Step Stages -->
-<div class="space-y-3" id="step-content-1">
-<div class="p-2.5 bg-surface-container-low rounded border border-outline-variant/20">
-<div class="text-label-mono-xs font-label-mono-xs text-outline">WORK ORDER #WO-88219</div>
-<div class="text-title-sm font-title-sm text-on-surface font-semibold">Fiber ONT Drop Repair</div>
-<div class="text-body-sm font-body-sm text-on-surface-variant mt-1">Client: PT Solusi Graha Cyber</div>
-</div>
-<div class="p-3 bg-surface-container-low rounded border border-outline-variant/20 space-y-2">
-<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
-<span>GPS Coordinates:</span>
-<span class="text-primary">-6.2088° S, 106.8456° E</span>
-</div>
-<div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
-<span>Geofence Status:</span>
-<span class="text-secondary font-semibold">INSIDE (12m to ONT)</span>
-</div>
-</div>
-<!-- Photo Verification Simulator -->
-<div class="border border-dashed border-outline-variant/40 rounded p-3 text-center bg-surface-container-lowest">
-<div class="flex flex-col items-center justify-center py-3" id="photo-box">
-<span class="material-symbols-outlined text-outline text-[28px] mb-1">photo_camera</span>
-<span class="text-body-sm font-body-sm text-on-surface-variant">Tap to Simulate OTB Photo Capture</span>
-<button class="mt-2 px-3 py-1 bg-surface-container-high hover:bg-surface-bright text-primary rounded font-label-mono-xs text-label-mono-xs border border-primary/30" onclick="simulatePhotoCapture()" type="button">
-                      Snap Evidence Photo
-                    </button>
-</div>
-<div class="hidden text-secondary font-label-mono-xs text-label-mono-xs py-2" id="photo-captured">
-                    ✓ Photo Tagged: EXIF_GEO_VALIDATED.jpg (1.2 MB)
-                  </div>
-</div>
-<button class="w-full py-2 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded hover:bg-primary transition-colors" onclick="goToStep(2)" type="button">
-                  Continue to Optical Power Check →
-                </button>
-</div>
-<!-- Step 2 (Hidden initially) -->
-<div class="space-y-3 hidden" id="step-content-2">
-<div class="p-3 bg-surface-container-low rounded border border-outline-variant/20">
-<div class="text-label-mono-xs font-label-mono-xs text-outline">CALIBRATION • BLUETOOTH OPM</div>
-<div class="text-title-sm font-title-sm text-on-surface font-semibold mt-1">Optical Transceiver Reading</div>
-<div class="mt-3 flex items-center justify-between p-2 bg-surface-container-lowest rounded border border-outline-variant/30">
-<span class="font-label-mono-xs text-label-mono-xs text-outline">1490nm Downstream:</span>
-<span class="font-label-mono-md text-label-mono-md font-bold text-secondary" id="opm-val">-18.42 dBm</span>
-</div>
-<div class="mt-2 text-label-mono-xs font-label-mono-xs text-secondary flex items-center gap-1">
-<span class="material-symbols-outlined text-[14px]">check_circle</span>
-<span>Within Spec Standard (-15 dBm to -25 dBm)</span>
-</div>
-</div>
-<div class="flex gap-2">
-<button class="w-1/3 py-2 bg-surface-container-high text-on-surface font-body-sm rounded hover:bg-surface-bright" onclick="goToStep(1)" type="button">Back</button>
-<button class="w-2/3 py-2 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded hover:bg-primary transition-colors" onclick="goToStep(3)" type="button">Next: Customer Signature →</button>
-</div>
-</div>
-<!-- Step 3 (Hidden initially) -->
-<div class="space-y-3 hidden" id="step-content-3">
-<div class="p-2.5 bg-surface-container-low rounded border border-outline-variant/20">
-<div class="text-label-mono-xs font-label-mono-xs text-outline">FINAL CERTIFICATION</div>
-<div class="text-title-sm font-title-sm text-on-surface font-semibold">Customer Electronic Signature</div>
-<p class="text-body-sm font-body-sm text-on-surface-variant text-[12px] mt-0.5">Please sign on the canvas below to endorse the BAST handover.</p>
-</div>
-<!-- HTML5 Canvas for Signature Pad -->
-<div class="bg-surface-container-lowest border border-outline-variant/50 rounded p-1 relative">
-<canvas class="w-full bg-surface-container-lowest cursor-crosshair rounded" height="110" id="signature-canvas" width="280"></canvas>
-<div class="absolute bottom-1 right-2 flex gap-1">
-<button class="px-1.5 py-0.5 bg-surface-container-high text-outline hover:text-white rounded text-[10px] font-label-mono-xs" onclick="clearSignature()" type="button">Clear</button>
-<button class="px-1.5 py-0.5 bg-surface-container-high text-primary hover:text-white rounded text-[10px] font-label-mono-xs" onclick="autoSignature()" type="button">Autofill</button>
-</div>
-</div>
-<div class="flex gap-2">
-<button class="w-1/3 py-2 bg-surface-container-high text-on-surface font-body-sm rounded hover:bg-surface-bright" onclick="goToStep(2)" type="button">Back</button>
-<button class="w-2/3 py-2 bg-secondary text-surface-container-lowest font-body-sm font-medium rounded hover:bg-secondary-fixed transition-colors" onclick="completeHandover()" type="button">Endorse &amp; Sync BAST ✓</button>
-</div>
-</div>
+<div class="lg:col-span-5 phone-mockup-chassis max-w-sm mx-auto w-full">
+  <!-- Dynamic Pill / Camera & Speaker Sensor -->
+  <div class="phone-speaker-pill" aria-hidden="true">
+    <div class="phone-camera-dot"></div>
+    <div class="phone-speaker-grill"></div>
+  </div>
+  <!-- Mobile Status Bar -->
+  <div class="flex items-center justify-between pb-2 hairline-b mb-3 font-label-mono-xs text-[10px] text-outline px-1">
+    <span class="font-mono text-on-surface">09:41 <span class="text-primary font-bold">5G</span></span>
+    <div class="flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[12px] text-secondary">near_me</span>
+      <span class="text-secondary font-mono font-semibold">BAT: 94%</span>
+    </div>
+  </div>
+  <!-- Stepper Indicator -->
+  <div class="flex items-center justify-between mb-4 px-1">
+    <div class="flex flex-col items-center">
+      <span class="w-7 h-7 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)]" id="step-bead-1">1</span>
+      <span class="text-[10px] text-primary mt-1 font-label-mono-xs font-semibold">Arrival</span>
+    </div>
+    <div class="h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors" id="step-bar-1"></div>
+    <div class="flex flex-col items-center">
+      <span class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30" id="step-bead-2">2</span>
+      <span class="text-[10px] text-outline mt-1 font-label-mono-xs">Optical</span>
+    </div>
+    <div class="h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors" id="step-bar-2"></div>
+    <div class="flex flex-col items-center">
+      <span class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30" id="step-bead-3">3</span>
+      <span class="text-[10px] text-outline mt-1 font-label-mono-xs">Sign BAST</span>
+    </div>
+  </div>
+  <!-- Interactive Step Stages -->
+  <div class="space-y-3" id="step-content-1">
+    <div class="p-2.5 bg-surface-container-low rounded border border-outline-variant/30">
+      <div class="flex justify-between items-center text-[10px] font-mono text-outline mb-1">
+        <span>WORK ORDER #WO-88219</span>
+        <span class="px-1.5 py-0.5 bg-red-500/10 border border-red-500/30 text-red-400 font-bold rounded">HIGH SLA PRIORITY</span>
+      </div>
+      <div class="text-title-sm font-title-sm text-on-surface font-semibold">Fiber ONT Drop Repair</div>
+      <div class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Client: PT Solusi Graha Cyber</div>
+    </div>
+    <div class="p-3 bg-surface-container-low rounded border border-outline-variant/30 space-y-2">
+      <div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+        <span>GPS Coordinates:</span>
+        <span class="text-primary font-mono font-semibold">-6.2088° S, 106.8456° E</span>
+      </div>
+      <div class="flex justify-between text-label-mono-xs font-label-mono-xs text-outline">
+        <span>Geofence Status:</span>
+        <span class="text-secondary font-mono font-bold flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary pulse-bead-green"></span>
+          <span>INSIDE (12m to ONT)</span>
+        </span>
+      </div>
+    </div>
+    <!-- Photo Verification Simulator -->
+    <div class="border border-dashed border-outline-variant/50 rounded-lg p-3 text-center bg-surface-container-lowest">
+      <div class="flex flex-col items-center justify-center py-2" id="photo-box">
+        <span class="material-symbols-outlined text-outline text-[32px] mb-1">photo_camera</span>
+        <span class="text-body-sm font-body-sm text-on-surface-variant text-xs">Simulate Field Evidence Photo Capture</span>
+        <button class="mt-2.5 px-3 py-1.5 bg-primary-container text-surface-container-lowest hover:bg-primary rounded font-label-mono-xs text-label-mono-xs font-semibold flex items-center gap-1.5 transition-colors" onclick="simulatePhotoCapture()" type="button">
+          <span class="material-symbols-outlined text-[16px]">camera</span>
+          <span>Snap Evidence Photo</span>
+        </button>
+      </div>
+      <div class="hidden py-1 space-y-1.5" id="photo-captured">
+        <div class="flex items-center justify-between p-2 rounded bg-surface-container border border-secondary/40 text-left">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+            <div>
+              <div class="text-[11px] font-mono text-secondary font-semibold">OTB_EVIDENCE_GEO_STAMPED.jpg</div>
+              <div class="text-[9px] font-mono text-outline">EXIF: -6.2088, 106.8456 • 1.2 MB Encrypted</div>
+            </div>
+          </div>
+          <span class="px-1.5 py-0.5 bg-secondary/10 text-secondary text-[9px] font-mono rounded font-bold">VERIFIED</span>
+        </div>
+      </div>
+    </div>
+    <button class="w-full py-2.5 bg-primary-container text-surface-container-lowest font-body-sm font-bold rounded-lg hover:bg-primary transition-all flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/10" onclick="goToStep(2)" type="button">
+      <span>Continue to Optical Power Check</span>
+      <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+    </button>
+  </div>
+  <!-- Step 2 (Hidden initially) -->
+  <div class="space-y-3 hidden" id="step-content-2">
+    <div class="p-3 bg-surface-container-low rounded border border-outline-variant/30">
+      <div class="text-label-mono-xs font-label-mono-xs text-outline uppercase">CALIBRATION • BLUETOOTH OPM</div>
+      <div class="text-title-sm font-title-sm text-on-surface font-semibold mt-1">Optical Transceiver Reading</div>
+      <!-- Digital Segmented LCD Meter -->
+      <div class="lcd-meter-box p-3 mt-3 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-mono text-outline uppercase tracking-wider" id="opm-wl-label">WAVELENGTH: 1490nm DWDM DOWN</div>
+          <div class="lcd-meter-text text-2xl font-bold font-mono tracking-tight" id="opm-val">-18.42 dBm</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <div class="flex items-center gap-1 text-[10px] text-secondary font-mono font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary pulse-bead-green"></span>
+            <span>BLE PAIRED</span>
+          </div>
+          <span class="text-[9px] text-outline font-mono mt-0.5">Grandway FHP2</span>
+        </div>
+      </div>
+      <!-- Wavelength selector pills -->
+      <div class="flex gap-1.5 mt-2.5">
+        <button type="button" id="opm-btn-1310" onclick="setOpmWavelength('1310')" class="opm-wl-btn px-2.5 py-1 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-on-surface-variant font-mono text-xs rounded transition-colors">1310nm</button>
+        <button type="button" id="opm-btn-1490" onclick="setOpmWavelength('1490')" class="opm-wl-btn px-2.5 py-1 bg-primary/20 border border-primary text-primary font-mono text-xs rounded font-bold transition-colors">1490nm</button>
+        <button type="button" id="opm-btn-1550" onclick="setOpmWavelength('1550')" class="opm-wl-btn px-2.5 py-1 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-on-surface-variant font-mono text-xs rounded transition-colors">1550nm</button>
+      </div>
+      <div class="mt-2 text-label-mono-xs font-label-mono-xs text-secondary flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">check_circle</span>
+        <span>Standard Spec Window (-15 dBm to -25 dBm): OPTIMAL</span>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button class="w-1/3 py-2 bg-surface-container-high text-on-surface font-body-sm rounded hover:bg-surface-bright" onclick="goToStep(1)" type="button">Back</button>
+      <button class="w-2/3 py-2 bg-primary-container text-surface-container-lowest font-body-sm font-semibold rounded hover:bg-primary transition-colors flex items-center justify-center gap-1" onclick="goToStep(3)" type="button">
+        <span>Next: Customer Sign</span>
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+  <!-- Step 3 (Hidden initially) -->
+  <div class="space-y-3 hidden" id="step-content-3">
+    <div class="p-2.5 bg-surface-container-low rounded border border-outline-variant/30">
+      <div class="text-label-mono-xs font-label-mono-xs text-outline uppercase">FINAL CERTIFICATION</div>
+      <div class="text-title-sm font-title-sm text-on-surface font-semibold">Customer Electronic Signature</div>
+      <p class="text-body-sm font-body-sm text-on-surface-variant text-[12px] mt-0.5">Please endorse on the glass canvas below.</p>
+    </div>
+    <!-- HTML5 Canvas for Signature Pad -->
+    <div class="bg-surface-container-lowest border border-outline-variant/60 rounded p-1.5 relative shadow-inner">
+      <canvas class="w-full bg-[#0a0f18] cursor-crosshair rounded border border-outline-variant/30" height="110" id="signature-canvas" width="280"></canvas>
+      <div class="absolute bottom-2.5 right-3 flex gap-1.5">
+        <button class="px-2 py-0.5 bg-surface-container-high text-outline hover:text-white rounded text-[10px] font-label-mono-xs border border-outline-variant/40" onclick="clearSignature()" type="button">Clear</button>
+        <button class="px-2 py-0.5 bg-surface-container-high text-primary hover:text-white rounded text-[10px] font-label-mono-xs border border-primary/40 font-semibold" onclick="autoSignature()" type="button">Autofill</button>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button class="w-1/3 py-2 bg-surface-container-high text-on-surface font-body-sm rounded hover:bg-surface-bright" onclick="goToStep(2)" type="button">Back</button>
+      <button class="w-2/3 py-2 bg-secondary text-surface-container-lowest font-body-sm font-bold rounded hover:bg-secondary-fixed transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20" onclick="completeHandover()" type="button">
+        <span class="material-symbols-outlined text-[16px]">verified</span>
+        <span>Endorse &amp; Sync BAST</span>
+      </button>
+    </div>
+  </div>
 </div>
 <!-- Right Telemetry & Architecture Explainer (7 cols) -->
 <div class="lg:col-span-7 flex flex-col justify-between">
@@ -963,11 +1082,372 @@
 </div>
 </div>
 <!-- ================= TAB 2: Customer Uber-Style Radar ================= -->
-<div class="hidden" id="sim-panel-2"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-7 bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-space-md relative overflow-hidden min-h-[380px] flex flex-col justify-between"><div class="absolute inset-0 flex items-center justify-center pointer-events-none"><div class="w-80 h-80 rounded-full border border-primary/20"></div><div class="w-60 h-60 rounded-full border border-primary/20 absolute"></div><div class="w-40 h-40 rounded-full border border-primary/30 absolute"></div><div class="w-20 h-20 rounded-full border border-primary/40 absolute"></div><div class="w-full h-px bg-primary/10 absolute"></div><div class="h-full w-px bg-primary/10 absolute"></div><div class="w-80 h-80 absolute flex items-center justify-center"><div class="w-1/2 h-1/2 origin-bottom-right radar-beam absolute top-0 left-0 bg-gradient-to-br from-primary/20 to-transparent"></div></div></div><div class="relative z-10 flex items-center justify-between pb-2 hairline-b font-label-mono-xs text-label-mono-xs"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span><span class="text-on-surface font-semibold">DISPATCH #DP-4402 LIVE TRACKING</span></div><div class="flex items-center gap-2 text-outline"><span>SPEED: <strong class="text-primary" id="radar-speed">38 km/h</strong></span><span>•</span><span>ROUTE: <strong class="text-secondary">SC-04 BYPASS</strong></span></div></div><div class="relative z-10 w-full flex-1 flex items-center justify-between px-6 my-4"><div class="flex flex-col items-center transition-all duration-300 ease-out" id="radar-van" style="transform: translateX(10px);"><div class="w-10 h-10 bg-primary-container text-surface-container-lowest rounded-full flex items-center justify-center shadow-[0_0_15px_#22d3ee]"><span class="material-symbols-outlined text-[22px]">local_shipping</span></div><span class="mt-1 px-1.5 py-0.5 bg-surface-container-high border border-primary/40 text-primary font-label-mono-xs text-[10px] rounded whitespace-nowrap">Tech: Budi S. (Van #04)</span></div><div class="flex flex-col items-center"><div class="w-10 h-10 bg-secondary text-surface-container-lowest rounded-full flex items-center justify-center shadow-[0_0_15px_#4edea3]"><span class="material-symbols-outlined text-[22px]">location_on</span></div><span class="mt-1 px-1.5 py-0.5 bg-surface-container-high border border-secondary/40 text-secondary font-label-mono-xs text-[10px] rounded whitespace-nowrap">Customer ONT Target</span></div></div><div class="relative z-10 bg-surface-container-high/95 border border-outline-variant/40 p-3 rounded backdrop-blur space-y-2"><div class="flex justify-between items-center text-label-mono-xs font-label-mono-xs"><div><span class="text-outline block">ESTIMATED TIME OF ARRIVAL</span><div class="text-title-sm font-title-sm text-primary font-bold" id="radar-eta">8 Minutes (2.4 km away)</div></div><div class="flex items-center gap-2"><button class="px-2.5 py-1 bg-surface-container hover:bg-surface-bright text-on-surface rounded border border-outline-variant/40 font-label-mono-xs text-label-mono-xs" onclick="simulateVehicleArrival()" type="button">Arrive Now</button><button class="px-3 py-1.5 bg-primary text-surface-container-lowest font-medium rounded hover:bg-primary-container transition-colors font-label-mono-xs text-label-mono-xs" id="radar-auto-btn" onclick="toggleRadarSimulation()" type="button">Auto Move: ON</button></div></div><div class="pt-1"><div class="flex justify-between text-[10px] font-label-mono-xs text-outline mb-1"><span>Route Progress: <strong class="text-on-surface" id="radar-percent-text">20%</strong></span><span>Waypoints: 4 / 6 Cleared</span></div><input class="w-full accent-cyan-400 bg-surface-container-low cursor-pointer" id="radar-progress-slider" max="100" min="0" oninput="updateRadarProgress(this.value)" type="range" value="20"></div></div></div><div class="lg:col-span-5 flex flex-col justify-between"><div><span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded">CUSTOMER EXPERIENCE</span><h3 class="text-headline-md font-headline-md text-on-surface mt-2 mb-2">Uber-Grade Live Field Radar</h3><p class="text-body-sm font-body-sm text-on-surface-variant mb-4">Eliminate blind wait times and frantic phone calls. Customers receive an SMS/WhatsApp tracking link with interactive leaf-map telemetry, photo verification of the assigned technician, and sub-minute ETA predictions.</p><div class="space-y-2.5"><div class="p-2.5 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between gap-3"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-[20px]">sms</span><div class="text-body-sm font-body-sm text-on-surface-variant text-[12px]"><span class="text-on-surface font-medium block">Automated Dispatch Ping</span>Sent via WhatsApp Business Cloud API with one-click live tracking URL.</div></div><button class="px-2 py-1 bg-surface-container-high hover:bg-surface-bright text-secondary text-label-mono-xs rounded border border-secondary/30 whitespace-nowrap" onclick="resendWhatsAppPing()" type="button">Resend Ping</button></div><div class="p-2.5 bg-surface-container-low border border-outline-variant/20 rounded flex items-center gap-3"><span class="material-symbols-outlined text-primary text-[20px]">security</span><div class="text-body-sm font-body-sm text-on-surface-variant text-[12px]"><span class="text-on-surface font-medium block">Zero-Spam Identity Shield</span>Masked VoIP routing prevents disclosure of customer or technician cell numbers.</div></div></div></div><div class="p-3 bg-surface-container border border-outline-variant/30 rounded font-label-mono-xs text-label-mono-xs mt-4"><div class="flex justify-between items-center mb-1"><span class="text-outline uppercase">TELEMETRY LATENCY:</span><span class="text-secondary font-semibold" id="radar-socket-status">Socket.io active • ping: 22ms</span></div><div class="text-on-surface-variant" id="radar-event-log">&gt; Live GPS broadcast synchronized with Jakarta Gateway cluster.</div></div></div></div></div>
+<div class="hidden" id="sim-panel-2">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+    <!-- Left: High-Precision Radar Map Screen (7 cols) -->
+    <div class="lg:col-span-7 bg-[#05080e] border border-outline-variant/40 rounded-xl p-space-md relative overflow-hidden min-h-[400px] flex flex-col justify-between shadow-2xl">
+      <!-- Rotating Tactical Radar Rings & Sweeping Beam -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+        <div class="w-80 h-80 rounded-full border border-primary/20"></div>
+        <div class="w-60 h-60 rounded-full border border-primary/20 absolute"></div>
+        <div class="w-40 h-40 rounded-full border border-primary/30 absolute"></div>
+        <div class="w-20 h-20 rounded-full border border-primary/40 absolute"></div>
+        <div class="w-full h-px bg-primary/10 absolute"></div>
+        <div class="h-full w-px bg-primary/10 absolute"></div>
+        <!-- 360-Degree Continuous Rotating Sweep -->
+        <div class="w-80 h-80 absolute flex items-center justify-center pointer-events-none">
+          <div class="w-full h-full rounded-full radar-sweep-anim" style="background: conic-gradient(from 0deg, rgba(34, 211, 238, 0.28) 0deg, rgba(34, 211, 238, 0.05) 45deg, transparent 90deg);"></div>
+        </div>
+      </div>
+
+      <!-- Radar Top Instrument Readout -->
+      <div class="relative z-10 flex items-center justify-between pb-2 hairline-b font-label-mono-xs text-label-mono-xs bg-[#05080e]/70 backdrop-blur-sm px-1">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+          <span class="text-on-surface font-semibold font-mono">DISPATCH #DP-4402 LIVE TRACKING</span>
+        </div>
+        <div class="flex items-center gap-2 text-outline font-mono text-[11px]">
+          <span>SPEED: <strong class="text-primary font-bold" id="radar-speed">38 km/h</strong></span>
+          <span>•</span>
+          <span>ROUTE: <strong class="text-secondary font-semibold">SC-04 BYPASS</strong></span>
+        </div>
+      </div>
+
+      <!-- Radar Active Field Track Corridor -->
+      <div class="relative z-10 w-full flex-1 flex items-center justify-between px-6 my-4">
+        <!-- Moving Van Marker -->
+        <div class="flex flex-col items-center transition-all duration-300 ease-out" id="radar-van" style="transform: translateX(10px);">
+          <div class="w-11 h-11 bg-primary-container text-surface-container-lowest rounded-full flex items-center justify-center shadow-[0_0_20px_#22d3ee] border-2 border-white/20">
+            <span class="material-symbols-outlined text-[24px]">local_shipping</span>
+          </div>
+          <span class="mt-1 px-2 py-0.5 bg-surface-container-high/90 border border-primary/40 text-primary font-label-mono-xs text-[10px] rounded whitespace-nowrap font-mono shadow">
+            Tech: Budi S. (Van #04)
+          </span>
+        </div>
+        <!-- Customer ONT Target Pin -->
+        <div class="flex flex-col items-center">
+          <div class="w-11 h-11 bg-secondary text-surface-container-lowest rounded-full flex items-center justify-center shadow-[0_0_20px_#4edea3] border-2 border-white/20">
+            <span class="material-symbols-outlined text-[24px]">location_on</span>
+          </div>
+          <span class="mt-1 px-2 py-0.5 bg-surface-container-high/90 border border-secondary/40 text-secondary font-label-mono-xs text-[10px] rounded whitespace-nowrap font-mono shadow">
+            Customer ONT Target
+          </span>
+        </div>
+      </div>
+
+      <!-- Radar Bottom Control Deck -->
+      <div class="relative z-10 bg-surface-container-high/90 border border-outline-variant/40 p-3 rounded-lg backdrop-blur space-y-2.5">
+        <div class="flex justify-between items-center text-label-mono-xs font-label-mono-xs">
+          <div>
+            <span class="text-outline block text-[10px] font-mono">ESTIMATED TIME OF ARRIVAL</span>
+            <div class="text-title-sm font-title-sm text-primary font-bold font-mono" id="radar-eta">8 Minutes (2.4 km away)</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="px-2.5 py-1 bg-surface-container hover:bg-surface-bright text-on-surface rounded border border-outline-variant/40 font-label-mono-xs text-xs font-mono transition-colors" onclick="simulateVehicleArrival()" type="button">Arrive Now</button>
+            <button class="px-3 py-1.5 bg-primary text-surface-container-lowest font-bold rounded hover:bg-primary-container transition-colors font-label-mono-xs text-xs font-mono shadow-sm" id="radar-auto-btn" onclick="toggleRadarSimulation()" type="button">Auto Move: ON</button>
+          </div>
+        </div>
+        <div class="pt-1">
+          <div class="flex justify-between text-[10px] font-label-mono-xs text-outline mb-1 font-mono">
+            <span>Route Progress: <strong class="text-primary font-bold" id="radar-percent-text">20%</strong></span>
+            <span>Waypoints: 4 / 6 Cleared</span>
+          </div>
+          <input class="w-full accent-cyan-400 bg-surface-container-low cursor-pointer h-1.5 rounded-lg" id="radar-progress-slider" max="100" min="0" oninput="updateRadarProgress(this.value)" type="range" value="20">
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Customer Experience Telemetry & WhatsApp Hook (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col justify-between">
+      <div>
+        <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-semibold font-mono">CUSTOMER EXPERIENCE</span>
+        <h3 class="text-headline-md font-headline-md text-on-surface mt-2 mb-2 font-bold">Uber-Grade Live Field Radar</h3>
+        <p class="text-body-sm font-body-sm text-on-surface-variant mb-4 leading-relaxed">
+          Eliminate blind wait times and customer churn. Subscribers receive an instant SMS/WhatsApp tracking link with interactive leaf-map telemetry, photo verification of the assigned technician, and sub-minute arrival estimates.
+        </p>
+        <div class="space-y-2.5">
+          <div class="p-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-secondary text-[22px]">sms</span>
+              <div class="text-body-sm font-body-sm text-on-surface-variant text-[12px]">
+                <span class="text-on-surface font-semibold block">Automated Dispatch Ping</span>
+                Sent via WhatsApp Business Cloud API with one-click live tracking URL.
+              </div>
+            </div>
+            <button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-secondary text-label-mono-xs rounded border border-secondary/40 whitespace-nowrap font-mono font-medium transition-colors" onclick="resendWhatsAppPing()" type="button">
+              Resend Ping
+            </button>
+          </div>
+          <div class="p-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-[22px]">security</span>
+            <div class="text-body-sm font-body-sm text-on-surface-variant text-[12px]">
+              <span class="text-on-surface font-semibold block">Zero-Spam Identity Shield</span>
+              Masked VoIP routing prevents disclosure of customer or technician cell numbers.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-3 bg-surface-container border border-outline-variant/40 rounded-lg font-label-mono-xs text-label-mono-xs mt-4">
+        <div class="flex justify-between items-center mb-1 font-mono">
+          <span class="text-outline uppercase">TELEMETRY LATENCY:</span>
+          <span class="text-secondary font-semibold" id="radar-socket-status">Socket.io active • ping: 22ms</span>
+        </div>
+        <div class="text-on-surface-variant font-mono text-[11px]" id="radar-event-log">&gt; Live GPS broadcast synchronized with Jakarta Gateway cluster.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ================= TAB 3: Automated BAST PDF Certificate ================= -->
-<div class="hidden" id="sim-panel-3"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-7 bg-white text-slate-900 rounded p-6 shadow-2xl font-body-sm border border-slate-300"><div class="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4"><div><div class="font-headline-md text-slate-950 font-bold uppercase tracking-tight text-lg">BERITA ACARA SERAH TERIMA (BAST)</div><div class="text-[11px] text-slate-600 font-label-mono-xs">FIBER INSTALLATION &amp; ACCEPTANCE CERTIFICATE</div></div><div class="text-right"><div class="text-xs font-bold text-slate-900" id="bast-doc-no">NO: BAST/BS/2025/1109</div><div class="text-[10px] text-slate-500 font-label-mono-xs" id="bast-timestamp">TIMESTAMP: 2025-05-18 14:32:00 UTC</div></div></div><div class="grid grid-cols-2 gap-3 text-xs mb-4 p-2.5 bg-slate-50 rounded border border-slate-200"><div><span class="font-semibold text-slate-700">Customer:</span> PT Nusantara Graha Data</div><div><span class="font-semibold text-slate-700">Account ID:</span> BNT-782910-JKT</div><div><span class="font-semibold text-slate-700">Technician:</span> Budi Santoso (ID 9412)</div><div><span class="font-semibold text-slate-700">Circuit ID:</span> OLT-TB-02/PON4/ONU-18</div></div><table class="w-full text-left text-xs mb-4 border-collapse"><thead><tr class="bg-slate-200 text-slate-800 font-semibold border-b border-slate-300"><th class="p-1.5">Verification Metric</th><th class="p-1.5">Benchmark Target</th><th class="p-1.5">Measured Value</th><th class="p-1.5">Status</th></tr></thead><tbody class="divide-y divide-slate-200 font-label-mono-xs text-[11px]"><tr><td class="p-1.5">Before / After Photo Proof</td><td class="p-1.5">2 Required Slots</td><td class="p-1.5 font-bold text-emerald-700">2 Verified Photos</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr><tr><td class="p-1.5">Bandwidth Throughput</td><td class="p-1.5">≥ 100 Mbps Symmetrical</td><td class="p-1.5 font-bold text-emerald-700">104.2 / 102.8 Mbps</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr><tr><td class="p-1.5">Latency to Core Gateway</td><td class="p-1.5">&lt; 5.0 ms</td><td class="p-1.5 font-bold text-emerald-700">1.8 ms</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr></tbody></table><div class="grid grid-cols-2 gap-6 pt-2 border-t border-slate-300"><div class="text-center"><div class="text-[10px] uppercase font-bold text-slate-600 mb-1">Technician Signature</div><div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50"><span class="font-serif italic text-slate-800 text-sm">Budi Santoso</span></div><span class="text-[9px] text-slate-500 font-label-mono-xs mt-1 block">SHA256: 4f8a...c011</span></div><div class="text-center"><div class="text-[10px] uppercase font-bold text-slate-600 mb-1">Customer E-Endorsement</div><div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50"><span class="font-serif italic text-blue-900 text-sm font-bold">R. Hendrawan</span></div><span class="text-[9px] text-slate-500 font-label-mono-xs mt-1 block">STAMP: 2025-05-18T14:32:19Z</span></div></div></div><div class="lg:col-span-5 flex flex-col justify-between bg-surface-container-low border border-outline-variant/30 rounded p-space-md"><div><div class="flex items-center justify-between mb-3"><span class="px-2 py-0.5 bg-primary-container text-surface-container-lowest font-label-mono-xs text-label-mono-xs rounded font-semibold">BAST ENGINE • LARAVEL 10</span><span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold">HASH_EQUALS VERIFIED</span></div><div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded mb-4"><div class="text-outline text-label-mono-xs font-label-mono-xs uppercase mb-1">Official Route</div><div class="font-label-mono-sm text-primary font-semibold">/tasks/{task}/bast?token=...</div><p class="text-body-sm font-body-sm text-on-surface-variant mt-1.5">Automatically compiles customer metadata, Before/After photo proofs, BOM materials consumed, and HTML5 customer e-signature into a printable certificate.</p></div><div class="space-y-2 text-body-sm text-on-surface-variant mb-4"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span><span>Timing-attack safe token guard (<code class="text-primary">hash_equals</code>)</span></div><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span><span>Includes Before &amp; After field photo attachments</span></div><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span><span>Lists atomic BOM materials &amp; serial numbers</span></div></div></div><div class="pt-3 hairline-t flex gap-2"><button class="flex-1 py-2.5 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded hover:bg-primary transition-colors flex items-center justify-center gap-1.5" onclick="printDemoBast()" type="button"><span class="material-symbols-outlined text-[18px]">print</span><span>Preview Print Dialog</span></button><a class="py-2.5 px-3 bg-surface-container-high border border-outline-variant/40 text-on-surface font-body-sm rounded hover:border-primary/40 flex items-center justify-center" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Open PWA</a></div></div></div></div>
+<div class="hidden" id="sim-panel-3">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+    <!-- Left: Official BAST Printable Document Frame (7 cols) -->
+    <div class="lg:col-span-7 bast-cert-paper p-6 sm:p-7 border border-slate-300 shadow-2xl relative">
+      <div class="bast-watermark-stamp" aria-hidden="true">BENTENG SIBER OFFICIAL</div>
+      <!-- Certificate Header -->
+      <div class="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4 relative z-10">
+        <div>
+          <div class="font-bold text-slate-950 uppercase tracking-tight text-lg font-mono">BERITA ACARA SERAH TERIMA (BAST)</div>
+          <div class="text-[11px] text-slate-600 font-mono">FIBER INSTALLATION &amp; ACCEPTANCE CERTIFICATE</div>
+        </div>
+        <div class="text-right">
+          <div class="text-xs font-bold text-slate-900 font-mono" id="bast-doc-no">NO: BAST/BS/2026/05-1109</div>
+          <div class="text-[10px] text-slate-500 font-mono" id="bast-timestamp">TIMESTAMP: 2026-05-18 14:32:00 UTC</div>
+        </div>
+      </div>
+      <!-- Account & Metadata Grid -->
+      <div class="grid grid-cols-2 gap-3 text-xs mb-4 p-2.5 bg-slate-50 rounded border border-slate-200 relative z-10 font-mono">
+        <div><span class="font-semibold text-slate-700">Customer:</span> PT Nusantara Graha Data</div>
+        <div><span class="font-semibold text-slate-700">Account ID:</span> BNT-782910-JKT</div>
+        <div><span class="font-semibold text-slate-700">Technician:</span> Budi Santoso (ID 9412)</div>
+        <div><span class="font-semibold text-slate-700">Circuit ID:</span> OLT-TB-02/PON4/ONU-18</div>
+      </div>
+      <!-- Acceptance Metrics Table -->
+      <table class="w-full text-left text-xs mb-4 border-collapse relative z-10">
+        <thead>
+          <tr class="bg-slate-200 text-slate-800 font-semibold border-b border-slate-300">
+            <th class="p-1.5">Verification Metric</th>
+            <th class="p-1.5">Benchmark Target</th>
+            <th class="p-1.5">Measured Value</th>
+            <th class="p-1.5">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 font-mono text-[11px]">
+          <tr>
+            <td class="p-1.5">Before / After Photo Proof</td>
+            <td class="p-1.5">2 Required Slots</td>
+            <td class="p-1.5 font-bold text-emerald-700">2 Verified Photos</td>
+            <td class="p-1.5 font-bold text-emerald-700">PASSED</td>
+          </tr>
+          <tr>
+            <td class="p-1.5">Bandwidth Throughput</td>
+            <td class="p-1.5">≥ 100 Mbps Symmetrical</td>
+            <td class="p-1.5 font-bold text-emerald-700">104.2 / 102.8 Mbps</td>
+            <td class="p-1.5 font-bold text-emerald-700">PASSED</td>
+          </tr>
+          <tr>
+            <td class="p-1.5">Latency to Core Gateway</td>
+            <td class="p-1.5">&lt; 5.0 ms</td>
+            <td class="p-1.5 font-bold text-emerald-700">1.8 ms</td>
+            <td class="p-1.5 font-bold text-emerald-700">PASSED</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Dual Endorsement Signature Row with Emblem -->
+      <div class="grid grid-cols-2 gap-6 pt-3 border-t border-slate-300 relative z-10">
+        <div class="text-center">
+          <div class="text-[10px] uppercase font-bold text-slate-600 mb-1 font-mono">Technician Signature</div>
+          <div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50">
+            <span class="italic text-slate-800 text-sm font-serif">Budi Santoso</span>
+          </div>
+          <span class="text-[9px] text-slate-500 font-mono mt-1 block">SHA256: 4f8a...c011</span>
+        </div>
+        <div class="text-center">
+          <div class="text-[10px] uppercase font-bold text-slate-600 mb-1 font-mono">Customer E-Endorsement</div>
+          <div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50">
+            <span class="italic text-blue-900 text-sm font-bold font-serif">R. Hendrawan</span>
+          </div>
+          <span class="text-[9px] text-slate-500 font-mono mt-1 block">STAMP: 2026-05-18T14:32:19Z</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: BAST Verification Architecture Explainer (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col justify-between bg-surface-container-low border border-outline-variant/40 rounded-xl p-space-md">
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="px-2 py-0.5 bg-primary-container text-surface-container-lowest font-label-mono-xs text-label-mono-xs rounded font-bold font-mono">BAST ENGINE • LARAVEL 10</span>
+          <span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold font-mono">HASH_EQUALS VERIFIED</span>
+        </div>
+        <div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded-lg mb-4">
+          <div class="text-outline text-label-mono-xs font-label-mono-xs uppercase mb-1 font-mono">Official Route</div>
+          <div class="font-mono text-primary font-semibold text-xs">/tasks/{task}/bast?token=...</div>
+          <p class="text-body-sm font-body-sm text-on-surface-variant mt-1.5 text-xs leading-relaxed">
+            Automatically compiles subscriber metadata, Before/After photos, consumed materials, and customer e-signature into a tamper-evident PDF.
+          </p>
+        </div>
+        <div class="space-y-2 text-body-sm text-on-surface-variant mb-4 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span>
+            <span>Timing-attack safe token guard (<code class="text-primary font-mono">hash_equals</code>)</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span>
+            <span>Includes Before &amp; After field photo attachments</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span>
+            <span>Lists atomic BOM materials &amp; serial numbers</span>
+          </div>
+        </div>
+        <!-- Live Hash Verification Badge -->
+        <div class="p-2.5 bg-surface-container rounded border border-outline-variant/30 flex items-center justify-between">
+          <div class="text-[11px] font-mono" id="bast-hash-badge">
+            <span class="text-outline">SHA-256: 4F8A902C118B...</span>
+          </div>
+          <button type="button" onclick="verifyBastHash()" class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary text-[10px] font-mono font-semibold rounded border border-primary/30 transition-colors">
+            Verify Hash
+          </button>
+        </div>
+      </div>
+      <div class="pt-3 hairline-t flex gap-2 mt-4">
+        <button class="flex-1 py-2.5 bg-primary-container text-surface-container-lowest font-body-sm font-bold rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/10" onclick="printDemoBast()" type="button">
+          <span class="material-symbols-outlined text-[18px]">print</span>
+          <span>Preview Print Dialog</span>
+        </button>
+        <a class="py-2.5 px-3 bg-surface-container-high border border-outline-variant/40 text-on-surface font-body-sm rounded-lg hover:border-primary/40 flex items-center justify-center font-medium" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">
+          Open PWA
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ================= TAB 4: Atomic BOM Inventory Stock Engine ================= -->
-<div class="hidden" id="sim-panel-4"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between"><div class="flex items-center justify-between pb-3 hairline-b mb-3"><div class="text-title-sm font-title-sm text-on-surface font-semibold">Field Van 04 Mobile Stock (BOM)</div><span class="px-2 py-0.5 bg-surface-container text-primary font-label-mono-xs text-label-mono-xs rounded">ATOMIC ENGINE</span></div><div class="space-y-2 font-label-mono-xs text-label-mono-xs"><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fiber Patchcord SC-UPC 3m</span><span class="text-outline">SKU: FPC-SC-3M • Bin A-02</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-patchcord">24</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('patchcord', 'Fiber Patchcord SC-UPC 3m')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fast Connector SC-UPC 0.9mm</span><span class="text-outline">SKU: FCON-SC-09 • Bin B-01</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-connector">50</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('connector', 'Fast Connector SC-UPC')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">ONT GPON 1GE + 3FE + WiFi</span><span class="text-outline">SKU: ONT-GPON-WIFI • Serial Tracked</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-ont">6</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('ont', 'ONT GPON 1GE+3FE')" type="button">Use -1</button></div></div></div><div class="mt-4 pt-3 hairline-t"><div class="text-outline uppercase text-[10px] font-label-mono-xs mb-1.5">RECENT STOCK TRANSACTIONS</div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded text-label-mono-xs font-label-mono-xs space-y-1 max-h-24 overflow-y-auto" id="bom-log"><div>[09:12:00] Initial Van Stock Loaded (Audited by Warehouse).</div></div></div></div><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/40 rounded p-space-md flex flex-col justify-between font-label-mono-xs text-label-mono-xs"><div><div class="flex items-center justify-between pb-2 hairline-b mb-3"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">database</span><span class="text-on-surface font-semibold">ATOMIC DB TRANSACTION GUARD</span></div><span class="text-secondary text-[10px]">LOCKFORUPDATE()</span></div><p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Every material deduction in <code class="text-primary">TaskMaterialController.php</code> executes inside <code class="text-primary">DB::transaction()</code> with row-level pessimistic locking (<code class="text-primary">lockForUpdate()</code>) to guarantee zero race conditions and automatic stock restoration on item removal.</p><div class="space-y-2 p-3 bg-surface-container-low border border-outline-variant/20 rounded text-[11px]"><div class="text-primary font-semibold">POST /api/tasks/{task}/materials</div><div class="text-on-surface-variant">1. Acquire pessimistic lock on <code>inventory_items</code> row</div><div class="text-on-surface-variant">2. Validate <code>stock &gt;= quantity</code> (else HTTP 422)</div><div class="text-on-surface-variant">3. Decrement stock &amp; commit <code>task_materials</code> record</div><div class="text-secondary mt-1">DELETE restores exact quantity atomically.</div></div></div><div class="mt-4 pt-3 hairline-t flex items-center justify-between gap-2"><button class="px-3 py-2 bg-surface-container-high hover:bg-surface-bright text-on-surface border border-outline-variant/40 rounded font-label-mono-xs" onclick="resetBomStock()" type="button">Reset Demo Stock</button><a class="px-3 py-2 bg-primary text-surface-container-lowest font-medium rounded hover:bg-primary-container text-label-mono-xs" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Test BOM in Live PWA &rarr;</a></div></div></div></div>
+<div class="hidden" id="sim-panel-4">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+    <!-- Left: Warehouse Mobile Van Stock (6 cols) -->
+    <div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-space-md flex flex-col justify-between shadow-2xl">
+      <div>
+        <div class="flex items-center justify-between pb-3 hairline-b mb-3">
+          <div class="text-title-sm font-title-sm text-on-surface font-semibold">Field Van 04 Mobile Stock (BOM)</div>
+          <span class="px-2 py-0.5 bg-surface-container text-primary font-label-mono-xs text-label-mono-xs rounded font-mono font-semibold">ATOMIC ENGINE</span>
+        </div>
+        <div class="space-y-3 font-label-mono-xs text-label-mono-xs">
+          <!-- Item 1: Patchcord -->
+          <div class="p-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg">
+            <div class="flex items-center justify-between mb-1.5">
+              <div>
+                <span class="text-on-surface font-semibold block text-body-sm">Fiber Patchcord SC-UPC 3m</span>
+                <span class="text-outline font-mono text-[10px]">SKU: FPC-SC-3M • Bin A-02</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-headline-md font-headline-md font-bold text-secondary font-mono" id="stock-patchcord">24</span>
+                <button class="px-2.5 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded font-mono text-xs font-semibold border border-primary/30 transition-colors" onclick="deductStock('patchcord', 'Fiber Patchcord SC-UPC 3m')" type="button">Use -1</button>
+              </div>
+            </div>
+            <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
+              <div id="stock-bar-patchcord" class="h-1.5 rounded-full bg-secondary transition-all duration-300" style="width: 80%;"></div>
+            </div>
+          </div>
+          <!-- Item 2: Connector -->
+          <div class="p-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg">
+            <div class="flex items-center justify-between mb-1.5">
+              <div>
+                <span class="text-on-surface font-semibold block text-body-sm">Fast Connector SC-UPC 0.9mm</span>
+                <span class="text-outline font-mono text-[10px]">SKU: FCON-SC-09 • Bin B-01</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-headline-md font-headline-md font-bold text-secondary font-mono" id="stock-connector">50</span>
+                <button class="px-2.5 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded font-mono text-xs font-semibold border border-primary/30 transition-colors" onclick="deductStock('connector', 'Fast Connector SC-UPC')" type="button">Use -1</button>
+              </div>
+            </div>
+            <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
+              <div id="stock-bar-connector" class="h-1.5 rounded-full bg-secondary transition-all duration-300" style="width: 83%;"></div>
+            </div>
+          </div>
+          <!-- Item 3: ONT -->
+          <div class="p-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg">
+            <div class="flex items-center justify-between mb-1.5">
+              <div>
+                <span class="text-on-surface font-semibold block text-body-sm">ONT GPON 1GE + 3FE + WiFi</span>
+                <span class="text-outline font-mono text-[10px]">SKU: ONT-GPON-WIFI • Serial Tracked</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-headline-md font-headline-md font-bold text-secondary font-mono" id="stock-ont">6</span>
+                <button class="px-2.5 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded font-mono text-xs font-semibold border border-primary/30 transition-colors" onclick="deductStock('ont', 'ONT GPON 1GE+3FE')" type="button">Use -1</button>
+              </div>
+            </div>
+            <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
+              <div id="stock-bar-ont" class="h-1.5 rounded-full bg-secondary transition-all duration-300" style="width: 60%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Transaction Log Stream -->
+      <div class="mt-4 pt-3 hairline-t">
+        <div class="flex items-center justify-between text-outline uppercase text-[10px] font-mono mb-1.5">
+          <span>RECENT STOCK TRANSACTIONS</span>
+          <span class="text-primary font-semibold">DB_MUTEX: FREE</span>
+        </div>
+        <div class="p-2 bg-surface-container-low border border-outline-variant/30 rounded-lg text-label-mono-xs font-mono space-y-1 max-h-24 overflow-y-auto" id="bom-log">
+          <div>[09:12:00] Initial Van Stock Loaded (Audited by Warehouse).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: ACID Mutex Architecture & Concurrency Simulation (6 cols) -->
+    <div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-space-md flex flex-col justify-between font-label-mono-xs text-label-mono-xs shadow-2xl">
+      <div>
+        <div class="flex items-center justify-between pb-2 hairline-b mb-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[18px]">database</span>
+            <span class="text-on-surface font-semibold font-mono">ATOMIC DB TRANSACTION GUARD</span>
+          </div>
+          <span class="text-secondary text-[10px] font-mono font-bold">LOCKFORUPDATE()</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mb-3 leading-relaxed text-xs">
+          Every material deduction in <code class="text-primary font-mono">TaskMaterialController.php</code> executes inside <code class="text-primary font-mono">DB::transaction()</code> with row-level pessimistic locking (<code class="text-primary font-mono">lockForUpdate()</code>) to guarantee zero race conditions and automatic stock restoration.
+        </p>
+        <!-- Step Machine Pipeline Visualizer -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-center">
+          <div class="p-1.5 rounded bg-surface-container border border-outline-variant/30">
+            <span class="text-[9px] text-outline block">STEP 1</span>
+            <span class="text-[10px] text-primary font-bold">BEGIN TX</span>
+          </div>
+          <div class="p-1.5 rounded bg-surface-container border border-outline-variant/30">
+            <span class="text-[9px] text-outline block">STEP 2</span>
+            <span class="text-[10px] text-secondary font-bold">ROW LOCK</span>
+          </div>
+          <div class="p-1.5 rounded bg-surface-container border border-outline-variant/30">
+            <span class="text-[9px] text-outline block">STEP 3</span>
+            <span class="text-[10px] text-primary font-bold">QTY AUDIT</span>
+          </div>
+          <div class="p-1.5 rounded bg-surface-container border border-outline-variant/30">
+            <span class="text-[9px] text-outline block">STEP 4</span>
+            <span class="text-[10px] text-secondary font-bold">COMMIT</span>
+          </div>
+        </div>
+        <!-- Concurrency Stress Test Trigger -->
+        <div class="p-3 bg-surface-container-low border border-primary/30 rounded-lg">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-on-surface font-semibold text-xs font-mono">Concurrency Stress Test</span>
+            <span class="text-secondary text-[10px] font-mono">5 CONCURRENT THREADS</span>
+          </div>
+          <p class="text-[11px] text-on-surface-variant font-mono mb-2">Simulate 5 field technicians claiming materials simultaneously to test mutex serialization.</p>
+          <button id="btn-concurrent-acid" onclick="simulateConcurrentDispatches()" type="button" class="w-full py-2 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary border border-primary/40 font-mono text-xs font-bold rounded transition-colors flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">bolt</span>
+            <span>Simulate 5 Concurrent Dispatches</span>
+          </button>
+        </div>
+      </div>
+      <div class="mt-4 pt-3 hairline-t flex items-center justify-between gap-2">
+        <button class="px-3 py-2 bg-surface-container-high hover:bg-surface-bright text-on-surface border border-outline-variant/40 rounded-lg font-label-mono-xs font-mono transition-colors" onclick="resetBomStock()" type="button">Reset Demo Stock</button>
+        <a class="px-3 py-2 bg-primary text-surface-container-lowest font-bold rounded-lg hover:bg-primary-container text-label-mono-xs font-mono transition-colors shadow-sm" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Test BOM in Live PWA &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 </div>
 </section>
@@ -1571,5 +2051,6 @@
 
 
 
-<span id="PING_CONTENT_PUSH_NOTIFICATION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><script src="script.js?v=5.5" defer></script>
-</body><grammarly-desktop-integration data-grammarly-shadow-root="true" style="visibility: visible !important;"></grammarly-desktop-integration></html>
+<script src="script.js?v=5.6" defer></script>
+</body>
+</html>

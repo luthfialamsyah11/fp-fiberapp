@@ -1,14 +1,42 @@
-function switchSimTab(tabIndex) {
+function showSimToast(title, message, icon = 'verified') {
+      let existing = document.getElementById('sim-active-toast');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.id = 'sim-active-toast';
+      toast.className = 'sim-floating-toast';
+      toast.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-primary/20 border border-primary/40 text-primary flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-[18px]">${icon}</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-primary font-mono tracking-tight">${title}</span>
+          <span class="text-[11px] text-slate-300 font-mono">${message}</span>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white ml-2 text-xs font-mono" aria-label="Close">✕</button>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 4200);
+    }
+    window.showSimToast = showSimToast;
+
+    function switchSimTab(tabIndex) {
       for (let i = 1; i <= 4; i++) {
         const btn = document.getElementById(`sim-tab-${i}`);
         const panel = document.getElementById(`sim-panel-${i}`);
         if (!btn || !panel) continue;
         if (i === tabIndex) {
-          btn.className = 'px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all whitespace-nowrap flex-shrink-0';
+          btn.classList.add('active');
           panel.classList.remove('hidden');
           panel.classList.add('block');
         } else {
-          btn.className = 'px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0';
+          btn.classList.remove('active');
           panel.classList.remove('block');
           panel.classList.add('hidden');
         }
@@ -29,25 +57,33 @@ function switchSimTab(tabIndex) {
       const bead1 = document.getElementById('step-bead-1');
       const bead2 = document.getElementById('step-bead-2');
       const bead3 = document.getElementById('step-bead-3');
+      const bar1 = document.getElementById('step-bar-1');
+      const bar2 = document.getElementById('step-bar-2');
       const logText = document.getElementById('stepper-log-text');
 
       if (step === 1 && c1 && bead1 && bead2 && bead3) {
         c1.classList.remove('hidden');
-        bead1.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
-        bead2.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
-        bead3.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        bead1.className = 'w-7 h-7 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)]';
+        bead2.className = 'w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30';
+        bead3.className = 'w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30';
+        if (bar1) bar1.className = 'h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors';
+        if (bar2) bar2.className = 'h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors';
         if (logText) logText.innerText = '> Step 1: Work order acknowledged. Geofence valid.';
       } else if (step === 2 && c2 && bead1 && bead2 && bead3) {
         c2.classList.remove('hidden');
-        bead1.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
-        bead2.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
-        bead3.className = 'w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center';
+        bead1.className = 'w-7 h-7 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(78,222,163,0.5)]';
+        bead2.className = 'w-7 h-7 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)]';
+        bead3.className = 'w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30';
+        if (bar1) bar1.className = 'h-0.5 flex-1 bg-secondary mx-1.5 transition-colors';
+        if (bar2) bar2.className = 'h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors';
         if (logText) logText.innerText = '> Step 2: Web Bluetooth OPM connected. Signal -18.42 dBm captured.';
       } else if (step === 3 && c3 && bead1 && bead2 && bead3) {
         c3.classList.remove('hidden');
-        bead1.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
-        bead2.className = 'w-6 h-6 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
-        bead3.className = 'w-6 h-6 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold';
+        bead1.className = 'w-7 h-7 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(78,222,163,0.5)]';
+        bead2.className = 'w-7 h-7 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(78,222,163,0.5)]';
+        bead3.className = 'w-7 h-7 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)]';
+        if (bar1) bar1.className = 'h-0.5 flex-1 bg-secondary mx-1.5 transition-colors';
+        if (bar2) bar2.className = 'h-0.5 flex-1 bg-secondary mx-1.5 transition-colors';
         if (logText) logText.innerText = '> Step 3: Prompting customer signature for digital BAST endorsement...';
         initSignaturePad();
       }
@@ -60,7 +96,35 @@ function switchSimTab(tabIndex) {
       if (box) box.classList.add('hidden');
       if (cap) cap.classList.remove('hidden');
       if (log) log.innerText = '> Photo taken: EXIF coordinates match (-6.2088, 106.8456). Integrity PASS.';
+      showSimToast('PHOTO EVIDENCE CAPTURED', 'EXIF Geotag: -6.2088° S, 106.8456° E (1.2 MB Encrypted)', 'photo_camera');
     }
+
+    function setOpmWavelength(wl) {
+      const valEl = document.getElementById('opm-val');
+      const wlLabel = document.getElementById('opm-wl-label');
+      const btns = ['1310', '1490', '1550'];
+      btns.forEach(k => {
+        const b = document.getElementById(`opm-btn-${k}`);
+        if (b) {
+          if (k === wl) {
+            b.className = 'px-2.5 py-1 bg-primary/20 border border-primary text-primary font-mono text-xs rounded font-bold';
+          } else {
+            b.className = 'px-2.5 py-1 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-on-surface-variant font-mono text-xs rounded';
+          }
+        }
+      });
+      const presets = {
+        '1310': { val: '-17.92', label: '1310nm UPSTREAM' },
+        '1490': { val: '-18.42', label: '1490nm DWDM DOWNSTREAM' },
+        '1550': { val: '-19.15', label: '1550nm CATV / OVERLAY' }
+      };
+      const p = presets[wl] || presets['1490'];
+      if (valEl) valEl.innerText = `${p.val} dBm`;
+      if (wlLabel) wlLabel.innerText = p.label;
+      const log = document.getElementById('stepper-log-text');
+      if (log) log.innerText = `> Optical Meter calibrated to ${wl}nm. Attenuation ${p.val} dBm. Standard: PASS.`;
+    }
+    window.setOpmWavelength = setOpmWavelength;
 
     let canvas, ctx, isDrawing = false;
     function initSignaturePad() {
@@ -134,7 +198,7 @@ function switchSimTab(tabIndex) {
     }
 
     function completeHandover() {
-      alert('BAST Handover endorsed! Hash generated: SHA256-4F8A902C118B. PDF synced to dispatch ledger.');
+      showSimToast('BAST CRYPTOGRAPHICALLY ENDORSED', 'SHA256: 4F8A902C118B • Synced to Dispatch Ledger', 'verified');
       const log = document.getElementById('stepper-log-text');
       if (log) log.innerText = '> Handover complete. Status changed to RESOLVED. Notification dispatched.';
     }
@@ -206,6 +270,7 @@ function switchSimTab(tabIndex) {
 
     function simulateVehicleArrival() {
       updateRadarProgress(100);
+      showSimToast('VEHICLE ARRIVED AT ONT', 'Geofence proximity confirmed: 4 meters to subscriber terminal.', 'local_shipping');
     }
 
     function resendWhatsAppPing() {
@@ -213,10 +278,42 @@ function switchSimTab(tabIndex) {
       const status = document.getElementById('radar-socket-status');
       if (log) log.innerText = '> WhatsApp template triggered: "Teknisi Budi menuju lokasi Anda..."';
       if (status) status.innerText = 'Webhook Triggered • Click-to-Chat (wa.me) Ready';
+      showSimToast('WHATSAPP DISPATCH PING SENT', 'Subscriber received live GPS tracking URL via Cloud API.', 'sms');
     }
+
+    function verifyBastHash() {
+      const statusEl = document.getElementById('bast-hash-badge');
+      if (!statusEl) return;
+      statusEl.innerHTML = '<span class="text-primary font-mono animate-pulse">Computing SHA-256 Digest...</span>';
+      setTimeout(() => {
+        statusEl.innerHTML = '<span class="text-emerald-700 font-mono font-bold">✓ SHA-256 MATCH VERIFIED (100% Tamper-Evident)</span>';
+        showSimToast('CRYPTOGRAPHIC SEAL VERIFIED', 'Digest 4F8A902C matches immutable ledger entry.', 'verified_user');
+      }, 450);
+    }
+    window.verifyBastHash = verifyBastHash;
 
     function printDemoBast() {
       window.print();
+    }
+
+    const stockCounts = { patchcord: 24, connector: 50, ont: 6 };
+    const stockMax = { patchcord: 30, connector: 60, ont: 10 };
+
+    function updateStockBars() {
+      ['patchcord', 'connector', 'ont'].forEach(k => {
+        const bar = document.getElementById(`stock-bar-${k}`);
+        if (bar) {
+          const pct = Math.max(0, Math.min(100, Math.round((stockCounts[k] / stockMax[k]) * 100)));
+          bar.style.width = `${pct}%`;
+          if (pct <= 20) {
+            bar.className = 'h-1.5 rounded-full transition-all duration-300 bg-red-500';
+          } else if (pct <= 45) {
+            bar.className = 'h-1.5 rounded-full transition-all duration-300 bg-amber-400';
+          } else {
+            bar.className = 'h-1.5 rounded-full transition-all duration-300 bg-secondary';
+          }
+        }
+      });
     }
 
     function resetBomStock() {
@@ -227,30 +324,59 @@ function switchSimTab(tabIndex) {
         const el = document.getElementById('stock-' + k);
         if (el) el.innerText = stockCounts[k];
       });
+      updateStockBars();
       const logBox = document.getElementById('bom-log');
       if (logBox) logBox.innerHTML = '<div>[RESET] Warehouse Van Stock restored to initial baseline.</div>';
+      showSimToast('WAREHOUSE STOCK RESET', 'Field Van 04 inventory restored to initial baseline.', 'restart_alt');
     }
 
-    const stockCounts = { patchcord: 24, connector: 50, ont: 6 };
     function deductStock(itemKey, itemName) {
       if (stockCounts[itemKey] > 0) {
         stockCounts[itemKey]--;
         const badge = document.getElementById(`stock-${itemKey}`);
         if (badge) badge.innerText = stockCounts[itemKey];
+        updateStockBars();
         
         const now = new Date();
         const timeStr = now.toTimeString().split(' ')[0];
         const logBox = document.getElementById('bom-log');
         if (logBox) {
           const entry = document.createElement('div');
-          entry.className = 'text-secondary';
+          entry.className = 'text-secondary font-mono';
           entry.innerHTML = `[${timeStr}] DEDUCT: ${itemName} (-1) &bull; Remainder: ${stockCounts[itemKey]} &bull; WO-88219`;
           logBox.prepend(entry);
         }
       } else {
-        alert('Stock depleted for this item in Mobile Van 04!');
+        showSimToast('STOCK DEPLETED', `No remaining ${itemName} available in Mobile Van 04!`, 'warning');
       }
     }
+
+    function simulateConcurrentDispatches() {
+      const btn = document.getElementById('btn-concurrent-acid');
+      if (btn) btn.disabled = true;
+      const logBox = document.getElementById('bom-log');
+      if (logBox) {
+        const header = document.createElement('div');
+        header.className = 'text-primary font-mono font-bold';
+        header.innerText = `[ACID LOCK] Simulating 5 concurrent field transactions with DB::transaction()...`;
+        logBox.prepend(header);
+      }
+      
+      let count = 0;
+      const timer = setInterval(() => {
+        if (stockCounts.patchcord > 0) {
+          deductStock('patchcord', 'Fiber Patchcord SC-UPC 3m');
+        }
+        count++;
+        if (count >= 5) {
+          clearInterval(timer);
+          if (btn) btn.disabled = false;
+          showSimToast('ACID MUTEX COMMITTED', '5 concurrent transactions executed sequentially without race conditions.', 'database');
+        }
+      }, 180);
+    }
+    window.simulateConcurrentDispatches = simulateConcurrentDispatches;
+
 
     function copyToClipboard(text, btnElement) {
       navigator.clipboard.writeText(text).then(() => {
@@ -593,7 +719,7 @@ window.refreshHeroTelemetry = function() {
 (function() {
   function initMotionPolish() {
     // 1. Add subtle Hero ambient glow wrapper
-    const heroSection = document.querySelector('main > section:first-of-type');
+    const heroSection = document.getElementById('hero') || document.querySelector('main > section:first-of-type');
     if (heroSection) heroSection.classList.add('hero-ambient-glow');
 
     // 2. Add tactile hover lift to portal, sandbox, pricing, and architecture cards

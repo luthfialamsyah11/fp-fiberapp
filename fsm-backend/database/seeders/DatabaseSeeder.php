@@ -8,6 +8,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(FsmRichDataSeeder::class);
+        $this->call([
+            InventorySeeder::class,
+            FsmRichDataSeeder::class,
+        ]);
     }
 }

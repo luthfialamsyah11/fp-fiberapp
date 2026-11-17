@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Task;
+use App\Models\TaskMaterial;
 use App\Models\ProgressUpdate;
 use App\Models\ProofOfWork;
 use App\Models\TechnicianLocation;
@@ -18,6 +19,7 @@ class FsmRichDataSeeder extends Seeder
     {
         // Clear existing FSM data
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        TaskMaterial::truncate();
         ProofOfWork::truncate();
         ProgressUpdate::truncate();
         TechnicianLocation::truncate();

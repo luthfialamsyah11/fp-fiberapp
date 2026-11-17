@@ -295,7 +295,7 @@
               <span>Items Consumed for This Work Order</span>
               <span class="bom-count-pill">{{ task.materials.length }} Items</span>
             </div>
-            <div class="bom-item-row" *ngFor="let m of task.materials">
+            <div class="bom-item-row" *ngFor="let m of task.materials; trackBy: trackByMaterialId">
               <div class="bom-item-info">
                 <div class="bom-item-name">{{ m.inventory_item?.name || m.item_name || 'Material' }}</div>
                 <div class="bom-item-details">
@@ -485,7 +485,7 @@
             <span>Progress History ({{ task.progress_updates.length }})</span>
           </div>
           <div class="timeline-list">
-            <div class="timeline-item" *ngFor="let pu of task.progress_updates">
+            <div class="timeline-item" *ngFor="let pu of task.progress_updates; trackBy: trackByProgressId">
               <div class="tl-dot"></div>
               <div class="tl-content">
                 <div class="tl-header">

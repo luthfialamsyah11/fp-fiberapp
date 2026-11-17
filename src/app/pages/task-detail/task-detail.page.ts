@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
@@ -11,7 +11,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
   styleUrls: ['./task-detail.page.scss'],
   standalone: false,
 })
-export class TaskDetailPage implements OnInit, AfterViewInit {
+export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private navCtrl = inject(NavController);
@@ -85,9 +85,34 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
   isCanvasDrawn = false;
   customerSignerName = '';
   isSavingSignature = false;
+  private canvasListenersAttached = false;
+  private signatureTimeouts: any[] = [];
+
+  // Bound event listener references for leak-free cleanup
+  private touchStartHandler = (e: TouchEvent) => this.handleCanvasTouch(e, 'start');
+  private touchMoveHandler = (e: TouchEvent) => this.handleCanvasTouch(e, 'move');
+  private touchEndHandler = () => this.handleCanvasTouch(null, 'end');
+  private mouseDownHandler = (e: MouseEvent) => this.handleCanvasMouse(e, 'start');
+  private mouseMoveHandler = (e: MouseEvent) => this.handleCanvasMouse(e, 'move');
+  private mouseUpHandler = () => this.handleCanvasMouse(null, 'end');
+  private mouseLeaveHandler = () => this.handleCanvasMouse(null, 'end');
 
   async ngOnInit() {
     this.taskId = Number(this.route.snapshot.paramMap.get('id'));
+  }
+
+  ngOnDestroy() {
+    this.removeCanvasListeners();
+    this.signatureTimeouts.forEach(t => clearTimeout(t));
+    this.signatureTimeouts = [];
+  }
+
+  trackByMaterialId(index: number, item: any): number {
+    return item?.id || index;
+  }
+
+  trackByProgressId(index: number, item: any): number {
+    return item?.id || index;
   }
 
   async ionViewWillEnter() {
@@ -96,7 +121,8 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    setTimeout(() => this.initSignatureCanvas(), 500);
+    const t = setTimeout(() => this.initSignatureCanvas(), 500);
+    this.signatureTimeouts.push(t);
   }
 
   async loadTask() {
@@ -122,7 +148,8 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
         this.customerSignerName = this.task.customer_name;
       }
 
-      setTimeout(() => this.initSignatureCanvas(), 300);
+      const t = setTimeout(() => this.initSignatureCanvas(), 300);
+      this.signatureTimeouts.push(t);
     } catch (e) {
       this.showToast('Failed to load task details', 'danger');
     } finally {
@@ -380,16 +407,37 @@ export class TaskDetailPage implements OnInit, AfterViewInit {
     this.canvasCtx.lineJoin = 'round';
     this.canvasCtx.strokeStyle = '#0284c7';
 
-    // Touch events for Mobile
-    canvas.addEventListener('touchstart', (e) => this.handleCanvasTouch(e, 'start'), { passive: false });
-    canvas.addEventListener('touchmove', (e) => this.handleCanvasTouch(e, 'move'), { passive: false });
-    canvas.addEventListener('touchend', () => this.handleCanvasTouch(null, 'end'), { passive: false });
+    // Only attach event listeners once to prevent duplicate handler accumulation
+    if (!this.canvasListenersAttached) {
+      // Touch events for Mobile
+      canvas.addEventListener('touchstart', this.touchStartHandler, { passive: false });
+      canvas.addEventListener('touchmove', this.touchMoveHandler, { passive: false });
+      canvas.addEventListener('touchend', this.touchEndHandler, { passive: false });
 
-    // Mouse events for Desktop/Emulators
-    canvas.addEventListener('mousedown', (e) => this.handleCanvasMouse(e, 'start'));
-    canvas.addEventListener('mousemove', (e) => this.handleCanvasMouse(e, 'move'));
-    canvas.addEventListener('mouseup', () => this.handleCanvasMouse(null, 'end'));
-    canvas.addEventListener('mouseleave', () => this.handleCanvasMouse(null, 'end'));
+      // Mouse events for Desktop/Emulators
+      canvas.addEventListener('mousedown', this.mouseDownHandler);
+      canvas.addEventListener('mousemove', this.mouseMoveHandler);
+      canvas.addEventListener('mouseup', this.mouseUpHandler);
+      canvas.addEventListener('mouseleave', this.mouseLeaveHandler);
+
+      this.canvasListenersAttached = true;
+    }
+  }
+
+  private removeCanvasListeners() {
+    if (!this.signatureCanvasRef?.nativeElement || !this.canvasListenersAttached) return;
+    const canvas = this.signatureCanvasRef.nativeElement;
+
+    canvas.removeEventListener('touchstart', this.touchStartHandler);
+    canvas.removeEventListener('touchmove', this.touchMoveHandler);
+    canvas.removeEventListener('touchend', this.touchEndHandler);
+
+    canvas.removeEventListener('mousedown', this.mouseDownHandler);
+    canvas.removeEventListener('mousemove', this.mouseMoveHandler);
+    canvas.removeEventListener('mouseup', this.mouseUpHandler);
+    canvas.removeEventListener('mouseleave', this.mouseLeaveHandler);
+
+    this.canvasListenersAttached = false;
   }
 
   private handleCanvasTouch(e: TouchEvent | null, type: 'start' | 'move' | 'end') {

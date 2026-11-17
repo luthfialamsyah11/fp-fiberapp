@@ -51,6 +51,9 @@ jobs:
           log-level: verbose
           dry-run: false
 
+      - name: ⏳ Cooldown FTP Connection
+        run: sleep 5
+
       # 5. Deploy Compiled Frontend PWA to app/ (public_html/app)
       - name: 🚀 Deploy PWA Client
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -63,6 +66,9 @@ jobs:
           server-dir: ${{ vars.FTP_APP_DIR || 'app/' }}
           dry-run: false
 
+      - name: ⏳ Cooldown FTP Connection
+        run: sleep 5
+
       # 6. Deploy Admin Public bootstrap assets to admin/ (public_html/admin)
       - name: 🚀 Deploy Admin Public
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -74,6 +80,9 @@ jobs:
           local-dir: ./admin-public/
           server-dir: ${{ vars.FTP_ADMIN_DIR || 'admin/' }}
           dry-run: false
+
+      - name: ⏳ Cooldown FTP Connection
+        run: sleep 5
 
       # 7. Deploy Backend Core Laravel to laravel-core/ (public_html/laravel-core)
       - name: 🚀 Deploy Laravel Backend Core

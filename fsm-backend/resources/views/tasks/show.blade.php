@@ -19,7 +19,7 @@
         </a>
     </div>
     <div class="flex items-center gap-2">
-        <a href="{{ route('admin.tasks.bast', $task->id) }}" target="_blank" class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-100 transition-all flex items-center gap-1.5 shadow-sm">
+        <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-100 transition-all flex items-center gap-1.5 shadow-sm">
             <ion-icon name="print-outline"></ion-icon> Print Official BAST (PDF)
         </a>
         <a href="{{ route('admin.tasks.edit', $task->id) }}" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition-all flex items-center gap-1.5">
@@ -287,7 +287,7 @@
                             Ditandatangani: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d M Y H:i') : '-' }} WIB
                         </div>
                         <div class="pt-2">
-                            <a href="{{ route('admin.tasks.bast', $task->id) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+                            <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                                 <ion-icon name="document-text-outline"></ion-icon> Lihat Lembar BAST Lengkap
                             </a>
                         </div>

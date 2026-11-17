@@ -113,7 +113,7 @@ class TaskController extends Controller
 
     public function show(Task $task)
     {
-        $task->load(['technician', 'technician.latestLocation', 'proofs', 'progressUpdates']);
+        $task->load(['technician', 'technician.latestLocation', 'proofs', 'progressUpdates', 'materials.inventoryItem']);
         return view('tasks.show', compact('task'));
     }
 

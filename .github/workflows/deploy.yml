@@ -91,7 +91,5 @@ jobs:
             **/tests/**
             **/.git*
             **/.env*
-            **/composer.lock
-            **/package-lock.json
             **/laravel.zip
             **/resources.zip

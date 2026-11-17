@@ -337,21 +337,42 @@ function switchSimTab(tabIndex) {
       }
     }
 
+    window.switchSimTab = switchSimTab;
+    window.goToStep = goToStep;
+    window.simulatePhotoCapture = simulatePhotoCapture;
+    window.initSignaturePad = initSignaturePad;
+    window.clearSignature = clearSignature;
+    window.autoSignature = autoSignature;
+    window.completeHandover = completeHandover;
+    window.updateRadarProgress = updateRadarProgress;
+    window.toggleRadarSimulation = toggleRadarSimulation;
+    window.simulateVehicleArrival = simulateVehicleArrival;
+    window.resendWhatsAppPing = resendWhatsAppPing;
+    window.printDemoBast = printDemoBast;
+    window.resetBomStock = resetBomStock;
+    window.deductStock = deductStock;
+    window.copyToClipboard = copyToClipboard;
+    window.runDomainScan = runDomainScan;
+    window.triggerFastAudit = triggerFastAudit;
+
     window.addEventListener('DOMContentLoaded', () => {
       initSignaturePad();
       startRadarTimer();
     });
 
 (function() {
+  function initMobileDrawer() {
     const mobileBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenu = document.getElementById('mobile-nav-menu');
+    const mobileCloseBtn = document.getElementById('mobile-sidebar-close');
+    const mobileDrawer = document.getElementById('mobile-sidebar-drawer') || document.getElementById('mobile-nav-menu');
     const mobileBackdrop = document.getElementById('mobile-menu-backdrop');
     const mobileIcon = document.getElementById('mobile-menu-icon');
 
+    if (!mobileBtn || !mobileDrawer) return;
+
     function openMobileDrawer() {
-      if (!mobileMenu) return;
-      mobileMenu.classList.remove('hidden', 'drawer-closed');
-      mobileMenu.classList.add('drawer-open');
+      mobileDrawer.classList.remove('hidden', 'drawer-closed', 'translate-x-full');
+      mobileDrawer.classList.add('drawer-open', 'translate-x-0');
       if (mobileBackdrop) {
         mobileBackdrop.classList.remove('hidden');
         requestAnimationFrame(() => {
@@ -359,56 +380,74 @@ function switchSimTab(tabIndex) {
           mobileBackdrop.classList.add('opacity-100');
         });
       }
-      if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'true');
+      mobileBtn.setAttribute('aria-expanded', 'true');
       if (mobileIcon) mobileIcon.textContent = 'close';
       document.body.style.overflow = 'hidden';
     }
 
     function closeMobileDrawer() {
-      if (!mobileMenu) return;
-      mobileMenu.classList.remove('drawer-open');
-      mobileMenu.classList.add('drawer-closed');
+      mobileDrawer.classList.remove('drawer-open', 'translate-x-0');
+      mobileDrawer.classList.add('drawer-closed', 'translate-x-full');
       if (mobileBackdrop) {
         mobileBackdrop.classList.remove('opacity-100');
         mobileBackdrop.classList.add('opacity-0');
-        setTimeout(() => mobileBackdrop.classList.add('hidden'), 220);
+        setTimeout(() => {
+          if (!mobileDrawer.classList.contains('drawer-open')) {
+            mobileBackdrop.classList.add('hidden');
+          }
+        }, 300);
       }
-      if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
+      mobileBtn.setAttribute('aria-expanded', 'false');
       if (mobileIcon) mobileIcon.textContent = 'menu';
       document.body.style.overflow = '';
-      setTimeout(() => {
-        if (mobileMenu.classList.contains('drawer-closed')) {
-          mobileMenu.classList.add('hidden');
-        }
-      }, 250);
     }
 
-    if (mobileBtn && mobileMenu) {
-      mobileBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isOpen = mobileMenu.classList.contains('drawer-open');
-        if (isOpen) {
-          closeMobileDrawer();
-        } else {
-          openMobileDrawer();
-        }
-      });
-
-      if (mobileBackdrop) {
-        mobileBackdrop.addEventListener('click', closeMobileDrawer);
+    mobileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = mobileDrawer.classList.contains('drawer-open');
+      if (isOpen) {
+        closeMobileDrawer();
+      } else {
+        openMobileDrawer();
       }
+    });
 
-      mobileMenu.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', closeMobileDrawer);
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && mobileMenu.classList.contains('drawer-open')) {
-          closeMobileDrawer();
-        }
+    if (mobileCloseBtn) {
+      mobileCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeMobileDrawer();
       });
     }
-  })();
+
+    if (mobileBackdrop) {
+      mobileBackdrop.addEventListener('click', closeMobileDrawer);
+    }
+
+    mobileDrawer.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        closeMobileDrawer();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileDrawer.classList.contains('drawer-open')) {
+        closeMobileDrawer();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024 && mobileDrawer.classList.contains('drawer-open')) {
+        closeMobileDrawer();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileDrawer);
+  } else {
+    initMobileDrawer();
+  }
+})();
 
 // =========================================================================
 // BILINGUAL ENGINE (EN / ID), SCROLLSPY & LIVE HERO TELEMETRY
@@ -458,11 +497,15 @@ function switchSimTab(tabIndex) {
   let currentLang = localStorage.getItem('benteng_lang') || 'en';
   const langBtn = document.getElementById('lang-toggle-btn');
   const langLabel = document.getElementById('lang-label');
+  const langBtnSidebar = document.getElementById('lang-toggle-btn-sidebar');
+  const langLabelSidebar = document.getElementById('lang-label-sidebar');
 
   function applyLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('benteng_lang', lang);
-    if (langLabel) langLabel.textContent = lang === 'id' ? 'ID / EN' : 'EN / ID';
+    const labelText = lang === 'id' ? 'ID / EN' : 'EN / ID';
+    if (langLabel) langLabel.textContent = labelText;
+    if (langLabelSidebar) langLabelSidebar.textContent = labelText;
     const dict = translations[lang] || translations.en;
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
@@ -470,11 +513,12 @@ function switchSimTab(tabIndex) {
     });
   }
 
-  if (langBtn) {
-    langBtn.addEventListener('click', () => {
-      applyLanguage(currentLang === 'en' ? 'id' : 'en');
-    });
+  function toggleLanguage() {
+    applyLanguage(currentLang === 'en' ? 'id' : 'en');
   }
+
+  if (langBtn) langBtn.addEventListener('click', toggleLanguage);
+  if (langBtnSidebar) langBtnSidebar.addEventListener('click', toggleLanguage);
   applyLanguage(currentLang);
 
   // Scrollspy for top desktop navbar

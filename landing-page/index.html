@@ -11,33 +11,35 @@
 <meta property="og:url" content="https://bentengsiber.com/"/>
 <link rel="stylesheet" href="app.css?v=5.5"/>
 </head>
-<body class="bg-surface-container-lowest text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col font-body-sm">
+<body id="top" class="bg-surface-container-lowest text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col font-body-sm overflow-x-hidden">
 <!-- =====================================================================
        1. Top Asset Announcement Strip (#sale-announcement)
   ====================================================================== -->
-<div class="w-full bg-surface-container-low hairline-b py-1.5 px-space-md flex items-center justify-between z-50 text-on-surface-variant font-label-mono-xs text-label-mono-xs" id="sale-announcement">
-<div class="flex items-center gap-space-sm mx-auto md:mx-0">
+<div class="w-full bg-surface-container-low hairline-b py-2 px-4 sm:px-6 lg:px-8 text-on-surface-variant font-label-mono-xs text-label-mono-xs" id="sale-announcement">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-2.5 mx-auto md:mx-0">
 <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green inline-block"></span>
 <span class="text-on-surface tracking-wider uppercase font-semibold text-primary">COMMERCIAL NOTICE:</span>
 <span class="hidden sm:inline text-on-surface-variant">Complete Intellectual Property, BAST Engine &amp; Domain [bentengsiber.com] Available for Immediate Acquisition.</span>
 <span class="sm:hidden text-on-surface-variant">IP &amp; Domain Buyout Available.</span>
 </div>
-<div class="hidden md:flex items-center gap-space-md">
+<div class="hidden md:flex items-center gap-4">
 <span class="text-outline">Escrow Verified • BAST v4.2 Certified</span>
 <a class="text-primary hover:text-white flex items-center gap-1 transition-colors duration-150" href="#acquisition">
         Inquire Price &amp; Terms →
       </a>
 </div>
 </div>
+</div>
 <!-- =====================================================================
        2. Top Navigation Bar (Shared Component: TopNavBar Anchor)
   ====================================================================== -->
-<header class="top-nav docked full-width top-0 sticky z-50 bg-surface-container-lowest hairline-b shadow-none transition-all">
-<div class="flex justify-between items-center w-full px-space-lg md:px-margin-desktop h-14 max-w-full">
+<header class="top-nav docked full-width top-0 sticky z-40 bg-surface-container-lowest/95 backdrop-blur-xl hairline-b shadow-none transition-all">
+<div class="max-w-7xl mx-auto flex justify-between items-center w-full px-4 sm:px-6 lg:px-8 h-16">
 <!-- Brand Lockup -->
-<a class="flex items-center gap-2 group" href="index.html">
-<div class="w-7 h-7 bg-surface-container-high border border-outline-variant/40 rounded flex items-center justify-center text-primary group-hover:border-primary/50 transition-colors">
-<span class="material-symbols-outlined text-[18px]">shield_with_house</span>
+<a class="flex items-center gap-2.5 group" href="index.html">
+<div class="w-8 h-8 bg-surface-container-high border border-outline-variant/40 rounded flex items-center justify-center text-primary group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-[20px]">shield_with_house</span>
 </div>
 <div class="flex flex-col">
 <span class="text-headline-md font-headline-md font-semibold text-primary tracking-tight leading-none">Benteng Siber</span>
@@ -45,7 +47,7 @@
 </div>
 </a>
 <!-- Desktop Navigation Links (6 Exact Items) -->
-<nav class="hidden lg:flex items-center space-x-6">
+<nav class="hidden lg:flex items-center space-x-7">
 <a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" data-i18n="nav.portals" href="#portals">Portals</a>
 <a class="text-primary font-medium border-b border-primary pb-0.5" data-i18n="nav.simulator" href="#simulator">Live Simulator</a>
 <a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" data-i18n="nav.sandbox" href="#demo">Live Sandbox</a>
@@ -54,95 +56,141 @@
 <a class="text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150" data-i18n="nav.architecture" href="#architecture">Architecture</a>
 </nav>
 <!-- Trailing Action Cluster -->
-<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-2.5 sm:gap-3">
 <!-- Bilingual Switcher (EN / ID) -->
-<button class="flex items-center gap-1 px-2 py-1 bg-surface-container border border-outline-variant/40 rounded text-on-surface-variant hover:text-primary font-label-mono-xs text-label-mono-xs transition-colors" id="lang-toggle-btn">
-<span class="material-symbols-outlined text-[14px]">translate</span>
+<button class="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-container border border-outline-variant/40 rounded-lg text-on-surface-variant hover:text-primary font-label-mono-xs text-label-mono-xs transition-colors" id="lang-toggle-btn" type="button" aria-label="Toggle Language">
+<span class="material-symbols-outlined text-[15px]">translate</span>
 <span id="lang-label">EN / ID</span>
 </button>
-<!-- Trailing Icon Actions -->
-<a class="p-1.5 text-on-surface-variant hover:text-primary transition-colors hidden sm:flex" href="#telemetry-terminal" title="Terminal Console">
-<span class="material-symbols-outlined text-[18px]">terminal</span>
-</a>
-<a class="p-1.5 text-on-surface-variant hover:text-secondary transition-colors hidden sm:flex" href="#scanner-spotlight" title="Security State">
-<span class="material-symbols-outlined text-[18px]">shield_with_house</span>
-</a>
 <!-- Sandbox Secondary Action Button -->
-<a class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high border border-outline-variant/50 hover:border-primary/50 text-primary rounded font-label-mono-sm text-label-mono-sm transition-all duration-150" href="#demo">
+<a class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high border border-outline-variant/50 hover:border-primary/50 text-primary rounded-lg font-label-mono-sm text-label-mono-sm transition-all duration-150" href="#demo">
 <span>Deploy Sandbox</span>
 <span class="material-symbols-outlined text-[14px]">terminal</span>
 </a>
 <!-- Primary CTA: Acquire Asset -->
-<a class="inline-flex items-center gap-1 px-3.5 py-1.5 bg-white text-surface-container-lowest hover:bg-slate-200 font-body-sm font-medium rounded transition-all duration-150 active:scale-[0.99] shadow-sm" href="#acquisition">
+<a class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-surface-container-lowest hover:bg-slate-200 font-body-sm font-semibold rounded-lg transition-all duration-150 active:scale-[0.99] shadow-sm" href="#acquisition">
 <span>Acquire Asset</span>
 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
 </a>
 <!-- Mobile Menu Toggle (44x44px Touch Target) -->
-<button class="lg:hidden touch-target-44 w-11 h-11 bg-surface-container border border-outline-variant/40 rounded-lg text-on-surface-variant hover:text-primary transition-all active:scale-90" id="mobile-menu-btn" type="button" aria-label="Toggle Menu" aria-expanded="false">
+<button class="lg:hidden touch-target-44 w-11 h-11 bg-surface-container border border-outline-variant/40 rounded-lg text-on-surface-variant hover:text-primary transition-all active:scale-90 flex items-center justify-center" id="mobile-menu-btn" type="button" aria-label="Toggle Navigation Sidebar" aria-expanded="false">
 <span class="material-symbols-outlined text-[22px]" id="mobile-menu-icon">menu</span>
 </button>
 </div>
 </div>
+</header>
 
 <!-- Mobile Drawer Backdrop Overlay -->
-<div id="mobile-menu-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-200 lg:hidden"></div>
+<div id="mobile-menu-backdrop" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
-<!-- Mobile Navigation Drawer Sheet -->
-<div class="fixed top-14 left-0 right-0 z-50 lg:hidden bg-surface-container-lowest/95 backdrop-blur-2xl border-b border-outline-variant/40 shadow-2xl px-space-md py-4 space-y-3 drawer-closed hidden" id="mobile-nav-menu">
-  <!-- System Status Banner inside Drawer -->
-  <div class="flex items-center justify-between pb-2 hairline-b text-label-mono-xs font-label-mono-xs text-outline">
-    <div class="flex items-center gap-1.5 text-secondary">
-      <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
-      <span class="font-semibold">CORE ONLINE • v4.2</span>
+<!-- Mobile Navigation Slide-Over Sidebar Drawer -->
+<aside id="mobile-sidebar-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 max-w-[85vw] bg-surface-container-lowest/98 backdrop-blur-2xl border-l border-outline-variant/30 shadow-2xl flex flex-col justify-between translate-x-full lg:hidden drawer-closed" aria-label="Mobile Navigation Sidebar">
+  <!-- 1. Drawer Header -->
+  <div class="flex items-center justify-between px-5 py-4 hairline-b bg-surface-container-low/50">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 bg-surface-container-high border border-outline-variant/40 rounded flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined text-[18px]">shield_with_house</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-title-sm font-semibold text-primary leading-tight">Benteng Siber</span>
+        <span class="text-[10px] font-mono text-outline uppercase tracking-wider">FiberOps • v4.2</span>
+      </div>
     </div>
-    <span class="text-outline uppercase">Navigation Drawer</span>
+    <button id="mobile-sidebar-close" type="button" class="touch-target-44 w-10 h-10 rounded-lg bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-white hover:border-primary/50 flex items-center justify-center transition-all" aria-label="Close Navigation Sidebar">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
   </div>
 
-  <!-- Links Grid -->
-  <div class="grid grid-cols-2 gap-2">
-    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.portals" href="#portals">
-      <span class="material-symbols-outlined text-[18px] text-primary">gate</span>
-      <span>Portals</span>
-    </a>
-    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container-high border border-primary/40 text-body-sm text-primary font-medium transition-colors" data-i18n="nav.simulator" href="#simulator">
-      <span class="material-symbols-outlined text-[18px] text-primary">play_circle</span>
-      <span>Live Simulator</span>
-    </a>
-    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.sandbox" href="#demo">
-      <span class="material-symbols-outlined text-[18px] text-secondary">terminal</span>
-      <span>Live Sandbox</span>
-    </a>
-    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.pricing" href="#acquisition">
-      <span class="material-symbols-outlined text-[18px] text-tertiary">monetization_on</span>
-      <span>Acquire Asset</span>
-    </a>
-    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.scanner" href="#scanner-spotlight">
-      <span class="material-symbols-outlined text-[18px] text-primary">verified_user</span>
-      <span>Scanner</span>
-    </a>
-    <a class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface-variant hover:text-primary transition-colors" data-i18n="nav.architecture" href="#architecture">
-      <span class="material-symbols-outlined text-[18px] text-outline">account_tree</span>
-      <span>Architecture</span>
-    </a>
+  <!-- 2. Scrollable Body -->
+  <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+    <!-- Status Badge -->
+    <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container/60 border border-outline-variant/30 text-label-mono-xs font-mono">
+      <div class="flex items-center gap-2 text-secondary">
+        <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
+        <span class="font-semibold">CORE ONLINE • SLA 99.98%</span>
+      </div>
+      <span class="text-outline uppercase text-[10px]">ID-JKT01</span>
+    </div>
+
+    <!-- Navigation Links List -->
+    <div class="space-y-1.5">
+      <div class="text-[10px] font-mono uppercase tracking-widest text-outline px-1 mb-2">Main Navigation</div>
+      <a class="flex items-center justify-between p-3 rounded-lg bg-surface-container/40 border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface hover:text-primary transition-all group" data-i18n="nav.portals" href="#portals">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[18px] text-primary group-hover:scale-110 transition-transform">gate</span>
+          <span class="font-medium">Portals</span>
+        </div>
+        <span class="material-symbols-outlined text-[16px] text-outline group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+      </a>
+      <a class="flex items-center justify-between p-3 rounded-lg bg-surface-container/40 border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface hover:text-primary transition-all group" data-i18n="nav.simulator" href="#simulator">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[18px] text-primary group-hover:scale-110 transition-transform">play_circle</span>
+          <span class="font-medium">Live Simulator</span>
+        </div>
+        <span class="material-symbols-outlined text-[16px] text-outline group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+      </a>
+      <a class="flex items-center justify-between p-3 rounded-lg bg-surface-container/40 border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface hover:text-primary transition-all group" data-i18n="nav.sandbox" href="#demo">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[18px] text-secondary group-hover:scale-110 transition-transform">terminal</span>
+          <span class="font-medium">Live Sandbox</span>
+        </div>
+        <span class="material-symbols-outlined text-[16px] text-outline group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+      </a>
+      <a class="flex items-center justify-between p-3 rounded-lg bg-surface-container-high/80 border border-primary/40 text-body-sm text-primary transition-all group" data-i18n="nav.pricing" href="#acquisition">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[18px] text-tertiary group-hover:scale-110 transition-transform">monetization_on</span>
+          <span class="font-semibold">Acquire Asset ($5,850)</span>
+        </div>
+        <span class="material-symbols-outlined text-[16px] text-primary group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+      </a>
+      <a class="flex items-center justify-between p-3 rounded-lg bg-surface-container/40 border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface hover:text-primary transition-all group" data-i18n="nav.scanner" href="#scanner-spotlight">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[18px] text-primary group-hover:scale-110 transition-transform">verified_user</span>
+          <span class="font-medium">Scanner</span>
+        </div>
+        <span class="material-symbols-outlined text-[16px] text-outline group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+      </a>
+      <a class="flex items-center justify-between p-3 rounded-lg bg-surface-container/40 border border-outline-variant/20 hover:border-primary/50 text-body-sm text-on-surface hover:text-primary transition-all group" data-i18n="nav.architecture" href="#architecture">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[18px] text-outline group-hover:scale-110 transition-transform">account_tree</span>
+          <span class="font-medium">Architecture</span>
+        </div>
+        <span class="material-symbols-outlined text-[16px] text-outline group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+      </a>
+    </div>
+
+    <!-- Live Portal Access -->
+    <div class="space-y-2 pt-2 hairline-t">
+      <div class="text-[10px] font-mono uppercase tracking-widest text-outline px-1">Live Applications</div>
+      <a class="w-full py-3 px-4 min-h-[46px] bg-primary-container text-surface-container-lowest rounded-lg font-mono text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 active:scale-[0.98] transition-all" href="https://admin.bentengsiber.com/" target="_blank" rel="noopener noreferrer">
+        <span class="material-symbols-outlined text-[18px]">shield_person</span>
+        <span>Admin Command Center &rarr;</span>
+      </a>
+      <a class="w-full py-3 px-4 min-h-[46px] bg-surface-container border border-outline-variant/60 hover:border-secondary/60 text-secondary rounded-lg font-mono text-xs font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">
+        <span class="material-symbols-outlined text-[18px]">devices</span>
+        <span>Technician Mobile PWA &rarr;</span>
+      </a>
+    </div>
+
+    <!-- Language & Regional Controls -->
+    <div class="pt-2 hairline-t flex items-center justify-between px-1 text-xs text-outline">
+      <span>Language Preference</span>
+      <button type="button" id="lang-toggle-btn-sidebar" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/50 text-on-surface hover:text-primary transition-colors">
+        <span class="material-symbols-outlined text-[14px]">translate</span>
+        <span id="lang-label-sidebar" class="font-mono text-[11px] font-semibold">EN / ID</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Direct Portal Launch Cards in Drawer -->
-  <div class="pt-2 hairline-t flex flex-col gap-2">
-    <a class="w-full text-center py-2.5 min-h-[44px] bg-surface-container-high border border-outline-variant/50 hover:border-secondary/60 text-secondary rounded-lg font-label-mono-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98]" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">
-      <span class="material-symbols-outlined text-[18px]">devices</span>
-      <span class="font-semibold">Launch Technician PWA (Demo) &rarr;</span>
-    </a>
-    <a class="w-full text-center py-2.5 min-h-[44px] bg-primary-container text-surface-container-lowest rounded-lg font-label-mono-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 transition-all active:scale-[0.98]" href="https://admin.bentengsiber.com/" target="_blank" rel="noopener noreferrer">
-      <span class="material-symbols-outlined text-[18px]">shield_person</span>
-      <span>Open Admin Command Center &rarr;</span>
-    </a>
+  <!-- 3. Drawer Footer -->
+  <div class="p-4 hairline-t bg-surface-container-low/40 text-center text-outline text-[11px] font-mono">
+    <span>Jakarta Node (ID-JKT01) • Edge Engine 4.2.1-SEC</span>
   </div>
-</div>
-</header>
+</aside>
 <!-- =====================================================================
        3. SECTION 1: HERO & INTEGRATED COMMAND DASHBOARD
   ====================================================================== -->
-<section class="relative w-full pt-12 pb-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto flex flex-col items-center">
+<section id="hero" class="relative w-full pt-14 pb-20 lg:pt-16 lg:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center">
 <!-- Hero Tactical Badging -->
 <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container/90 border border-outline-variant/40 backdrop-blur-md mb-6 shadow-sm">
 <span class="w-2 h-2 rounded-full bg-secondary pulse-bead-green"></span>
@@ -176,7 +224,7 @@
 </a>
 </div>
 <!-- Bento Dashboard Component (Floor 1 Paneling) -->
-<div class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-md md:p-space-lg shadow-2xl relative overflow-hidden">
+<div class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-5 sm:p-6 lg:p-8 shadow-2xl relative overflow-hidden">
 <!-- Top Instrument Header -->
 <div class="flex flex-wrap items-center justify-between pb-space-md hairline-b gap-3 mb-space-md">
 <div class="flex items-center gap-space-md">
@@ -200,11 +248,11 @@
 </div>
 </div>
 <!-- Bento Grid: 3 Columns -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 <!-- Left: Telemetry Sparklines (4 cols) -->
-<div class="lg:col-span-4 flex flex-col gap-space-md">
+<div class="lg:col-span-4 flex flex-col gap-4 sm:gap-6">
 <!-- Card 1 -->
-<div class="bg-surface-container-low border border-outline-variant/20 p-space-md rounded">
+<div class="bg-surface-container-low border border-outline-variant/20 p-4 sm:p-5 rounded-lg">
 <div class="flex justify-between items-start mb-2">
 <div>
 <div class="text-label-mono-xs font-label-mono-xs text-outline uppercase">ODN Optical Loss Average</div>
@@ -229,7 +277,7 @@
 </div>
 </div>
 <!-- Card 2 -->
-<div class="bg-surface-container-low border border-outline-variant/20 p-space-md rounded">
+<div class="bg-surface-container-low border border-outline-variant/20 p-4 sm:p-5 rounded-lg">
 <div class="flex justify-between items-start mb-2">
 <div>
 <div class="text-label-mono-xs font-label-mono-xs text-outline uppercase">Active Technician Fleet Dispatches</div>
@@ -255,7 +303,7 @@
 </div>
 </div>
 <!-- Center: Primary Cyan Spline Chart & Telemetry (5 cols) -->
-<div class="lg:col-span-5 bg-surface-container-low border border-outline-variant/20 p-space-md rounded flex flex-col justify-between">
+<div class="lg:col-span-5 bg-surface-container-low border border-outline-variant/20 p-4 sm:p-5 rounded-lg flex flex-col justify-between">
 <div class="flex justify-between items-center mb-2">
 <div>
 <span class="text-label-mono-xs font-label-mono-xs text-outline uppercase">FTTx Signal Quality &amp; Zero-Trust Handshakes</span>
@@ -310,7 +358,7 @@
 </div>
 </div>
 <!-- Right: Live Monospace Decision Log Stream (3 cols) -->
-<div class="lg:col-span-3 bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded flex flex-col font-label-mono-xs text-label-mono-xs" id="telemetry-terminal">
+<div class="lg:col-span-3 bg-surface-container-lowest border border-outline-variant/30 p-4 sm:p-5 rounded-lg flex flex-col font-label-mono-xs text-label-mono-xs" id="telemetry-terminal">
 <div class="flex items-center justify-between pb-2 hairline-b mb-2">
 <span class="text-outline uppercase font-semibold">DECISION STREAM • LIVE</span>
 <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
@@ -343,7 +391,7 @@
 <!-- =====================================================================
        4. SECTION 2: ECOSYSTEM GATEWAY PORTALS (FIG 0.1 - 0.4)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="portals">
+<section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="portals">
 <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
 <div>
 <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">FIG 0.1 — FIG 0.4 MODULE BLUEPRINTS</div>
@@ -354,7 +402,7 @@
       </p>
 </div>
 <!-- 4-Card Bento Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
 <!-- FIG 0.1 Clientzone Admin -->
 <div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between hover:border-primary/50 transition-colors group">
 <div>
@@ -455,7 +503,7 @@
 <!-- =====================================================================
      4.5. SECTION 2B: SMOOTH INTERACTIVE ECOSYSTEM CAROUSEL (#ecosystem-carousel)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="ecosystem-carousel">
+<section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="ecosystem-carousel">
   <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
     <div>
       <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">REAL-WORLD WORKFLOWS • 6 CORE SCREENS</div>
@@ -630,7 +678,7 @@
 <!-- =====================================================================
        5. SECTION 3: INTERACTIVE LIVE PRODUCT SIMULATOR HUB (#simulator)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="simulator">
+<section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="simulator">
 <div class="text-center max-w-3xl mx-auto mb-10">
 <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">TACTICAL EMULATOR • LIVE SANDBOX</div>
 <h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight" data-i18n="sim.title">Interactive Product Simulator Hub</h2>
@@ -641,7 +689,7 @@
 <!-- Simulator Container (Obsidian Surface 1) -->
 <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden shadow-2xl">
 <!-- Tab Headers (Smooth Horizontal Scroll on Mobile) -->
-<div class="flex items-center bg-surface-container-low hairline-b px-space-md pt-2 gap-2 text-label-mono-sm font-label-mono-sm overflow-x-auto no-scrollbar scroll-smooth"><button class="px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-1" onclick="switchSimTab(1)"><span class="material-symbols-outlined text-[16px]">touch_app</span><span>1. Technician Mobile Stepper</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-2" onclick="switchSimTab(2)"><span class="material-symbols-outlined text-[16px]">local_shipping</span><span>2. Customer Live Uber Radar &amp; GPS</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-3" onclick="switchSimTab(3)"><span class="material-symbols-outlined text-[16px]">verified</span><span>3. Official BAST PDF Certificate</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-4" onclick="switchSimTab(4)"><span class="material-symbols-outlined text-[16px]">inventory_2</span><span>4. Atomic BOM &amp; Inventory Tracker</span></button></div>
+<div class="flex items-center bg-surface-container-low hairline-b px-4 sm:px-6 pt-2 gap-2 text-label-mono-sm font-label-mono-sm overflow-x-auto no-scrollbar scroll-smooth"><button class="px-4 py-2.5 bg-surface-container-lowest border-t-2 border-primary text-primary font-medium flex items-center gap-2 rounded-t transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-1" onclick="switchSimTab(1)"><span class="material-symbols-outlined text-[16px]">touch_app</span><span>1. Technician Mobile Stepper</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-2" onclick="switchSimTab(2)"><span class="material-symbols-outlined text-[16px]">local_shipping</span><span>2. Customer Live Uber Radar &amp; GPS</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-3" onclick="switchSimTab(3)"><span class="material-symbols-outlined text-[16px]">verified</span><span>3. Official BAST PDF Certificate</span></button><button class="px-4 py-2.5 text-on-surface-variant hover:text-on-surface flex items-center gap-2 border-t-2 border-transparent transition-all whitespace-nowrap flex-shrink-0" id="sim-tab-4" onclick="switchSimTab(4)"><span class="material-symbols-outlined text-[16px]">inventory_2</span><span>4. Atomic BOM &amp; Inventory Tracker</span></button></div>
 <!-- Tab Content Canvas -->
 <div class="p-space-lg md:p-space-xl">
 <!-- ================= TAB 1: Technician Mobile Stepper ================= -->
@@ -777,14 +825,14 @@
 <!-- ================= TAB 3: Automated BAST PDF Certificate ================= -->
 <div class="hidden" id="sim-panel-3"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-7 bg-white text-slate-900 rounded p-6 shadow-2xl font-body-sm border border-slate-300"><div class="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4"><div><div class="font-headline-md text-slate-950 font-bold uppercase tracking-tight text-lg">BERITA ACARA SERAH TERIMA (BAST)</div><div class="text-[11px] text-slate-600 font-label-mono-xs">FIBER INSTALLATION &amp; ACCEPTANCE CERTIFICATE</div></div><div class="text-right"><div class="text-xs font-bold text-slate-900" id="bast-doc-no">NO: BAST/BS/2025/1109</div><div class="text-[10px] text-slate-500 font-label-mono-xs" id="bast-timestamp">TIMESTAMP: 2025-05-18 14:32:00 UTC</div></div></div><div class="grid grid-cols-2 gap-3 text-xs mb-4 p-2.5 bg-slate-50 rounded border border-slate-200"><div><span class="font-semibold text-slate-700">Customer:</span> PT Nusantara Graha Data</div><div><span class="font-semibold text-slate-700">Account ID:</span> BNT-782910-JKT</div><div><span class="font-semibold text-slate-700">Technician:</span> Budi Santoso (ID 9412)</div><div><span class="font-semibold text-slate-700">Circuit ID:</span> OLT-TB-02/PON4/ONU-18</div></div><table class="w-full text-left text-xs mb-4 border-collapse"><thead><tr class="bg-slate-200 text-slate-800 font-semibold border-b border-slate-300"><th class="p-1.5">Verification Metric</th><th class="p-1.5">Benchmark Target</th><th class="p-1.5">Measured Value</th><th class="p-1.5">Status</th></tr></thead><tbody class="divide-y divide-slate-200 font-label-mono-xs text-[11px]"><tr><td class="p-1.5">Before / After Photo Proof</td><td class="p-1.5">2 Required Slots</td><td class="p-1.5 font-bold text-emerald-700">2 Verified Photos</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr><tr><td class="p-1.5">Bandwidth Throughput</td><td class="p-1.5">≥ 100 Mbps Symmetrical</td><td class="p-1.5 font-bold text-emerald-700">104.2 / 102.8 Mbps</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr><tr><td class="p-1.5">Latency to Core Gateway</td><td class="p-1.5">&lt; 5.0 ms</td><td class="p-1.5 font-bold text-emerald-700">1.8 ms</td><td class="p-1.5 font-bold text-emerald-700">PASSED</td></tr></tbody></table><div class="grid grid-cols-2 gap-6 pt-2 border-t border-slate-300"><div class="text-center"><div class="text-[10px] uppercase font-bold text-slate-600 mb-1">Technician Signature</div><div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50"><span class="font-serif italic text-slate-800 text-sm">Budi Santoso</span></div><span class="text-[9px] text-slate-500 font-label-mono-xs mt-1 block">SHA256: 4f8a...c011</span></div><div class="text-center"><div class="text-[10px] uppercase font-bold text-slate-600 mb-1">Customer E-Endorsement</div><div class="h-12 border border-slate-300 rounded flex items-center justify-center bg-slate-50"><span class="font-serif italic text-blue-900 text-sm font-bold">R. Hendrawan</span></div><span class="text-[9px] text-slate-500 font-label-mono-xs mt-1 block">STAMP: 2025-05-18T14:32:19Z</span></div></div></div><div class="lg:col-span-5 flex flex-col justify-between bg-surface-container-low border border-outline-variant/30 rounded p-space-md"><div><div class="flex items-center justify-between mb-3"><span class="px-2 py-0.5 bg-primary-container text-surface-container-lowest font-label-mono-xs text-label-mono-xs rounded font-semibold">BAST ENGINE • LARAVEL 10</span><span class="px-2 py-0.5 bg-secondary/10 border border-secondary/30 text-secondary font-label-mono-xs text-label-mono-xs rounded font-bold">HASH_EQUALS VERIFIED</span></div><div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded mb-4"><div class="text-outline text-label-mono-xs font-label-mono-xs uppercase mb-1">Official Route</div><div class="font-label-mono-sm text-primary font-semibold">/tasks/{task}/bast?token=...</div><p class="text-body-sm font-body-sm text-on-surface-variant mt-1.5">Automatically compiles customer metadata, Before/After photo proofs, BOM materials consumed, and HTML5 customer e-signature into a printable certificate.</p></div><div class="space-y-2 text-body-sm text-on-surface-variant mb-4"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span><span>Timing-attack safe token guard (<code class="text-primary">hash_equals</code>)</span></div><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span><span>Includes Before &amp; After field photo attachments</span></div><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[16px]">check_circle</span><span>Lists atomic BOM materials &amp; serial numbers</span></div></div></div><div class="pt-3 hairline-t flex gap-2"><button class="flex-1 py-2.5 bg-primary-container text-surface-container-lowest font-body-sm font-medium rounded hover:bg-primary transition-colors flex items-center justify-center gap-1.5" onclick="printDemoBast()" type="button"><span class="material-symbols-outlined text-[18px]">print</span><span>Preview Print Dialog</span></button><a class="py-2.5 px-3 bg-surface-container-high border border-outline-variant/40 text-on-surface font-body-sm rounded hover:border-primary/40 flex items-center justify-center" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Open PWA</a></div></div></div></div>
 <!-- ================= TAB 4: Atomic BOM Inventory Stock Engine ================= -->
-<div class="hidden" id="sim-panel-4"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between"><div class="flex items-center justify-between pb-3 hairline-b mb-3"><div class="text-title-sm font-title-sm text-on-surface font-semibold">Field Van 04 Mobile Stock (BOM)</div><span class="px-2 py-0.5 bg-surface-container text-primary font-label-mono-xs text-label-mono-xs rounded">ATOMIC ENGINE</span></div><div class="space-y-2 font-label-mono-xs text-label-mono-xs"><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fiber Patchcord SC-UPC 3m</span><span class="text-outline">SKU: FPC-SC-3M • Bin A-02</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-patchcord">24</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('patchcord', 'Fiber Patchcord SC-UPC 3m')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fast Connector SC-UPC 0.9mm</span><span class="text-outline">SKU: FCON-SC-09 • Bin B-01</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-connector">50</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('connector', 'Fast Connector SC-UPC')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">ONT GPON 1GE + 3FE + WiFi</span><span class="text-outline">SKU: ONT-GPON-WIFI • Serial Tracked</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-ont">6</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('ont', 'ONT GPON 1GE+3FE')" type="button">Use -1</button></div></div></div><div class="mt-4 pt-3 hairline-t"><div class="text-outline uppercase text-[10px] font-label-mono-xs mb-1.5">RECENT STOCK TRANSACTIONS</div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded text-label-mono-xs font-label-mono-xs space-y-1 max-h-24 overflow-y-auto" id="bom-log"><div>[09:12:00] Initial Van Stock Loaded (Audited by Warehouse).</div></div></div></div><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/40 rounded p-space-md flex flex-col justify-between font-label-mono-xs text-label-mono-xs"><div><div class="flex items-center justify-between pb-2 hairline-b mb-3"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">database</span><span class="text-on-surface font-semibold">ATOMIC DB TRANSACTION GUARD</span></div><span class="text-secondary text-[10px]">LOCKFORUPDATE()</span></div><p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Every material deduction in <code class="text-primary">TaskMaterialController.php</code> executes inside <code class="text-primary">DB::transaction()</code> with row-level pessimistic locking (<code class="text-primary">lockForUpdate()</code>) to guarantee zero race conditions and automatic stock restoration on item removal.</p><div class="space-y-2 p-3 bg-surface-container-low border border-outline-variant/20 rounded text-[11px]"><div class="text-primary font-semibold">POST /api/tasks/{task}/materials</div><div class="text-on-surface-variant">1. Acquire pessimistic lock on <code>inventory_items</code> row</div><div class="text-on-surface-variant">2. Validate <code>stock &gt;= quantity</code> (else HTTP 422)</div><div class="text-on-surface-variant">3. Decrement stock &amp; commit <code>task_materials</code> record</div><div class="text-secondary mt-1">DELETE restores exact quantity atomically.</div></div></div><div class="mt-4 pt-3 hairline-t flex items-center justify-between gap-2"><button class="px-3 py-2 bg-surface-container-high hover:bg-surface-bright text-on-surface border border-outline-variant/40 rounded font-label-mono-xs" onclick="resetBomStock()" type="button">Reset Demo Stock</button><a class="px-3 py-2 bg-primary text-surface-container-lowest font-medium rounded hover:bg-primary-container text-label-mono-xs" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Test BOM in Live PWA &rarr;</a></div></div></div>
+<div class="hidden" id="sim-panel-4"><div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg"><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/30 rounded p-space-md flex flex-col justify-between"><div class="flex items-center justify-between pb-3 hairline-b mb-3"><div class="text-title-sm font-title-sm text-on-surface font-semibold">Field Van 04 Mobile Stock (BOM)</div><span class="px-2 py-0.5 bg-surface-container text-primary font-label-mono-xs text-label-mono-xs rounded">ATOMIC ENGINE</span></div><div class="space-y-2 font-label-mono-xs text-label-mono-xs"><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fiber Patchcord SC-UPC 3m</span><span class="text-outline">SKU: FPC-SC-3M • Bin A-02</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-patchcord">24</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('patchcord', 'Fiber Patchcord SC-UPC 3m')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">Fast Connector SC-UPC 0.9mm</span><span class="text-outline">SKU: FCON-SC-09 • Bin B-01</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-connector">50</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('connector', 'Fast Connector SC-UPC')" type="button">Use -1</button></div></div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between"><div><span class="text-on-surface font-semibold block text-body-sm">ONT GPON 1GE + 3FE + WiFi</span><span class="text-outline">SKU: ONT-GPON-WIFI • Serial Tracked</span></div><div class="flex items-center gap-3"><span class="text-headline-md font-headline-md font-bold text-secondary" id="stock-ont">6</span><button class="px-2 py-1 bg-surface-container-high hover:bg-primary hover:text-surface-container-lowest text-primary rounded border border-primary/30 transition-colors" onclick="deductStock('ont', 'ONT GPON 1GE+3FE')" type="button">Use -1</button></div></div></div><div class="mt-4 pt-3 hairline-t"><div class="text-outline uppercase text-[10px] font-label-mono-xs mb-1.5">RECENT STOCK TRANSACTIONS</div><div class="p-2 bg-surface-container-low border border-outline-variant/20 rounded text-label-mono-xs font-label-mono-xs space-y-1 max-h-24 overflow-y-auto" id="bom-log"><div>[09:12:00] Initial Van Stock Loaded (Audited by Warehouse).</div></div></div></div><div class="lg:col-span-6 bg-surface-container-lowest border border-outline-variant/40 rounded p-space-md flex flex-col justify-between font-label-mono-xs text-label-mono-xs"><div><div class="flex items-center justify-between pb-2 hairline-b mb-3"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">database</span><span class="text-on-surface font-semibold">ATOMIC DB TRANSACTION GUARD</span></div><span class="text-secondary text-[10px]">LOCKFORUPDATE()</span></div><p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Every material deduction in <code class="text-primary">TaskMaterialController.php</code> executes inside <code class="text-primary">DB::transaction()</code> with row-level pessimistic locking (<code class="text-primary">lockForUpdate()</code>) to guarantee zero race conditions and automatic stock restoration on item removal.</p><div class="space-y-2 p-3 bg-surface-container-low border border-outline-variant/20 rounded text-[11px]"><div class="text-primary font-semibold">POST /api/tasks/{task}/materials</div><div class="text-on-surface-variant">1. Acquire pessimistic lock on <code>inventory_items</code> row</div><div class="text-on-surface-variant">2. Validate <code>stock &gt;= quantity</code> (else HTTP 422)</div><div class="text-on-surface-variant">3. Decrement stock &amp; commit <code>task_materials</code> record</div><div class="text-secondary mt-1">DELETE restores exact quantity atomically.</div></div></div><div class="mt-4 pt-3 hairline-t flex items-center justify-between gap-2"><button class="px-3 py-2 bg-surface-container-high hover:bg-surface-bright text-on-surface border border-outline-variant/40 rounded font-label-mono-xs" onclick="resetBomStock()" type="button">Reset Demo Stock</button><a class="px-3 py-2 bg-primary text-surface-container-lowest font-medium rounded hover:bg-primary-container text-label-mono-xs" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Test BOM in Live PWA &rarr;</a></div></div></div></div>
 </div>
 </div>
 </section>
 <!-- =====================================================================
        6. SECTION 4: LIVE SANDBOX & DEMO CREDENTIALS (#demo)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="demo">
+<section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="demo">
 <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
 <div>
 <div class="font-label-mono-xs text-label-mono-xs text-secondary uppercase tracking-widest mb-1">EVALUATION ENVIRONMENT</div>
@@ -903,7 +951,7 @@
 <!-- =====================================================================
        7. SECTION 5: COMMERCIAL ACQUISITION & LICENSING HUB (#acquisition)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="acquisition">
+<section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="acquisition">
 <div class="text-center max-w-3xl mx-auto mb-12">
 <div class="font-label-mono-xs text-label-mono-xs text-tertiary uppercase tracking-widest mb-1">M&amp;A ASSET SALE • COMMERCIAL TERMS</div>
 <h2 class="text-headline-lg font-headline-lg text-on-surface tracking-tight" data-i18n="pricing.title">Commercial Acquisition &amp; Licensing Hub</h2>
@@ -912,7 +960,7 @@
       </p>
 </div>
 <!-- Commercial Bento Pricing Cards -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-12">
 <!-- Card 1: Full Asset Buyout ($5,850) -->
 <div class="lg:col-span-7 bg-surface-container-lowest border-2 border-primary/50 rounded-lg p-space-lg flex flex-col justify-between relative shadow-[0_0_35px_-5px_rgba(34,211,238,0.15)]">
 <!-- Amber / Cyan Badge (Securely Inside Container) -->
@@ -1054,7 +1102,7 @@
 <!-- =====================================================================
        8. SECTION 6: INTERACTIVE DOMAIN SECURITY POSTURE AUDIT (#scanner-spotlight)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="scanner-spotlight">
+<section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="scanner-spotlight">
 <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
 <div>
 <div class="font-label-mono-xs text-label-mono-xs text-primary uppercase tracking-widest mb-1">PERIMETER AUDIT TOOL • RFC 9116</div>
@@ -1087,7 +1135,7 @@
 </div>
 </div>
 <!-- Report Card Output (Default Benchmark: Grade A 98/100) -->
-<div class="bg-surface-container-low border border-outline-variant/20 rounded p-space-md md:p-space-lg" id="audit-report-card">
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-5 sm:p-6 lg:p-8" id="audit-report-card">
 <div class="flex flex-wrap items-center justify-between gap-4 pb-space-md hairline-b mb-space-md">
 <div class="flex items-center gap-4">
 <!-- Score Ring -->
@@ -1109,7 +1157,7 @@
 </div>
 </div>
 <!-- 4 Detailed Metric Tiles -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 <div class="p-3 bg-surface-container-lowest border border-outline-variant/30 rounded">
 <div class="text-label-mono-xs font-label-mono-xs text-outline mb-1">TLS ENCRYPTION</div>
 <div class="text-title-sm font-title-sm text-secondary font-semibold">TLS 1.3 Only</div>
@@ -1137,32 +1185,32 @@
 <!-- =====================================================================
        9. SECTION 7: TELEMETRY STRIP, ARCHITECTURE & EDITORIAL BLOCKS (#architecture)
   ====================================================================== -->
-<section class="w-full py-16 px-space-md md:px-margin-desktop max-w-7xl mx-auto hairline-t scroll-mt-20" id="architecture">
+<section class="w-full py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto hairline-t scroll-mt-20" id="architecture">
 <!-- Telemetry Metrics Strip -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-space-md mb-16">
-<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-16">
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-5 rounded-xl">
 <span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">TOTAL ONT HANDSHAKES</span>
 <div class="text-headline-lg font-headline-lg font-bold text-primary mt-1">1.48M+</div>
 <span class="text-[11px] font-label-mono-xs text-secondary mt-1 block">↑ 14.2% Month-over-Month</span>
 </div>
-<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-5 rounded-xl">
 <span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">MEAN FIELD CLOSURE TIME</span>
 <div class="text-headline-lg font-headline-lg font-bold text-on-surface mt-1">28.4m</div>
 <span class="text-[11px] font-label-mono-xs text-secondary mt-1 block">↓ 42% vs Manual Paper BAST</span>
 </div>
-<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-5 rounded-xl">
 <span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">CONTRACTOR FRAUD RATE</span>
 <div class="text-headline-lg font-headline-lg font-bold text-secondary mt-1">0.00%</div>
 <span class="text-[11px] font-label-mono-xs text-outline mt-1 block">Hardware GPS + BLE Binding</span>
 </div>
-<div class="bg-surface-container-lowest border border-outline-variant/30 p-space-md rounded">
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-5 rounded-xl">
 <span class="text-label-mono-xs font-label-mono-xs text-outline uppercase block">DISPATCH CONCURRENCY</span>
 <div class="text-headline-lg font-headline-lg font-bold text-tertiary mt-1">10,000+</div>
 <span class="text-[11px] font-label-mono-xs text-outline mt-1 block">Parallel Field Nodes Supported</span>
 </div>
 </div>
 <!-- Architecture Flow Schematic -->
-<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg mb-16">
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-5 sm:p-7 lg:p-8 mb-16">
 <div class="flex items-center justify-between pb-3 hairline-b mb-6">
 <div>
 <span class="font-label-mono-xs text-label-mono-xs text-primary uppercase">SCHEMATIC 01 • END-TO-END TELEMETRY ROUTING</span>
@@ -1252,7 +1300,7 @@
        10. SECTION 8: WORLD-CLASS ENTERPRISE OBSIDIAN FOOTER
   ====================================================================== -->
 <footer class="w-full bg-surface-container-lowest border-t border-outline-variant/30 mt-auto pt-16 pb-14 text-on-surface">
-  <div class="w-full px-space-lg md:px-margin-desktop max-w-7xl mx-auto">
+  <div class="w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
     <!-- Top Grid: 4 Enterprise Columns -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 hairline-b">
       

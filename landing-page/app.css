@@ -732,6 +732,7 @@
 
 @media (min-width: 640px) {
   .sm\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .sm\:text-right { text-align: right; }
 }
 
 /* 3. Offscreen & Hidden GPU Animation Containment (/audit--perf) */

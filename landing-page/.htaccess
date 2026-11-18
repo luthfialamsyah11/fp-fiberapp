@@ -21,9 +21,18 @@
 
     # CSS & JS assets: revalidate on update
     <FilesMatch "\.(css|js)$">
-        Header set Cache-Control "no-cache, must-revalidate"
-        Header set Pragma "no-cache"
+        Header set Cache-Control "public, max-age=86400, must-revalidate"
     </FilesMatch>
+
+    # Static Icons & Images: cache for 30 days
+    <FilesMatch "\.(png|ico|jpg|jpeg|svg|webp|woff2)$">
+        Header set Cache-Control "public, max-age=2592000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# ─── 2B. GZIP / DEFLATE PAYLOAD COMPRESSION (/audit--perf) ──────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json image/svg+xml
 </IfModule>
 
 # ─── 3. DEFENSIVE ACCESS CONTROLS (BLOCK SENSITIVE DIRECTORIES & FILES) ───────

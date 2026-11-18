@@ -126,7 +126,7 @@ function showSimToast(title, message, icon = 'verified') {
     }
     window.setOpmWavelength = setOpmWavelength;
 
-    let canvas, ctx, isDrawing = false;
+    let canvas, ctx, isDrawing = false, hasSignature = false;
     function initSignaturePad() {
       canvas = document.getElementById('signature-canvas');
       if (!canvas) return;
@@ -134,6 +134,9 @@ function showSimToast(title, message, icon = 'verified') {
       ctx.strokeStyle = '#22d3ee';
       ctx.lineWidth = 2.5;
       ctx.lineCap = 'round';
+
+      if (canvas.dataset.bound === '1') return;
+      canvas.dataset.bound = '1';
 
       function getCanvasPos(clientX, clientY) {
         const rect = canvas.getBoundingClientRect();
@@ -145,47 +148,52 @@ function showSimToast(title, message, icon = 'verified') {
         };
       }
 
-      canvas.onmousedown = (e) => {
+      canvas.addEventListener('mousedown', (e) => {
         isDrawing = true;
+        hasSignature = true;
         ctx.beginPath();
         const pos = getCanvasPos(e.clientX, e.clientY);
         ctx.moveTo(pos.x, pos.y);
-      };
-      canvas.onmousemove = (e) => {
+      });
+      canvas.addEventListener('mousemove', (e) => {
         if (!isDrawing) return;
         const pos = getCanvasPos(e.clientX, e.clientY);
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-      };
-      window.onmouseup = () => { isDrawing = false; };
+      });
+      window.addEventListener('mouseup', () => { isDrawing = false; });
 
-      canvas.ontouchstart = (e) => {
+      canvas.addEventListener('touchstart', (e) => {
         isDrawing = true;
+        hasSignature = true;
         ctx.beginPath();
         const touch = e.touches[0];
         const pos = getCanvasPos(touch.clientX, touch.clientY);
         ctx.moveTo(pos.x, pos.y);
         e.preventDefault();
-      };
-      canvas.ontouchmove = (e) => {
+      }, { passive: false });
+      canvas.addEventListener('touchmove', (e) => {
         if (!isDrawing) return;
         const touch = e.touches[0];
         const pos = getCanvasPos(touch.clientX, touch.clientY);
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
         e.preventDefault();
-      };
-      canvas.ontouchend = () => { isDrawing = false; };
+      }, { passive: false });
+      canvas.addEventListener('touchend', () => { isDrawing = false; });
     }
 
     function clearSignature() {
       if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSignature = false;
     }
 
     function autoSignature() {
+      if (!ctx || !canvas) initSignaturePad();
       if (!ctx || !canvas) return;
       clearSignature();
+      hasSignature = true;
       ctx.beginPath();
       ctx.moveTo(40, 60);
       ctx.bezierCurveTo(70, 20, 90, 80, 120, 40);
@@ -198,6 +206,12 @@ function showSimToast(title, message, icon = 'verified') {
     }
 
     function completeHandover() {
+      if (!hasSignature) {
+        autoSignature();
+      }
+      const nowIso = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+      const tsEl = document.getElementById('bast-timestamp');
+      if (tsEl) tsEl.innerText = `TIMESTAMP: ${nowIso}`;
       showSimToast('BAST CRYPTOGRAPHICALLY ENDORSED', 'SHA256: 4F8A902C118B • Synced to Dispatch Ledger', 'verified');
       const log = document.getElementById('stepper-log-text');
       if (log) log.innerText = '> Handover complete. Status changed to RESOLVED. Notification dispatched.';
@@ -257,9 +271,10 @@ function showSimToast(title, message, icon = 'verified') {
 
     function startRadarTimer() {
       if (radarAutoInterval) clearInterval(radarAutoInterval);
+      if (!document.getElementById('sim-panel-2')) return;
       radarAutoInterval = setInterval(() => {
         const panel2 = document.getElementById('sim-panel-2');
-        if (document.hidden || (panel2 && panel2.classList.contains('hidden'))) return;
+        if (document.hidden || !panel2 || panel2.classList.contains('hidden')) return;
         if (radarProgress < 100) {
           updateRadarProgress(radarProgress + 5);
         } else {
@@ -379,21 +394,63 @@ function showSimToast(title, message, icon = 'verified') {
 
 
     function copyToClipboard(text, btnElement) {
-      navigator.clipboard.writeText(text).then(() => {
-        const originalText = btnElement.innerText;
+      if (!btnElement) return;
+      if (!btnElement.dataset.origLabel) {
+        btnElement.dataset.origLabel = btnElement.innerText;
+      }
+      const applyCopiedUI = () => {
+        if (btnElement._copyTimer) clearTimeout(btnElement._copyTimer);
         btnElement.innerText = 'Copied!';
         btnElement.classList.add('bg-primary', 'text-surface-container-lowest');
-        setTimeout(() => {
-          btnElement.innerText = originalText;
+        btnElement._copyTimer = setTimeout(() => {
+          btnElement.innerText = btnElement.dataset.origLabel || 'Copy';
           btnElement.classList.remove('bg-primary', 'text-surface-container-lowest');
+          btnElement._copyTimer = null;
         }, 1800);
-      });
+      };
+
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text).then(applyCopiedUI).catch(() => {
+          fallbackCopy(text, applyCopiedUI);
+        });
+      } else {
+        fallbackCopy(text, applyCopiedUI);
+      }
+    }
+
+    function fallbackCopy(text, onDone) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+      ta.remove();
+      if (typeof onDone === 'function') onDone();
+    }
+
+    let activeScanInterval = null;
+    let activeScanTimeout = null;
+
+    function sanitizeHostname(rawInput) {
+      const cleaned = String(rawInput || '')
+        .trim()
+        .replace(/^https?:\/\//i, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0]
+        .replace(/[^a-zA-Z0-9.-]/g, '')
+        .toLowerCase();
+      return cleaned && cleaned.includes('.') ? cleaned : 'bentengsiber.com';
     }
 
     function runDomainScan(e) {
       if (e) e.preventDefault();
       const inputEl = document.getElementById('target-domain-input');
-      const domain = (inputEl && inputEl.value.trim()) || 'bentengsiber.com';
+      const domain = sanitizeHostname(inputEl ? inputEl.value : 'bentengsiber.com');
+      if (inputEl) inputEl.value = domain;
+
       const progressBox = document.getElementById('scan-progress-box');
       const progressBar = document.getElementById('scan-progress-bar');
       const stageText = document.getElementById('scan-stage-text');
@@ -401,34 +458,58 @@ function showSimToast(title, message, icon = 'verified') {
       const reportCard = document.getElementById('audit-report-card');
       const submitBtn = document.getElementById('audit-submit-btn');
 
+      if (activeScanInterval) clearInterval(activeScanInterval);
+      if (activeScanTimeout) clearTimeout(activeScanTimeout);
+
       if (progressBox) progressBox.classList.remove('hidden');
+      if (progressBar) progressBar.style.width = '0%';
+      if (percentText) percentText.innerText = '0%';
       if (reportCard) reportCard.classList.add('opacity-40');
       if (submitBtn) submitBtn.disabled = true;
 
       let progress = 0;
       const stages = [
-        'Resolving DNSSEC & authoritative NS...',
-        'Handshaking TLS 1.3 cipher negotiation...',
-        'Querying /.well-known/security.txt (RFC 9116)...',
-        'Inspecting CSP, HSTS, and X-Content headers...',
-        'Compiling vulnerability index & generating score...'
+        `Resolving DNSSEC & authoritative NS for ${domain}...`,
+        `Handshaking TLS 1.3 cipher negotiation on ${domain}...`,
+        `Querying https://${domain}/.well-known/security.txt (RFC 9116)...`,
+        `Inspecting CSP, HSTS, and X-Content headers for ${domain}...`,
+        `Compiling vulnerability index & generating score for ${domain}...`
       ];
 
-      const interval = setInterval(() => {
+      activeScanInterval = setInterval(() => {
         progress += 20;
         if (progressBar) progressBar.style.width = `${progress}%`;
         if (percentText) percentText.innerText = `${progress}%`;
         if (stageText) stageText.innerText = stages[Math.min(Math.floor(progress / 20) - 1, stages.length - 1)];
 
         if (progress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
+          clearInterval(activeScanInterval);
+          activeScanInterval = null;
+          activeScanTimeout = setTimeout(() => {
             if (progressBox) progressBox.classList.add('hidden');
             if (reportCard) reportCard.classList.remove('opacity-40');
             if (submitBtn) submitBtn.disabled = false;
-          }, 400);
+
+            const domainLabel = document.getElementById('audit-domain-label');
+            const scoreVal = document.getElementById('audit-score-val');
+            const gradeBadge = document.getElementById('audit-grade-badge');
+            const nodeMeta = document.getElementById('audit-node-meta');
+
+            const isBenteng = domain === 'bentengsiber.com' || domain.endsWith('.bentengsiber.com');
+            const hashSeed = Array.from(domain).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+            const score = isBenteng ? 98 : (91 + (hashSeed % 7));
+            const grade = score >= 95 ? 'GRADE A+' : 'GRADE A';
+
+            if (domainLabel) domainLabel.textContent = domain;
+            if (scoreVal) scoreVal.textContent = String(score);
+            if (gradeBadge) gradeBadge.textContent = grade;
+            if (nodeMeta) {
+              nodeMeta.textContent = `Scanned ${domain} via Edge Node JKT-02 • TLS 1.3 Strict-Transport-Security Valid`;
+            }
+            showSimToast('PERIMETER AUDIT COMPLETE', `${domain} scored ${score}/100 (${grade}) via passive RFC 9116 probe.`, 'security_update_good');
+          }, 350);
         }
-      }, 300);
+      }, 280);
     }
 
     function triggerFastAudit() {
@@ -438,23 +519,6 @@ function showSimToast(title, message, icon = 'verified') {
         runDomainScan();
       }
     }
-
-    function dismissTestingDock() {
-      const dock = document.getElementById('testing-dock');
-      if (dock) dock.style.display = 'none';
-    }
-
-    function toggleTestingDock(expand) {
-      const dock = document.getElementById('testing-dock');
-      if (!dock) return;
-      if (typeof expand === 'boolean') {
-        dock.classList.toggle('dock-collapsed', !expand);
-      } else {
-        dock.classList.toggle('dock-collapsed');
-      }
-    }
-    window.dismissTestingDock = dismissTestingDock;
-    window.toggleTestingDock = toggleTestingDock;
 
     function clearHeroLog() {
       const log = document.getElementById('hero-log-stream');
@@ -490,7 +554,7 @@ function showSimToast(title, message, icon = 'verified') {
   function initMobileDrawer() {
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const mobileCloseBtn = document.getElementById('mobile-sidebar-close');
-    const mobileDrawer = document.getElementById('mobile-sidebar-drawer') || document.getElementById('mobile-nav-menu');
+    const mobileDrawer = document.getElementById('mobile-sidebar-drawer');
     const mobileBackdrop = document.getElementById('mobile-menu-backdrop');
     const mobileIcon = document.getElementById('mobile-menu-icon');
 
@@ -618,6 +682,16 @@ function showSimToast(title, message, icon = 'verified') {
   }
 
   applyLanguage();
+
+  [document.getElementById('lang-toggle-btn'), document.getElementById('lang-toggle-btn-sidebar')].forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      applyLanguage();
+      if (typeof window.showSimToast === 'function') {
+        window.showSimToast('GLOBAL ENGLISH EDITION', 'Interface locked to International English (EN-GLOBAL) for enterprise evaluation.', 'translate');
+      }
+    });
+  });
 
   // Scrollspy for top desktop navbar
   const navLinks = document.querySelectorAll('header nav a[href^="#"]');
@@ -762,23 +836,49 @@ window.refreshHeroTelemetry = function() {
 // =========================================================================
 (function() {
   function initCarouselAndMotion() {
-    // 1. Mouse-Tracking Radial Spotlight (60 FPS rAF throttled)
+    // 1. Mouse-Tracking Radial Spotlight (60 FPS rAF throttled, zero-reflow cached bounds)
     document.querySelectorAll('.card-interactive').forEach(card => {
       let rafPending = false;
+      let cachedRect = null;
+      card.addEventListener('mouseenter', () => {
+        cachedRect = card.getBoundingClientRect();
+      }, { passive: true });
+      card.addEventListener('mouseleave', () => {
+        cachedRect = null;
+      }, { passive: true });
       card.addEventListener('mousemove', (e) => {
         if (rafPending) return;
+        const clientX = e.clientX;
+        const clientY = e.clientY;
         rafPending = true;
         requestAnimationFrame(() => {
-          const rect = card.getBoundingClientRect();
-          card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-          card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+          const rect = cachedRect || card.getBoundingClientRect();
+          card.style.setProperty('--mouse-x', `${clientX - rect.left}px`);
+          card.style.setProperty('--mouse-y', `${clientY - rect.top}px`);
           rafPending = false;
         });
-      });
+      }, { passive: true });
     });
 
-    // 2. Smooth Count-Up for Telemetry Numbers (Hero ODN & Uptime)
-    const countTargets = document.querySelectorAll('#telemetry .font-headline-lg, #acquisition .text-display-lg');
+    // 1B. Secondary Page Ambient Mouse Glow (#mouse-glow in playstore.html & privacy-policy.html)
+    const mouseGlow = document.getElementById('mouse-glow');
+    if (mouseGlow) {
+      let glowRaf = false;
+      window.addEventListener('mousemove', (e) => {
+        if (glowRaf) return;
+        const x = e.clientX;
+        const y = e.clientY;
+        glowRaf = true;
+        requestAnimationFrame(() => {
+          document.documentElement.style.setProperty('--mouse-x', `${x}px`);
+          document.documentElement.style.setProperty('--mouse-y', `${y}px`);
+          glowRaf = false;
+        });
+      }, { passive: true });
+    }
+
+    // 2. Smooth Count-Up for Telemetry Numbers (#architecture KPIs & #acquisition pricing)
+    const countTargets = document.querySelectorAll('#architecture .text-headline-lg, #acquisition .text-display-lg');
     if ('IntersectionObserver' in window && countTargets.length) {
       const countObs = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
@@ -792,18 +892,20 @@ window.refreshHeroTelemetry = function() {
             const suffix = match[3];
             const decimals = (match[2].split('.')[1] || '').length;
             const hasComma = match[2].includes(',');
-            const duration = 700;
-            const start = performance.now();
-            function tick(now) {
-              const p = Math.min(1, (now - start) / duration);
-              const eased = 1 - Math.pow(1 - p, 3);
-              let val = (targetNum * eased).toFixed(decimals);
-              if (hasComma) val = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-              el.textContent = prefix + val + suffix;
-              if (p < 1) requestAnimationFrame(tick);
-              else el.textContent = raw;
+            if (targetNum > 0) {
+              const duration = 700;
+              const start = performance.now();
+              function tick(now) {
+                const p = Math.min(1, (now - start) / duration);
+                const eased = 1 - Math.pow(1 - p, 3);
+                let val = (targetNum * eased).toFixed(decimals);
+                if (hasComma) val = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+                el.textContent = prefix + val + suffix;
+                if (p < 1) requestAnimationFrame(tick);
+                else el.textContent = raw;
+              }
+              requestAnimationFrame(tick);
             }
-            requestAnimationFrame(tick);
           }
           obs.unobserve(el);
         });
@@ -811,17 +913,27 @@ window.refreshHeroTelemetry = function() {
       countTargets.forEach(el => countObs.observe(el));
     }
 
-    // 3. Continuous Infinite Marquee Stream (#ecosystem-carousel)
+    // 3. Continuous Infinite Marquee Stream & Offscreen GPU Animation Governor
     const viewport = document.getElementById('carousel-viewport');
-    const marqueeStatus = document.getElementById('marquee-badge-status') || document.getElementById('carousel-status-text');
+    const marqueeStatus = document.getElementById('marquee-badge-status');
 
     if (viewport && marqueeStatus) {
       viewport.addEventListener('mouseenter', () => {
         marqueeStatus.textContent = 'STREAM PAUSED • INSPECTING MODULE';
-      });
+      }, { passive: true });
       viewport.addEventListener('mouseleave', () => {
         marqueeStatus.textContent = 'CONTINUOUS STREAM • HOVER TO PAUSE';
-      });
+      }, { passive: true });
+    }
+
+    if ('IntersectionObserver' in window) {
+      const animSections = document.querySelectorAll('#hero, #ecosystem-carousel, #simulator');
+      const gpuObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          entry.target.classList.toggle('is-offscreen', !entry.isIntersecting);
+        });
+      }, { rootMargin: '100px 0px 100px 0px', threshold: 0.01 });
+      animSections.forEach(sec => gpuObserver.observe(sec));
     }
   }
 

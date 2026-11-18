@@ -538,4 +538,62 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertJsonCount(1, 'history_logs')
             ->assertJsonPath('technicians.0.active_task.latitude', -6.21);
     }
+
+    public function test_create_and_edit_task_pages_render_interactive_map_picker_and_fleet_data(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => 'Marco Silva']);
+
+        TechnicianLocation::create([
+            'technician_id' => $tech->id,
+            'latitude'      => -6.2015,
+            'longitude'     => 106.8210,
+        ]);
+
+        $existingTask = Task::create([
+            'title'          => 'Existing Subscriber Fiber Link',
+            'customer_name'  => 'Vanguard Towers',
+            'customer_phone' => '+6281199887766',
+            'address'        => 'Jl. Sudirman Kav 10',
+            'latitude'       => -6.214620,
+            'longitude'      => 106.845130,
+            'technician_id'  => $tech->id,
+            'status'         => 'assigned',
+            'priority'       => 'high',
+        ]);
+
+        // 1. Create page renders Geo-Dispatcher workbench elements
+        $createRes = $this->actingAs($admin)->get('/tasks/create');
+        $createRes->assertStatus(200)
+            ->assertSee('location-picker-map', false)
+            ->assertSee('gmaps-paste-input', false)
+            ->assertSee('Marco Silva')
+            ->assertSee('Vanguard Towers');
+
+        // 2. Edit page renders with existing task coordinates prefilled
+        $editRes = $this->actingAs($admin)->get("/tasks/{$existingTask->id}/edit");
+        $editRes->assertStatus(200)
+            ->assertSee('location-picker-map', false)
+            ->assertSee('-6.21462', false)
+            ->assertSee('106.84513', false);
+
+        // 3. Submitting a new task with precise map coordinates persists cleanly
+        $storeRes = $this->actingAs($admin)->post('/tasks', [
+            'title'          => 'FTTH New Subscriber Installation',
+            'customer_name'  => 'Horizon Logistics',
+            'customer_phone' => '+628123450000',
+            'address'        => 'Jl. Gatot Subroto No. 45, Jakarta',
+            'latitude'       => -6.229728,
+            'longitude'      => 106.819560,
+            'priority'       => 'high',
+            'technician_id'  => $tech->id,
+        ]);
+        $storeRes->assertRedirect('/tasks');
+        $this->assertDatabaseHas('tasks', [
+            'title'         => 'FTTH New Subscriber Installation',
+            'customer_name' => 'Horizon Logistics',
+            'technician_id' => $tech->id,
+            'status'        => 'assigned',
+        ]);
+    }
 }

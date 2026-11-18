@@ -68,8 +68,7 @@ class TaskController extends Controller
     public function create()
     {
         $task = new Task();
-        $technicians = User::where('role', 'technician')->where('is_active', true)->get();
-        return view('tasks.form', compact('task', 'technicians'));
+        return view('tasks.form', $this->buildFormViewData($task));
     }
 
     public function store(Request $request)
@@ -122,8 +121,79 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
-        $technicians = User::where('role', 'technician')->where('is_active', true)->get();
-        return view('tasks.form', compact('task', 'technicians'));
+        return view('tasks.form', $this->buildFormViewData($task));
+    }
+
+    /**
+     * Assemble enriched technician fleet telemetry, recent customer directory,
+     * and platform map/geofence settings for the Create/Edit Task Geo-Dispatcher Workbench.
+     */
+    private function buildFormViewData(Task $task): array
+    {
+        $technicians = User::where('role', 'technician')
+            ->where('is_active', true)
+            ->with(['latestLocation', 'tasks' => function ($q) {
+                $q->whereIn('status', ['assigned', 'accepted', 'on-going'])->latest();
+            }])
+            ->withCount(['tasks as active_tasks_count' => function ($q) {
+                $q->whereIn('status', ['assigned', 'accepted', 'on-going']);
+            }])
+            ->orderBy('name')
+            ->get();
+
+        $technicianFleet = $technicians->map(function ($tech) {
+            $loc = $tech->latestLocation;
+            $activeTask = $tech->tasks->first();
+            return [
+                'id'                 => $tech->id,
+                'name'               => $tech->name,
+                'email'              => $tech->email,
+                'phone'              => $tech->phone ?? '',
+                'is_online'          => $tech->isEffectivelyOnline(10),
+                'active_tasks_count' => (int) ($tech->active_tasks_count ?? 0),
+                'active_task_title'  => $activeTask ? $activeTask->title : null,
+                'latitude'           => ($loc && $loc->latitude) ? (float) $loc->latitude : null,
+                'longitude'          => ($loc && $loc->longitude) ? (float) $loc->longitude : null,
+                'last_seen'          => $loc ? $loc->created_at->diffForHumans() : 'No GPS signal yet',
+            ];
+        })->values();
+
+        // Recent unique customers for 1-click returning subscriber auto-fill
+        $recentCustomers = Task::select('customer_name', 'customer_phone', 'address', 'location', 'latitude', 'longitude', 'created_at')
+            ->whereNotNull('customer_name')
+            ->orderByDesc('id')
+            ->take(100)
+            ->get()
+            ->unique(function ($t) {
+                return strtolower(trim((string) $t->customer_name)) . '|' . preg_replace('/[^0-9]/', '', (string) $t->customer_phone);
+            })
+            ->take(30)
+            ->map(function ($t) {
+                return [
+                    'name'      => $t->customer_name,
+                    'phone'     => $t->customer_phone ?? '',
+                    'address'   => $t->address ?: ($t->location ?? ''),
+                    'latitude'  => $t->latitude ? (float) $t->latitude : null,
+                    'longitude' => $t->longitude ? (float) $t->longitude : null,
+                ];
+            })
+            ->values();
+
+        $mapStyle = SettingService::get('map_style', 'openstreetmap');
+        $geofenceRadius = (int) SettingService::get('geofence_check_meters', '100');
+        $slaHours = (int) SettingService::get('sla_warning_hours', '2');
+        $autoAssignEnabled = SettingService::get('auto_assign', '0') === '1';
+
+        return compact(
+            'task',
+            'technicians',
+            'technicianFleet',
+            'recentCustomers',
+            'mapStyle',
+            'geofenceRadius',
+            'slaHours',
+            'autoAssignEnabled'
+        );
     }
 
     public function update(Request $request, Task $task)

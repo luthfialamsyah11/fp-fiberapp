@@ -3,44 +3,43 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryItem;
 use App\Models\Task;
 use App\Models\TaskMaterial;
-use App\Models\InventoryItem;
+use App\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TaskMaterialController extends Controller
 {
-    /**
-     * Get all materials used on a task
-     */
     public function index(Task $task)
     {
-        // Guard authorization against IDOR
         if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
         $materials = $task->materials()->with('inventoryItem')->get();
-        $totalCost = $materials->sum(function ($mat) {
+        $totalCost = (float) $materials->sum(function ($mat) {
             return ($mat->inventoryItem->unit_price ?? 0) * $mat->quantity;
         });
 
         return response()->json([
-            'data' => $materials,
-            'total_cost' => $totalCost,
-            'formatted_total_cost' => 'Rp ' . number_format($totalCost, 0, ',', '.')
+            'data'                 => $materials,
+            'total_cost'           => $totalCost,
+            'formatted_total_cost' => SettingService::formatCurrency($totalCost),
         ]);
     }
 
-    /**
-     * Record material used on a task and deduct inventory stock
-     */
     public function store(Request $request, Task $task)
     {
-        // Guard authorization
-        if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $user = auth()->user();
+        if ($task->technician_id !== $user->id && $user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
+        }
+
+        // Prevent post-completion BOM tampering
+        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && $user->role !== 'admin') {
+            return response()->json(['message' => 'Materials cannot be modified after a work order is completed or closed.'], 422);
         }
 
         $validated = $request->validate([
@@ -53,46 +52,45 @@ class TaskMaterialController extends Controller
         return DB::transaction(function () use ($validated, $task) {
             $item = InventoryItem::lockForUpdate()->findOrFail($validated['inventory_item_id']);
 
-            // Validate sufficient stock
             if ($item->stock < $validated['quantity']) {
                 return response()->json([
-                    'message' => "Stok {$item->name} tidak mencukupi (Tersisa: {$item->stock} {$item->unit})"
+                    'message' => "Insufficient stock for {$item->name} (Available: {$item->stock} {$item->unit})."
                 ], 422);
             }
 
-            // Deduct stock
             $item->decrement('stock', $validated['quantity']);
 
-            // Create record
             $taskMaterial = TaskMaterial::create([
                 'task_id'           => $task->id,
                 'inventory_item_id' => $item->id,
                 'quantity'          => $validated['quantity'],
-                'serial_number'     => $validated['serial_number'] ?? null,
-                'notes'             => $validated['notes'] ?? null,
+                'serial_number'     => isset($validated['serial_number']) ? strip_tags(trim($validated['serial_number'])) : null,
+                'notes'             => isset($validated['notes']) ? strip_tags(trim($validated['notes'])) : null,
             ]);
 
             $taskMaterial->load('inventoryItem');
 
             return response()->json([
-                'message' => 'Material berhasil dicatat dan stok gudang terpotong',
-                'data'    => $taskMaterial,
-                'current_stock' => $item->fresh()->stock
+                'message'       => 'Material consumption recorded and warehouse inventory deducted.',
+                'data'          => $taskMaterial,
+                'current_stock' => $item->fresh()->stock,
             ], 201);
         });
     }
 
-    /**
-     * Remove material from task and restore inventory stock
-     */
     public function destroy(Task $task, TaskMaterial $material)
     {
-        if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        $user = auth()->user();
+        if ($task->technician_id !== $user->id && $user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
+        }
+
+        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && $user->role !== 'admin') {
+            return response()->json(['message' => 'Materials cannot be removed after a work order is completed or closed.'], 422);
         }
 
         if ($material->task_id !== $task->id) {
-            return response()->json(['message' => 'Material tidak terdaftar pada tugas ini'], 422);
+            return response()->json(['message' => 'Material record does not belong to this work order.'], 422);
         }
 
         DB::transaction(function () use ($material) {
@@ -103,6 +101,6 @@ class TaskMaterialController extends Controller
             $material->delete();
         });
 
-        return response()->json(['message' => 'Material berhasil dihapus dan stok dikembalikan']);
+        return response()->json(['message' => 'Material entry removed and warehouse stock restored.']);
     }
 }

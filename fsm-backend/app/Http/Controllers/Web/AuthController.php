@@ -16,30 +16,28 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Check if user is active
             if (!Auth::user()->is_active) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 return back()->withErrors([
-                    'email' => 'Akun Anda telah dinonaktifkan.',
+                    'email' => 'Your account has been deactivated.',
                 ])->onlyInput('email');
             }
 
-            // Check if user is admin
             if (Auth::user()->role !== 'admin') {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 return back()->withErrors([
-                    'email' => 'Hanya admin yang dapat mengakses portal ini.',
+                    'email' => 'Only administrators are authorized to access this command portal.',
                 ])->onlyInput('email');
             }
 
@@ -47,7 +45,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password yang dimasukkan salah.',
+            'email' => 'Invalid email address or password.',
         ])->onlyInput('email');
     }
 

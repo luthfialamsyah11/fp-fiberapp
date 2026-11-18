@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { LocationService } from '../../services/location.service';
 import { NavigationService } from '../../services/navigation.service';
+import { formatPhoneForWhatsApp } from '../../utils/phone';
 
 @Component({
   selector: 'app-task-list',
@@ -89,11 +90,12 @@ export class TaskListPage {
     try {
       const res: any = await this.api.getTasks();
       this.tasks = Array.isArray(res) ? res : (res?.data ?? []);
-      
-      // Determine Sticky Active Mission (Prioritize 'on-going', then 'accepted')
-      this.activeMission = this.tasks.find(t => t.status === 'on-going') 
-        || this.tasks.find(t => t.status === 'accepted') 
+
+      this.activeMission = this.tasks.find(t => t.status === 'on-going')
+        || this.tasks.find(t => t.status === 'accepted')
         || null;
+
+      this.locationService.setActiveTaskId(this.activeMission?.id || null);
 
       this.applyFilter();
     } catch (e) {
@@ -135,15 +137,18 @@ export class TaskListPage {
   openWhatsApp(task: any, event?: Event) {
     if (event) event.stopPropagation();
     if (!task?.customer_phone) return;
-    let cleanPhone = task.customer_phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.startsWith('0')) {
-      cleanPhone = '62' + cleanPhone.substring(1);
-    }
+    const countryCode = this.api.getClientConfig().default_country_code || '62';
+    const cleanPhone = formatPhoneForWhatsApp(task.customer_phone, countryCode);
+    if (!cleanPhone) return;
+
     const customer = task.customer_name || 'Customer';
     const technician = this.user?.name || 'FiberOps Field Tech';
-    const trackUrl = task.tracking_token ? `https://bentengsiber.com/track/${task.tracking_token}` : '';
+    const trackUrl = task.tracking_url
+      || (task.tracking_token ? `${this.api.getBaseUrl()}/track/${task.tracking_token}` : '');
     const trackingMsg = trackUrl ? ` Live tracking: ${trackUrl}` : '';
-    const text = encodeURIComponent(`Hello ${customer}, I am ${technician} from FiberOps field team. I am assigned to handle your work order #${task.id}.${trackingMsg}`);
+    const text = encodeURIComponent(
+      `Hello ${customer}, I am ${technician} from FiberOps field team. I am assigned to handle your work order #${task.id}.${trackingMsg}`
+    );
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
   }
 

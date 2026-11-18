@@ -12,12 +12,12 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('customer_name');
-            $table->text('description');
-            $table->text('address');
+            $table->text('description')->nullable();
+            $table->text('address')->nullable();
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
             $table->foreignId('technician_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->enum('status', ['assigned','accepted','on-going','completed'])->default('assigned');
+            $table->string('status', 30)->default('pending');
             $table->text('additional_notes')->nullable();
             $table->timestamps();
         });

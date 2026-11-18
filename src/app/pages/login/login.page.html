@@ -37,7 +37,7 @@
       <div class="demo-selector">
         <div class="demo-label">
           <ion-icon name="key-outline"></ion-icon>
-          <span>Pilih Akun Demo Cepat:</span>
+          <span>Quick Evaluation Credentials:</span>
         </div>
         <div class="demo-chips">
           <button 
@@ -90,7 +90,7 @@
             class="toggle-btn" 
             (click)="togglePassword()" 
             type="button"
-            aria-label="Tampilkan atau sembunyikan password"
+            aria-label="Show or hide password"
           >
             <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
           </button>
@@ -101,7 +101,7 @@
       <div class="options-row">
         <label class="remember-label">
           <input type="checkbox" [(ngModel)]="rememberMe" />
-          <span>Ingat email saya</span>
+          <span>Remember my email</span>
         </label>
         <span class="secure-badge">
           <ion-icon name="shield-checkmark-outline"></ion-icon>
@@ -117,7 +117,7 @@
         type="button"
       >
         <span *ngIf="!isLoading">Sign In to Terminal</span>
-        <span *ngIf="isLoading">Memverifikasi...</span>
+        <span *ngIf="isLoading">Authenticating...</span>
         <ion-icon *ngIf="!isLoading" name="arrow-forward-outline"></ion-icon>
         <ion-spinner *ngIf="isLoading" name="crescent" class="btn-spinner"></ion-spinner>
       </button>
@@ -128,14 +128,14 @@
       </button>
 
       <div class="admin-portal-link">
-        <p>Login sebagai Administrator? <a [href]="adminUrl" target="_blank" rel="noopener noreferrer">Buka Web Admin</a></p>
+        <p>Signing in as Administrator? <a [href]="adminUrl" target="_blank" rel="noopener noreferrer">Open Admin Console</a></p>
       </div>
     </div>
 
     <!-- Footer -->
     <div class="login-footer">
       <p class="app-version">FiberOps Technician v1.0.4-premium</p>
-      <p class="copyright">&copy; 2026 FiberOps ISP System. Hak cipta dilindungi.</p>
+      <p class="copyright">&copy; 2026 FiberOps ISP System. All rights reserved.</p>
     </div>
   </div>
 </ion-content>

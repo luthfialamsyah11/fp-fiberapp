@@ -48,7 +48,7 @@ class InventoryController extends Controller
         ]);
 
         InventoryItem::create($validated);
-        return redirect()->route('admin.inventory.index')->with('success', 'Material/Perangkat berhasil ditambahkan ke inventaris.');
+        return redirect()->route('admin.inventory.index')->with('success', 'Material or equipment added to warehouse inventory.');
     }
 
     public function update(Request $request, InventoryItem $inventory)
@@ -64,12 +64,12 @@ class InventoryController extends Controller
         ]);
 
         $inventory->update($validated);
-        return redirect()->route('admin.inventory.index')->with('success', 'Data inventaris berhasil diperbarui.');
+        return redirect()->route('admin.inventory.index')->with('success', 'Inventory item updated successfully.');
     }
 
     public function destroy(InventoryItem $inventory)
     {
         $inventory->delete();
-        return redirect()->route('admin.inventory.index')->with('success', 'Item inventaris berhasil dihapus.');
+        return redirect()->route('admin.inventory.index')->with('success', 'Inventory item deleted successfully.');
     }
 }

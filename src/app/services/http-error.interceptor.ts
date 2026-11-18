@@ -22,7 +22,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        let errorMessage = 'Terjadi kesalahan';
+        let errorMessage = 'An unexpected error occurred.';
 
         if (error.error instanceof ErrorEvent) {
           // Client-side error
@@ -36,17 +36,19 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           } else if (error.status === 401) {
             errorMessage = error.error?.message || (
               request.url.includes('/login')
-                ? 'Email atau password salah'
+                ? 'Invalid email or password.'
                 : 'Session expired. Please sign in again.'
             );
           } else if (error.status === 403) {
-            errorMessage = error.error?.message || 'Akses ditolak';
+            errorMessage = error.error?.message || 'Access denied.';
           } else if (error.status === 404) {
-            errorMessage = 'Endpoint tidak ditemukan';
+            errorMessage = 'Requested endpoint not found.';
+          } else if (error.status === 429) {
+            errorMessage = error.error?.message || 'Too many requests. Please wait a moment and try again.';
           } else if (error.status === 503) {
             errorMessage = error.error?.message || 'Backend server is in maintenance mode or unreachable.';
           } else if (error.status === 500) {
-            errorMessage = 'Terjadi kesalahan di server';
+            errorMessage = 'Internal server error occurred.';
           } else {
             errorMessage = error.error?.message || `Error: ${error.statusText}`;
           }

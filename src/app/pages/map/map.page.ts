@@ -40,7 +40,7 @@ export class MapPage implements OnDestroy {
 
   private startLocationPolling() {
     this.stopLocationPolling();
-    this.locationInterval = setInterval(() => this.getCurrentLocation(), 15000);
+    this.locationInterval = setInterval(() => this.syncFromLocationService(), 10000);
   }
 
   private stopLocationPolling() {
@@ -50,30 +50,32 @@ export class MapPage implements OnDestroy {
     }
   }
 
+  private syncFromLocationService() {
+    const cached = this.locationService.getLastKnownPosition();
+    if (cached?.coords) {
+      this.latitude = cached.coords.latitude;
+      this.longitude = cached.coords.longitude;
+      this.accuracy = Math.round(cached.coords.accuracy);
+      this.lastUpdated = new Date(cached.timestamp || Date.now());
+      this.locationError = false;
+    }
+  }
+
   async getCurrentLocation() {
     try {
       this.isLocating = true;
       this.locationError = false;
       const position = await this.locationService.getCurrentPosition();
-      if (position) {
+      if (position?.coords) {
         this.latitude = position.coords.latitude;
         this.longitude = position.coords.longitude;
         this.accuracy = Math.round(position.coords.accuracy);
-        this.lastUpdated = new Date();
-
-        // Dispatch coordinates to backend dispatcher tracking
-        this.api.updateLocation(this.latitude, this.longitude).catch((err) => {
-          console.warn('[MapPage] Could not sync GPS to backend:', err);
-        });
+        this.lastUpdated = new Date(position.timestamp || Date.now());
       }
     } catch (e) {
-      console.error('Location error:', e);
+      console.warn('GPS signal unavailable:', e);
       this.locationError = true;
-      // Set fallback coordinates (Jakarta)
-      if (!this.latitude) {
-        this.latitude = -6.2088;
-        this.longitude = 106.8456;
-      }
+      this.syncFromLocationService();
     } finally {
       this.isLocating = false;
     }
@@ -83,7 +85,10 @@ export class MapPage implements OnDestroy {
     try {
       const res: any = await this.api.getTasks();
       const tasks = Array.isArray(res) ? res : (res?.data ?? []);
-      this.activeTask = tasks.find((t: any) => t.status === 'on-going') || null;
+      this.activeTask = tasks.find((t: any) => t.status === 'on-going')
+        || tasks.find((t: any) => t.status === 'accepted')
+        || null;
+      this.locationService.setActiveTaskId(this.activeTask?.id || null);
     } catch (e) {
       console.error(e);
     }
@@ -100,7 +105,7 @@ export class MapPage implements OnDestroy {
       this.navigationService.openNavigationOptions(
         this.latitude,
         this.longitude,
-        'Posisi Saya Saat Ini'
+        'My Current Location'
       );
     }
   }

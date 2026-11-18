@@ -470,8 +470,20 @@
                 </div>
                 <div class="sig-name">{{ $task->customer_signer_name ?? $task->customer_name }}</div>
                 <div class="sig-date">
-                    Date: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d/m/Y H:i') : date('d/m/Y') }} WIB
+                    Date: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d/m/Y H:i') : date('d/m/Y') }} UTC
                 </div>
+            </div>
+        </div>
+
+        <!-- Cryptographic SHA-256 BAST Seal Footer -->
+        <div style="margin-top: 28px; padding: 12px 16px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-size: 11px; color: #334155; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div>
+                <div style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">CRYPTOGRAPHIC TAMPER-EVIDENT SEAL (SHA-256)</div>
+                <div style="word-break: break-all;">DIGEST: {{ $task->bast_hash ?? $task->computeBastHash() }}</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="color: #059669; font-weight: 700;">&#10003; INTEGRITY VERIFIED</div>
+                <div><a href="{{ route('admin.tasks.bast.verify', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" style="color: #0284c7; text-decoration: none;">Verify JSON Seal &rarr;</a></div>
             </div>
         </div>
 

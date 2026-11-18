@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domain\Tasks\TaskStateMachine;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
-use App\Models\ProgressUpdate;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller
 {
+    public function __construct(private readonly TaskStateMachine $stateMachine)
+    {
+    }
+
     public function index(Request $request)
     {
         $tasks = Task::where('technician_id', auth()->id())
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->with(['progressUpdates', 'proofOfWork'])
             ->orderByDesc('created_at')
             ->get();
@@ -24,100 +29,99 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
         $task->ensureTrackingToken();
-        $task->load(['technician', 'progressUpdates.user', 'proofOfWork', 'materials.inventoryItem']);
+        $task->load(['technician', 'progressUpdates.user', 'proofOfWork', 'materials.inventoryItem', 'statusHistories']);
         return response()->json(['data' => $task]);
     }
 
     public function accept(Task $task)
     {
         if ($task->technician_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
         if ($task->status !== 'assigned') {
-            return response()->json(['message' => 'Tugas tidak dalam status assigned'], 422);
+            return response()->json(['message' => 'Work order is not in assigned status.'], 422);
         }
 
-        $task->update(['status' => 'accepted']);
-        return response()->json(['data' => $task]);
+        try {
+            $updated = $this->stateMachine->transition($task, 'accepted', auth()->user());
+            return response()->json(['data' => $updated]);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => collect($e->errors())->flatten()->first(), 'errors' => $e->errors()], 422);
+        }
     }
 
-    public function reject(Task $task)
+    public function reject(Request $request, Task $task)
     {
         if ($task->technician_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
         if ($task->status !== 'assigned') {
-            return response()->json(['message' => 'Tugas tidak bisa ditolak'], 422);
+            return response()->json(['message' => 'Work order cannot be declined in its current status.'], 422);
         }
 
-        $task->update(['technician_id' => null, 'status' => 'pending']);
-        return response()->json(['message' => 'Tugas ditolak']);
+        $reason = $request->input('reason', 'Declined by field technician');
+
+        try {
+            $this->stateMachine->transition($task, 'pending', auth()->user(), $reason, ['unassign' => true]);
+
+            SettingService::dispatchWebhook('TASK_DECLINED', [
+                'task_id'         => $task->id,
+                'title'           => $task->title,
+                'technician_name' => auth()->user()->name,
+                'reason'          => $reason,
+            ]);
+
+            return response()->json(['message' => 'Work order declined and returned to dispatch queue.']);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => collect($e->errors())->flatten()->first(), 'errors' => $e->errors()], 422);
+        }
     }
 
     public function start(Task $task)
     {
         if ($task->technician_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
-        if (!in_array($task->status, ['assigned', 'accepted'])) {
-            return response()->json(['message' => 'Tugas tidak dalam status yang dapat dimulai'], 422);
-        }
-
-        $task->update(['status' => 'on-going']);
-
-        // Record initial start timeline log if none exists
-        if ($task->progressUpdates()->doesntExist()) {
-            ProgressUpdate::create([
-                'task_id'          => $task->id,
-                'user_id'          => auth()->id(),
-                'note'             => 'Teknisi tiba di lokasi dan memulai pengerjaan.',
-                'progress_percent' => 25,
-            ]);
+        if (!in_array($task->status, ['assigned', 'accepted'], true)) {
+            return response()->json(['message' => 'Work order cannot be started from its current status.'], 422);
         }
 
-        return response()->json(['data' => $task->fresh(['progressUpdates', 'proofOfWork'])]);
+        try {
+            $updated = $this->stateMachine->transition($task, 'on-going', auth()->user());
+            return response()->json(['data' => $updated]);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => collect($e->errors())->flatten()->first(), 'errors' => $e->errors()], 422);
+        }
     }
 
     public function complete(Task $task)
     {
         if ($task->technician_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
         if ($task->status !== 'on-going') {
-            return response()->json(['message' => 'Pekerjaan belum dimulai'], 422);
+            return response()->json(['message' => 'Work order execution has not been started yet.'], 422);
         }
 
-        // Enforce Proof of Work guardrail if configured in settings
-        $requireProof = SettingService::get('require_proof_photo', '1');
-        if ($requireProof == '1' && $task->proofOfWork()->count() === 0) {
-            return response()->json(['message' => 'Wajib mengunggah minimal 1 foto bukti pekerjaan sebelum menyelesaikan tugas'], 422);
-        }
+        try {
+            $updated = $this->stateMachine->transition($task, 'completed', auth()->user());
 
-        $task->update(['status' => 'completed']);
-
-        // Ensure 100% progress update is recorded so timeline and meters show 100% completion
-        if ($task->progressUpdates()->where('progress_percent', 100)->doesntExist()) {
-            ProgressUpdate::create([
-                'task_id'          => $task->id,
-                'user_id'          => auth()->id(),
-                'note'             => 'Pekerjaan selesai dan telah diverifikasi normal.',
-                'progress_percent' => 100,
+            SettingService::dispatchWebhook('TASK_COMPLETED', [
+                'task_id'         => $updated->id,
+                'title'           => $updated->title,
+                'customer_name'   => $updated->customer_name,
+                'technician_name' => auth()->user()->name,
+                'status'          => 'completed',
+                'bast_hash'       => $updated->bast_hash,
             ]);
+
+            return response()->json(['data' => $updated]);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => collect($e->errors())->flatten()->first(), 'errors' => $e->errors()], 422);
         }
-
-        // Dispatch real-time webhook alert if configured
-        SettingService::dispatchWebhook('TASK_COMPLETED', [
-            'task_id'         => $task->id,
-            'title'           => $task->title,
-            'customer_name'   => $task->customer_name,
-            'technician_name' => auth()->user()->name,
-            'status'          => 'completed',
-        ]);
-
-        return response()->json(['data' => $task]);
     }
 
     public function history(Request $request)

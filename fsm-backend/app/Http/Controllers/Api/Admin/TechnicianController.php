@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\TechnicianLocation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -22,10 +21,10 @@ class TechnicianController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string',
+            'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'phone'    => 'nullable|string',
+            'phone'    => 'nullable|string|max:50',
         ]);
 
         $technician = User::create([
@@ -47,7 +46,7 @@ class TechnicianController extends Controller
 
     public function destroy(User $user)
     {
-        $user->update(['is_active' => false]);
-        return response()->json(['message' => 'Teknisi dinonaktifkan']);
+        $user->update(['is_active' => false, 'is_online' => false]);
+        return response()->json(['message' => 'Technician deactivated successfully.']);
     }
 }

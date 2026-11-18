@@ -92,9 +92,9 @@
     <!-- Metric 4: Latest Activity -->
     <div class="bg-white rounded-2xl border border-slate-200/60 p-4 shadow-sm flex items-center justify-between">
         <div>
-            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Upload Terbaru</span>
+            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Latest Upload</span>
             <div class="text-sm font-bold text-textPrimary mt-1 truncate max-w-[150px]">
-                {{ $metrics['latest_upload_at'] ? \Carbon\Carbon::parse($metrics['latest_upload_at'])->diffForHumans() : 'Belum ada' }}
+                {{ $metrics['latest_upload_at'] ? \Carbon\Carbon::parse($metrics['latest_upload_at'])->diffForHumans() : 'None yet' }}
             </div>
             <span class="text-[10px] font-medium text-amber-600 flex items-center gap-1 mt-0.5">
                 <ion-icon name="time-outline"></ion-icon> Real-time sync
@@ -420,10 +420,10 @@
         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div class="flex items-center gap-3">
                 <span id="modal-task-badge" class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">#TSK-0000</span>
-                <h3 id="modal-task-title" class="text-sm sm:text-base font-bold text-textPrimary truncate max-w-[280px] sm:max-w-md">Detail Bukti Pekerjaan</h3>
+                <h3 id="modal-task-title" class="text-sm sm:text-base font-bold text-textPrimary truncate max-w-[280px] sm:max-w-md">Proof of Work Details</h3>
             </div>
             <div class="flex items-center gap-2">
-                <a id="modal-download-btn" href="#" target="_blank" rel="noopener noreferrer" download class="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-primary hover:border-blue-300 transition-all text-sm flex items-center gap-1" title="Unduh foto resolusi penuh">
+                <a id="modal-download-btn" href="#" target="_blank" rel="noopener noreferrer" download class="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:text-primary hover:border-blue-300 transition-all text-sm flex items-center gap-1" title="Download full-resolution photo">
                     <ion-icon name="download-outline"></ion-icon>
                 </a>
                 <button type="button" onclick="closeInspectorModal()" class="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 transition-all text-lg">

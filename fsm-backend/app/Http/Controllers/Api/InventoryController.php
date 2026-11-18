@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {
-    /**
-     * Active inventory items for field technicians (Mobile App Dropdown)
-     */
     public function index()
     {
         $items = InventoryItem::where('is_active', true)
@@ -21,9 +18,6 @@ class InventoryController extends Controller
         return response()->json(['data' => $items]);
     }
 
-    /**
-     * Admin Inventory Management List
-     */
     public function adminIndex(Request $request)
     {
         $items = InventoryItem::when($request->search, function ($q, $search) {
@@ -39,9 +33,6 @@ class InventoryController extends Controller
         return response()->json(['data' => $items]);
     }
 
-    /**
-     * Store new inventory item
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -55,12 +46,9 @@ class InventoryController extends Controller
         ]);
 
         $item = InventoryItem::create($validated);
-        return response()->json(['message' => 'Item berhasil ditambahkan', 'data' => $item], 201);
+        return response()->json(['message' => 'Inventory item created successfully.', 'data' => $item], 201);
     }
 
-    /**
-     * Update inventory item
-     */
     public function update(Request $request, InventoryItem $item)
     {
         $validated = $request->validate([
@@ -74,15 +62,12 @@ class InventoryController extends Controller
         ]);
 
         $item->update($validated);
-        return response()->json(['message' => 'Item berhasil diperbarui', 'data' => $item]);
+        return response()->json(['message' => 'Inventory item updated successfully.', 'data' => $item]);
     }
 
-    /**
-     * Delete / Toggle active state
-     */
     public function destroy(InventoryItem $item)
     {
         $item->delete();
-        return response()->json(['message' => 'Item berhasil dihapus']);
+        return response()->json(['message' => 'Inventory item deleted successfully.']);
     }
 }

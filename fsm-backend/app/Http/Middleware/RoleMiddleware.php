@@ -10,10 +10,10 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string $role)
     {
         if (!$request->user() || $request->user()->role !== $role) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Akses ditolak'], 403);
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Access denied.'], 403);
             }
-            abort(403, 'Akses ditolak: Anda tidak memiliki wewenang untuk mengakses halaman ini.');
+            abort(403, 'Access denied: You are not authorized to access this page.');
         }
 
         return $next($request);

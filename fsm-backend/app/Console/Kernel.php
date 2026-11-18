@@ -2,8 +2,12 @@
 
 namespace App\Console;
 
+use App\Models\TechnicianLocation;
+use App\Services\SettingService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Kernel extends ConsoleKernel
 {
@@ -12,7 +16,32 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->call(function () {
+            // 1. Prune expired GPS telemetry while preserving latest 50 points per technician
+            $retentionDays = (int) SettingService::get('telemetry_retention_days', '30');
+            $techIds = TechnicianLocation::select('technician_id')->distinct()->pluck('technician_id');
+            $protectedIds = [];
+
+            foreach ($techIds as $techId) {
+                $recent = TechnicianLocation::where('technician_id', $techId)
+                    ->orderBy('id', 'desc')
+                    ->take(50)
+                    ->pluck('id')
+                    ->all();
+                $protectedIds = array_merge($protectedIds, $recent);
+            }
+
+            TechnicianLocation::where('created_at', '<', now()->subDays($retentionDays))
+                ->when(!empty($protectedIds), fn ($q) => $q->whereNotIn('id', $protectedIds))
+                ->delete();
+
+            // 2. Prune expired idempotency keys older than 48 hours
+            if (Schema::hasTable('idempotency_keys')) {
+                DB::table('idempotency_keys')
+                    ->where('created_at', '<', now()->subHours(48))
+                    ->delete();
+            }
+        })->daily()->name('fsm-telemetry-and-idempotency-prune');
     }
 
     /**

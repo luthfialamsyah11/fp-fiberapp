@@ -325,34 +325,29 @@
             <div class="progress-fill" id="progress-bar-fill" style="width: {{ max(15, $task->progress_percent) }}%;"></div>
         </div>
 
-        <!-- Technician Info Card -->
+        <!-- Technician Info Card (Field-Level Privacy Redacted) -->
         <div class="technician-card">
             <div class="tech-info">
                 <div class="tech-avatar">
                     <ion-icon name="construct"></ion-icon>
                 </div>
                 <div class="tech-text">
-                    <h4 id="tech-name-text">{{ $task->technician?->name ?? 'Assigned Technician' }}</h4>
+                    <h4 id="tech-name-text">{{ $task->technician ? \Illuminate\Support\Str::before(trim($task->technician->name), ' ') : 'Assigned Specialist' }}</h4>
                     <span><ion-icon name="shield-checkmark"></ion-icon> Certified Field Technician</span>
                 </div>
             </div>
 
             <div class="tech-actions">
-                @if($task->technician?->phone)
-                    <a href="tel:{{ $task->technician->phone }}" class="btn-call" title="Telepon Langsung">
-                        <ion-icon name="call-outline"></ion-icon>
-                    </a>
-                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $task->technician->phone)) }}?text=Halo%20{{ urlencode($task->technician->name) }}%2C%20saya%20pelanggan%20tiket%20{{ urlencode($task->title) }}" target="_blank" class="btn-wa" title="Chat WhatsApp">
-                        <ion-icon name="logo-whatsapp"></ion-icon>
-                    </a>
-                @endif
+                <span style="font-size: 11px; color: #38bdf8; font-weight: 600; background: rgba(56, 189, 248, 0.12); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                    ID #TECH-{{ str_pad((string) ($task->technician_id ?? 0), 3, '0', STR_PAD_LEFT) }}
+                </span>
             </div>
         </div>
 
         <!-- Customer Destination Row -->
         <div class="destination-row">
             <ion-icon name="location-sharp"></ion-icon>
-            <span>Tujuan: {{ $task->customer_name }} &bull; {{ $task->address }}</span>
+            <span>Destination: {{ $task->customer_name }} &bull; {{ $task->address }}</span>
         </div>
     </div>
 
@@ -361,12 +356,13 @@
 
     <script>
         const TOKEN = "{{ $task->tracking_token }}";
+        const IS_EXPIRED = {{ ($isExpired ?? false) ? 'true' : 'false' }};
+        const HAS_INITIAL_TECH_LOC = {{ $latestLocation ? 'true' : 'false' }};
         const destLat = {{ (float) ($task->latitude ?? -6.2088) }};
         const destLng = {{ (float) ($task->longitude ?? 106.8456) }};
-        
-        // Initial tech coordinates
-        let techLat = {{ (float) ($latestLocation?->latitude ?? $task->latitude ?? -6.2100) }};
-        let techLng = {{ (float) ($latestLocation?->longitude ?? $task->longitude ?? 106.8400) }};
+
+        let techLat = {{ $latestLocation ? (float) $latestLocation->latitude : 'null' }};
+        let techLng = {{ $latestLocation ? (float) $latestLocation->longitude : 'null' }};
 
         // Initialize Map
         const map = L.map('map-viewport', { zoomControl: false }).setView([destLat, destLng], 14);
@@ -401,44 +397,57 @@
         // Add Customer Marker
         const destMarker = L.marker([destLat, destLng], { icon: customerIcon })
             .addTo(map)
-            .bindPopup("<b>Alamat Anda:</b><br>{{ $task->customer_name }}");
+            .bindPopup("<b>Subscriber Location:</b><br>{{ $task->customer_name }}");
 
-        // Add Technician Marker
-        const techMarker = L.marker([techLat, techLng], { icon: techIcon })
-            .addTo(map)
-            .bindPopup("<b>Field Technician Location</b>");
+        let techMarker = null;
+        let routeLine = null;
 
-        // Route Polyline
-        let routeLine = L.polyline([[techLat, techLng], [destLat, destLng]], {
-            color: '#00f2fe',
-            weight: 4,
-            opacity: 0.7,
-            dashArray: '6, 8'
-        }).addTo(map);
+        function ensureTechMarker(lat, lng) {
+            if (!techMarker) {
+                techMarker = L.marker([lat, lng], { icon: techIcon })
+                    .addTo(map)
+                    .bindPopup("<b>Field Technician Location</b>");
+                routeLine = L.polyline([[lat, lng], [destLat, destLng]], {
+                    color: '#00f2fe',
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '6, 8'
+                }).addTo(map);
+                const bounds = L.latLngBounds([[lat, lng], [destLat, destLng]]);
+                map.fitBounds(bounds, { padding: [60, 60] });
+            } else {
+                techMarker.setLatLng([lat, lng]);
+                routeLine.setLatLngs([[lat, lng], [destLat, destLng]]);
+            }
+        }
 
-        // Fit map bounds
-        const bounds = L.latLngBounds([[techLat, techLng], [destLat, destLng]]);
-        map.fitBounds(bounds, { padding: [60, 60] });
+        if (HAS_INITIAL_TECH_LOC && techLat !== null && techLng !== null) {
+            ensureTechMarker(techLat, techLng);
+        }
 
-        // Real-time Polling Engine (Every 5 seconds)
         let pollingTimer = null;
 
         async function fetchLiveStatus() {
-            if (document.hidden) return;
+            if (document.hidden || IS_EXPIRED) return;
             try {
                 const res = await fetch(`/api/public/track/${TOKEN}`);
+                if (res.status === 410) {
+                    const etaText = document.getElementById('mission-eta-text');
+                    if (etaText) {
+                        etaText.innerHTML = '<ion-icon name="lock-closed-outline"></ion-icon><span>Tracking session expired (24h post-completion)</span>';
+                    }
+                    if (pollingTimer) clearInterval(pollingTimer);
+                    return;
+                }
                 if (!res.ok) return;
                 const data = await res.json();
 
-                // Update status text & badge
                 const statusBadge = document.getElementById('badge-status-text');
                 if (statusBadge) statusBadge.textContent = data.task.status_label;
 
-                // Update progress bar
                 const progressFill = document.getElementById('progress-bar-fill');
                 if (progressFill) progressFill.style.width = Math.max(15, data.task.progress_percent) + '%';
 
-                // Update ETA / subtitle
                 const etaText = document.getElementById('mission-eta-text');
                 if (etaText) {
                     if (data.task.status === 'completed') {
@@ -447,25 +456,31 @@
                             clearInterval(pollingTimer);
                             pollingTimer = null;
                         }
+                    } else if (data.live_location && data.live_location.eta_minutes) {
+                        etaText.innerHTML = `<ion-icon name="navigate-outline"></ion-icon><span>Technician en route &bull; ETA ~${data.live_location.eta_minutes} min (${data.live_location.distance_km} km)</span>`;
+                    } else if (data.state === 'waiting') {
+                        etaText.innerHTML = '<ion-icon name="time-outline"></ion-icon><span>Waiting for field technician GPS signal...</span>';
                     } else if (data.task.status === 'on-going') {
-                        etaText.innerHTML = '<ion-icon name="navigate-outline"></ion-icon><span>Technician is en route to your location</span>';
+                        etaText.innerHTML = '<ion-icon name="navigate-outline"></ion-icon><span>Technician is executing your work order</span>';
                     }
                 }
 
-                // Smoothly update technician coordinates
                 if (data.live_location && data.live_location.latitude && data.live_location.longitude) {
-                    const newLat = data.live_location.latitude;
-                    const newLng = data.live_location.longitude;
-
-                    techMarker.setLatLng([newLat, newLng]);
-                    routeLine.setLatLngs([[newLat, newLng], [destLat, destLng]]);
+                    ensureTechMarker(data.live_location.latitude, data.live_location.longitude);
                 }
             } catch (err) {
                 console.warn('Polling tracking failed:', err);
             }
         }
 
-        pollingTimer = setInterval(fetchLiveStatus, 5000);
+        if (IS_EXPIRED) {
+            const etaText = document.getElementById('mission-eta-text');
+            if (etaText) {
+                etaText.innerHTML = '<ion-icon name="lock-closed-outline"></ion-icon><span>Tracking session expired (24h post-completion)</span>';
+            }
+        } else {
+            pollingTimer = setInterval(fetchLiveStatus, 5000);
+        }
     </script>
 </body>
 </html>

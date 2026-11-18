@@ -40,17 +40,17 @@ export class AuthService {
     } catch (error: any) {
       if (isDebug) console.error('[AuthService] Login error:', error);
       
-      // Re-throw dengan message yang user-friendly
+      // Re-throw with user-friendly message
       if (error?.error?.message) {
         throw error;
       }
       if (error?.status === 401 || error?.statusText === 'Unauthorized') {
-        throw { error: { message: 'Email atau password salah' } };
+        throw { error: { message: 'Invalid email or password.' } };
       }
       if (error?.status === 0 || error?.statusText === 'Unknown Error') {
         throw { error: { message: 'Connection failed. Please check network connectivity and API server status.' } };
       }
-      throw { error: { message: error?.message || 'Terjadi kesalahan saat login' } };
+      throw { error: { message: error?.message || 'An unexpected error occurred during sign in.' } };
     }
   }
 

@@ -2,7 +2,9 @@ import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit, OnDest
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
+import { LocationService } from '../../services/location.service';
 import { NavigationService } from '../../services/navigation.service';
+import { formatPhoneForWhatsApp } from '../../utils/phone';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 @Component({
@@ -16,6 +18,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private navCtrl = inject(NavController);
   private api = inject(ApiService);
+  private locationService = inject(LocationService);
   private alertCtrl = inject(AlertController);
   private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
@@ -140,6 +143,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
       const res: any = await this.api.getTaskById(this.taskId);
       this.task = res?.data ?? res;
 
+      if (this.task && ['accepted', 'on-going'].includes(this.task.status)) {
+        this.locationService.setActiveTaskId(this.task.id);
+      }
+
       if (this.task?.progress_percent) {
         this.progressPercent = this.task.progress_percent;
       }
@@ -191,17 +198,24 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   async rejectTask() {
     const alert = await this.alertCtrl.create({
       header: 'Decline Assignment?',
-      message: 'Are you sure you want to decline this task? The ticket will be returned to the dispatcher pool.',
+      message: 'Please provide a brief reason so the NOC dispatcher can reallocate this work order.',
+      inputs: [
+        {
+          name: 'reason',
+          type: 'text',
+          placeholder: 'e.g. Currently resolving critical fiber cut at POP-2',
+        },
+      ],
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         {
           text: 'Decline Task',
           role: 'destructive',
-          handler: async () => {
+          handler: async (data) => {
             const loading = await this.loadingCtrl.create({ message: 'Declining task...' });
             await loading.present();
             try {
-              await this.api.rejectTask(this.taskId);
+              await this.api.rejectTask(this.taskId, data?.reason || 'Declined by field technician');
               await loading.dismiss();
               await this.showToast('Task has been declined.', 'medium');
               this.router.navigate(['/task-list']);
@@ -556,14 +570,15 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    let cleanPhone = this.task.customer_phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.startsWith('0')) {
-      cleanPhone = '62' + cleanPhone.substring(1);
-    }
+    const countryCode = this.api.getClientConfig().default_country_code || '62';
+    const cleanPhone = formatPhoneForWhatsApp(this.task.customer_phone, countryCode);
+    if (!cleanPhone) return;
+
     const customer = this.task.customer_name || 'Customer';
     const techName = this.user?.name || 'FiberOps Specialist';
-    const trackingUrl = this.task?.tracking_url || `http://127.0.0.1:8000/track/${this.task?.tracking_token}`;
-    
+    const trackingUrl = this.task?.tracking_url
+      || `${this.api.getBaseUrl()}/track/${this.task?.tracking_token}`;
+
     const text = encodeURIComponent(
       `Hello ${customer}, this is ${techName} from the FiberOps technical team en route to your location for ticket: ${this.task.title}.\n\nYou can track our service fleet live here:\n👉 ${trackingUrl}\n\nPlease ensure someone is on-site. Thank you!`
     );
@@ -572,10 +587,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
 
   openWhatsApp() {
     if (!this.task?.customer_phone) return;
-    let cleanPhone = this.task.customer_phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.startsWith('0')) {
-      cleanPhone = '62' + cleanPhone.substring(1);
-    }
+    const countryCode = this.api.getClientConfig().default_country_code || '62';
+    const cleanPhone = formatPhoneForWhatsApp(this.task.customer_phone, countryCode);
+    if (!cleanPhone) return;
+
     const customer = this.task.customer_name || 'Customer';
     const techName = this.user?.name || 'FiberOps Specialist';
     const text = encodeURIComponent(

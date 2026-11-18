@@ -48,7 +48,7 @@
             <ion-icon name="cloud-download-outline" class="text-sm"></ion-icon>
             <span>Export CSV</span>
         </a>
-        <button type="button" onclick="window.print()" class="px-3.5 py-2 text-xs font-semibold bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5" title="Cetak atau simpan sebagai PDF">
+        <button type="button" onclick="window.print()" class="px-3.5 py-2 text-xs font-semibold bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5" title="Print or save as PDF">
             <ion-icon name="print-outline" class="text-sm"></ion-icon>
             <span>Print PDF</span>
         </button>
@@ -61,7 +61,7 @@
         <!-- Preset Timeframes -->
         <div class="flex flex-wrap items-center gap-1.5">
             <span class="text-xs font-bold text-slate-500 mr-1 flex items-center gap-1">
-                <ion-icon name="calendar-outline"></ion-icon> Periode:
+                <ion-icon name="calendar-outline"></ion-icon> Period:
             </span>
             @php
                 $presets = [
@@ -269,7 +269,7 @@
             <ion-icon name="podium-outline" class="text-xl text-primary"></ion-icon>
             <div>
                 <h3 class="text-base font-bold text-textPrimary">Fleet Performance Evaluation Matrix</h3>
-                <span class="text-[10px] text-textSecondary">Benchmarking efisiensi penyelesaian tugas, bukti foto, dan status kehadiran</span>
+                <span class="text-[10px] text-textSecondary">Benchmarking task completion efficiency, photographic proof, and attendance status</span>
             </div>
         </div>
         <span class="text-xs font-semibold text-slate-500">

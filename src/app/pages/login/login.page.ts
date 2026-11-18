@@ -58,25 +58,25 @@ export class LoginPage {
 
   async enterDemoMode() {
     await this.auth.loginDemo(this.email || undefined);
-    this.showToast('Demo Testing Mode aktif (Data Simulasi Lokal)', 'success');
+    this.showToast('Demo Evaluation Mode active (Local Simulation Data)', 'success');
     this.router.navigate(['/task-list'], { replaceUrl: true });
   }
 
   fillDemo(email: string) {
     this.email = email;
     this.password = 'password123';
-    this.showToast(`Kredensial demo ${email} diterapkan`, 'success');
+    this.showToast(`Demo credentials for ${email} applied`, 'success');
   }
 
   async login() {
     if (!this.email || !this.password) {
-      this.showToast('Email dan password wajib diisi', 'warning');
+      this.showToast('Email and password are required', 'warning');
       return;
     }
 
     this.isLoading = true;
     const loading = await this.loadingCtrl.create({ 
-      message: 'Memverifikasi akun...',
+      message: 'Authenticating account...',
       spinner: 'crescent'
     });
     await loading.present();

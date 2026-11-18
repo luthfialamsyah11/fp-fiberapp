@@ -11,14 +11,17 @@ class Task extends Model
         'title', 'customer_name', 'customer_phone', 'description', 'address', 'location',
         'latitude', 'longitude', 'technician_id', 'status', 'priority',
         'additional_notes', 'scheduled_at',
-        'tracking_token', 'customer_signature', 'customer_signer_name', 'customer_signed_at'
+        'tracking_token', 'customer_signature', 'customer_signer_name', 'customer_signed_at',
+        'completed_at', 'bast_hash', 'bast_sealed_at'
     ];
 
     protected $casts = [
-        'scheduled_at' => 'datetime',
+        'scheduled_at'       => 'datetime',
         'customer_signed_at' => 'datetime',
-        'latitude' => 'float',
-        'longitude' => 'float',
+        'completed_at'       => 'datetime',
+        'bast_sealed_at'     => 'datetime',
+        'latitude'           => 'float',
+        'longitude'          => 'float',
     ];
 
     protected $appends = [
@@ -47,8 +50,8 @@ class Task extends Model
 
     public function getTrackingUrlAttribute(): string
     {
-        $token = $this->tracking_token ?? $this->ensureTrackingToken();
-        return url('/track/' . $token);
+        $token = $this->tracking_token ?: '';
+        return $token ? url('/track/' . $token) : '';
     }
 
     public function technician()
@@ -66,12 +69,16 @@ class Task extends Model
         return $this->hasOne(ProgressUpdate::class)->latestOfMany();
     }
 
+    public function statusHistories()
+    {
+        return $this->hasMany(TaskStatusHistory::class)->orderBy('created_at', 'desc');
+    }
+
     public function materials()
     {
         return $this->hasMany(TaskMaterial::class)->with('inventoryItem');
     }
 
-    // Alias: proofs (used in web views)
     public function proofs()
     {
         return $this->hasMany(ProofOfWork::class);
@@ -82,7 +89,6 @@ class Task extends Model
         return $this->hasOne(ProofOfWork::class)->latestOfMany();
     }
 
-    // Original relation name kept for compatibility
     public function proofOfWork()
     {
         return $this->hasMany(ProofOfWork::class);
@@ -108,17 +114,11 @@ class Task extends Model
         return $query->where('priority', 'high');
     }
 
-    /**
-     * Get the resolved location (uses 'location' column first, falls back to 'address').
-     */
     public function getResolvedLocationAttribute(): string
     {
         return $this->location ?? $this->address ?? '-';
     }
 
-    /**
-     * Get a human-readable status label.
-     */
     public function getStatusLabelAttribute(): string
     {
         return match($this->status) {
@@ -128,18 +128,60 @@ class Task extends Model
             'on-going'    => 'In Progress',
             'completed'   => 'Completed',
             'rejected'    => 'Declined',
-            default       => ucfirst($this->status),
+            default       => ucfirst((string) $this->status),
         };
     }
 
-    /**
-     * Get the current progress percentage based on the latest update.
-     */
     public function getProgressPercentAttribute(): int
     {
+        if ($this->status === 'completed') {
+            return 100;
+        }
         if ($this->relationLoaded('progressUpdates')) {
             return $this->progressUpdates->first()?->progress_percent ?? 0;
         }
-        return $this->progressUpdates()->first()?->progress_percent ?? 0;
+        if ($this->relationLoaded('latestProgressUpdate')) {
+            return $this->latestProgressUpdate?->progress_percent ?? 0;
+        }
+        return $this->progressUpdates()->value('progress_percent') ?? 0;
+    }
+
+    /**
+     * Compute deterministic SHA-256 cryptographic seal over task acceptance payload.
+     */
+    public function computeBastHash(): string
+    {
+        $this->loadMissing(['materials', 'proofOfWork']);
+
+        $materialsCanonical = $this->materials
+            ->sortBy('id')
+            ->map(fn ($m) => [
+                'item_id' => (int) $m->inventory_item_id,
+                'qty'     => (float) $m->quantity,
+                'sn'      => (string) ($m->serial_number ?? ''),
+            ])
+            ->values()
+            ->all();
+
+        $proofsCanonical = $this->proofOfWork
+            ->sortBy('id')
+            ->map(fn ($p) => [
+                'image' => (string) $p->image,
+                'desc'  => (string) ($p->description ?? ''),
+            ])
+            ->values()
+            ->all();
+
+        $payload = [
+            'task_id'         => (int) $this->id,
+            'customer_name'   => (string) $this->customer_name,
+            'technician_id'   => (int) ($this->technician_id ?? 0),
+            'signer_name'     => (string) ($this->customer_signer_name ?? ''),
+            'signature_ref'   => (string) ($this->customer_signature ?? ''),
+            'materials'       => $materialsCanonical,
+            'proofs'          => $proofsCanonical,
+        ];
+
+        return hash('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 }

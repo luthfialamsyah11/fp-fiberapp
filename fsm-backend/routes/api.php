@@ -18,17 +18,17 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return response()->json([
         'name'    => 'FSM (Field Service Management) API',
-        'version' => '1.1.0',
+        'version' => '1.2.0',
         'status'  => 'running',
-        'docs'    => 'Import openapi.json ke Apidog/Postman untuk dokumentasi lengkap',
+        'docs'    => 'Import openapi.json into Apidog or Postman for full API specification',
     ]);
 });
 
-// Public Authentication
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:60,1');
+// Public Authentication (Strict brute-force protection: 5 attempts per minute)
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
-// Public Customer Live Tracking Polling API
-Route::get('/public/track/{token}', [CustomerTrackingController::class, 'apiStatus']);
+// Public Customer Live Tracking Polling API (Rate-limited)
+Route::get('/public/track/{token}', [CustomerTrackingController::class, 'apiStatus'])->middleware('throttle:60,1');
 
 // Authenticated Routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -37,35 +37,36 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 
-    // Teknisi - Tasks
+    // Technician - Tasks & Deterministic State Machine
     Route::get('/tasks', [TaskController::class, 'index']);
     Route::get('/tasks/history', [TaskController::class, 'history']);
     Route::get('/tasks/{task}', [TaskController::class, 'show']);
-    Route::post('/tasks/{task}/accept', [TaskController::class, 'accept']);
-    Route::post('/tasks/{task}/reject', [TaskController::class, 'reject']);
-    Route::post('/tasks/{task}/start', [TaskController::class, 'start']);
-    Route::post('/tasks/{task}/complete', [TaskController::class, 'complete']);
+    Route::post('/tasks/{task}/accept', [TaskController::class, 'accept'])->middleware('idempotent');
+    Route::post('/tasks/{task}/reject', [TaskController::class, 'reject'])->middleware('idempotent');
+    Route::post('/tasks/{task}/start', [TaskController::class, 'start'])->middleware('idempotent');
+    Route::post('/tasks/{task}/complete', [TaskController::class, 'complete'])->middleware('idempotent');
 
-    // Teknisi - Progress
-    Route::post('/tasks/{task}/progress', [ProgressController::class, 'store'])->middleware('throttle:30,1');
+    // Technician - Progress
+    Route::post('/tasks/{task}/progress', [ProgressController::class, 'store'])->middleware(['throttle:30,1', 'idempotent']);
 
-    // Teknisi - GPS
-    Route::post('/location', [LocationController::class, 'update'])->middleware('throttle:60,1');
+    // Technician - GPS (Single & Offline Batch Queue Flush)
+    Route::post('/location', [LocationController::class, 'update'])->middleware('throttle:120,1');
+    Route::post('/location/batch', [LocationController::class, 'batchUpdate'])->middleware('throttle:60,1');
 
-    // Teknisi - Proof of Work
+    // Technician - Proof of Work
     Route::get('/tasks/{task}/proof', [ProofController::class, 'index']);
-    Route::post('/tasks/{task}/proof', [ProofController::class, 'store'])->middleware('throttle:30,1');
+    Route::post('/tasks/{task}/proof', [ProofController::class, 'store'])->middleware(['throttle:30,1', 'idempotent']);
 
-    // Teknisi - Active Inventory Items Picker
+    // Technician - Active Inventory Items Picker
     Route::get('/inventory', [InventoryController::class, 'index']);
 
-    // Teknisi & Admin - Task Materials (BOM)
+    // Technician & Admin - Task Materials (BOM) with Idempotency Guard
     Route::get('/tasks/{task}/materials', [TaskMaterialController::class, 'index']);
-    Route::post('/tasks/{task}/materials', [TaskMaterialController::class, 'store']);
+    Route::post('/tasks/{task}/materials', [TaskMaterialController::class, 'store'])->middleware('idempotent');
     Route::delete('/tasks/{task}/materials/{material}', [TaskMaterialController::class, 'destroy']);
 
-    // Teknisi & Admin - Digital Customer Signature
-    Route::post('/tasks/{task}/signature', [TaskSignatureController::class, 'store']);
+    // Technician & Admin - Digital Customer Signature
+    Route::post('/tasks/{task}/signature', [TaskSignatureController::class, 'store'])->middleware('idempotent');
 
     // Admin Routes
     Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {

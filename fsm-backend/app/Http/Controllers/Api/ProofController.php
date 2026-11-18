@@ -6,17 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\ProofOfWork;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProofController extends Controller
 {
     public function store(Request $request, Task $task)
     {
         if ($task->technician_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
-        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'])) {
-            return response()->json(['message' => 'Bukti pekerjaan tidak dapat diunggah pada tiket yang sudah selesai atau ditolak'], 422);
+        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true)) {
+            return response()->json(['message' => 'Proof of work cannot be uploaded to a completed or closed work order.'], 422);
         }
 
         $request->validate([
@@ -38,11 +39,11 @@ class ProofController extends Controller
     public function index(Task $task)
     {
         if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
         $proofs = $task->proofOfWork()->get()->map(function ($proof) {
-            if (\Illuminate\Support\Str::startsWith($proof->image, ['http://', 'https://'])) {
+            if (Str::startsWith($proof->image, ['http://', 'https://'])) {
                 $proof->image_url = $proof->image;
             } else {
                 $proof->image_url = asset('storage/' . $proof->image);

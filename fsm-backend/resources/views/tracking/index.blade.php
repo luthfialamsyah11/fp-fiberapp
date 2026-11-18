@@ -92,14 +92,14 @@
                                         {{ number_format($latestLoc->latitude, 4) }}, {{ number_format($latestLoc->longitude, 4) }}
                                     </span>
                                 @else
-                                    <span class="text-[9px] text-slate-400 truncate block">Belum ada koordinat</span>
+                                    <span class="text-[9px] text-slate-400 truncate block">No coordinates yet</span>
                                 @endif
                             </div>
                         </div>
                         
                         <div class="flex items-center gap-1.5 flex-shrink-0">
-                            @if($tech->is_online || ($latestLoc && $latestLoc->created_at->gt(now()->subMinutes(30))))
-                                <span class="h-2 w-2 rounded-full bg-emerald-500" title="Online Aktif"></span>
+                            @if($tech->isEffectivelyOnline(10))
+                                <span class="h-2 w-2 rounded-full bg-emerald-500" title="Active Online"></span>
                             @else
                                 <span class="h-2 w-2 rounded-full bg-slate-300" title="Offline"></span>
                             @endif
@@ -113,7 +113,7 @@
             @if($selectedTech)
                 <div class="mt-3 pt-3 border-t border-fsmBorder flex justify-between items-center">
                     <span class="text-[10px] text-blue-700 bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded font-semibold truncate max-w-[150px]">
-                        Rute: {{ $selectedTech->name }}
+                        Route: {{ $selectedTech->name }}
                     </span>
                     <a href="{{ route('admin.tracking') }}" class="text-[10px] text-red-500 font-semibold hover:underline">
                         Clear Route Filter
@@ -129,7 +129,7 @@
                     <ion-icon name="pulse-outline" class="text-blue-500"></ion-icon>
                     Live Telemetry Log
                 </h3>
-                <span id="log-status-dot" class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Streaming Telemetri"></span>
+                <span id="log-status-dot" class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Telemetry Streaming"></span>
             </div>
             
             <div id="live-logs-container" class="flex-1 overflow-y-auto max-h-[260px] space-y-2 pr-1 text-[10px] font-mono text-textSecondary">
@@ -143,7 +143,7 @@
                         <p class="truncate text-slate-500">LNG: {{ $log->longitude }}</p>
                     </div>
                 @empty
-                    <p class="text-xs text-textSecondary text-center py-4 font-sans">Belum ada data telemetri.</p>
+                    <p class="text-xs text-textSecondary text-center py-4 font-sans">No telemetry records yet.</p>
                 @endforelse
             </div>
         </div>

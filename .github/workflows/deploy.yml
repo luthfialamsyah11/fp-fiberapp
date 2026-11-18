@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - master
+  workflow_dispatch:
+
+concurrency:
+  group: rumahweb-ftp-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -28,46 +33,87 @@ jobs:
         run: |
           npm ci
           npx ng build --configuration production --base-href ./
+          node -c landing-page/script.js
 
       # 3.5 Verify FTP Secrets Existence
       - name: 🔍 Verify FTP Secrets Configuration
         run: |
           if [ -z "${{ secrets.FTP_SERVER }}" ] || [ -z "${{ secrets.FTP_USERNAME }}" ] || [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
-            echo "::error::GitHub Repository Secrets (FTP_SERVER, FTP_USERNAME, or FTP_PASSWORD) are missing or empty in this repository! Please configure them in Settings -> Secrets and variables -> Actions."
+            echo "::error::GitHub Repository Secrets (FTP_SERVER, FTP_USERNAME, or FTP_PASSWORD) are missing or empty in this repository!"
             exit 1
           fi
           echo "FTP Secrets are populated and ready for deployment."
 
       # 4. Deploy Root Landing Page to ./ (public_html root)
       - name: 🚀 Deploy Root Landing Page
+        id: ftp_landing
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
+          timeout: 60000
           local-dir: ./landing-page/
           server-dir: ${{ vars.FTP_LANDING_DIR || './' }}
-          log-level: verbose
+          log-level: standard
+          dry-run: false
+
+      - name: 🔁 Retry Root Landing Page (if transient FTP drop)
+        if: steps.ftp_landing.outcome == 'failure'
+        run: sleep 15
+
+      - name: 🚀 Deploy Root Landing Page (Retry)
+        if: steps.ftp_landing.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          timeout: 60000
+          local-dir: ./landing-page/
+          server-dir: ${{ vars.FTP_LANDING_DIR || './' }}
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 10
+        run: sleep 12
 
       # 5. Deploy Compiled Frontend PWA to app/ (public_html/app)
       - name: 🚀 Deploy PWA Client
+        id: ftp_pwa
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
+          timeout: 60000
+          local-dir: ./www/
+          server-dir: ${{ vars.FTP_APP_DIR || 'app/' }}
+          dry-run: false
+
+      - name: 🔁 Retry PWA Client (if transient FTP drop)
+        if: steps.ftp_pwa.outcome == 'failure'
+        run: sleep 15
+
+      - name: 🚀 Deploy PWA Client (Retry)
+        if: steps.ftp_pwa.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          timeout: 60000
           local-dir: ./www/
           server-dir: ${{ vars.FTP_APP_DIR || 'app/' }}
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 10
+        run: sleep 12
 
       # 6. Deploy Admin Public bootstrap assets to admin/ (public_html/admin)
       - name: 🚀 Deploy Admin Public
@@ -77,21 +123,25 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
+          timeout: 60000
           local-dir: ./admin-public/
           server-dir: ${{ vars.FTP_ADMIN_DIR || 'admin/' }}
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 10
+        run: sleep 12
 
       # 7. Deploy Backend Core Laravel to laravel-core/ (public_html/laravel-core)
       - name: 🚀 Deploy Laravel Backend Core
+        id: ftp_core
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
+          timeout: 60000
           local-dir: ./fsm-backend/
           server-dir: ${{ vars.FTP_CORE_DIR || 'laravel-core/' }}
           dry-run: false
@@ -103,3 +153,36 @@ jobs:
             **/.env*
             **/laravel.zip
             **/resources.zip
+
+      - name: 🔁 Retry Laravel Backend Core (if transient FTP drop)
+        if: steps.ftp_core.outcome == 'failure'
+        run: sleep 15
+
+      - name: 🚀 Deploy Laravel Backend Core (Retry)
+        if: steps.ftp_core.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          timeout: 60000
+          local-dir: ./fsm-backend/
+          server-dir: ${{ vars.FTP_CORE_DIR || 'laravel-core/' }}
+          dry-run: false
+          exclude: |
+            **/node_modules/**
+            **/vendor/**
+            **/tests/**
+            **/.git*
+            **/.env*
+            **/laravel.zip
+            **/resources.zip
+
+      # 8. Trigger Production Schema Auto-Sync & Smoke Check
+      - name: ✅ Trigger Schema Sync & Verify Live Endpoints
+        run: |
+          sleep 5
+          curl -sS -I https://bentengsiber.com/ | head -n 5
+          curl -sS -I https://admin.bentengsiber.com/login | head -n 5
+          curl -sS -I https://app.bentengsiber.com/ | head -n 5

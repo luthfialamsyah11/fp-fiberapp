@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TechnicianLocation;
-use Illuminate\Http\Request;
+use App\Services\SettingService;
+use Illuminate\Support\Str;
 
 class CustomerTrackingController extends Controller
 {
     /**
-     * Show the public Uber-style tracking web page for customer
+     * Show the public Uber-style tracking web page for customer with strict privacy & expiry guards.
      */
     public function show(string $token)
     {
@@ -18,19 +19,14 @@ class CustomerTrackingController extends Controller
             ->with(['technician', 'progressUpdates'])
             ->firstOrFail();
 
-        // Get latest technician location
-        $latestLocation = null;
-        if ($task->technician_id) {
-            $latestLocation = TechnicianLocation::where('technician_id', $task->technician_id)
-                ->latest('created_at')
-                ->first();
-        }
+        $isExpired = $this->isTrackingExpired($task);
+        $latestLocation = $isExpired ? null : $this->resolveJobBoundLocation($task);
 
-        return view('tracking.customer', compact('task', 'latestLocation'));
+        return view('tracking.customer', compact('task', 'latestLocation', 'isExpired'));
     }
 
     /**
-     * Public JSON polling API for live location & mission status updates
+     * Public JSON polling API for live location & mission status updates.
      */
     public function apiStatus(string $token)
     {
@@ -39,22 +35,42 @@ class CustomerTrackingController extends Controller
             ->first();
 
         if (!$task) {
-            return response()->json(['message' => 'Tracking session not found'], 404);
+            return response()->json(['message' => 'Tracking session not found.'], 404);
         }
 
-        $latestLocation = null;
-        if ($task->technician_id) {
-            $latestLocation = TechnicianLocation::where('technician_id', $task->technician_id)
-                ->latest('created_at')
-                ->first();
+        if ($this->isTrackingExpired($task)) {
+            return response()->json([
+                'message' => 'This tracking session expired 24 hours after work order completion.',
+                'state'   => 'expired',
+            ], 410);
         }
 
-        // Determine technician coordinates
-        $techLat = $latestLocation ? (float) $latestLocation->latitude : (float) ($task->latitude ?? -6.2088);
-        $techLng = $latestLocation ? (float) $latestLocation->longitude : (float) ($task->longitude ?? 106.8456);
+        $latestLocation = $this->resolveJobBoundLocation($task);
+
+        $distanceKm = null;
+        $etaMinutes = null;
+        if ($latestLocation && $task->latitude && $task->longitude) {
+            $meters = SettingService::haversineMeters(
+                (float) $latestLocation->latitude,
+                (float) $latestLocation->longitude,
+                (float) $task->latitude,
+                (float) $task->longitude
+            );
+            $distanceKm = round($meters / 1000, 2);
+            $speedMps = ($latestLocation->speed_mps && $latestLocation->speed_mps > 1.5)
+                ? (float) $latestLocation->speed_mps
+                : 8.33; // ~30 km/h urban average
+            $etaMinutes = max(1, (int) ceil(($meters / $speedMps) / 60));
+        }
+
+        // Field-level privacy redaction: expose only technician first name, never private phone number
+        $techFirstName = $task->technician
+            ? Str::before(trim($task->technician->name), ' ')
+            : 'Assigned Specialist';
 
         return response()->json([
-            'task' => [
+            'state' => $latestLocation ? 'tracking' : 'waiting',
+            'task'  => [
                 'id'               => $task->id,
                 'title'            => $task->title,
                 'status'           => $task->status,
@@ -62,18 +78,68 @@ class CustomerTrackingController extends Controller
                 'progress_percent' => $task->progress_percent,
                 'customer_name'    => $task->customer_name,
                 'address'          => $task->address,
-                'destination_lat'  => (float) $task->latitude,
-                'destination_lng'  => (float) $task->longitude,
+                'destination_lat'  => $task->latitude ? (float) $task->latitude : null,
+                'destination_lng'  => $task->longitude ? (float) $task->longitude : null,
             ],
             'technician' => [
-                'name'  => $task->technician?->name ?? 'Teknisi Lapangan',
-                'phone' => $task->technician?->phone ?? '-',
+                'name' => $techFirstName,
             ],
-            'live_location' => [
-                'latitude'    => $techLat,
-                'longitude'   => $techLng,
-                'recorded_at' => $latestLocation?->created_at?->diffForHumans() ?? 'Baru saja',
-            ]
+            'live_location' => $latestLocation ? [
+                'latitude'    => (float) $latestLocation->latitude,
+                'longitude'   => (float) $latestLocation->longitude,
+                'accuracy_m'  => $latestLocation->accuracy_m,
+                'distance_km' => $distanceKm,
+                'eta_minutes' => $etaMinutes,
+                'recorded_at' => ($latestLocation->captured_at ?? $latestLocation->created_at)?->diffForHumans() ?? 'Just now',
+            ] : null,
         ]);
+    }
+
+    private function isTrackingExpired(Task $task): bool
+    {
+        if ($task->status !== 'completed') {
+            return false;
+        }
+        $closedAt = $task->completed_at ?? $task->updated_at;
+        return $closedAt !== null && $closedAt->lt(now()->subHours(24));
+    }
+
+    /**
+     * Resolve only GPS pings bound to this task or captured while this task is actively being worked.
+     * Never leak technician movements on other tasks after this task is completed!
+     */
+    private function resolveJobBoundLocation(Task $task): ?TechnicianLocation
+    {
+        if (!$task->technician_id) {
+            return null;
+        }
+
+        // 1. Prefer points explicitly linked to this task_id
+        $taskBound = TechnicianLocation::where('technician_id', $task->technician_id)
+            ->where('task_id', $task->id)
+            ->latest('id')
+            ->first();
+
+        if ($taskBound) {
+            return $taskBound;
+        }
+
+        // 2. If task is completed, do NOT show newer pings from subsequent jobs
+        if ($task->status === 'completed') {
+            $closedAt = $task->completed_at ?? $task->updated_at;
+            return TechnicianLocation::where('technician_id', $task->technician_id)
+                ->where('created_at', '<=', $closedAt)
+                ->latest('id')
+                ->first();
+        }
+
+        // 3. Only return general technician ping while task is accepted or on-going
+        if (in_array($task->status, ['accepted', 'on-going'], true)) {
+            return TechnicianLocation::where('technician_id', $task->technician_id)
+                ->latest('id')
+                ->first();
+        }
+
+        return null;
     }
 }

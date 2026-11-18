@@ -1,24 +1,61 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { StorageService } from './storage.service';
 import { environment } from '../../environments/environment';
 import { DEMO_INVENTORY, DEMO_USER, createInitialDemoTasks } from './demo-mock.data';
+import { GpsTelemetryPoint, OfflineQueueService } from './offline-queue.service';
 
 const isDebug = !environment.production;
+
+export interface FsmClientConfig {
+  gps_refresh_interval: number;
+  geofence_check_meters: number;
+  require_proof_photo: boolean;
+  require_customer_signature: boolean;
+  currency: string;
+  default_country_code: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
   private storage = inject(StorageService);
+  private offlineQueue = inject(OfflineQueueService);
 
   private baseUrl = environment.apiUrl;
   private demoUser = { ...DEMO_USER };
   private demoTasks = createInitialDemoTasks();
   private demoInventory = DEMO_INVENTORY.map(item => ({ ...item }));
 
+  private clientConfig: FsmClientConfig = {
+    gps_refresh_interval: 15,
+    geofence_check_meters: 0,
+    require_proof_photo: true,
+    require_customer_signature: false,
+    currency: 'USD',
+    default_country_code: '62',
+  };
+
   getBaseUrl(): string {
     return this.baseUrl.replace(/\/api$/, '');
+  }
+
+  getClientConfig(): FsmClientConfig {
+    return this.clientConfig;
+  }
+
+  private applyClientConfig(cfg: any) {
+    if (cfg && typeof cfg === 'object') {
+      this.clientConfig = { ...this.clientConfig, ...cfg };
+    }
+  }
+
+  private idempotentHeaders(customKey?: string): { headers: HttpHeaders } {
+    const key = customKey || this.offlineQueue.generateUuid();
+    return {
+      headers: new HttpHeaders({ 'Idempotency-Key': key }),
+    };
   }
 
   private async isDemoMode(): Promise<boolean> {
@@ -28,9 +65,11 @@ export class ApiService {
   // Auth
   async login(email: string, password: string) {
     const url = `${this.baseUrl}/login`;
-    
     try {
-      const response = await firstValueFrom(this.http.post(url, { email, password }));
+      const response: any = await firstValueFrom(this.http.post(url, { email, password }));
+      if (response?.config) {
+        this.applyClientConfig(response.config);
+      }
       return response;
     } catch (error) {
       if (isDebug) console.error('[ApiService] Login request failed:', error);
@@ -48,9 +87,13 @@ export class ApiService {
 
   async getMe() {
     if (await this.isDemoMode()) {
-      return { data: this.demoUser };
+      return { data: this.demoUser, config: this.clientConfig };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/me`));
+    const res: any = await firstValueFrom(this.http.get(`${this.baseUrl}/me`));
+    if (res?.config) {
+      this.applyClientConfig(res.config);
+    }
+    return res;
   }
 
   async updateProfile(data: any) {
@@ -92,22 +135,22 @@ export class ApiService {
 
   async acceptTask(id: number) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'accepted', 10);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/accept`, {}));
+    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/accept`, {}, this.idempotentHeaders()));
   }
 
-  async rejectTask(id: number) {
+  async rejectTask(id: number, reason?: string) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'rejected', 0);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/reject`, {}));
+    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/reject`, { reason }, this.idempotentHeaders()));
   }
 
   async startTask(id: number) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'on-going', 25);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/start`, {}));
+    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/start`, {}, this.idempotentHeaders()));
   }
 
   async completeTask(id: number) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'completed', 100);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/complete`, {}));
+    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/complete`, {}, this.idempotentHeaders()));
   }
 
   async updateProgress(id: number, note: string, percent: number) {
@@ -126,7 +169,13 @@ export class ApiService {
       }
       return { data: task };
     }
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/progress`, { note, progress_percent: percent }));
+    return firstValueFrom(
+      this.http.post(
+        `${this.baseUrl}/tasks/${id}/progress`,
+        { note, progress_percent: percent },
+        this.idempotentHeaders()
+      )
+    );
   }
 
   async getHistory() {
@@ -136,12 +185,33 @@ export class ApiService {
     return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/history`));
   }
 
-  // GPS
-  async updateLocation(latitude: number, longitude: number) {
+  // GPS Telemetry (Single & Offline Batch Queue Flush)
+  async updateLocation(
+    latitudeOrPayload: number | GpsTelemetryPoint,
+    longitude?: number
+  ) {
+    const payload: any =
+      typeof latitudeOrPayload === 'number'
+        ? {
+            latitude: latitudeOrPayload,
+            longitude: longitude ?? 0,
+            captured_at: new Date().toISOString(),
+            client_uuid: this.offlineQueue.generateUuid(),
+            source: 'foreground',
+          }
+        : latitudeOrPayload;
+
     if (await this.isDemoMode()) {
-      return { status: 'ok', latitude, longitude };
+      return { status: 'ok', ...payload };
     }
-    return firstValueFrom(this.http.post(`${this.baseUrl}/location`, { latitude, longitude }));
+    return firstValueFrom(this.http.post(`${this.baseUrl}/location`, payload));
+  }
+
+  async batchUpdateLocation(points: GpsTelemetryPoint[]) {
+    if (await this.isDemoMode()) {
+      return { status: 'ok', accepted: points.length, skipped: 0 };
+    }
+    return firstValueFrom(this.http.post(`${this.baseUrl}/location/batch`, { points }));
   }
 
   // Proof of Work
@@ -163,7 +233,7 @@ export class ApiService {
     const formData = new FormData();
     formData.append('image', file);
     formData.append('description', description);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/proof`, formData));
+    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/proof`, formData, this.idempotentHeaders()));
   }
 
   async getProof(taskId: number) {
@@ -192,7 +262,11 @@ export class ApiService {
     return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/materials`));
   }
 
-  async addTaskMaterial(taskId: number, data: { inventory_item_id: number; quantity: number; serial_number?: string; notes?: string }): Promise<any> {
+  async addTaskMaterial(
+    taskId: number,
+    data: { inventory_item_id: number; quantity: number; serial_number?: string; notes?: string },
+    idempotencyKey?: string
+  ): Promise<any> {
     if (await this.isDemoMode()) {
       const task = this.demoTasks.find(t => t.id === Number(taskId));
       const inv = this.demoInventory.find(i => i.id === Number(data.inventory_item_id));
@@ -204,7 +278,9 @@ export class ApiService {
       }
       return { data: mat, current_stock: inv?.stock ?? 0 };
     }
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/materials`, data));
+    return firstValueFrom(
+      this.http.post(`${this.baseUrl}/tasks/${taskId}/materials`, data, this.idempotentHeaders(idempotencyKey))
+    );
   }
 
   async deleteTaskMaterial(taskId: number, materialId: number): Promise<any> {
@@ -233,9 +309,12 @@ export class ApiService {
       }
       return { message: 'Signature saved in demo mode', data: task };
     }
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/signature`, {
-      signature,
-      signer_name: signerName
-    }));
+    return firstValueFrom(
+      this.http.post(
+        `${this.baseUrl}/tasks/${taskId}/signature`,
+        { signature, signer_name: signerName },
+        this.idempotentHeaders()
+      )
+    );
   }
 }

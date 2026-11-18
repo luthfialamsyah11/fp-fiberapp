@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProofOfWork;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,9 +12,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    /**
-     * Display comprehensive operational reports & analytics.
-     */
     public function index(Request $request)
     {
         $timeframe = $request->query('timeframe', 'all');
@@ -23,15 +19,12 @@ class ReportController extends Controller
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
 
-        // Check if user requested direct CSV export
         if ($request->query('export') === 'csv') {
             return $this->export($request);
         }
 
-        // Base query with timeframe and technician filters applied
         $taskQuery = $this->applyFilters(Task::query(), $timeframe, $technicianId, $startDate, $endDate);
 
-        // Core Aggregate Metrics & Distribution (Consolidated into 1 high-efficiency query)
         $metricsRow = (clone $taskQuery)->selectRaw("
             COUNT(*) as total_tasks,
             COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tasks,
@@ -53,20 +46,23 @@ class ReportController extends Controller
         $ongoingTasks = (int) ($metricsRow->ongoing_tasks ?? 0);
         $urgentTasks = (int) ($metricsRow->urgent_tasks ?? 0);
 
-        // Completion Rate
         $completionRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
 
-        // Quality Gate: Proof of Work Compliance Rate (% of completed tasks with at least 1 photo proof)
         $completedWithProof = (clone $taskQuery)->where('status', 'completed')->has('proofs')->count();
         $proofComplianceRate = $completedTasks > 0 ? round(($completedWithProof / $completedTasks) * 100, 1) : 100;
 
-        // Average Resolution Turnaround in Hours computed directly in database engine (zero PHP memory overhead)
-        $avgMinutes = (clone $taskQuery)->where('status', 'completed')
-            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as avg_min')
-            ->value('avg_min');
+        // Cross-database compatible resolution duration calculation (MySQL & SQLite)
+        if (DB::getDriverName() === 'sqlite') {
+            $avgMinutes = (clone $taskQuery)->where('status', 'completed')
+                ->selectRaw('AVG((julianday(updated_at) - julianday(created_at)) * 1440) as avg_min')
+                ->value('avg_min');
+        } else {
+            $avgMinutes = (clone $taskQuery)->where('status', 'completed')
+                ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as avg_min')
+                ->value('avg_min');
+        }
         $avgResolutionHours = $avgMinutes ? round($avgMinutes / 60, 1) : 0;
 
-        // Status Distribution
         $statusCounts = [
             'pending'   => (int) ($metricsRow->pending_tasks ?? 0),
             'assigned'  => (int) ($metricsRow->assigned_tasks ?? 0),
@@ -76,14 +72,12 @@ class ReportController extends Controller
             'rejected'  => (int) ($metricsRow->rejected_tasks ?? 0),
         ];
 
-        // Priority Distribution
         $priorityCounts = [
             'low'    => (int) ($metricsRow->low_priority_tasks ?? 0),
             'medium' => (int) ($metricsRow->medium_priority_tasks ?? 0),
             'high'   => (int) ($metricsRow->high_priority_tasks ?? 0),
         ];
 
-        // 14-Day Trend Data for Dynamic Line Chart (Bulk grouped query replacing 28 loop queries)
         $trendDays = 14;
         $trendLabels = [];
         $trendCreated = [];
@@ -92,14 +86,14 @@ class ReportController extends Controller
         $fourteenDaysAgo = Carbon::today()->subDays($trendDays - 1)->startOfDay();
 
         $createdTrends = Task::where('created_at', '>=', $fourteenDaysAgo)
-            ->when($technicianId, fn($q) => $q->where('technician_id', $technicianId))
+            ->when($technicianId, fn ($q) => $q->where('technician_id', $technicianId))
             ->selectRaw('DATE(created_at) as date, count(*) as total')
             ->groupBy('date')
             ->pluck('total', 'date');
 
         $completedTrends = Task::where('status', 'completed')
             ->where('updated_at', '>=', $fourteenDaysAgo)
-            ->when($technicianId, fn($q) => $q->where('technician_id', $technicianId))
+            ->when($technicianId, fn ($q) => $q->where('technician_id', $technicianId))
             ->selectRaw('DATE(updated_at) as date, count(*) as total')
             ->groupBy('date')
             ->pluck('total', 'date');
@@ -112,9 +106,8 @@ class ReportController extends Controller
             $trendCompleted[] = (int) ($completedTrends[$dateStr] ?? 0);
         }
 
-        // Technician Performance Benchmarking Table
         $technicianCompletions = User::technicians()
-            ->with(['tasks' => function ($q) use ($timeframe, $startDate, $endDate) {
+            ->with(['latestLocation', 'tasks' => function ($q) use ($timeframe, $startDate, $endDate) {
                 if ($timeframe === 'today') {
                     $q->whereDate('created_at', Carbon::today());
                 } elseif ($timeframe === '7_days') {
@@ -133,9 +126,7 @@ class ReportController extends Controller
                 $total = $tasks->count();
                 $completed = $tasks->where('status', 'completed')->count();
                 $active = $tasks->whereIn('status', ['assigned', 'accepted', 'on-going'])->count();
-                $proofsCount = $tasks->sum(function ($t) {
-                    return $t->proofs->count();
-                });
+                $proofsCount = $tasks->sum(fn ($t) => $t->proofs->count());
                 $rate = $total > 0 ? round(($completed / $total) * 100, 1) : 0;
 
                 return [
@@ -143,7 +134,7 @@ class ReportController extends Controller
                     'name'            => $tech->name,
                     'email'           => $tech->email,
                     'phone'           => $tech->phone ?? '-',
-                    'is_online'       => (bool) $tech->is_online,
+                    'is_online'       => $tech->isEffectivelyOnline(10),
                     'total_assigned'  => $total,
                     'completed'       => $completed,
                     'active'          => $active,
@@ -152,7 +143,6 @@ class ReportController extends Controller
                 ];
             });
 
-        // Technicians list for filter dropdown
         $techniciansList = User::technicians()->orderBy('name')->get();
 
         return view('reports.index', compact(
@@ -178,9 +168,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * Export operational report matching active filters as a downloadable CSV.
-     */
     public function export(Request $request): StreamedResponse
     {
         $timeframe = $request->query('timeframe', 'all');
@@ -201,25 +188,22 @@ class ReportController extends Controller
         $response = new StreamedResponse(function () use ($query) {
             $handle = fopen('php://output', 'w');
 
-            // UTF-8 BOM for Excel compatibility
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // CSV Header Row
             fputcsv($handle, [
                 'Task ID',
-                'Judul Tugas',
-                'Nama Pelanggan',
-                'No. Telepon',
-                'Alamat / Lokasi',
-                'Teknisi Penanggung Jawab',
-                'Prioritas',
+                'Work Order Title',
+                'Customer Name',
+                'Phone Number',
+                'Address / Location',
+                'Assigned Technician',
+                'Priority',
                 'Status',
-                'Jumlah Bukti Foto',
-                'Tanggal Dibuat',
-                'Pembaruan Terakhir'
+                'Proof Photos Count',
+                'Created At',
+                'Last Updated'
             ]);
 
-            // Stream rows chunk by chunk
             $query->chunk(100, function ($tasks) use ($handle) {
                 foreach ($tasks as $task) {
                     fputcsv($handle, [
@@ -228,7 +212,7 @@ class ReportController extends Controller
                         $task->customer_name,
                         $task->customer_phone ?? '-',
                         $task->resolved_location,
-                        $task->technician ? $task->technician->name : 'Belum Ditugaskan',
+                        $task->technician ? $task->technician->name : 'Unassigned',
                         ucfirst($task->priority),
                         $task->status_label,
                         $task->proofs->count(),
@@ -247,9 +231,6 @@ class ReportController extends Controller
         return $response;
     }
 
-    /**
-     * Helper to apply timeframe and technician filters.
-     */
     private function applyFilters($query, string $timeframe, ?string $technicianId, ?string $startDate, ?string $endDate)
     {
         if ($technicianId) {
@@ -279,7 +260,6 @@ class ReportController extends Controller
                 }
                 break;
             default:
-                // 'all' - no date filter
                 break;
         }
 

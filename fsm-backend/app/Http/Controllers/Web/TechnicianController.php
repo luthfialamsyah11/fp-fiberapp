@@ -13,8 +13,8 @@ class TechnicianController extends Controller
     public function index(Request $request)
     {
         $technicians = User::where('role', 'technician')
-            ->when($request->search, function($query, $search) {
-                $query->where(function($q) use ($search) {
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%")
                       ->orWhere('phone', 'like', "%{$search}%");
@@ -35,10 +35,10 @@ class TechnicianController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'phone' => 'nullable|string|max:20',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|string|email|max:255|unique:users',
+            'password'  => 'required|string|min:6|confirmed',
+            'phone'     => 'nullable|string|max:20',
             'is_active' => 'boolean',
         ]);
 
@@ -48,7 +48,7 @@ class TechnicianController extends Controller
 
         User::create($validated);
 
-        return redirect()->route('admin.technicians.index')->with('success', 'Teknisi berhasil ditambahkan.');
+        return redirect()->route('admin.technicians.index')->with('success', 'Technician provisioned successfully.');
     }
 
     public function edit(User $technician)
@@ -66,10 +66,10 @@ class TechnicianController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($technician->id)],
+            'name'     => 'required|string|max:255',
+            'email'    => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($technician->id)],
             'password' => 'nullable|string|min:6|confirmed',
-            'phone' => 'nullable|string|max:20',
+            'phone'    => 'nullable|string|max:20',
         ]);
 
         if (!empty($validated['password'])) {
@@ -82,7 +82,7 @@ class TechnicianController extends Controller
 
         $technician->update($validated);
 
-        return redirect()->route('admin.technicians.index')->with('success', 'Data teknisi berhasil diperbarui.');
+        return redirect()->route('admin.technicians.index')->with('success', 'Technician profile updated successfully.');
     }
 
     public function destroy(User $technician)
@@ -91,10 +91,8 @@ class TechnicianController extends Controller
             abort(404);
         }
 
-        // Technically we might want to soft delete or prevent deletion if tasks exist
-        // For simplicity, we just delete or deactivate. Let's just deactivate instead of delete to be safe.
-        $technician->update(['is_active' => false]);
+        $technician->update(['is_active' => false, 'is_online' => false]);
 
-        return redirect()->route('admin.technicians.index')->with('success', 'Teknisi berhasil dinonaktifkan.');
+        return redirect()->route('admin.technicians.index')->with('success', 'Technician deactivated successfully.');
     }
 }

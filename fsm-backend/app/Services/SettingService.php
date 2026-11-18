@@ -16,15 +16,18 @@ class SettingService
     public static function all()
     {
         $defaults = [
-            'company_name'             => 'FiberOps Indonesia',
-            'support_email'            => 'support@fiberops.net',
-            'support_phone'            => '021-9988-7766',
+            'company_name'             => 'FiberOps Global Carrier',
+            'support_email'            => 'noc@bentengsiber.com',
+            'support_phone'            => '+1-800-555-0199',
+            'currency'                 => 'USD',
+            'default_country_code'     => '62',
             'gps_refresh_interval'     => '15',
             'map_style'                => 'openstreetmap',
             'auto_assign'              => '1',
             'sla_warning_hours'        => '2',
             'require_proof_photo'      => '1',
-            'geofence_check_meters'    => '100',
+            'require_customer_signature'=> '1',
+            'geofence_check_meters'    => '0',
             'webhook_url'              => '',
             'notify_emergency_tickets' => '1',
             'notify_task_completed'    => '1',
@@ -52,6 +55,32 @@ class SettingService
         return $settings[$key] ?? $default;
     }
 
+    public static function formatCurrency(float $amount): string
+    {
+        $currency = strtoupper((string) self::get('currency', 'USD'));
+        return match ($currency) {
+            'IDR', 'RP' => 'IDR ' . number_format($amount, 0, '.', ','),
+            'EUR'       => '€' . number_format($amount, 2, '.', ','),
+            'GBP'       => '£' . number_format($amount, 2, '.', ','),
+            default     => '$' . number_format($amount, 2, '.', ','),
+        };
+    }
+
+    /**
+     * Calculate Haversine distance in meters between two GPS coordinates.
+     */
+    public static function haversineMeters(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $earthRadius = 6371000.0; // meters
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(max(0.0, 1 - $a)));
+        return $earthRadius * $c;
+    }
+
     /**
      * Dispatch webhook notification safely without blocking or throwing
      */
@@ -61,11 +90,17 @@ class SettingService
             $settings = self::all();
             $webhookUrl = trim($settings['webhook_url'] ?? '');
 
-            if (empty($webhookUrl)) {
+            if (empty($webhookUrl) || str_contains($webhookUrl, 'bot-sample-token')) {
                 return false;
             }
 
-            // Check trigger filters
+            // SSRF safety guard: only allow external http/https hosts
+            $parsed = parse_url($webhookUrl);
+            $host = strtolower($parsed['host'] ?? '');
+            if (empty($host) || in_array($host, ['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254'], true)) {
+                return false;
+            }
+
             if ($event === 'TASK_EMERGENCY_CREATED' && empty($settings['notify_emergency_tickets'])) {
                 return false;
             }
@@ -81,7 +116,6 @@ class SettingService
                 'data'        => $payload,
             ];
 
-            // Send with short 2.5s timeout so user action is never delayed
             Http::timeout(2.5)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post($webhookUrl, $body);

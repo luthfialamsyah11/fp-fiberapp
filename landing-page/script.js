@@ -598,54 +598,26 @@ function showSimToast(title, message, icon = 'verified') {
       'demo.title': 'Live Sandbox & Demo Credentials',
       'pricing.title': 'Commercial Acquisition & Licensing Hub',
       'scanner.title': 'Interactive Domain Security Posture Audit'
-    },
-    id: {
-      'nav.portals': 'Portal',
-      'nav.simulator': 'Simulator Live',
-      'nav.sandbox': 'Sandbox Demo',
-      'nav.pricing': 'Akuisisi Aset',
-      'nav.scanner': 'Scanner',
-      'nav.architecture': 'Arsitektur',
-      'hero.title': 'Platform komando operasional fiber & pertahanan siber.',
-      'hero.desc': 'Benteng Siber menyatukan dispatch teknisi lapangan, telemetri GPS real-time, tanda tangan BAST digital, dan audit keamanan domain dalam satu layar kendali presisi.',
-      'hero.cta1': 'Coba Simulator Interaktif',
-      'hero.cta2': 'Akuisisi Full IP ($5,850)',
-      'hero.cta3': 'Jalankan Audit Keamanan',
-      'portals.title': 'Gerbang Portal Ekosistem',
-      'carousel.title': 'Layar Ekosistem & Alur Kerja Real-Time',
-      'sim.title': 'Hub Simulator Produk Interaktif',
-      'demo.title': 'Sandbox Live & Kredensial Demo',
-      'pricing.title': 'Hub Akuisisi Komersial & Lisensi',
-      'scanner.title': 'Audit Postur Keamanan Domain Interaktif'
     }
   };
 
   let currentLang = 'en';
-  const langBtn = document.getElementById('lang-toggle-btn');
   const langLabel = document.getElementById('lang-label');
-  const langBtnSidebar = document.getElementById('lang-toggle-btn-sidebar');
   const langLabelSidebar = document.getElementById('lang-label-sidebar');
 
-  function applyLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem('benteng_lang', lang);
-    const labelText = lang === 'id' ? 'ID / EN' : 'EN / ID';
-    if (langLabel) langLabel.textContent = labelText;
-    if (langLabelSidebar) langLabelSidebar.textContent = labelText;
-    const dict = translations[lang] || translations.en;
+  function applyLanguage() {
+    currentLang = 'en';
+    localStorage.setItem('benteng_lang', 'en');
+    if (langLabel) langLabel.textContent = 'EN • GLOBAL';
+    if (langLabelSidebar) langLabelSidebar.textContent = 'EN • GLOBAL';
+    const dict = translations.en;
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (dict[key]) el.textContent = dict[key];
     });
   }
 
-  function toggleLanguage() {
-    applyLanguage(currentLang === 'en' ? 'id' : 'en');
-  }
-
-  if (langBtn) langBtn.addEventListener('click', toggleLanguage);
-  if (langBtnSidebar) langBtnSidebar.addEventListener('click', toggleLanguage);
-  applyLanguage(currentLang);
+  applyLanguage();
 
   // Scrollspy for top desktop navbar
   const navLinks = document.querySelectorAll('header nav a[href^="#"]');

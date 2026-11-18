@@ -13,7 +13,6 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Consolidated Task & User Aggregations into 2 lean queries
         $taskStats = Task::selectRaw("
             COUNT(*) as total_tasks,
             COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
@@ -24,10 +23,14 @@ class DashboardController extends Controller
             COUNT(CASE WHEN priority = 'high' AND status NOT IN ('completed', 'rejected') THEN 1 END) as urgent_active
         ")->first();
 
-        $techStats = User::technicians()->selectRaw("
-            COUNT(CASE WHEN is_active = 1 THEN 1 END) as active,
-            COUNT(CASE WHEN is_active = 1 AND is_online = 1 THEN 1 END) as online
-        ")->first();
+        $technicians = User::technicians()
+            ->with(['latestLocation', 'tasks' => function ($q) {
+                $q->whereIn('status', ['assigned', 'accepted', 'on-going']);
+            }])
+            ->get();
+
+        $activeTechsCount = $technicians->where('is_active', true)->count();
+        $onlineTechsCount = $technicians->filter(fn ($t) => $t->is_active && $t->isEffectivelyOnline(10))->count();
 
         $totalProofs = ProofOfWork::count();
         $totalTasksCount = (int) ($taskStats->total_tasks ?? 0);
@@ -42,12 +45,11 @@ class DashboardController extends Controller
             'completed'          => $completedTasksCount,
             'urgent_active'      => (int) ($taskStats->urgent_active ?? 0),
             'completion_rate'    => $totalTasksCount > 0 ? round(($completedTasksCount / $totalTasksCount) * 100, 1) : 0,
-            'active_technicians' => (int) ($techStats->active ?? 0),
-            'online_technicians' => (int) ($techStats->online ?? 0),
+            'active_technicians' => $activeTechsCount,
+            'online_technicians' => $onlineTechsCount,
             'total_proofs'       => $totalProofs,
         ];
 
-        // Active Tasks Filter (All, Pending, On-Going, Urgent, Completed)
         $filter = $request->query('filter', 'all');
         $taskQuery = Task::with(['technician', 'latestProgressUpdate', 'proofs']);
 
@@ -65,51 +67,41 @@ class DashboardController extends Controller
                 $taskQuery->where('status', 'completed');
                 break;
             default:
-                // 'all' - show all recent
                 break;
         }
 
         $recentTasks = $taskQuery->orderBy('created_at', 'desc')->take(10)->get();
 
-        // Recent Activity Timeline logs
         $timelineLogs = ProgressUpdate::with(['task', 'user'])
             ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 
-        // Unified Technicians collection with latest location and active tasks
-        $technicians = User::technicians()
-            ->with(['latestLocation', 'tasks' => function ($q) {
-                $q->whereIn('status', ['assigned', 'accepted', 'on-going']);
-            }])
-            ->get();
-
-        // Fleet Roster for real-time technician readiness widget
         $fleetRoster = $technicians->map(function ($tech) {
             $ongoingTask = $tech->tasks->firstWhere('status', 'on-going') ?? $tech->tasks->firstWhere('status', 'accepted');
+            $effectiveOnline = $tech->isEffectivelyOnline(10);
             return [
                 'id'               => $tech->id,
                 'name'             => $tech->name,
                 'phone'            => $tech->phone,
-                'is_online'        => (bool) $tech->is_online,
+                'is_online'        => $effectiveOnline,
                 'is_active'        => (bool) $tech->is_active,
                 'active_task'      => $ongoingTask ? $ongoingTask->title : null,
                 'active_task_id'   => $ongoingTask ? $ongoingTask->id : null,
                 'active_tasks_qty' => $tech->tasks->count(),
-                'last_ping'        => $tech->latestLocation ? $tech->latestLocation->updated_at->diffForHumans() : 'Belum ada sinyal',
+                'last_ping'        => $tech->latestLocation ? $tech->latestLocation->updated_at->diffForHumans() : 'No signal yet',
                 'latitude'         => $tech->latestLocation ? (float) $tech->latestLocation->latitude : null,
                 'longitude'        => $tech->latestLocation ? (float) $tech->latestLocation->longitude : null,
             ];
         });
 
-        // Prepare sanitized, XSS-safe marker data directly from unified collection (0 duplicate queries)
         $markerData = $technicians->map(function ($tech) {
             $loc = $tech->latestLocation;
             if (!$loc || !$loc->latitude || !$loc->longitude) {
                 return null;
             }
 
-            $isOnline = (bool) $tech->is_online;
+            $isOnline = $tech->isEffectivelyOnline(10);
             $ongoingTask = $tech->tasks->firstWhere('status', 'on-going');
             $hasOngoing = !is_null($ongoingTask);
             $activeTask = $ongoingTask ?? $tech->tasks->firstWhere('status', 'accepted');
@@ -127,12 +119,11 @@ class DashboardController extends Controller
             ];
         })->filter()->values();
 
-        // Dynamic notifications for header
         $notifications = $timelineLogs->take(4)->map(function ($p) {
             return [
-                'title'    => ($p->user->name ?? 'Teknisi') . ' memperbarui tugas ' . ($p->task ? '#TSK-' . str_pad($p->task->id, 4, '0', STR_PAD_LEFT) : ''),
+                'title'    => ($p->user->name ?? 'Technician') . ' updated work order ' . ($p->task ? '#TSK-' . str_pad($p->task->id, 4, '0', STR_PAD_LEFT) : ''),
                 'note'     => $p->note ? \Illuminate\Support\Str::limit($p->note, 45) : 'Progress ' . $p->progress_percent . '%',
-                'time_ago' => $p->created_at ? $p->created_at->diffForHumans() : 'baru saja',
+                'time_ago' => $p->created_at ? $p->created_at->diffForHumans() : 'just now',
                 'url'      => $p->task ? route('admin.tasks.show', $p->task->id) : route('admin.tasks.index'),
             ];
         });

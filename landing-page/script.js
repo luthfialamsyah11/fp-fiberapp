@@ -43,6 +43,8 @@ function showSimToast(title, message, icon = 'verified') {
       }
       if (tabIndex === 1) {
         initSignaturePad();
+      } else if (tabIndex === 2) {
+        requestAnimationFrame(() => updateRadarProgress(radarProgress));
       }
     }
 
@@ -233,12 +235,17 @@ function showSimToast(title, message, icon = 'verified') {
       if (slider) slider.value = radarProgress;
       if (percentText) percentText.innerText = `${radarProgress}%`;
 
-      const trackRow = van ? van.parentElement : null;
-      let maxOffset = 210;
-      if (trackRow) {
+      const trackRow = document.getElementById('radar-corridor') || (van ? van.parentElement : null);
+      const targetPin = document.getElementById('radar-target-pin');
+      let maxOffset = 140;
+      if (trackRow && van) {
         const rowWidth = trackRow.getBoundingClientRect().width;
-        // Keep van from overlapping target pin icon (approx 80-90px)
-        maxOffset = Math.max(70, rowWidth - 90);
+        const vanWidth = van.getBoundingClientRect().width || 135;
+        const targetWidth = targetPin ? (targetPin.getBoundingClientRect().width || 135) : 135;
+        if (rowWidth > 0) {
+          // Ensure van marker never collides with Customer ONT Target pin (leaving 56px padding + 16px safety gap)
+          maxOffset = Math.max(0, Math.floor(rowWidth - vanWidth - targetWidth - 64));
+        }
       }
       const currentOffset = Math.round((radarProgress / 100) * maxOffset);
       if (van) van.style.transform = `translateX(${currentOffset}px)`;

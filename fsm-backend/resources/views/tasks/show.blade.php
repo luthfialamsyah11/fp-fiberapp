@@ -252,7 +252,7 @@
             @else
                 <div class="text-center py-6 text-textSecondary">
                     <ion-icon name="cube-outline" class="text-3xl mb-1 text-slate-300"></ion-icon>
-                    <p class="text-xs">Belum ada material yang dicatat oleh teknisi untuk pekerjaan ini.</p>
+                    <p class="text-xs">No materials have been logged by the technician for this work order.</p>
                 </div>
             @endif
         </div>
@@ -261,16 +261,16 @@
         <div class="bg-white rounded-xl border border-fsmBorder p-6 shadow-sm">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-fsmBorder">
                 <div>
-                    <h3 class="text-sm font-bold text-textPrimary">Tanda Tangan Elektronik Pelanggan</h3>
-                    <p class="text-xs text-textSecondary">Bukti pengesahan serah terima pekerjaan (E-Signature)</p>
+                    <h3 class="text-sm font-bold text-textPrimary">Customer Electronic Signature (Sign-on-Glass)</h3>
+                    <p class="text-xs text-textSecondary">Cryptographic digital acceptance proof (E-Signature)</p>
                 </div>
                 @if($task->customer_signature)
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Disetujui Pelanggan
+                        Customer Approved
                     </span>
                 @else
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                        Menunggu TTD
+                        Pending Signature
                     </span>
                 @endif
             </div>
@@ -278,7 +278,7 @@
             @if($task->customer_signature)
                 <div class="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
                     <div class="w-48 h-24 bg-white border border-slate-200 rounded-lg p-2 flex items-center justify-center shadow-inner">
-                        <img src="{{ asset($task->customer_signature) }}" alt="Tanda Tangan Pelanggan" class="max-h-full max-w-full object-contain">
+                        <img src="{{ asset($task->customer_signature) }}" alt="Customer Signature" class="max-h-full max-w-full object-contain">
                     </div>
                     <div class="space-y-1 text-xs">
                         <div class="font-bold text-textPrimary text-sm">{{ $task->customer_signer_name ?? $task->customer_name }}</div>
@@ -296,7 +296,7 @@
             @else
                 <div class="text-center py-6 text-textSecondary bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                     <ion-icon name="create-outline" class="text-3xl mb-1 text-slate-300"></ion-icon>
-                    <p class="text-xs">Pelanggan belum menandatangani serah terima di aplikasi teknisi.</p>
+                    <p class="text-xs">Customer has not yet signed the acceptance certificate on technician terminal.</p>
                 </div>
             @endif
         </div>
@@ -332,7 +332,7 @@
                 @if($task->customer_phone)
                     @php
                         $cleanPhone = preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $task->customer_phone));
-                        $waMsg = "Halo Bpk/Ibu " . $task->customer_name . ", teknisi kami sedang meluncur ke lokasi Anda untuk tiket: " . $task->title . ". Lacak posisi live teknisi secara langsung di: " . $task->tracking_url;
+                        $waMsg = "Hello " . $task->customer_name . ", our certified field technician is en route to your location for work order #TSK-" . $task->id . ". You can track their live location here: " . route('tracking.customer', $task->tracking_token);
                     @endphp
                     <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode($waMsg) }}" target="_blank" rel="noopener noreferrer" class="py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all" title="Share via WhatsApp">
                         <ion-icon name="logo-whatsapp"></ion-icon> Share

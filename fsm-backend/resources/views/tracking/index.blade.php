@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Live Tracking Teknisi')
+@section('title', 'Field Technician Live Tracking')
 @section('header', 'Live Tracking Lapangan')
 
 @push('styles')
@@ -53,7 +53,7 @@
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-sm font-bold text-textPrimary flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-online"></span>
-                    Armada Teknisi
+                    Technician Fleet
                 </h3>
                 <span id="badge-tech-count" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
                     {{ $technicians->where('is_online', true)->count() }} / {{ $technicians->count() }} Aktif
@@ -61,7 +61,7 @@
             </div>
             
             <p class="text-xs text-textSecondary mb-3">
-                Klik teknisi untuk menampilkan riwayat lintasan rute GPS lengkap.
+                Click any technician to view complete GPS breadcrumb route history.
             </p>
 
             <!-- Technicians List Container -->
@@ -106,7 +106,7 @@
                         </div>
                     </a>
                 @empty
-                    <p class="text-xs text-textSecondary text-center py-4">Belum ada teknisi terdaftar.</p>
+                    <p class="text-xs text-textSecondary text-center py-4">No technicians registered.</p>
                 @endforelse
             </div>
             
@@ -116,7 +116,7 @@
                         Rute: {{ $selectedTech->name }}
                     </span>
                     <a href="{{ route('admin.tracking') }}" class="text-[10px] text-red-500 font-semibold hover:underline">
-                        Hapus Filter Rute
+                        Clear Route Filter
                     </a>
                 </div>
             @endif
@@ -136,7 +136,7 @@
                 @forelse($historyLogs as $log)
                     <div class="border-b border-slate-100 pb-2 transition-all">
                         <div class="flex justify-between items-center mb-0.5 font-sans font-bold text-textPrimary">
-                            <span class="truncate">{{ $log->technician ? $log->technician->name : 'Teknisi' }}</span>
+                            <span class="truncate">{{ $log->technician ? $log->technician->name : 'Technician' }}</span>
                             <span class="text-[9px] text-slate-400 font-medium font-sans flex-shrink-0">{{ $log->created_at->format('H:i:s') }}</span>
                         </div>
                         <p class="truncate text-slate-500">LAT: {{ $log->latitude }}</p>
@@ -164,7 +164,7 @@
                         </h2>
                         <span class="text-[10px] text-textSecondary flex items-center gap-1.5 mt-1">
                             <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                            Terhubung secara real-time ke aplikasi teknisi mobile
+                            Real-time telemetry link to field technician mobile PWA
                         </span>
                     </div>
                 </div>
@@ -194,17 +194,17 @@
                 <div class="flex items-center gap-4 flex-wrap">
                     <span class="flex items-center gap-1.5">
                         <span class="w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow-sm inline-block"></span>
-                        Lokasi Teknisi Terkini
+                        Current Technician Location
                     </span>
                     @if($selectedTech)
                         <span class="flex items-center gap-1.5 text-red-600 font-semibold">
                             <span class="w-3 h-3 rounded-full bg-red-500 border-2 border-white shadow-sm inline-block"></span>
-                            Jejak Lintasan Rute ({{ $selectedTech->name }})
+                            GPS Route Breadcrumbs ({{ $selectedTech->name }})
                         </span>
                     @endif
                     <span class="flex items-center gap-1.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-                        Status Tugas On-Going
+                        On-Going Work Order Status
                     </span>
                 </div>
                 <div class="text-[10px] text-slate-400">
@@ -274,14 +274,14 @@
                 activeTaskHtml = `
                     <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 6px 8px; margin: 6px 0;">
                         <div style="color: #1E40AF; font-weight: 700; font-size: 11px;">🛠️ ${escapeHtml(tech.active_task.title)}</div>
-                        <div style="color: #3B82F6; font-size: 10px;">Pelanggan: ${escapeHtml(tech.active_task.customer_name || '-')}</div>
+                        <div style="color: #3B82F6; font-size: 10px;">Customer: ${escapeHtml(tech.active_task.customer_name || '-')}</div>
                         <div style="color: #64748B; font-size: 9px;">Status: <b>${escapeHtml(tech.active_task.status)}</b></div>
                     </div>
                 `;
             } else {
                 activeTaskHtml = `
                     <div style="color: #64748B; font-size: 10px; margin: 4px 0;">
-                        <i>Tidak ada tugas aktif</i>
+                        <i>No active task</i>
                     </div>
                 `;
             }

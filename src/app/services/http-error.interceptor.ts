@@ -31,20 +31,20 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         } else {
           // Server-side error
           if (error.status === 0) {
-            errorMessage = 'Gagal terhubung ke server. Periksa URL API dan koneksi internet.';
+            errorMessage = 'Unable to connect to server. Check internet connection and API URL.';
             if (isDebug) console.error('Network Error - Cannot reach server:', error);
           } else if (error.status === 401) {
             errorMessage = error.error?.message || (
               request.url.includes('/login')
                 ? 'Email atau password salah'
-                : 'Sesi telah berakhir. Silakan login kembali.'
+                : 'Session expired. Please sign in again.'
             );
           } else if (error.status === 403) {
             errorMessage = error.error?.message || 'Akses ditolak';
           } else if (error.status === 404) {
             errorMessage = 'Endpoint tidak ditemukan';
           } else if (error.status === 503) {
-            errorMessage = error.error?.message || 'Server backend sedang dalam pemeliharaan atau belum dikonfigurasi.';
+            errorMessage = error.error?.message || 'Backend server is in maintenance mode or unreachable.';
           } else if (error.status === 500) {
             errorMessage = 'Terjadi kesalahan di server';
           } else {

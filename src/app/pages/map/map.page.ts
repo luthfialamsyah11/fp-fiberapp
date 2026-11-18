@@ -94,7 +94,7 @@ export class MapPage implements OnDestroy {
       this.navigationService.openNavigationOptions(
         this.activeTask.latitude,
         this.activeTask.longitude,
-        this.activeTask.title || 'Lokasi Tugas Aktif'
+        this.activeTask.title || 'Active Task Location'
       );
     } else if (this.latitude && this.longitude) {
       this.navigationService.openNavigationOptions(

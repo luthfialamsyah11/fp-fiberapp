@@ -57,7 +57,7 @@ export class ProfilePage {
 
       this.completedTasks = Array.isArray(hRes) ? hRes : (hRes?.data ?? []);
     } catch (e: any) {
-      const errMsg = e?.error?.message || 'Gagal memuat profil';
+      const errMsg = e?.error?.message || 'Failed to load technician profile';
       const status = e?.status !== undefined ? e.status : 'N/A';
       this.showToast(`${errMsg} (Status: ${status})`, 'danger');
     } finally {

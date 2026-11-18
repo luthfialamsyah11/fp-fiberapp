@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Buku Panduan Penggunaan Web Admin')
-@section('header', 'Panduan Operasional Web Admin')
+@section('title', 'Admin Operations Manual')
+@section('header', 'Admin Operations Manual')
 
 @push('styles')
 <style>
@@ -25,14 +25,14 @@
                     <ion-icon name="book-outline" class="text-lg"></ion-icon>
                 </div>
                 <div>
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Daftar Isi Panduan</h3>
-                    <span class="text-[10px] text-slate-400">FiberOps Manual v1.2</span>
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Manual Table of Contents</h3>
+                    <span class="text-[10px] text-slate-400">FiberOps Standard v1.2</span>
                 </div>
             </div>
 
             <!-- Quick Filter -->
             <div>
-                <input type="text" id="guide-search" placeholder="Cari panduan..."
+                <input type="text" id="guide-search" placeholder="Search manual topics..."
                     class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
             </div>
 
@@ -40,27 +40,27 @@
             <nav id="guide-toc" class="space-y-1 text-xs">
                 <a href="#quickstart" class="guide-nav-item flex items-center gap-2 p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                     <ion-icon name="rocket-outline" class="text-sm flex-shrink-0 text-blue-600"></ion-icon>
-                    <span>1. Memulai Cepat & Alur FSM</span>
+                    <span>1. Quickstart & FSM Workflow</span>
                 </a>
                 <a href="#dashboard" class="guide-nav-item flex items-center gap-2 p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                     <ion-icon name="grid-outline" class="text-sm flex-shrink-0 text-indigo-600"></ion-icon>
-                    <span>2. Dashboard & Metrik KPI</span>
+                    <span>2. Dashboard & KPI Metrics</span>
                 </a>
                 <a href="#tasks" class="guide-nav-item flex items-center gap-2 p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                     <ion-icon name="clipboard-outline" class="text-sm flex-shrink-0 text-emerald-600"></ion-icon>
-                    <span>3. Manajemen & Siklus Tiket</span>
+                    <span>3. Ticket Lifecycle Management</span>
                 </a>
                 <a href="#tracking" class="guide-nav-item flex items-center gap-2 p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                     <ion-icon name="navigate-outline" class="text-sm flex-shrink-0 text-sky-600"></ion-icon>
-                    <span>4. Live Tracking GPS Peta</span>
+                    <span>4. Live GPS Telemetry Map</span>
                 </a>
                 <a href="#proof" class="guide-nav-item flex items-center gap-2 p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                     <ion-icon name="camera-outline" class="text-sm flex-shrink-0 text-amber-600"></ion-icon>
-                    <span>5. Audit Bukti Foto Redaman</span>
+                    <span>5. Optical Proof & BAST Audit</span>
                 </a>
                 <a href="#technicians" class="guide-nav-item flex items-center gap-2 p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                     <ion-icon name="people-outline" class="text-sm flex-shrink-0 text-purple-600"></ion-icon>
-                    <span>6. Manajemen Armada Teknisi</span>
+                    <span>6. Technician Fleet Operations</span>
                 </a>
                 <a href="#faq" class="guide-nav-item flex items-center gap-2 p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                     <ion-icon name="help-circle-outline" class="text-sm flex-shrink-0 text-red-600"></ion-icon>
@@ -69,8 +69,8 @@
             </nav>
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                <span>Hotline: (021) 8062-8888</span>
-                <a href="{{ route('admin.settings') }}" class="text-blue-600 hover:underline font-semibold">Pengaturan &rarr;</a>
+                <span>NOC Desk: +1 (800) 555-0199</span>
+                <a href="{{ route('admin.settings') }}" class="text-blue-600 hover:underline font-semibold">Settings &rarr;</a>
             </div>
         </div>
     </div>
@@ -82,13 +82,13 @@
         <div class="bg-white rounded-2xl border border-fsmBorder p-6 sm:p-8 shadow-sm">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-3">
                 <ion-icon name="shield-checkmark"></ion-icon>
-                <span>Dokumentasi Standar Operasional Prosedur (SOP)</span>
+                <span>Standard Operating Procedures (SOP) Documentation</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Panduan Operasional Web Admin FiberOps
+                FiberOps Admin Operations Manual
             </h1>
             <p class="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-                Panduan komprehensif ini dirancang untuk Dispatcher, Supervisor Lapangan, dan Administrator dalam mengelola tiket perbaikan, dispatching tugas, pemantauan live GPS telemetri, dan validasi bukti pekerjaan teknisi.
+                Comprehensive operational handbook designed for NOC Dispatchers, Field Supervisors, and System Administrators to coordinate work orders, manage dispatch queues, monitor live telemetry, and audit photographic proof of work.
             </p>
         </div>
 
@@ -97,35 +97,35 @@
             <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">1</div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Alur Kerja Sistem (End-to-End Workflow)</h2>
-                    <span class="text-xs text-slate-500">Integrasi penuh antara Web Admin Dispatcher dan Aplikasi Mobile Teknisi</span>
+                    <h2 class="text-lg font-bold text-slate-900">End-to-End System Workflow</h2>
+                    <span class="text-xs text-slate-500">Bi-directional integration between Web Dispatcher and Mobile Field PWA</span>
                 </div>
             </div>
 
             <p class="text-xs text-slate-600 leading-relaxed">
-                FiberOps FSM beroperasi dengan sistem tertutup dua arah. Setiap aksi yang dilakukan admin di komputer kantor langsung tersinkronisasi ke smartphone teknisi di lapangan, dan sebaliknya:
+                FiberOps FSM operates as a closed-loop reactive engine. Every dispatch or status update issued by the NOC console instantly reflects on field technician terminals, and field telemetry syncs seamlessly back to dispatchers:
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 my-4">
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
                     <div class="w-8 h-8 rounded-lg bg-blue-600 text-white mx-auto flex items-center justify-center text-xs font-bold mb-2">1</div>
-                    <div class="text-xs font-bold text-slate-800">Tiket Dibuat</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Admin input keluhan atau pasang baru di Web Admin.</div>
+                    <div class="text-xs font-bold text-slate-800">Order Ingestion</div>
+                    <div class="text-[10px] text-slate-500 mt-1">NOC creates ticket or subscriber reports outage.</div>
                 </div>
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
                     <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white mx-auto flex items-center justify-center text-xs font-bold mb-2">2</div>
-                    <div class="text-xs font-bold text-slate-800">Dispatch Teknisi</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Tugas otomatis masuk ke aplikasi HP teknisi terkait.</div>
+                    <div class="text-xs font-bold text-slate-800">Field Dispatch</div>
+                    <div class="text-[10px] text-slate-500 mt-1">Smart proximity routes task to field specialist.</div>
                 </div>
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
                     <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white mx-auto flex items-center justify-center text-xs font-bold mb-2">3</div>
-                    <div class="text-xs font-bold text-slate-800">Live Eksekusi</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Teknisi terima tugas, mulai kerja, dan update progres %.</div>
+                    <div class="text-xs font-bold text-slate-800">Live Execution</div>
+                    <div class="text-[10px] text-slate-500 mt-1">Technician accepts, travels, and logs work progress %.</div>
                 </div>
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
                     <div class="w-8 h-8 rounded-lg bg-amber-600 text-white mx-auto flex items-center justify-center text-xs font-bold mb-2">4</div>
-                    <div class="text-xs font-bold text-slate-800">Upload & Selesai</div>
-                    <div class="text-[10px] text-slate-500 mt-1">Wajib upload foto bukti redaman OPM sebelum closing tiket.</div>
+                    <div class="text-xs font-bold text-slate-800">Proof & Sign-Off</div>
+                    <div class="text-[10px] text-slate-500 mt-1">OPM photo verification and customer sign-on-glass BAST.</div>
                 </div>
             </div>
         </div>
@@ -135,18 +135,18 @@
             <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">2</div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Dashboard & Metrik KPI Operasional</h2>
-                    <span class="text-xs text-slate-500">Membaca metrik performa secara instan</span>
+                    <h2 class="text-lg font-bold text-slate-900">Dashboard & Operational KPI Metrics</h2>
+                    <span class="text-xs text-slate-500">Instant situational awareness across all operational clusters</span>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <p>Dashboard utama menyajikan 4 kartu metrik utama:</p>
+                <p>The executive dashboard delivers real-time telemetry across 4 operational quadrants:</p>
                 <ul class="list-disc list-inside space-y-1.5 ml-2">
-                    <li><b>Pending Tasks</b> (Kuning): Tiket baru yang belum ditugaskan ke teknisi manapun. Wajib segera di-dispatch sebelum melanggar batas SLA.</li>
-                    <li><b>Active Tasks / On-Going</b> (Biru): Tiket yang saat ini sedang dalam pengerjaan aktif oleh teknisi di lapangan.</li>
-                    <li><b>Completed Tasks</b> (Hijau): Akumulasi tiket yang telah berhasil diselesaikan dan lolos audit bukti foto.</li>
-                    <li><b>Online Fleet</b> (Emerald): Jumlah teknisi yang sedang memancarkan sinyal GPS aktif dalam 30 menit terakhir.</li>
+                    <li><b>Pending Tasks</b> (Amber): New work orders awaiting technician assignment. Must be dispatched within SLA bounds to prevent breaches.</li>
+                    <li><b>Active Tasks / On-Going</b> (Blue): Tasks currently in progress by field technicians at subscriber premises or splice enclosures.</li>
+                    <li><b>Completed Tasks</b> (Green): Cumulative work orders successfully closed with verified photographic proof and signed acceptance certificates.</li>
+                    <li><b>Online Fleet</b> (Emerald): Active technicians transmitting live GPS telemetry pings within the last 30 minutes.</li>
                 </ul>
             </div>
         </div>
@@ -156,43 +156,43 @@
             <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">3</div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Manajemen & Siklus Hidup Tiket</h2>
-                    <span class="text-xs text-slate-500">SOP pembuatan, penugasan, dan penutupan tugas lapangan</span>
+                    <h2 class="text-lg font-bold text-slate-900">Ticket Lifecycle & Workflow SOP</h2>
+                    <span class="text-xs text-slate-500">Standard operating procedure for ticket creation, routing, and closure</span>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <h4 class="font-bold text-slate-800">A. Cara Membuat Tiket Tugas Baru:</h4>
+                <h4 class="font-bold text-slate-800">A. Creating a New Work Order:</h4>
                 <ol class="list-decimal list-inside space-y-1 ml-2">
-                    <li>Buka menu <b>Task Management</b> &rarr; klik tombol <b>+ Buat Tugas Baru</b>.</li>
-                    <li>Isi data pelanggan (Nama, Nomor Telepon, Alamat Lengkap).</li>
-                    <li>Tentukan koordinat Latitude dan Longitude pelanggan (gunakan format desimal, contoh: `-6.2088, 106.8456`).</li>
-                    <li>Pilih tingkat prioritas: <b>High</b> (Gangguan total / kabel putus), <b>Medium</b> (WiFi lambat), atau <b>Low</b> (Pengecekan berkala).</li>
-                    <li>Pilih teknisi yang ditugaskan (atau biarkan kosong untuk status <i>pending</i>).</li>
-                    <li>Klik <b>Simpan Tugas</b>.</li>
+                    <li>Navigate to <b>Task Management</b> &rarr; click <b>+ Create Work Order</b>.</li>
+                    <li>Input subscriber details (Full Name, Contact Phone, Physical Premise Address).</li>
+                    <li>Set precise GPS coordinates (Latitude and Longitude in decimal format, e.g., `-6.2088, 106.8456`).</li>
+                    <li>Assign priority level: <b>High</b> (Total service outage / fiber cut), <b>Medium</b> (Packet loss / degradation), or <b>Low</b> (Routine preventative inspection).</li>
+                    <li>Select designated field technician (or leave unassigned for <i>pending</i> queue).</li>
+                    <li>Click <b>Save Work Order</b>.</li>
                 </ol>
 
-                <h4 class="font-bold text-slate-800 mt-4">B. Penjelasan Status Tiket:</h4>
+                <h4 class="font-bold text-slate-800 mt-4">B. Work Order Status Definitions:</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2">
                     <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">pending</span>
-                        <p class="text-[11px] text-slate-600 mt-1">Tiket baru dibuat, belum ada teknisi yang dialokasikan.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Ticket created; awaiting technician allocation.</p>
                     </div>
                     <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">assigned</span>
-                        <p class="text-[11px] text-slate-600 mt-1">Teknisi sudah ditunjuk, menunggu teknisi menekan tombol "Terima".</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Technician designated; awaiting acceptance in mobile terminal.</p>
                     </div>
                     <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">accepted</span>
-                        <p class="text-[11px] text-slate-600 mt-1">Teknisi telah mengonfirmasi kesiapan penanganan tugas.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Technician confirmed readiness and initiated routing.</p>
                     </div>
                     <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">on-going</span>
-                        <p class="text-[11px] text-slate-600 mt-1">Teknisi telah tiba di lokasi dan sedang melakukan perbaikan fisik.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Technician checked in at subscriber location; repairs active.</p>
                     </div>
                     <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50 sm:col-span-2">
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700">completed</span>
-                        <p class="text-[11px] text-slate-600 mt-1">Pekerjaan tuntas, bukti foto sudah terunggah, dan sistem internet pelanggan normal.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Repairs certified, optical proof uploaded, customer signature captured.</p>
                     </div>
                 </div>
             </div>
@@ -203,18 +203,18 @@
             <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold">4</div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Live Tracking GPS Peta Lapangan</h2>
-                    <span class="text-xs text-slate-500">Memantau pergerakan armada secara real-time</span>
+                    <h2 class="text-lg font-bold text-slate-900">Live GPS Fleet Telemetry Map</h2>
+                    <span class="text-xs text-slate-500">Real-time geospatial positioning and breadcrumb routes</span>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <p>Halaman <b>Live Tracking</b> (`/tracking`) menggunakan Leaflet Map Engine yang melakukan streaming telemetri setiap 4 detik tanpa reload halaman:</p>
+                <p>The <b>Live Tracking</b> view (`/tracking`) employs a high-performance Leaflet Geospatial Engine streaming updates dynamically without full-page refreshes:</p>
                 <ul class="list-disc list-inside space-y-1.5 ml-2">
-                    <li><b>Pin Biru</b>: Menandakan posisi teknisi yang sedang *standby* atau idle.</li>
-                    <li><b>Pin Hijau</b>: Menandakan teknisi yang sedang memegang tugas aktif berstatus *on-going*.</li>
-                    <li><b>Garis Merah (Route Trail)</b>: Menampilkan jejak lintasan riwayat perjalanan teknisi dari titik ke titik. Klik nama teknisi di sidebar kiri untuk menampilkan rutenya.</li>
-                    <li><b>Live Telemetry Log</b>: Feed log di bagian kiri bawah mencatat setiap ping koordinat yang masuk beserta stempel waktu detiknya.</li>
+                    <li><b>Blue Marker</b>: Designates field technician on standby or idle status.</li>
+                    <li><b>Gold Marker</b>: Designates technician actively managing an on-going dispatch.</li>
+                    <li><b>Red Route Trail</b>: Displays chronological GPS breadcrumbs and routing history. Click technician in roster to isolate trail.</li>
+                    <li><b>Telemetry Socket Feed</b>: Live event log records millisecond-precision coordinate pings and speed measurements.</li>
                 </ul>
             </div>
         </div>
@@ -224,22 +224,22 @@
             <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">5</div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Audit Bukti Pekerjaan (Proof of Work)</h2>
-                    <span class="text-xs text-slate-500">Standar mutu hasil instalasi & perbaikan kabel fiber optik</span>
+                    <h2 class="text-lg font-bold text-slate-900">Proof of Work & Optical Audit Standards</h2>
+                    <span class="text-xs text-slate-500">Quality assurance metrics for fiber splicing and physical termination</span>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <p>Sistem secara ketat mewajibkan teknisi mengunggah minimal 1 foto bukti kerja sebelum tugas dapat diselesaikan. Admin wajib memeriksa:</p>
+                <p>The platform enforces strict cryptographic proof requirements. Work orders cannot transition to completed without verifiable photographic evidence:</p>
                 <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
-                    <div class="font-bold text-amber-900">Parameter Kunci Standar Redaman Fiber Optik:</div>
+                    <div class="font-bold text-amber-900">Optical Power Meter (OPM) Loss Standards:</div>
                     <ul class="list-disc list-inside space-y-1 text-amber-800">
-                        <li><b>Sangat Baik:</b> -15.0 dBm s/d -20.0 dBm (Loss minimal, ONT stabil maksimal).</li>
-                        <li><b>Standar Layak:</b> -20.1 dBm s/d -24.0 dBm (Operasional normal tanpa packet loss).</li>
-                        <li><b>Kritis / Buruk:</b> Di atas -25.0 dBm (Potensi Red LOS, laser modulasi lemah).</li>
+                        <li><b>Optimal:</b> -15.0 dBm to -20.0 dBm (Negligible attenuation, peak ONT operational stability).</li>
+                        <li><b>Standard Compliant:</b> -20.1 dBm to -24.0 dBm (Acceptable carrier baseline with zero packet loss).</li>
+                        <li><b>Critical / Degraded:</b> Exceeding -25.0 dBm (Risk of Red LOS, laser modulation failure, requeue required).</li>
                     </ul>
                 </div>
-                <p>Jika foto yang diunggah tidak jelas atau angka OPM tidak terbaca, admin berhak meminta teknisi melakukan pengukuran ulang sebelum menandatangani berita acara serah terima.</p>
+                <p>If photographic evidence shows blurred OPM LCD screens or unverified readings, dispatchers must reject ticket closure until calibrated re-measurement is uploaded.</p>
             </div>
         </div>
 
@@ -248,17 +248,17 @@
             <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">6</div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Manajemen Armada Teknisi</h2>
-                    <span class="text-xs text-slate-500">Registrasi akun, aktivasi, dan pengawasan shift</span>
+                    <h2 class="text-lg font-bold text-slate-900">Technician Fleet & Shift Management</h2>
+                    <span class="text-xs text-slate-500">Account provisioning, credential rotation, and shift supervision</span>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <p>Melalui menu <b>Technicians</b> (`/technicians`), admin dapat:</p>
+                <p>Via the <b>Technicians</b> console (`/technicians`), administrators can:</p>
                 <ul class="list-disc list-inside space-y-1 ml-2">
-                    <li>Menambahkan teknisi baru dengan memasukkan nama, email, nomor WhatsApp, dan password awal.</li>
-                    <li>Mengaktifkan / menonaktifkan status akun teknisi yang sedang cuti atau mutasi.</li>
-                    <li>Melihat riwayat penyelesaian tugas tiap teknisi untuk keperluan evaluasi kinerja bulanan (KPI Performance).</li>
+                    <li>Provision field technician credentials with role-based access control (RBAC).</li>
+                    <li>Toggle operational status (Active / Standby / On Leave) for dynamic schedule planning.</li>
+                    <li>Review historical completion velocity and photo audit compliance scores.</li>
                 </ul>
             </div>
         </div>
@@ -268,25 +268,25 @@
             <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold">7</div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Troubleshooting & Tanya Jawab Umum (FAQ)</h2>
-                    <span class="text-xs text-slate-500">Solusi cepat kendala operasional harian</span>
+                    <h2 class="text-lg font-bold text-slate-900">Troubleshooting & Frequently Asked Questions (FAQ)</h2>
+                    <span class="text-xs text-slate-500">Rapid resolution for common operational queries</span>
                 </div>
             </div>
 
             <div class="space-y-3 text-xs text-slate-600">
                 <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50">
-                    <h4 class="font-bold text-slate-800">Q: Teknisi mengeluh tidak bisa menekan tombol "Selesaikan Tugas" di HP?</h4>
-                    <p class="mt-1 text-slate-600">A: Pastikan teknisi sudah mengunggah minimal 1 foto bukti pekerjaan di bagian bawah layar HP. Sistem keamanan secara otomatis menolak penyelesaian tugas tanpa foto bukti demi mencegah kecurangan lapangan.</p>
+                    <h4 class="font-bold text-slate-800">Q: Field technician cannot click "Complete Work Order" on terminal?</h4>
+                    <p class="mt-1 text-slate-600">A: Verify that the technician has attached at least 1 verified photographic proof and obtained subscriber e-signature. The security guardrail strictly blocks completion to prevent unverified dispatch fraud.</p>
                 </div>
 
                 <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50">
-                    <h4 class="font-bold text-slate-800">Q: Posisi teknisi tidak bergerak di peta Live Tracking?</h4>
-                    <p class="mt-1 text-slate-600">A: Periksa apakah izin GPS lokasi di browser HP teknisi dalam kondisi "Diizinkan". Pastikan teknisi tidak berada di basement tertutup yang menghalangi sinyal satelit GPS.</p>
+                    <h4 class="font-bold text-slate-800">Q: Technician marker is static or not updating on Live Tracking?</h4>
+                    <p class="mt-1 text-slate-600">A: Ensure GPS location permissions are granted in the technician's mobile browser. Underground basements or dense shielding may attenuate GNSS satellite signals.</p>
                 </div>
 
                 <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50">
-                    <h4 class="font-bold text-slate-800">Q: Bagaimana cara mengatur interval refresh peta atau menguji bot notifikasi?</h4>
-                    <p class="mt-1 text-slate-600">A: Buka menu <b>Settings</b> &rarr; atur interval polling peta ke 5 detik (ultra-realtime) dan masukkan URL bot Telegram/WhatsApp di bagian Webhook Alert Dispatcher.</p>
+                    <h4 class="font-bold text-slate-800">Q: How do we configure map refresh intervals or dispatch alert webhooks?</h4>
+                    <p class="mt-1 text-slate-600">A: Open <b>Settings</b> &rarr; configure polling intervals to ultra-realtime mode and input alert webhook endpoints for Slack, WhatsApp, or Telegram integration.</p>
                 </div>
             </div>
         </div>
@@ -294,10 +294,10 @@
         <!-- Back to Top / Footer Navigation -->
         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
             <a href="{{ route('admin.dashboard') }}" class="text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-1">
-                &larr; Kembali ke Dashboard Admin
+                &larr; Back to Admin Dashboard
             </a>
             <a href="{{ route('admin.settings') }}" class="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1">
-                Buka Pengaturan Sistem &rarr;
+                Open Platform Settings &rarr;
             </a>
         </div>
 
@@ -307,7 +307,11 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Smooth scrolling with offset for TOC items
+        const searchInput = document.getElementById('guide-search');
+        const sections = document.querySelectorAll('.guide-section');
+        const navItems = document.querySelectorAll('.guide-nav-item');
+
+        // Smooth scrolling for TOC items
         navItems.forEach(item => {
             item.addEventListener('click', function(e) {
                 const targetId = this.getAttribute('href');
@@ -322,10 +326,6 @@
         });
 
         // Quick client-side search in guide
-        const searchInput = document.getElementById('guide-search');
-        const sections = document.querySelectorAll('.guide-section');
-        const navItems = document.querySelectorAll('.guide-nav-item');
-
         if (searchInput) {
             searchInput.addEventListener('input', function(e) {
                 const query = e.target.value.toLowerCase().trim();

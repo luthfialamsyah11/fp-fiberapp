@@ -30,7 +30,7 @@ export class AuthService {
             },
           }).catch(() => {});
         }
-        throw { error: { message: 'Aplikasi ini khusus untuk teknisi. Admin harap login melalui Web.' } };
+        throw { error: { message: 'This terminal is restricted to field technicians. Administrators please sign in via Admin Portal.' } };
       }
 
       await this.storage.remove('demo_mode');
@@ -48,7 +48,7 @@ export class AuthService {
         throw { error: { message: 'Email atau password salah' } };
       }
       if (error?.status === 0 || error?.statusText === 'Unknown Error') {
-        throw { error: { message: 'Gagal terhubung ke server. Periksa koneksi internet dan URL API.' } };
+        throw { error: { message: 'Connection failed. Please check network connectivity and API server status.' } };
       }
       throw { error: { message: error?.message || 'Terjadi kesalahan saat login' } };
     }

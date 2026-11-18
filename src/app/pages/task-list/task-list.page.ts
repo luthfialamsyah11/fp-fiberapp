@@ -139,9 +139,11 @@ export class TaskListPage {
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '62' + cleanPhone.substring(1);
     }
-    const customer = task.customer_name || 'Pelanggan';
-    const technician = this.user?.name || 'Teknisi FiberOps';
-    const text = encodeURIComponent(`Halo Bapak/Ibu ${customer}, saya ${technician} dari tim teknisi FiberOps sedang menuju ke lokasi Anda untuk pengerjaan tiket: ${task.title}.`);
+    const customer = task.customer_name || 'Customer';
+    const technician = this.user?.name || 'FiberOps Field Tech';
+    const trackUrl = task.tracking_token ? `https://bentengsiber.com/track/${task.tracking_token}` : '';
+    const trackingMsg = trackUrl ? ` Live tracking: ${trackUrl}` : '';
+    const text = encodeURIComponent(`Hello ${customer}, I am ${technician} from FiberOps field team. I am assigned to handle your work order #${task.id}.${trackingMsg}`);
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
   }
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Masuk Admin - FiberOps Command Center</title>
+    <title>Admin Sign In - FiberOps Command Center</title>
     
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,14 +52,14 @@
             <span class="w-9 h-9 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-center text-slate-300 group-hover:border-cyan-500/50 group-hover:text-cyan-400 group-hover:shadow-[0_0_15px_-3px_rgba(34,211,238,0.3)] transition-all">
                 <ion-icon name="arrow-back-outline" class="text-base"></ion-icon>
             </span>
-            <span class="font-medium tracking-tight">Kembali ke Portal</span>
+            <span class="font-medium tracking-tight">Back to Portal</span>
         </a>
 
         <!-- System Status Bead -->
         <div class="flex items-center gap-2">
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Sistem Operasional Aktif</span>
+                <span>Operational Core Active</span>
             </span>
         </div>
     </header>
@@ -88,7 +88,7 @@
                     </span>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Admin &amp; Dispatcher</h1>
                     <p class="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-sm mx-auto leading-relaxed">
-                        Kendali sentral penugasan teknisi, validasi redaman optik ODN, dan audit tanda tangan BAST digital.
+                        Centralized field technician dispatch, ODN optical loss validation, and cryptographic digital BAST audit.
                     </p>
                 </div>
             </div>
@@ -101,7 +101,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
                             <ion-icon name="key-outline" class="text-cyan-400 text-sm"></ion-icon>
-                            <span>Pilih Kredensial Evaluasi:</span>
+                            <span>Evaluation Credentials:</span>
                         </div>
                         <span class="text-[10px] font-mono text-slate-400">1-Click Auto Fill</span>
                     </div>
@@ -129,7 +129,7 @@
 
                     <!-- Notice banner -->
                     <div class="mt-2 text-[11px] font-mono text-slate-400 flex items-center justify-between pt-1.5 border-t border-slate-800/60">
-                        <span id="demo-pill-label">Akun: admin@fsm.com</span>
+                        <span id="demo-pill-label">Account: admin@fsm.com</span>
                         <span class="text-cyan-400 font-semibold">pass: password123</span>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                     <div class="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-start gap-2.5">
                         <ion-icon name="alert-circle" class="text-lg flex-shrink-0 mt-0.5 text-red-400"></ion-icon>
                         <div class="space-y-1">
-                            <div class="font-semibold text-red-200">Gagal Mengakses Sesi:</div>
+                            <div class="font-semibold text-red-200">Authentication Failed:</div>
                             <ul class="list-disc list-inside space-y-0.5 text-red-300/90 text-[11px]">
                                 @foreach($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -156,7 +156,7 @@
                     <!-- Email Field -->
                     <div>
                         <label for="email" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                            Alamat Email Administrator
+                            Administrator Email Address
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -180,9 +180,9 @@
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <label for="password" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                                Kata Sandi
+                                Password
                             </label>
-                            <span class="text-[11px] font-mono text-slate-400">Min. 8 Karakter</span>
+                            <span class="text-[11px] font-mono text-slate-400">Min. 8 Characters</span>
                         </div>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -202,7 +202,7 @@
                                 type="button" 
                                 id="toggle-password" 
                                 class="absolute inset-y-0 right-0 w-11 h-full flex items-center justify-center text-slate-400 hover:text-white transition-colors focus:outline-none active:scale-90"
-                                aria-label="Tampilkan atau sembunyikan kata sandi"
+                                aria-label="Show or hide password"
                             >
                                 <ion-icon id="eye-icon" name="eye-outline" class="text-lg"></ion-icon>
                             </button>
@@ -218,7 +218,7 @@
                                 type="checkbox" 
                                 class="w-4 h-4 rounded bg-slate-950 border-slate-800 text-cyan-500 focus:ring-cyan-500/40 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer"
                             >
-                            <span class="text-xs text-slate-300">Ingat sesi saya</span>
+                            <span class="text-xs text-slate-300">Remember my session</span>
                         </label>
                         <span class="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
                             <ion-icon name="shield-checkmark" class="text-cyan-400"></ion-icon>
@@ -232,7 +232,7 @@
                         id="btn-submit"
                         class="w-full min-h-[48px] mt-2 py-3.5 px-5 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-semibold text-sm sm:text-base shadow-lg shadow-blue-500/25 transition-all duration-150 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span id="btn-text">Masuk ke Command Center</span>
+                        <span id="btn-text">Sign In to Command Center</span>
                         <ion-icon id="btn-icon" name="arrow-forward" class="text-base"></ion-icon>
                         <svg id="btn-spinner" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -245,7 +245,7 @@
                 <div class="mt-4 pt-4 border-t border-slate-800/80 text-center">
                     <a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
                         <ion-icon name="phone-portrait-outline" class="text-sm"></ion-icon>
-                        <span>Buka Aplikasi Teknisi Lapangan (PWA Mobile) →</span>
+                        <span>Open Field Technician Terminal (Mobile PWA) →</span>
                     </a>
                 </div>
 
@@ -299,14 +299,14 @@
                 if (!emailInput || !passwordInput) return;
                 emailInput.value = email;
                 passwordInput.value = pass;
-                if (demoPillLabel) demoPillLabel.textContent = 'Akun: ' + email;
+                if (demoPillLabel) demoPillLabel.textContent = 'Account: ' + email;
                 
                 // Visual Flash Feedback
                 emailInput.classList.add('ring-2', 'ring-emerald-500', 'border-emerald-500');
                 passwordInput.classList.add('ring-2', 'ring-emerald-500', 'border-emerald-500');
                 
                 const origHtml = btnEl.innerHTML;
-                btnEl.innerHTML = '<ion-icon name="checkmark-circle"></ion-icon> Terisi!';
+                btnEl.innerHTML = '<ion-icon name="checkmark-circle"></ion-icon> Filled!';
                 
                 setTimeout(() => {
                     emailInput.classList.remove('ring-2', 'ring-emerald-500', 'border-emerald-500');
@@ -340,7 +340,7 @@
             if (form && btnSubmit) {
                 form.addEventListener('submit', function () {
                     btnSubmit.disabled = true;
-                    btnText.textContent = 'Memverifikasi Sesi...';
+                    btnText.textContent = 'Authenticating Session...';
                     btnIcon.classList.add('hidden');
                     btnSpinner.classList.remove('hidden');
                 });

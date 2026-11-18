@@ -29,7 +29,7 @@ export class NavigationService {
 
     // 1. Google Maps (Primary for Android & universally supported)
     buttons.push({
-      text: 'Google Maps (Navigasi Suara & Rute)',
+      text: 'Google Maps (Turn-by-turn Navigation)',
       icon: 'navigate-outline',
       handler: () => {
         const url = `https://www.google.com/maps/dir/?api=1&destination=${cleanLat},${cleanLng}`;
@@ -39,7 +39,7 @@ export class NavigationService {
 
     // 2. Waze (Ideal for avoiding traffic & real-time road alerts in Indonesia)
     buttons.push({
-      text: 'Waze (Anti-Macet & Laporan Jalan)',
+      text: 'Waze (Live Traffic & Hazard Alerts)',
       icon: 'car-sport-outline',
       handler: () => {
         const url = `https://waze.com/ul?ll=${cleanLat},${cleanLng}&navigate=yes`;
@@ -50,7 +50,7 @@ export class NavigationService {
     // 3. Apple Maps (Specialized for iOS native navigation)
     if (isIOS) {
       buttons.unshift({
-        text: 'Apple Maps (Navigasi Native iOS)',
+        text: 'Apple Maps (Native iOS Navigation)',
         icon: 'map-outline',
         handler: () => {
           const url = `maps://?daddr=${cleanLat},${cleanLng}&dirflg=d`;
@@ -86,7 +86,7 @@ export class NavigationService {
             document.execCommand('copy');
             document.body.removeChild(input);
           }
-          await this.showToast('Koordinat GPS berhasil disalin ke clipboard! 📋', 'success');
+          await this.showToast('GPS coordinates copied to clipboard! 📋', 'success');
         } catch (e) {
           await this.showToast(`Koordinat: ${coordText}`, 'success');
         }
@@ -95,7 +95,7 @@ export class NavigationService {
 
     // 5. Cancel Button
     buttons.push({
-      text: 'Batal',
+      text: 'Cancel',
       icon: 'close-outline',
       role: 'cancel'
     });

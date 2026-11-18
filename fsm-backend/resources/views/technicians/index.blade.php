@@ -126,7 +126,7 @@
                             </a>
                             
                             @if($tech->is_active)
-                                <form action="{{ route('admin.technicians.destroy', $tech->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menonaktifkan teknisi ini? Akun tidak akan dapat masuk ke aplikasi mobile.');" class="inline">
+                                <form action="{{ route('admin.technicians.destroy', $tech->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to deactivate this technician? Their terminal session will be revoked.');" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-1.5 text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all" title="Deactivate Agent">

@@ -224,12 +224,12 @@
                             @else
                                 <div class="px-4 py-6 text-center text-slate-400 text-xs">
                                     <ion-icon name="notifications-off-outline" class="text-2xl mb-1 text-slate-300"></ion-icon>
-                                    <p>Tidak ada notifikasi baru.</p>
+                                    <p>No new notifications.</p>
                                 </div>
                             @endif
                         </div>
                         <div class="px-4 py-2 text-center bg-slate-50 rounded-b-xl">
-                            <a href="{{ route('admin.history') }}" class="text-[10px] font-bold text-primary hover:underline">Lihat Riwayat Lengkap</a>
+                            <a href="{{ route('admin.history') }}" class="text-[10px] font-bold text-primary hover:underline">View Full History</a>
                         </div>
                     </div>
                 </div>

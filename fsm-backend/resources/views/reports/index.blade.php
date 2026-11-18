@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Laporan & Analitik')
-@section('header', 'Laporan & Analitik Operasional')
+@section('title', 'Reports & Analytics')
+@section('header', 'Operational Reports & Analytics')
 
 @push('styles')
 <style>
@@ -39,18 +39,18 @@
                 FSM Intelligence
             </span>
         </div>
-        <p class="text-xs text-textSecondary mt-0.5">Analisis metrik produktivitas armada teknisi, kepatuhan SLA pekerjaan, dan dokumentasi bukti lapangan.</p>
+        <p class="text-xs text-textSecondary mt-0.5">Analyze fleet productivity metrics, SLA compliance rates, and field documentation records.</p>
     </div>
 
     <!-- Export & Print Action Buttons -->
     <div class="flex items-center gap-2 no-print">
-        <a href="{{ route('admin.reports.export', request()->query()) }}" class="px-3.5 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5" title="Unduh data laporan dalam format CSV / Excel">
+        <a href="{{ route('admin.reports.export', request()->query()) }}" class="px-3.5 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-1.5" title="Export report dataset in CSV format">
             <ion-icon name="cloud-download-outline" class="text-sm"></ion-icon>
-            <span>Ekspor CSV</span>
+            <span>Export CSV</span>
         </a>
         <button type="button" onclick="window.print()" class="px-3.5 py-2 text-xs font-semibold bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5" title="Cetak atau simpan sebagai PDF">
             <ion-icon name="print-outline" class="text-sm"></ion-icon>
-            <span>Cetak PDF</span>
+            <span>Print PDF</span>
         </button>
     </div>
 </div>
@@ -65,11 +65,11 @@
             </span>
             @php
                 $presets = [
-                    'all'        => 'Semua Waktu',
-                    'today'      => 'Hari Ini',
+                    'all'        => 'All Time',
+                    'today'      => 'Today',
                     '7_days'     => '7 Hari',
                     '30_days'    => '30 Hari',
-                    'this_month' => 'Bulan Ini',
+                    'this_month' => 'This Month',
                 ];
             @endphp
             @foreach($presets as $key => $label)
@@ -84,7 +84,7 @@
         <div class="flex flex-wrap items-center gap-2">
             <!-- Technician Filter -->
             <select name="technician_id" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                <option value="">Semua Teknisi</option>
+                <option value="">All Technicians</option>
                 @foreach($techniciansList as $tech)
                     <option value="{{ $tech->id }}" {{ $technicianId == $tech->id ? 'selected' : '' }}>
                         {{ $tech->name }}
@@ -103,7 +103,7 @@
             <!-- Submit Button -->
             <button type="submit" class="px-3.5 py-1.5 bg-primary hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1">
                 <ion-icon name="funnel-outline"></ion-icon>
-                <span>Filter</span>
+                <span>Apply Filter</span>
             </button>
 
             <!-- Reset Filter -->
@@ -136,7 +136,7 @@
             </div>
             <div class="flex justify-between items-center text-[10px] text-textSecondary mt-1.5 font-medium">
                 <span>{{ $completedTasks }} Sukses</span>
-                <span>Total {{ $totalTasks }} Tugas</span>
+                <span>Total {{ $totalTasks }} Tasks</span>
             </div>
         </div>
     </div>
@@ -167,8 +167,8 @@
     <div class="metric-card bg-white rounded-2xl border border-slate-200/70 p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-start justify-between">
             <div>
-                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Rata-Rata Waktu Selesai</span>
-                <h3 class="text-2xl font-bold text-indigo-600 leading-none mt-1.5">{{ $avgResolutionHours }} <span class="text-xs font-normal text-textSecondary">Jam</span></h3>
+                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Mean Resolution Time</span>
+                <h3 class="text-2xl font-bold text-indigo-600 leading-none mt-1.5">{{ $avgResolutionHours }} <span class="text-xs font-normal text-textSecondary">Hours</span></h3>
             </div>
             <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
                 <ion-icon name="timer-outline"></ion-icon>
@@ -176,9 +176,9 @@
         </div>
         <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-textSecondary">
             <span class="flex items-center gap-1 font-medium text-emerald-600">
-                <ion-icon name="flash-outline"></ion-icon> SLA Turnaround Terukur
+                <ion-icon name="flash-outline"></ion-icon> Measured SLA Turnaround
             </span>
-            <span>Dari pembuatan tiket</span>
+            <span>From ticket creation</span>
         </div>
     </div>
 
@@ -209,12 +209,12 @@
     <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/70 p-5 shadow-sm flex flex-col">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h3 class="text-sm font-bold text-textPrimary">Tren Pekerjaan Lapangan (14 Hari Terakhir)</h3>
-                <span class="text-[10px] text-textSecondary">Perbandingan tiket masuk vs pekerjaan yang tuntas diselesaikan</span>
+                <h3 class="text-sm font-bold text-textPrimary">Field Work Trends (Past 14 Days)</h3>
+                <span class="text-[10px] text-textSecondary">Incoming ticket intake vs completed work orders</span>
             </div>
             <div class="flex items-center gap-3 text-xs font-semibold text-textSecondary">
-                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Tiket Masuk</span>
-                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Tiket Selesai</span>
+                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Incoming Tickets</span>
+                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Completed Tickets</span>
             </div>
         </div>
         <div class="flex-1 w-full min-h-[260px] max-h-[300px]">
@@ -225,8 +225,8 @@
     <!-- Chart 2: Task Status Distribution (Takes 1 Column) -->
     <div class="bg-white rounded-2xl border border-slate-200/70 p-5 shadow-sm flex flex-col">
         <div class="mb-3">
-            <h3 class="text-sm font-bold text-textPrimary">Distribusi Status Tiket</h3>
-            <span class="text-[10px] text-textSecondary">Persentase status operasional seluruh penugasan</span>
+            <h3 class="text-sm font-bold text-textPrimary">Task Status Distribution</h3>
+            <span class="text-[10px] text-textSecondary">Operational lifecycle breakdown across all tasks</span>
         </div>
         <div class="flex-1 flex items-center justify-center max-h-[260px]">
             <canvas id="statusChart"></canvas>
@@ -241,8 +241,8 @@
     <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/70 p-5 shadow-sm flex flex-col">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h3 class="text-sm font-bold text-textPrimary">Komparasi Produktivitas Teknisi</h3>
-                <span class="text-[10px] text-textSecondary">Jumlah pekerjaan selesai dibandingkan dengan total tiket yang dialokasikan</span>
+                <h3 class="text-sm font-bold text-textPrimary">Technician Productivity Benchmark</h3>
+                <span class="text-[10px] text-textSecondary">Completed jobs vs total dispatched tickets per technician</span>
             </div>
         </div>
         <div class="flex-1 w-full min-h-[260px] max-h-[280px]">
@@ -253,8 +253,8 @@
     <!-- Chart 4: Priority Distribution (Takes 1 Column) -->
     <div class="bg-white rounded-2xl border border-slate-200/70 p-5 shadow-sm flex flex-col">
         <div class="mb-3">
-            <h3 class="text-sm font-bold text-textPrimary">Distribusi Tingkat Urgensi</h3>
-            <span class="text-[10px] text-textSecondary">Komposisi prioritas (Low, Medium, High / Darurat)</span>
+            <h3 class="text-sm font-bold text-textPrimary">Work Order Priority Breakdown</h3>
+            <span class="text-[10px] text-textSecondary">Priority composition (Low, Medium, High / Critical)</span>
         </div>
         <div class="flex-1 flex items-center justify-center max-h-[260px]">
             <canvas id="priorityChart"></canvas>
@@ -268,12 +268,12 @@
         <div class="flex items-center gap-2">
             <ion-icon name="podium-outline" class="text-xl text-primary"></ion-icon>
             <div>
-                <h3 class="text-base font-bold text-textPrimary">Matriks Evaluasi Kinerja Armada Teknisi</h3>
+                <h3 class="text-base font-bold text-textPrimary">Fleet Performance Evaluation Matrix</h3>
                 <span class="text-[10px] text-textSecondary">Benchmarking efisiensi penyelesaian tugas, bukti foto, dan status kehadiran</span>
             </div>
         </div>
         <span class="text-xs font-semibold text-slate-500">
-            Total Armada: {{ $technicianCompletions->count() }} Teknisi
+            Total Fleet: {{ $technicianCompletions->count() }} Technicians
         </span>
     </div>
 
@@ -281,14 +281,14 @@
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-slate-50 border-b border-slate-100 text-textSecondary text-[11px] font-semibold uppercase tracking-wider">
-                    <th class="p-4">Teknisi & Kontak</th>
-                    <th class="p-4 text-center">Status Kehadiran</th>
-                    <th class="p-4 text-center">Total Dialokasikan</th>
-                    <th class="p-4 text-center">Tuntas (Selesai)</th>
-                    <th class="p-4 text-center">Sedang Berjalan</th>
-                    <th class="p-4 text-center">Foto Bukti Diserahkan</th>
-                    <th class="p-4">Tingkat Keberhasilan</th>
-                    <th class="p-4 text-center no-print">Aksi</th>
+                    <th class="p-4">Technician & Contact</th>
+                    <th class="p-4 text-center">Attendance Status</th>
+                    <th class="p-4 text-center">Total Assigned</th>
+                    <th class="p-4 text-center">Completed</th>
+                    <th class="p-4 text-center">In Progress</th>
+                    <th class="p-4 text-center">Proofs Submitted</th>
+                    <th class="p-4">Success Rate</th>
+                    <th class="p-4 text-center no-print">Action</th>
                 </tr>
             </thead>
             <tbody class="text-xs divide-y divide-slate-100">
@@ -342,7 +342,7 @@
                 @empty
                 <tr>
                     <td colspan="8" class="p-8 text-center text-textSecondary">
-                        Tidak ada data teknisi yang sesuai.
+                        No technician data available.
                     </td>
                 </tr>
                 @endforelse
@@ -373,7 +373,7 @@
                 labels: @json($trendLabels),
                 datasets: [
                     {
-                        label: 'Tiket Masuk',
+                        label: 'Incoming Tickets',
                         data: @json($trendCreated),
                         borderColor: '#2563EB',
                         backgroundColor: gradientBlue,
@@ -384,7 +384,7 @@
                         borderWidth: 2
                     },
                     {
-                        label: 'Tiket Selesai',
+                        label: 'Completed Tickets',
                         data: @json($trendCompleted),
                         borderColor: '#10B981',
                         backgroundColor: gradientGreen,
@@ -471,13 +471,13 @@
                 labels: techLabels,
                 datasets: [
                     {
-                        label: 'Tuntas Selesai',
+                        label: 'Completed Tasks',
                         data: techCompleted,
                         backgroundColor: '#10B981',
                         borderRadius: 6
                     },
                     {
-                        label: 'Total Dialokasikan',
+                        label: 'Total Assigned',
                         data: techAssigned,
                         backgroundColor: '#3B82F6',
                         borderRadius: 6

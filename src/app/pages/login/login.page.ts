@@ -31,9 +31,9 @@ export class LoginPage {
   isLoading = false;
 
   demoTechnicians = [
-    { name: 'Alex', email: 'alex@fsm.com', role: 'Teknisi Fiber' },
-    { name: 'Budi', email: 'budi@fsm.com', role: 'Teknisi ONT' },
-    { name: 'Citra', email: 'citra@fsm.com', role: 'Teknisi Backbone' },
+    { name: 'Alex', email: 'alex@fsm.com', role: 'Fiber Splicer Specialist' },
+    { name: 'Budi', email: 'budi@fsm.com', role: 'FTTx Installation Tech' },
+    { name: 'Citra', email: 'citra@fsm.com', role: 'Backbone DWDM Engineer' },
   ];
 
   async ionViewWillEnter() {
@@ -98,7 +98,7 @@ export class LoginPage {
       await loading.dismiss();
       this.isLoading = false;
       
-      let msg = 'Login gagal, cek email dan password';
+      let msg = 'Sign in failed. Check email and password.';
       if (err?.error?.message) {
         msg = err.error.message;
       } else if (err?.message) {

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Proof of Work')
-@section('header', 'Verifikasi & Bukti Pekerjaan')
+@section('header', 'Work Order Verification & Proofs')
 
 @push('styles')
 <style>
@@ -31,12 +31,12 @@
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
     <div>
         <h2 class="text-xl font-bold text-textPrimary tracking-tight">Completion Proofs & Quality Audits</h2>
-        <p class="text-xs text-textSecondary mt-0.5">Inspeksi visual dokumentasi Before & After dari teknisi lapangan untuk verifikasi SLA dan validasi billing.</p>
+        <p class="text-xs text-textSecondary mt-0.5">Visual inspection of Before & After documentation from field technicians for SLA verification and billing validation.</p>
     </div>
     <div class="flex items-center gap-2">
         <a href="{{ route('admin.tasks.index') }}" class="px-3.5 py-2 text-xs font-semibold bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
             <ion-icon name="list-outline" class="text-sm"></ion-icon>
-            <span>Daftar Tugas</span>
+            <span>Task List</span>
         </a>
         <a href="{{ route('admin.tracking') }}" class="px-3.5 py-2 text-xs font-semibold bg-primary hover:bg-blue-700 text-white rounded-xl shadow-sm shadow-blue-500/20 transition-all flex items-center gap-1.5">
             <ion-icon name="locate-outline" class="text-sm"></ion-icon>
@@ -67,7 +67,7 @@
             <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Tiket Terverifikasi</span>
             <div class="text-2xl font-bold text-textPrimary mt-1">{{ $metrics['verified_tasks'] }}</div>
             <span class="text-[10px] font-medium text-emerald-600 flex items-center gap-1 mt-0.5">
-                <ion-icon name="checkmark-done-circle-outline"></ion-icon> Pekerjaan tuntas 100%
+                <ion-icon name="checkmark-done-circle-outline"></ion-icon> Work 100% Completed
             </span>
         </div>
         <div class="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
@@ -78,7 +78,7 @@
     <!-- Metric 3: Active Contributing Techs -->
     <div class="bg-white rounded-2xl border border-slate-200/60 p-4 shadow-sm flex items-center justify-between">
         <div>
-            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Teknisi Pengunggah</span>
+            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Uploading Technicians</span>
             <div class="text-2xl font-bold text-textPrimary mt-1">{{ $metrics['active_techs'] }}</div>
             <span class="text-[10px] font-medium text-purple-600 flex items-center gap-1 mt-0.5">
                 <ion-icon name="people-outline"></ion-icon> Tim lapangan aktif
@@ -116,7 +116,7 @@
                 type="text" 
                 name="search" 
                 value="{{ request('search') }}" 
-                placeholder="Cari ID tugas (#TSK-0001), pelanggan, atau kata kunci..."
+                placeholder="Search Task ID (#TSK-0001), customer, or keyword..."
                 class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-textPrimary transition-all placeholder:text-slate-400"
             >
         </div>
@@ -125,14 +125,14 @@
         <div class="flex flex-wrap items-center gap-2.5">
             <!-- Proof Status Filter -->
             <select name="proof_status" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
-                <option value="with_proof" {{ request('proof_status', 'with_proof') == 'with_proof' ? 'selected' : '' }}>Ada Foto Bukti (Terverifikasi)</option>
-                <option value="missing_proof" {{ request('proof_status') == 'missing_proof' ? 'selected' : '' }}>Belum Ada Foto (Menunggu Upload)</option>
-                <option value="all" {{ request('proof_status') == 'all' ? 'selected' : '' }}>Semua Tiket</option>
+                <option value="with_proof" {{ request('proof_status', 'with_proof') == 'with_proof' ? 'selected' : '' }}>Verified Proof Photos</option>
+                <option value="missing_proof" {{ request('proof_status') == 'missing_proof' ? 'selected' : '' }}>Pending Proof Upload</option>
+                <option value="all" {{ request('proof_status') == 'all' ? 'selected' : '' }}>All Tickets</option>
             </select>
 
             <!-- Technician Filter -->
             <select name="technician_id" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                <option value="">Semua Teknisi</option>
+                <option value="">All Technicians</option>
                 @foreach($technicians as $tech)
                     <option value="{{ $tech->id }}" {{ request('technician_id') == $tech->id ? 'selected' : '' }}>
                         {{ $tech->name }}
@@ -142,7 +142,7 @@
 
             <!-- Date Filter -->
             <select name="date_filter" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                <option value="">Semua Waktu</option>
+                <option value="">All Time</option>
                 <option value="today" {{ request('date_filter') == 'today' ? 'selected' : '' }}>Hari Ini</option>
                 <option value="this_week" {{ request('date_filter') == 'this_week' ? 'selected' : '' }}>Minggu Ini</option>
                 <option value="this_month" {{ request('date_filter') == 'this_month' ? 'selected' : '' }}>Bulan Ini</option>
@@ -203,7 +203,7 @@
                         'customer' => $task->customer_name,
                         'phone' => $task->customer_phone,
                         'address' => $task->resolved_location,
-                        'technician' => $task->technician ? $task->technician->name : 'Tidak Ditugaskan',
+                        'technician' => $task->technician ? $task->technician->name : 'Unassigned',
                         'status' => $task->status_label,
                         'priority' => ucfirst($task->priority),
                         'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
@@ -216,7 +216,7 @@
                         })
                     ]) }})"
                     class="p-2 rounded-xl bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all shadow-sm flex items-center justify-center flex-shrink-0"
-                    title="Buka Inspektor Bukti Resolusi Penuh"
+                    title="Open Full Resolution Proof Inspector"
                 >
                     <ion-icon name="scan-outline" class="text-base"></ion-icon>
                 </button>
@@ -226,8 +226,8 @@
             @if($proofList->count() === 0)
                 <div class="h-44 border-b border-slate-100 bg-slate-50 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
                     <ion-icon name="camera-outline" class="text-3xl mb-1.5 text-slate-300"></ion-icon>
-                    <span class="text-xs font-bold text-slate-600">Dokumentasi Belum Diunggah</span>
-                    <span class="text-[10px] text-slate-400 mt-0.5">Teknisi lapangan belum melampirkan foto verifikasi</span>
+                    <span class="text-xs font-bold text-slate-600">Documentation Pending</span>
+                    <span class="text-[10px] text-slate-400 mt-0.5">Field technician has not attached verification photos yet</span>
                 </div>
             @elseif($proofList->count() === 1)
                 @php $singleProof = $proofList->first(); @endphp
@@ -238,7 +238,7 @@
                         'customer' => $task->customer_name,
                         'phone' => $task->customer_phone,
                         'address' => $task->resolved_location,
-                        'technician' => $task->technician ? $task->technician->name : 'Tidak Ditugaskan',
+                        'technician' => $task->technician ? $task->technician->name : 'Unassigned',
                         'status' => $task->status_label,
                         'priority' => ucfirst($task->priority),
                         'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
@@ -268,7 +268,7 @@
                             'customer' => $task->customer_name,
                             'phone' => $task->customer_phone,
                             'address' => $task->resolved_location,
-                            'technician' => $task->technician ? $task->technician->name : 'Tidak Ditugaskan',
+                            'technician' => $task->technician ? $task->technician->name : 'Unassigned',
                             'status' => $task->status_label,
                             'priority' => ucfirst($task->priority),
                             'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
@@ -290,7 +290,7 @@
                         @else
                             <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 p-2 text-center">
                                 <ion-icon name="image-outline" class="text-2xl mb-1 text-slate-300"></ion-icon>
-                                <span class="text-[10px] font-medium">Foto Awal Nihil</span>
+                                <span class="text-[10px] font-medium">No Initial Photo</span>
                             </div>
                             <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-bold bg-slate-400 text-white uppercase tracking-wider">Before</span>
                         @endif
@@ -304,7 +304,7 @@
                             'customer' => $task->customer_name,
                             'phone' => $task->customer_phone,
                             'address' => $task->resolved_location,
-                            'technician' => $task->technician ? $task->technician->name : 'Tidak Ditugaskan',
+                            'technician' => $task->technician ? $task->technician->name : 'Unassigned',
                             'status' => $task->status_label,
                             'priority' => ucfirst($task->priority),
                             'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
@@ -326,7 +326,7 @@
                         @else
                             <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 p-2 text-center">
                                 <ion-icon name="image-outline" class="text-2xl mb-1 text-slate-300"></ion-icon>
-                                <span class="text-[10px] font-medium">Foto Selesai Nihil</span>
+                                <span class="text-[10px] font-medium">No Completion Photo</span>
                             </div>
                         @endif
                     </div>
@@ -353,12 +353,12 @@
 
                     <!-- Dispatched Technician -->
                     <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                        <span class="text-textSecondary text-[11px]">Teknisi Penanggung Jawab:</span>
+                        <span class="text-textSecondary text-[11px]">Assigned Field Technician:</span>
                         <div class="flex items-center gap-1.5">
                             <div class="h-5 w-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[9px]">
                                 {{ substr($task->technician ? $task->technician->name : 'N', 0, 1) }}
                             </div>
-                            <span class="font-semibold text-textPrimary">{{ $task->technician ? $task->technician->name : 'Tidak Ditugaskan' }}</span>
+                            <span class="font-semibold text-textPrimary">{{ $task->technician ? $task->technician->name : 'Unassigned' }}</span>
                         </div>
                     </div>
 
@@ -378,7 +378,7 @@
                     </span>
                     <div class="flex items-center gap-2">
                         <a href="{{ route('admin.tasks.show', $task->id) }}" class="text-[11px] font-bold text-primary hover:text-blue-700 transition-colors flex items-center gap-1">
-                            <span>Detail Tugas</span>
+                            <span>Task Details</span>
                             <ion-icon name="arrow-forward-outline"></ion-icon>
                         </a>
                     </div>
@@ -391,14 +391,14 @@
                 <div class="h-16 w-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
                     <ion-icon name="images-outline"></ion-icon>
                 </div>
-                <h3 class="text-base font-bold text-textPrimary">Tidak Ada Bukti Pekerjaan Ditemukan</h3>
+                <h3 class="text-base font-bold text-textPrimary">No Work Order Proofs Found</h3>
                 <p class="text-xs text-textSecondary mt-1 leading-relaxed">
-                    Tidak ditemukan data foto bukti yang sesuai dengan filter atau pencarian Anda. Pastikan teknisi telah mengunggah dokumentasi melalui aplikasi lapangan.
+                    No verification photos found matching your search or filter. Ensure field technicians have attached documentation via their mobile terminal.
                 </p>
                 @if(request()->hasAny(['search', 'technician_id', 'date_filter']))
                     <a href="{{ route('admin.proofs') }}" class="inline-flex items-center gap-1.5 px-4 py-2 mt-4 bg-primary text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-sm">
                         <ion-icon name="refresh-outline"></ion-icon>
-                        <span>Reset Semua Filter</span>
+                        <span>Reset All Filters</span>
                     </a>
                 @endif
             </div>
@@ -448,7 +448,7 @@
 
                 <!-- Image Subtitle / Note -->
                 <div class="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                    <span id="modal-img-meta">Foto Bukti Lapangan</span>
+                    <span id="modal-img-meta">Field Proof Photo</span>
                     <span id="modal-img-timestamp">-</span>
                 </div>
             </div>
@@ -457,7 +457,7 @@
             <div class="p-5 bg-white overflow-y-auto max-h-[65vh] flex flex-col justify-between space-y-4">
                 <div class="space-y-4">
                     <div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Status Pekerjaan</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Task Status</span>
                         <div class="flex items-center gap-2">
                             <span id="modal-task-status" class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">Selesai</span>
                             <span id="modal-task-priority" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 capitalize">Normal</span>
@@ -465,14 +465,14 @@
                     </div>
 
                     <div class="pt-3 border-t border-slate-100">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Pelanggan & Lokasi</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Customer & Location</span>
                         <h4 id="modal-customer-name" class="text-sm font-bold text-textPrimary">-</h4>
                         <div id="modal-customer-phone" class="text-xs text-blue-600 mt-0.5">-</div>
                         <p id="modal-task-address" class="text-xs text-textSecondary mt-1 leading-relaxed">-</p>
                     </div>
 
                     <div class="pt-3 border-t border-slate-100">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Teknisi Bertugas</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Assigned Technician</span>
                         <div class="flex items-center gap-2 mt-1">
                             <div class="h-7 w-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
                                 <ion-icon name="person"></ion-icon>
@@ -495,7 +495,7 @@
                 <div class="pt-4 border-t border-slate-100">
                     <a id="modal-task-detail-link" href="#" class="w-full py-2.5 bg-primary hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5">
                         <ion-icon name="open-outline"></ion-icon>
-                        <span>Buka Detail Tugas Lengkap</span>
+                        <span>Open Full Task Details</span>
                     </a>
                 </div>
             </div>
@@ -531,7 +531,7 @@
             taskData.proofs.forEach(function(proof, idx) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
-                var label = idx === 0 && taskData.proofs.length > 1 ? 'Foto Sebelum (Before)' : (idx === taskData.proofs.length - 1 && taskData.proofs.length > 1 ? 'Foto Selesai (After)' : 'Foto Bukti #' + (idx + 1));
+                var label = idx === 0 && taskData.proofs.length > 1 ? 'Initial Photo (Before)' : (idx === taskData.proofs.length - 1 && taskData.proofs.length > 1 ? 'Completion Photo (After)' : 'Proof Photo #' + (idx + 1));
                 btn.className = `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${idx === currentProofIndex ? 'bg-primary text-white shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`;
                 btn.innerText = label;
                 btn.onclick = function() {
@@ -542,7 +542,7 @@
             switchProof(currentProofIndex);
         } else {
             document.getElementById('modal-active-img').src = '';
-            document.getElementById('modal-proof-desc').innerText = 'Belum ada foto bukti diunggah.';
+            document.getElementById('modal-proof-desc').innerText = 'No proof photos uploaded yet.';
         }
 
         // Show Modal
@@ -558,8 +558,8 @@
 
         document.getElementById('modal-active-img').src = proof.image_url;
         document.getElementById('modal-download-btn').href = proof.image_url;
-        document.getElementById('modal-proof-desc').innerText = proof.description || 'Tidak ada catatan pengerjaan spesifik pada foto ini.';
-        document.getElementById('modal-img-meta').innerText = 'Foto #' + (index + 1) + ' dari ' + currentTaskData.proofs.length;
+        document.getElementById('modal-proof-desc').innerText = proof.description || 'No specific notes logged on this photograph.';
+        document.getElementById('modal-img-meta').innerText = 'Photo #' + (index + 1) + ' of ' + currentTaskData.proofs.length;
         document.getElementById('modal-img-timestamp').innerText = proof.created_at || '-';
 
         // Refresh Tab styles

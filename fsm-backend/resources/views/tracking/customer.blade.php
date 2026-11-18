@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Live Tracking Teknisi | {{ $task->customer_name }}</title>
+    <title>Technician Live Tracking | {{ $task->customer_name }}</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -315,7 +315,7 @@
                 <div class="mission-title" id="mission-title-text">{{ $task->title }}</div>
                 <div class="mission-sub" id="mission-eta-text">
                     <ion-icon name="navigate-outline"></ion-icon>
-                    <span>Teknisi sedang memproses tugas Anda</span>
+                    <span>Technician is processing your work order</span>
                 </div>
             </div>
         </div>
@@ -332,8 +332,8 @@
                     <ion-icon name="construct"></ion-icon>
                 </div>
                 <div class="tech-text">
-                    <h4 id="tech-name-text">{{ $task->technician?->name ?? 'Teknisi Ditugaskan' }}</h4>
-                    <span><ion-icon name="shield-checkmark"></ion-icon> Teknisi Resmi ISP</span>
+                    <h4 id="tech-name-text">{{ $task->technician?->name ?? 'Assigned Technician' }}</h4>
+                    <span><ion-icon name="shield-checkmark"></ion-icon> Certified Field Technician</span>
                 </div>
             </div>
 
@@ -406,7 +406,7 @@
         // Add Technician Marker
         const techMarker = L.marker([techLat, techLng], { icon: techIcon })
             .addTo(map)
-            .bindPopup("<b>Posisi Teknisi Lapangan</b>");
+            .bindPopup("<b>Field Technician Location</b>");
 
         // Route Polyline
         let routeLine = L.polyline([[techLat, techLng], [destLat, destLng]], {
@@ -442,13 +442,13 @@
                 const etaText = document.getElementById('mission-eta-text');
                 if (etaText) {
                     if (data.task.status === 'completed') {
-                        etaText.innerHTML = '<ion-icon name="checkmark-circle" style="color: #10b981;"></ion-icon><span style="color: #10b981;">Pekerjaan telah selesai</span>';
+                        etaText.innerHTML = '<ion-icon name="checkmark-circle" style="color: #10b981;"></ion-icon><span style="color: #10b981;">Work order completed</span>';
                         if (pollingTimer) {
                             clearInterval(pollingTimer);
                             pollingTimer = null;
                         }
                     } else if (data.task.status === 'on-going') {
-                        etaText.innerHTML = '<ion-icon name="navigate-outline"></ion-icon><span>Teknisi sedang dalam perjalanan / pengerjaan</span>';
+                        etaText.innerHTML = '<ion-icon name="navigate-outline"></ion-icon><span>Technician is en route to your location</span>';
                     }
                 }
 

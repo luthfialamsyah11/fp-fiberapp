@@ -38,7 +38,7 @@ export class AppComponent {
             App.exitApp();
           } else {
             const toast = await this.toastCtrl.create({
-              message: 'Tekan/Geser kembali sekali lagi untuk keluar',
+              message: 'Press back again to exit',
               duration: 2000,
               position: 'bottom'
             });

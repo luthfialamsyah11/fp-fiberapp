@@ -276,7 +276,7 @@ function showSimToast(title, message, icon = 'verified') {
     function resendWhatsAppPing() {
       const log = document.getElementById('radar-event-log');
       const status = document.getElementById('radar-socket-status');
-      if (log) log.innerText = '> WhatsApp template triggered: "Teknisi Budi menuju lokasi Anda..."';
+      if (log) log.innerText = '> WhatsApp template triggered: "Technician Budi is en route to your location (ETA: 8 mins)..."';
       if (status) status.innerText = 'Webhook Triggered • Click-to-Chat (wa.me) Ready';
       showSimToast('WHATSAPP DISPATCH PING SENT', 'Subscriber received live GPS tracking URL via Cloud API.', 'sms');
     }
@@ -620,7 +620,7 @@ function showSimToast(title, message, icon = 'verified') {
     }
   };
 
-  let currentLang = localStorage.getItem('benteng_lang') || 'en';
+  let currentLang = 'en';
   const langBtn = document.getElementById('lang-toggle-btn');
   const langLabel = document.getElementById('lang-label');
   const langBtnSidebar = document.getElementById('lang-toggle-btn-sidebar');

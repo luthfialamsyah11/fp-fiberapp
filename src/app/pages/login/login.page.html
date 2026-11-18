@@ -21,7 +21,7 @@
         </div>
         <div class="logo-ring"></div>
       </div>
-      <div class="kicker-tag">Aplikasi Teknisi Lapangan</div>
+      <div class="kicker-tag">Field Technician Terminal</div>
       <h1>FiberOps Mobile</h1>
       <p class="subtitle">Field Service Management System</p>
     </div>
@@ -29,8 +29,8 @@
     <!-- Login Card -->
     <div class="login-card">
       <div class="card-header">
-        <h2>Masuk ke Akun</h2>
-        <p class="card-desc">Masukkan kredensial teknisi Anda untuk memulai shift</p>
+        <h2>Technician Sign In</h2>
+        <p class="card-desc">Enter your technician credentials to start your shift</p>
       </div>
 
       <!-- Quick Demo Credentials Picker -->
@@ -55,7 +55,7 @@
 
       <!-- Form Inputs -->
       <div class="form-group">
-        <label for="tech-email">Alamat Email</label>
+        <label for="tech-email">Technician Email</label>
         <div class="input-wrap" [class.focused]="emailFocused">
           <ion-icon name="mail-outline" class="input-icon"></ion-icon>
           <input
@@ -72,14 +72,14 @@
       </div>
 
       <div class="form-group">
-        <label for="tech-password">Kata Sandi</label>
+        <label for="tech-password">Password</label>
         <div class="input-wrap" [class.focused]="passwordFocused">
           <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
           <input
             id="tech-password"
             [type]="showPassword ? 'text' : 'password'"
             [(ngModel)]="password"
-            placeholder="Masukkan kata sandi"
+            placeholder="Enter password"
             autocomplete="current-password"
             (focus)="passwordFocused = true"
             (blur)="passwordFocused = false"
@@ -116,7 +116,7 @@
         [disabled]="isLoading"
         type="button"
       >
-        <span *ngIf="!isLoading">Masuk ke Dashboard</span>
+        <span *ngIf="!isLoading">Sign In to Terminal</span>
         <span *ngIf="isLoading">Memverifikasi...</span>
         <ion-icon *ngIf="!isLoading" name="arrow-forward-outline"></ion-icon>
         <ion-spinner *ngIf="isLoading" name="crescent" class="btn-spinner"></ion-spinner>

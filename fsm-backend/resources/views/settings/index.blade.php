@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Pengaturan Platform & Sistem')
-@section('header', 'Pengaturan Platform')
+@section('title', 'Platform & System Settings')
+@section('header', 'Platform Settings')
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
@@ -16,18 +16,18 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20">
-                        Dokumentasi Lengkap
+                        Complete Documentation
                     </span>
                     <span class="text-[10px] text-slate-300">v1.2 Operations Manual</span>
                 </div>
-                <h3 class="text-base sm:text-lg font-bold text-white mt-1">Panduan Penggunaan Web Admin FiberOps</h3>
+                <h3 class="text-base sm:text-lg font-bold text-white mt-1">FiberOps Admin Operations Manual</h3>
                 <p class="text-xs text-slate-300 mt-0.5 max-w-xl">
-                    Pelajari SOP dispatching tiket, panduan membaca peta live tracking, verifikasi bukti kerja foto redaman OPM, dan manajemen armada teknisi.
+                    Learn ticket dispatching SOPs, live tracking map telemetry, OPM optical loss verification, and technician fleet management.
                 </p>
             </div>
         </div>
         <a href="{{ route('admin.guide') }}" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs transition-all shadow-md active:scale-95 flex items-center gap-2 flex-shrink-0 relative z-10">
-            <span>Buka Buku Panduan</span>
+            <span>Open Operations Manual</span>
             <ion-icon name="arrow-forward-outline" class="text-sm"></ion-icon>
         </a>
     </div>
@@ -44,7 +44,7 @@
     <div class="bg-white rounded-2xl border border-fsmBorder p-6 sm:p-8 shadow-sm">
         <div class="mb-6 border-b border-fsmBorder pb-4 flex items-center justify-between">
             <div>
-                <h2 class="text-base font-bold text-textPrimary">Konfigurasi Pengaturan Sistem</h2>
+                <h2 class="text-base font-bold text-textPrimary">System Configuration & Parameters</h2>
                 <p class="text-xs text-textSecondary">Atur identitas platform, guardrails SLA lapangan, integrasi webhook notifikasi, dan optimasi database.</p>
             </div>
             <span class="text-[11px] font-mono text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
@@ -69,7 +69,7 @@
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Dukungan Pelanggan</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Customer Support Email</label>
                             <input type="email" name="support_email" value="{{ $settings['support_email'] }}" required
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
                         </div>
@@ -115,8 +115,8 @@
                                     class="w-4 h-4 mt-0.5 text-blue-600 border-slate-300 rounded focus:ring-primary cursor-pointer" 
                                     {{ $settings['auto_assign'] == '1' ? 'checked' : '' }}>
                                 <div>
-                                    <span class="text-xs font-bold text-slate-800 block">Aktifkan Auto-Dispatch Berbasis Jarak Terdekat</span>
-                                    <span class="text-[11px] text-slate-500">Sistem otomatis merekomendasikan teknisi yang sedang idle dengan radius terdekat saat tiket dibuat.</span>
+                                    <span class="text-xs font-bold text-slate-800 block">Enable Proximity-Based Auto-Dispatch</span>
+                                    <span class="text-[11px] text-slate-500">System automatically suggests idle technicians within closest geofence radius upon ticket creation.</span>
                                 </div>
                             </label>
                         </div>
@@ -128,34 +128,34 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-2">
                             <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
-                            3. Fitur Baru: Guardrails SLA & Integritas Bukti Lapangan
+                            3. Field SLA Guardrails & Operational Integrity
                         </h3>
-                        <span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">Baru</span>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">New</span>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Ambang Peringatan SLA Tiket (Target Waktu)</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Ticket SLA Warning Threshold (Target Resolution Time)</label>
                             <select name="sla_warning_hours" 
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white">
-                                <option value="1" {{ $settings['sla_warning_hours'] == '1' ? 'selected' : '' }}>1 Jam (Kritis / Enterprise High SLA)</option>
-                                <option value="2" {{ $settings['sla_warning_hours'] == '2' ? 'selected' : '' }}>2 Jam (Standar Gangguan WiFi & Fiber)</option>
-                                <option value="4" {{ $settings['sla_warning_hours'] == '4' ? 'selected' : '' }}>4 Jam (Reguler Pasang Baru)</option>
-                                <option value="8" {{ $settings['sla_warning_hours'] == '8' ? 'selected' : '' }}>8 Jam (Next Day Service)</option>
+                                <option value="1" {{ $settings['sla_warning_hours'] == '1' ? 'selected' : '' }}>1 Hour (Critical / Enterprise Mission-Critical SLA)</option>
+                                <option value="2" {{ $settings['sla_warning_hours'] == '2' ? 'selected' : '' }}>2 Hours (Standard Fiber Degradation)</option>
+                                <option value="4" {{ $settings['sla_warning_hours'] == '4' ? 'selected' : '' }}>4 Hours (Standard Provisioning)</option>
+                                <option value="8" {{ $settings['sla_warning_hours'] == '8' ? 'selected' : '' }}>8 Hours (Next-Business-Day Resolution)</option>
                             </select>
-                            <span class="text-[10px] text-slate-400 mt-1 block">Tiket akan otomatis berwarna merah bila belum ada progres melebihi waktu ini.</span>
+                            <span class="text-[10px] text-slate-400 mt-1 block">Tickets are automatically highlighted in red when progress stalls beyond this threshold.</span>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Toleransi Radius Geofencing Lokasi Pelanggan</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Customer Location Geofencing Radius Tolerance</label>
                             <select name="geofence_check_meters" 
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white">
-                                <option value="0" {{ $settings['geofence_check_meters'] == '0' ? 'selected' : '' }}>Nonaktif (Bebas check-in)</option>
-                                <option value="50" {{ $settings['geofence_check_meters'] == '50' ? 'selected' : '' }}>50 Meter (Sangat Ketat)</option>
-                                <option value="100" {{ $settings['geofence_check_meters'] == '100' ? 'selected' : '' }}>100 Meter (Rekomendasi Area Padat)</option>
-                                <option value="250" {{ $settings['geofence_check_meters'] == '250' ? 'selected' : '' }}>250 Meter (Area Luas / Kompleks)</option>
+                                <option value="0" {{ $settings['geofence_check_meters'] == '0' ? 'selected' : '' }}>Disabled (Unrestricted Check-in)</option>
+                                <option value="50" {{ $settings['geofence_check_meters'] == '50' ? 'selected' : '' }}>50 Meters (Strict Urban)</option>
+                                <option value="100" {{ $settings['geofence_check_meters'] == '100' ? 'selected' : '' }}>100 Meters (Standard Recommended)</option>
+                                <option value="250" {{ $settings['geofence_check_meters'] == '250' ? 'selected' : '' }}>250 Meters (Campus / Rural)</option>
                             </select>
-                            <span class="text-[10px] text-slate-400 mt-1 block">Memperingatkan teknisi bila check-in tugas melebihi radius alamat pelanggan.</span>
+                            <span class="text-[10px] text-slate-400 mt-1 block">Warns technician if check-in occurs outside customer premise boundary.</span>
                         </div>
 
                         <div class="sm:col-span-2">
@@ -164,8 +164,8 @@
                                     class="w-4 h-4 mt-0.5 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer" 
                                     {{ $settings['require_proof_photo'] == '1' ? 'checked' : '' }}>
                                 <div>
-                                    <span class="text-xs font-bold text-slate-800 block">Wajibkan Foto Bukti Pekerjaan Sebelum Selesaikan Tugas (Strict Quality Gate)</span>
-                                    <span class="text-[11px] text-slate-500">Mencegah teknisi menandai tugas selesai tanpa mengunggah foto redaman OPM atau perangkat aktif.</span>
+                                    <span class="text-xs font-bold text-slate-800 block">Mandatory Photo Proof Before Completing Tasks (Strict Quality Gate)</span>
+                                    <span class="text-[11px] text-slate-500">Prevents technicians from closing tickets without calibrated OPM optical loss or ONT photos.</span>
                                 </div>
                             </label>
                         </div>
@@ -177,9 +177,9 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-2">
                             <ion-icon name="send-outline" class="text-sm"></ion-icon>
-                            4. Fitur Baru: Webhook Alert & Integrasi Bot Telegram/WhatsApp
+                            4. Webhook Alerts & Dispatch Notification Channels
                         </h3>
-                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-bold">Baru</span>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-bold">New</span>
                     </div>
 
                     <div class="space-y-4">
@@ -193,7 +193,7 @@
                                     class="flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
                                 <button type="button" id="btn-test-webhook" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
                                     <ion-icon name="flash-outline" class="text-sm"></ion-icon>
-                                    Uji Webhook
+                                    Test Webhook
                                 </button>
                             </div>
                             <span id="webhook-feedback" class="text-[11px] mt-1.5 hidden block"></span>
@@ -202,12 +202,12 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
                                 <input type="checkbox" name="notify_emergency_tickets" value="1" class="rounded text-indigo-600" {{ $settings['notify_emergency_tickets'] == '1' ? 'checked' : '' }}>
-                                <span>Kirim Notifikasi Saat Ada Tiket Prioritas Tinggi (High/Emergency)</span>
+                                <span>Dispatch Alerts for High/Emergency Priority Tickets</span>
                             </label>
 
                             <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
                                 <input type="checkbox" name="notify_task_completed" value="1" class="rounded text-indigo-600" {{ $settings['notify_task_completed'] == '1' ? 'checked' : '' }}>
-                                <span>Kirim Notifikasi Saat Teknisi Menyelesaikan Tugas</span>
+                                <span>Notify NOC when Technicians Complete Work Orders</span>
                             </label>
                         </div>
                     </div>
@@ -218,39 +218,39 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-2">
                             <ion-icon name="server-outline" class="text-sm"></ion-icon>
-                            5. Fitur Baru: Pemeliharaan Database & Retensi Telemetri GPS
+                            5. Database Maintenance & GPS Telemetry Retention
                         </h3>
-                        <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold">Baru</span>
+                        <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold">New</span>
                     </div>
 
                     <div class="bg-amber-50/50 border border-amber-200/80 rounded-xl p-4 space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div class="bg-white p-3 rounded-lg border border-amber-100">
-                                <div class="text-[10px] font-semibold text-slate-400 uppercase">Total Log GPS Tersimpan</div>
-                                <div class="text-base font-bold text-slate-800 mt-0.5">{{ number_format($totalGpsPoints) }} Titik</div>
+                                <div class="text-[10px] font-semibold text-slate-400 uppercase">Total GPS Telemetry Logs</div>
+                                <div class="text-base font-bold text-slate-800 mt-0.5">{{ number_format($totalGpsPoints) }} Points</div>
                             </div>
                             <div class="bg-white p-3 rounded-lg border border-amber-100">
-                                <div class="text-[10px] font-semibold text-slate-400 uppercase">Estimasi Bobot Data Telemetri</div>
+                                <div class="text-[10px] font-semibold text-slate-400 uppercase">Telemetry Storage Footprint</div>
                                 <div class="text-base font-bold text-slate-800 mt-0.5">{{ $databaseSize }}</div>
                             </div>
                             <div class="bg-white p-3 rounded-lg border border-amber-100">
-                                <div class="text-[10px] font-semibold text-slate-400 uppercase">Masa Retensi Otomatis</div>
+                                <div class="text-[10px] font-semibold text-slate-400 uppercase">Automated Retention Window</div>
                                 <select name="telemetry_retention_days" class="text-xs font-bold text-slate-800 bg-transparent outline-none w-full mt-0.5">
-                                    <option value="7" {{ $settings['telemetry_retention_days'] == '7' ? 'selected' : '' }}>7 Hari</option>
-                                    <option value="14" {{ $settings['telemetry_retention_days'] == '14' ? 'selected' : '' }}>14 Hari</option>
-                                    <option value="30" {{ $settings['telemetry_retention_days'] == '30' ? 'selected' : '' }}>30 Hari (Default)</option>
-                                    <option value="90" {{ $settings['telemetry_retention_days'] == '90' ? 'selected' : '' }}>90 Hari</option>
+                                    <option value="7" {{ $settings['telemetry_retention_days'] == '7' ? 'selected' : '' }}>7 Days</option>
+                                    <option value="14" {{ $settings['telemetry_retention_days'] == '14' ? 'selected' : '' }}>14 Days</option>
+                                    <option value="30" {{ $settings['telemetry_retention_days'] == '30' ? 'selected' : '' }}>30 Days (Default)</option>
+                                    <option value="90" {{ $settings['telemetry_retention_days'] == '90' ? 'selected' : '' }}>90 Days</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between pt-1">
                             <span class="text-[11px] text-slate-500">
-                                Bersihkan log koordinat lama untuk mempercepat pemuatan Leaflet map.
+                                Purge old GPS coordinate history to accelerate Leaflet map rendering.
                             </span>
                             <button type="button" id="btn-purge-cache" class="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
                                 <ion-icon name="trash-outline" class="text-sm"></ion-icon>
-                                Bersihkan Log Usang
+                                Purge Stale Logs
                             </button>
                         </div>
                         <span id="purge-feedback" class="text-[11px] hidden block"></span>
@@ -262,11 +262,11 @@
             <!-- Submit Button Bar -->
             <div class="mt-8 pt-5 border-t border-fsmBorder flex items-center justify-between">
                 <span class="text-xs text-slate-400">
-                    Perubahan langsung berlaku ke seluruh armada teknisi dan admin dashboard.
+                    Changes take effect immediately across all fleet terminals and dispatcher consoles.
                 </span>
                 <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer">
                     <ion-icon name="save-outline" class="text-sm"></ion-icon>
-                    Simpan Semua Pengaturan
+                    Save All Platform Settings
                 </button>
             </div>
         </form>
@@ -286,7 +286,7 @@
         if (btnTestWebhook) {
             btnTestWebhook.addEventListener('click', async function() {
                 btnTestWebhook.disabled = true;
-                btnTestWebhook.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon> Menguji...';
+                btnTestWebhook.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon> Testing...';
                 
                 try {
                     const resp = await fetch("{{ route('admin.settings.test_webhook') }}", {
@@ -304,10 +304,10 @@
                     webhookFeedback.textContent = '✅ ' + res.message;
                 } catch (e) {
                     webhookFeedback.className = 'text-[11px] mt-1.5 block text-red-600 font-semibold';
-                    webhookFeedback.textContent = '❌ Gagal mengirim webhook uji coba: ' + e.message;
+                    webhookFeedback.textContent = '❌ Failed to dispatch test webhook: ' + e.message;
                 } finally {
                     btnTestWebhook.disabled = false;
-                    btnTestWebhook.innerHTML = '<ion-icon name="flash-outline" class="text-sm"></ion-icon> Uji Webhook';
+                    btnTestWebhook.innerHTML = '<ion-icon name="flash-outline" class="text-sm"></ion-icon> Test Webhook';
                 }
             });
         }
@@ -318,12 +318,12 @@
 
         if (btnPurge) {
             btnPurge.addEventListener('click', async function() {
-                if (!confirm('Apakah Anda yakin ingin mengarsipkan log telemetri GPS lama? Data rute aktif 100 titik terakhir tetap aman.')) {
+                if (!confirm('Are you sure you want to purge older GPS telemetry logs? The latest 100 active breadcrumbs remain safeguarded.')) {
                     return;
                 }
 
                 btnPurge.disabled = true;
-                btnPurge.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon> Membersihkan...';
+                btnPurge.innerHTML = '<ion-icon name="sync" class="animate-spin"></ion-icon> Purging...';
 
                 try {
                     const resp = await fetch("{{ route('admin.settings.purge_cache') }}", {
@@ -340,10 +340,10 @@
                     purgeFeedback.textContent = '✅ ' + res.message;
                 } catch (e) {
                     purgeFeedback.className = 'text-[11px] block text-red-600 font-semibold mt-2';
-                    purgeFeedback.textContent = '❌ Gagal membersihkan cache: ' + e.message;
+                    purgeFeedback.textContent = '❌ Failed to clear cache: ' + e.message;
                 } finally {
                     btnPurge.disabled = false;
-                    btnPurge.innerHTML = '<ion-icon name="trash-outline" class="text-sm"></ion-icon> Bersihkan Log Usang';
+                    btnPurge.innerHTML = '<ion-icon name="trash-outline" class="text-sm"></ion-icon> Purge Stale Logs';
                 }
             });
         }

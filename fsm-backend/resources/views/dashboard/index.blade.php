@@ -38,13 +38,13 @@
         </div>
         <div>
             <div class="flex items-center gap-2">
-                <h2 class="text-base font-bold text-textPrimary tracking-tight">Ringkasan Operasional FSM</h2>
+                <h2 class="text-base font-bold text-textPrimary tracking-tight">FSM Operational Overview</h2>
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">
                     <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-ping"></span> Real-time Live
                 </span>
             </div>
             <p class="text-xs text-textSecondary mt-0.5">
-                Monitoring penugasan lapangan, koordinat GPS armada teknisi, dan validasi bukti kerja secara terintegrasi.
+                Integrated field task monitoring, technician fleet GPS coordinates, and real-time proof-of-work verification.
             </p>
         </div>
     </div>
@@ -53,7 +53,7 @@
     <div class="flex flex-wrap items-center gap-2">
         <a href="{{ route('admin.tasks.create') }}" class="px-3.5 py-2 text-xs font-semibold bg-primary hover:bg-blue-700 text-white rounded-xl shadow-sm shadow-blue-500/20 transition-all flex items-center gap-1.5">
             <ion-icon name="add-circle-outline" class="text-sm"></ion-icon>
-            <span>+ Buat Tugas</span>
+            <span>+ Create Task</span>
         </a>
         <a href="{{ route('admin.tracking') }}" class="px-3.5 py-2 text-xs font-semibold bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
             <ion-icon name="locate-outline" class="text-sm text-blue-600"></ion-icon>
@@ -61,11 +61,11 @@
         </a>
         <a href="{{ route('admin.proofs') }}" class="px-3.5 py-2 text-xs font-semibold bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
             <ion-icon name="shield-checkmark-outline" class="text-sm text-emerald-600"></ion-icon>
-            <span>Verifikasi Bukti</span>
+            <span>Verify Proofs</span>
         </a>
-        <a href="{{ route('admin.guide') }}" class="px-3 py-2 text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 rounded-xl transition-all flex items-center gap-1" title="Buka Panduan Operasional">
+        <a href="{{ route('admin.guide') }}" class="px-3 py-2 text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 rounded-xl transition-all flex items-center gap-1" title="Open Operations Guide">
             <ion-icon name="book-outline" class="text-sm"></ion-icon>
-            <span>Panduan</span>
+            <span>Guide</span>
         </a>
     </div>
 </div>
@@ -85,7 +85,7 @@
             <div>
                 <h3 class="text-2xl font-bold text-textPrimary leading-none">{{ $stats['total_tasks'] }}</h3>
                 <span class="text-[10px] font-semibold text-blue-600 flex items-center gap-0.5 mt-1">
-                    <ion-icon name="layers-outline"></ion-icon> Seluruh Tiket
+                    <ion-icon name="layers-outline"></ion-icon> All Tickets
                 </span>
             </div>
             <svg class="sparkline-svg" viewBox="0 0 100 30">
@@ -107,7 +107,7 @@
             <div>
                 <h3 class="text-2xl font-bold text-textPrimary leading-none">{{ $stats['on_going'] }}</h3>
                 <span class="text-[10px] font-semibold text-indigo-600 flex items-center gap-0.5 mt-1">
-                    <ion-icon name="flash-outline"></ion-icon> Sedang Dikerjakan
+                    <ion-icon name="flash-outline"></ion-icon> In Progress
                 </span>
             </div>
             <svg class="sparkline-svg" viewBox="0 0 100 30">
@@ -129,7 +129,7 @@
             <div>
                 <h3 class="text-2xl font-bold text-textPrimary leading-none">{{ $stats['pending'] }}</h3>
                 <span class="text-[10px] font-semibold text-amber-600 flex items-center gap-0.5 mt-1">
-                    <ion-icon name="alert-circle-outline"></ion-icon> Perlu Alokasi
+                    <ion-icon name="alert-circle-outline"></ion-icon> Needs Dispatch
                 </span>
             </div>
             <svg class="sparkline-svg" viewBox="0 0 100 30">
@@ -142,7 +142,7 @@
     <!-- KPI 4: Urgent / High Priority Active -->
     <a href="{{ route('admin.dashboard', ['filter' => 'urgent']) }}" class="bg-white rounded-2xl border {{ $stats['urgent_active'] > 0 ? 'border-red-300 bg-red-50/20' : 'border-slate-200/70' }} p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col justify-between block group">
         <div class="flex justify-between items-start">
-            <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider">Darurat / High</span>
+            <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider">Urgent / High</span>
             <div class="p-1.5 rounded-xl bg-red-50 text-red-600 group-hover:scale-110 transition-transform {{ $stats['urgent_active'] > 0 ? 'pulse-danger' : '' }}">
                 <ion-icon name="warning-outline" class="text-sm"></ion-icon>
             </div>
@@ -151,7 +151,7 @@
             <div>
                 <h3 class="text-2xl font-bold {{ $stats['urgent_active'] > 0 ? 'text-red-600' : 'text-textPrimary' }} leading-none">{{ $stats['urgent_active'] }}</h3>
                 <span class="text-[10px] font-semibold text-red-600 flex items-center gap-0.5 mt-1">
-                    <ion-icon name="flame-outline"></ion-icon> Butuh Penanganan
+                    <ion-icon name="flame-outline"></ion-icon> Immediate Action
                 </span>
             </div>
             <svg class="sparkline-svg" viewBox="0 0 100 30">
@@ -173,7 +173,7 @@
             <div>
                 <h3 class="text-2xl font-bold text-textPrimary leading-none">{{ $stats['completion_rate'] }}%</h3>
                 <span class="text-[10px] font-semibold text-emerald-600 flex items-center gap-0.5 mt-1">
-                    <ion-icon name="shield-checkmark-outline"></ion-icon> {{ $stats['completed'] }} Selesai
+                    <ion-icon name="shield-checkmark-outline"></ion-icon> {{ $stats['completed'] }} Completed
                 </span>
             </div>
             <svg class="sparkline-svg" viewBox="0 0 100 30">
@@ -186,7 +186,7 @@
     <!-- KPI 6: Active Technicians -->
     <a href="{{ route('admin.technicians.index') }}" class="bg-white rounded-2xl border border-slate-200/70 p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-purple-300 transition-all flex flex-col justify-between block group">
         <div class="flex justify-between items-start">
-            <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider">Armada Teknisi</span>
+            <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider">Technician Fleet</span>
             <div class="p-1.5 rounded-xl bg-purple-50 text-purple-600 group-hover:scale-110 transition-transform">
                 <ion-icon name="people-outline" class="text-sm"></ion-icon>
             </div>
@@ -195,7 +195,7 @@
             <div>
                 <h3 class="text-2xl font-bold text-textPrimary leading-none">{{ $stats['online_technicians'] }}<span class="text-xs text-textSecondary font-normal"> / {{ $stats['active_technicians'] }}</span></h3>
                 <span class="text-[10px] font-semibold text-purple-600 flex items-center gap-0.5 mt-1">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block"></span> Online di Lapangan
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block"></span> Online in Field
                 </span>
             </div>
             <svg class="sparkline-svg" viewBox="0 0 100 30">
@@ -215,20 +215,20 @@
                 <ion-icon name="map-outline" class="text-xl text-primary"></ion-icon>
                 <div>
                     <h2 class="text-sm sm:text-base font-bold text-textPrimary">Live Dispatcher Tracking</h2>
-                    <span class="text-[10px] text-textSecondary">Titik koordinat telemetri GPS teknisi aktif terkini</span>
+                    <span class="text-[10px] text-textSecondary">Active technician real-time GPS telemetry coordinates</span>
                 </div>
             </div>
 
             <!-- Map Controls & Legend -->
             <div class="flex flex-wrap items-center gap-2">
                 <div class="flex items-center gap-2 text-[10px] font-semibold text-textSecondary bg-slate-50 border border-slate-200/60 px-2.5 py-1 rounded-xl">
-                    <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-blue-600"></span> Siap</span>
+                    <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-blue-600"></span> Available</span>
                     <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-amber-500"></span> On-Going</span>
                     <span class="flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-slate-400"></span> Offline</span>
                 </div>
-                <a href="{{ route('admin.tracking') }}" class="p-1.5 rounded-xl bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all text-xs font-semibold flex items-center gap-1" title="Buka Halaman Live Tracking Lengkap">
+                <a href="{{ route('admin.tracking') }}" class="p-1.5 rounded-xl bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all text-xs font-semibold flex items-center gap-1" title="Open Full Live Tracking View">
                     <ion-icon name="expand-outline"></ion-icon>
-                    <span class="hidden sm:inline">Peta Penuh</span>
+                    <span class="hidden sm:inline">Full Map</span>
                 </a>
             </div>
         </div>
@@ -249,7 +249,7 @@
                 </button>
                 <button type="button" onclick="switchSideTab('roster')" id="btn-tab-roster" class="tab-btn px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1">
                     <ion-icon name="people-outline"></ion-icon>
-                    <span>Armada ({{ $fleetRoster->count() }})</span>
+                    <span>Fleet ({{ $fleetRoster->count() }})</span>
                 </button>
             </div>
             <span class="text-[10px] text-slate-400">Auto-sync</span>
@@ -280,7 +280,7 @@
                             <span class="text-[10px] text-textSecondary">{{ $log->created_at ? $log->created_at->diffForHumans() : '-' }}</span>
                         </div>
                         <p class="text-xs text-textSecondary mt-0.5 leading-snug">
-                            {{ $log->note ?? 'Pembaruan progres pekerjaan' }}
+                            {{ $log->note ?? 'Work order progress update' }}
                         </p>
                         <div class="flex items-center gap-2 mt-1.5">
                             @if($log->task)
@@ -297,7 +297,7 @@
             @empty
                 <div class="h-full flex flex-col items-center justify-center text-center p-8 text-textSecondary">
                     <ion-icon name="chatbox-ellipses-outline" class="text-3xl mb-1 text-slate-300"></ion-icon>
-                    <p class="text-xs">Belum ada aktivitas terekam.</p>
+                    <p class="text-xs">No activity recorded yet.</p>
                 </div>
             @endforelse
         </div>
@@ -316,7 +316,7 @@
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold text-textPrimary">{{ $tech['name'] }}</h4>
-                                <span class="text-[10px] text-textSecondary block">{{ $tech['phone'] ?? 'Tanpa nomor' }}</span>
+                                <span class="text-[10px] text-textSecondary block">{{ $tech['phone'] ?? 'No phone' }}</span>
                             </div>
                         </div>
                         <span class="text-[9px] font-bold px-2 py-0.5 rounded-full {{ $tech['is_online'] ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500' }}">
@@ -325,7 +325,7 @@
                     </div>
 
                     <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] flex justify-between items-center">
-                        <span class="text-textSecondary text-[10px]">Tugas Aktif:</span>
+                        <span class="text-textSecondary text-[10px]">Active Task:</span>
                         @if($tech['active_task'])
                             <a href="{{ route('admin.tasks.show', $tech['active_task_id']) }}" class="text-[10px] font-bold text-primary hover:underline truncate max-w-[130px]" title="{{ $tech['active_task'] }}">
                                 {{ $tech['active_task'] }}
@@ -337,7 +337,7 @@
                 </div>
             @empty
                 <div class="p-6 text-center text-textSecondary text-xs">
-                    Tidak ada teknisi terdaftar.
+                    No technicians registered.
                 </div>
             @endforelse
         </div>
@@ -351,14 +351,14 @@
             <ion-icon name="list-circle-outline" class="text-xl text-primary"></ion-icon>
             <div>
                 <h2 class="text-base font-bold text-textPrimary">Active Task Monitoring</h2>
-                <span class="text-[10px] text-textSecondary">Daftar penugasan dan status pengerjaan operasional</span>
+                <span class="text-[10px] text-textSecondary">Operational assignments and execution status</span>
             </div>
         </div>
 
         <!-- Filter Presets Tabs -->
         <div class="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
             <a href="{{ route('admin.dashboard', ['filter' => 'all']) }}" class="px-3 py-1.5 rounded-xl transition-all {{ $filter === 'all' ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                Semua ({{ $stats['total_tasks'] }})
+                All ({{ $stats['total_tasks'] }})
             </a>
             <a href="{{ route('admin.dashboard', ['filter' => 'pending']) }}" class="px-3 py-1.5 rounded-xl transition-all {{ $filter === 'pending' ? 'bg-amber-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
                 Pending ({{ $stats['pending'] }})
@@ -367,10 +367,10 @@
                 On-Going ({{ $stats['on_going'] }})
             </a>
             <a href="{{ route('admin.dashboard', ['filter' => 'urgent']) }}" class="px-3 py-1.5 rounded-xl transition-all {{ $filter === 'urgent' ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                Darurat ({{ $stats['urgent_active'] }})
+                Urgent ({{ $stats['urgent_active'] }})
             </a>
             <a href="{{ route('admin.dashboard', ['filter' => 'completed']) }}" class="px-3 py-1.5 rounded-xl transition-all {{ $filter === 'completed' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                Selesai ({{ $stats['completed'] }})
+                Completed ({{ $stats['completed'] }})
             </a>
         </div>
     </div>
@@ -380,13 +380,13 @@
             <thead>
                 <tr class="bg-slate-50 border-b border-slate-100 text-textSecondary text-[11px] font-semibold uppercase tracking-wider">
                     <th class="p-4">Task ID</th>
-                    <th class="p-4">Customer & Kontak</th>
-                    <th class="p-4">Teknisi Bertugas</th>
-                    <th class="p-4">Status & Progres</th>
-                    <th class="p-4">Prioritas</th>
-                    <th class="p-4">Lokasi Pekerjaan</th>
-                    <th class="p-4">Bukti Foto</th>
-                    <th class="p-4 text-center">Aksi</th>
+                    <th class="p-4">Customer & Contact</th>
+                    <th class="p-4">Assigned Technician</th>
+                    <th class="p-4">Status & Progress</th>
+                    <th class="p-4">Priority</th>
+                    <th class="p-4">Work Location</th>
+                    <th class="p-4">Proof Photos</th>
+                    <th class="p-4 text-center">Action</th>
                 </tr>
             </thead>
             <tbody class="text-xs divide-y divide-slate-100">
@@ -417,7 +417,7 @@
                             </a>
                         @else
                             <span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[10px] font-semibold border border-amber-200">
-                                Belum ditugaskan
+                                Unassigned
                             </span>
                         @endif
                     </td>
@@ -466,7 +466,7 @@
                         @if($task->proofs->count() > 0)
                             <a href="{{ route('admin.proofs', ['search' => '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT)]) }}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] hover:bg-emerald-100 transition-colors">
                                 <ion-icon name="image-outline"></ion-icon>
-                                <span>{{ $task->proofs->count() }} Foto</span>
+                                <span>{{ $task->proofs->count() }} Photos</span>
                             </a>
                         @else
                             <span class="text-slate-400 text-[10px] italic">-</span>
@@ -474,11 +474,11 @@
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex items-center justify-center gap-1">
-                            <a href="{{ route('admin.tasks.show', $task->id) }}" class="p-1.5 rounded-lg bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all" title="Buka Detail Tugas">
+                            <a href="{{ route('admin.tasks.show', $task->id) }}" class="p-1.5 rounded-lg bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all" title="View Task Details">
                                 <ion-icon name="eye-outline" class="text-sm"></ion-icon>
                             </a>
                             @if($task->status === 'pending')
-                                <a href="{{ route('admin.tasks.edit', $task->id) }}" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 transition-all" title="Tugaskan Teknisi">
+                                <a href="{{ route('admin.tasks.edit', $task->id) }}" class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 transition-all" title="Assign Technician">
                                     <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
                                 </a>
                             @endif
@@ -489,10 +489,10 @@
                 <tr>
                     <td colspan="8" class="p-8 text-center text-textSecondary">
                         <ion-icon name="file-tray-outline" class="text-4xl mb-2 text-slate-300"></ion-icon>
-                        <p class="text-xs font-semibold">Tidak ada data tugas yang sesuai dengan filter.</p>
+                        <p class="text-xs font-semibold">No work order records match this filter.</p>
                         @if($filter !== 'all')
                             <a href="{{ route('admin.dashboard') }}" class="text-[11px] font-bold text-primary hover:underline mt-1 inline-block">
-                                Tampilkan semua tugas
+                                Show all tasks
                             </a>
                         @endif
                     </td>
@@ -587,7 +587,7 @@
                     </div>
                     <div style="color: #64748B; font-size: 11px; margin-bottom: 6px;">Email: ${escapeHtml(item.email)}</div>
                     <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 6px; border-radius: 8px; margin-bottom: 6px;">
-                        <span style="font-weight: 600; color: #64748B; font-size: 10px; display: block;">Tugas Saat Ini:</span>
+                        <span style="font-weight: 600; color: #64748B; font-size: 10px; display: block;">Current Task:</span>
                         <a href="${taskLink}" style="color: #2563EB; font-weight: 600; text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             ${escapeHtml(item.taskTitle)}
                         </a>

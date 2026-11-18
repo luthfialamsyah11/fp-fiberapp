@@ -159,17 +159,22 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($task->proofs as $index => $proof)
                         @php
-                            $label = $index == 0 ? 'Before Photo' : 'After Photo';
-                            $labelBg = $index == 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-green-50 text-green-700 border-green-200';
+                            $resolvedSlot = $proof->resolved_slot;
+                            if ($resolvedSlot === 'before') {
+                                $label = 'Before Photo';
+                                $labelBg = 'bg-amber-50 text-amber-700 border-amber-200';
+                            } elseif ($resolvedSlot === 'after') {
+                                $label = 'After Photo';
+                                $labelBg = 'bg-green-50 text-green-700 border-green-200';
+                            } else {
+                                $label = $index === 0 ? 'Before Photo' : ($index === 1 ? 'After Photo' : 'Additional Photo');
+                                $labelBg = $index === 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200';
+                            }
                         @endphp
                         <div class="border border-slate-200 rounded-xl overflow-hidden flex flex-col">
                             <!-- Image Frame -->
-                            <div class="relative h-48 bg-slate-50">
-                                @if(Str::startsWith($proof->image, ['http://', 'https://']))
-                                    <img src="{{ $proof->image }}" class="w-full h-full object-cover" alt="{{ $label }}">
-                                @else
-                                    <img src="{{ asset('storage/' . $proof->image) }}" class="w-full h-full object-cover" alt="{{ $label }}" onerror="this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500'">
-                                @endif
+                            <div class="relative h-48 bg-slate-50 flex items-center justify-center">
+                                <img src="{{ $proof->image_url }}" class="w-full h-full object-cover" alt="{{ $label }}">
                                 
                                 <span class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold uppercase border {{ $labelBg }}">
                                     {{ $label }}
@@ -196,11 +201,11 @@
         <div class="bg-white rounded-xl border border-fsmBorder p-6 shadow-sm">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-fsmBorder">
                 <div>
-                    <h3 class="text-sm font-bold text-textPrimary">Material &amp; Perangkat Terpakai (BOM)</h3>
-                    <p class="text-xs text-textSecondary">Pencatatan suku cadang jaringan &amp; pemotongan inventaris</p>
+                    <h3 class="text-sm font-bold text-textPrimary">Consumed Materials &amp; Hardware (BOM)</h3>
+                    <p class="text-xs text-textSecondary">Network spare parts ledger &amp; automated warehouse stock deduction</p>
                 </div>
                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-                    {{ $task->materials->count() }} Item
+                    {{ $task->materials->count() }} Items
                 </span>
             </div>
 
@@ -212,7 +217,7 @@
                                 <th class="pb-2">Material</th>
                                 <th class="pb-2">Qty</th>
                                 <th class="pb-2">Serial Number / Note</th>
-                                <th class="pb-2 text-right">Est. Biaya</th>
+                                <th class="pb-2 text-right">Est. Cost</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -234,16 +239,16 @@
                                         {{ $mat->serial_number ?: ($mat->notes ?: '-') }}
                                     </td>
                                     <td class="py-2.5 text-right font-semibold text-emerald-600">
-                                        Rp {{ number_format($cost, 0, ',', '.') }}
+                                        {{ \App\Services\SettingService::formatCurrency((float) $cost) }}
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr class="border-t border-slate-200 font-bold">
-                                <td colspan="3" class="pt-2 text-textPrimary uppercase text-[11px]">Total Estimasi Biaya Material</td>
+                                <td colspan="3" class="pt-2 text-textPrimary uppercase text-[11px]">Total Estimated Material Cost</td>
                                 <td class="pt-2 text-right text-emerald-700 font-bold">
-                                    Rp {{ number_format($totalMatCost, 0, ',', '.') }}
+                                    {{ \App\Services\SettingService::formatCurrency((float) $totalMatCost) }}
                                 </td>
                             </tr>
                         </tfoot>
@@ -278,17 +283,17 @@
             @if($task->customer_signature)
                 <div class="flex flex-col sm:flex-row items-center gap-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
                     <div class="w-48 h-24 bg-white border border-slate-200 rounded-lg p-2 flex items-center justify-center shadow-inner">
-                        <img src="{{ asset($task->customer_signature) }}" alt="Customer Signature" class="max-h-full max-w-full object-contain">
+                        <img src="{{ $task->customer_signature_url }}" alt="Customer Signature" class="max-h-full max-w-full object-contain">
                     </div>
                     <div class="space-y-1 text-xs">
                         <div class="font-bold text-textPrimary text-sm">{{ $task->customer_signer_name ?? $task->customer_name }}</div>
                         <div class="text-textSecondary flex items-center gap-1">
                             <ion-icon name="time-outline" class="text-slate-400"></ion-icon>
-                            Ditandatangani: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d M Y H:i') : '-' }} WIB
+                            Signed at: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d M Y H:i') : '-' }} UTC
                         </div>
                         <div class="pt-2">
                             <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                                <ion-icon name="document-text-outline"></ion-icon> Lihat Lembar BAST Lengkap
+                                <ion-icon name="document-text-outline"></ion-icon> View Official BAST Certificate
                             </a>
                         </div>
                     </div>
@@ -297,6 +302,42 @@
                 <div class="text-center py-6 text-textSecondary bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                     <ion-icon name="create-outline" class="text-3xl mb-1 text-slate-300"></ion-icon>
                     <p class="text-xs">Customer has not yet signed the acceptance certificate on technician terminal.</p>
+                </div>
+            @endif
+        </div>
+
+        <!-- Status & Immutable Audit History Ledger -->
+        <div class="bg-white rounded-xl border border-fsmBorder p-6 shadow-sm">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-fsmBorder">
+                <div>
+                    <h3 class="text-sm font-bold text-textPrimary">State Transition &amp; Audit History</h3>
+                    <p class="text-xs text-textSecondary">Deterministic finite state machine transitions and override audit trail</p>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                    {{ $task->statusHistories ? $task->statusHistories->count() : 0 }} Events
+                </span>
+            </div>
+
+            @if($task->statusHistories && $task->statusHistories->count() > 0)
+                <div class="space-y-2.5">
+                    @foreach($task->statusHistories as $history)
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2 py-0.5 rounded bg-slate-200/70 text-slate-700 font-mono text-[10px] uppercase font-bold">{{ $history->from_status }}</span>
+                                <ion-icon name="arrow-forward-outline" class="text-slate-400"></ion-icon>
+                                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-mono text-[10px] uppercase font-bold">{{ $history->to_status }}</span>
+                                <span class="text-textSecondary">by <strong class="text-textPrimary">{{ $history->actor->name ?? ucfirst($history->actor_role) }}</strong> ({{ strtoupper($history->actor_role) }})</span>
+                                @if($history->reason)
+                                    <span class="text-slate-600 italic">— "{{ $history->reason }}"</span>
+                                @endif
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-mono flex-shrink-0">{{ $history->created_at->format('d M Y H:i:s') }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-5 text-textSecondary">
+                    <p class="text-xs">No state transitions recorded yet.</p>
                 </div>
             @endif
         </div>
@@ -331,8 +372,9 @@
                 </a>
                 @if($task->customer_phone)
                     @php
-                        $cleanPhone = preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $task->customer_phone));
-                        $waMsg = "Hello " . $task->customer_name . ", our certified field technician is en route to your location for work order #TSK-" . $task->id . ". You can track their live location here: " . route('tracking.customer', $task->tracking_token);
+                        $defaultCountryCode = preg_replace('/[^0-9]/', '', (string) \App\Services\SettingService::get('default_country_code', '62')) ?: '62';
+                        $cleanPhone = preg_replace('/^0/', $defaultCountryCode, preg_replace('/[^0-9]/', '', $task->customer_phone));
+                        $waMsg = "Hello " . $task->customer_name . ", our certified field technician is en route to your location for work order #TSK-" . $task->id . ". You can track their live location here: " . route('customer.tracking', $task->tracking_token);
                     @endphp
                     <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode($waMsg) }}" target="_blank" rel="noopener noreferrer" class="py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all" title="Share via WhatsApp">
                         <ion-icon name="logo-whatsapp"></ion-icon> Share
@@ -384,10 +426,10 @@
                 <h3 class="text-xs font-semibold text-textPrimary uppercase tracking-wider">Location Monitoring</h3>
                 @if($task->latitude && $task->longitude)
                     <div class="flex items-center gap-1.5">
-                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $task->latitude }},{{ $task->longitude }}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-[10px] font-bold transition-all flex items-center gap-1" title="Buka rute di Google Maps">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $task->latitude }},{{ $task->longitude }}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-[10px] font-bold transition-all flex items-center gap-1" title="Open route in Google Maps">
                             <ion-icon name="navigate-outline"></ion-icon> Maps
                         </a>
-                        <a href="https://waze.com/ul?ll={{ $task->latitude }},{{ $task->longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 text-[10px] font-bold transition-all flex items-center gap-1" title="Buka rute di Waze">
+                        <a href="https://waze.com/ul?ll={{ $task->latitude }},{{ $task->longitude }}&navigate=yes" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 text-[10px] font-bold transition-all flex items-center gap-1" title="Open route in Waze">
                             <ion-icon name="car-sport-outline"></ion-icon> Waze
                         </a>
                     </div>
@@ -398,10 +440,15 @@
                 <div id="task-map"></div>
                 <div class="p-3 bg-slate-50 border-t border-fsmBorder text-[10px] text-textSecondary font-medium flex justify-between">
                     <span>Task Coords: {{ number_format($task->latitude, 5) }}, {{ number_format($task->longitude, 5) }}</span>
-                    @if($task->technician && $task->technician->latestLocation)
+                    @if($task->technician && $task->technician->isEffectivelyOnline(10))
                         <span class="text-green-600 flex items-center gap-0.5">
                             <span class="h-1.5 w-1.5 bg-green-500 rounded-full animate-ping"></span>
                             Tech Online
+                        </span>
+                    @elseif($task->technician && $task->technician->latestLocation)
+                        <span class="text-slate-400 flex items-center gap-1">
+                            <span class="h-1.5 w-1.5 bg-slate-300 rounded-full"></span>
+                            Last ping {{ $task->technician->latestLocation->created_at->diffForHumans() }}
                         </span>
                     @endif
                 </div>
@@ -477,7 +524,9 @@
             @endif
         @endif
     });
-
+</script>
+@endif
+<script>
     function copyTrackingUrl() {
         var input = document.getElementById('customer-tracking-url');
         if (!input) return;
@@ -491,6 +540,5 @@
         });
     }
 </script>
-@endif
 @endpush
 @endsection

@@ -32,6 +32,67 @@
 </div>
 
 <!-- Main Assignment Layout Grid -->
+@if(isset($pendingQueue) && $pendingQueue->count() > 0)
+<div class="bg-amber-50/40 rounded-xl border border-amber-200/80 shadow-sm mb-6 overflow-hidden">
+    <div class="px-6 py-3.5 border-b border-amber-200/60 bg-amber-50/70 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <ion-icon name="flash-outline" class="text-amber-600 text-base"></ion-icon>
+            <h3 class="text-sm font-bold text-textPrimary">Pending Dispatch Queue ({{ $pendingQueue->count() }})</h3>
+        </div>
+        <span class="text-[11px] font-semibold text-amber-700">1-Click Field Technician Assignment</span>
+    </div>
+    <div class="overflow-x-auto bg-white">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-fsmBorder text-textSecondary text-[11px] font-semibold uppercase tracking-wider">
+                    <th class="p-3.5">Work Order</th>
+                    <th class="p-3.5">Customer & Location</th>
+                    <th class="p-3.5">Priority</th>
+                    <th class="p-3.5">Quick Assign Technician</th>
+                </tr>
+            </thead>
+            <tbody class="text-xs divide-y divide-fsmBorder">
+                @foreach($pendingQueue as $pendingTask)
+                <tr class="hover:bg-slate-50/40">
+                    <td class="p-3.5">
+                        <a href="{{ route('admin.tasks.show', $pendingTask->id) }}" class="font-bold text-textPrimary hover:text-primary block">
+                            {{ $pendingTask->title }}
+                        </a>
+                        <span class="text-[10px] font-mono text-textSecondary">#TSK-{{ str_pad($pendingTask->id, 4, '0', STR_PAD_LEFT) }}</span>
+                    </td>
+                    <td class="p-3.5">
+                        <div class="font-semibold text-textPrimary">{{ $pendingTask->customer_name }}</div>
+                        <div class="text-[10px] text-textSecondary truncate max-w-xs">{{ $pendingTask->resolved_location }}</div>
+                    </td>
+                    <td class="p-3.5">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $pendingTask->priority === 'high' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-slate-100 text-slate-600' }}">
+                            {{ $pendingTask->priority }}
+                        </span>
+                    </td>
+                    <td class="p-3.5">
+                        <form action="{{ route('admin.tasks.assign', $pendingTask->id) }}" method="POST" class="flex items-center gap-2">
+                            @csrf
+                            <select name="technician_id" required class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <option value="">Select technician...</option>
+                                @foreach($technicians as $tech)
+                                    <option value="{{ $tech->id }}" {{ $pendingTask->technician_id == $tech->id ? 'selected' : '' }}>
+                                        {{ $tech->name }} ({{ $tech->tasks_count }} active)
+                                    </option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="px-3 py-1.5 bg-primary hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all">
+                                Dispatch
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     
     <!-- Left Column: Assignment Timeline & History -->

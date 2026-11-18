@@ -45,7 +45,7 @@
         <div class="mb-6 border-b border-fsmBorder pb-4 flex items-center justify-between">
             <div>
                 <h2 class="text-base font-bold text-textPrimary">System Configuration & Parameters</h2>
-                <p class="text-xs text-textSecondary">Atur identitas platform, guardrails SLA lapangan, integrasi webhook notifikasi, dan optimasi database.</p>
+                <p class="text-xs text-textSecondary">Configure platform identity, field SLA guardrails, webhook notification channels, and database retention policies.</p>
             </div>
             <span class="text-[11px] font-mono text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
                 FSM Core v1.4
@@ -60,11 +60,11 @@
                 <div>
                     <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <ion-icon name="business-outline" class="text-sm"></ion-icon>
-                        1. Informasi Perusahaan & Layanan
+                        1. Organization & Carrier Identity
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Perusahaan / ISP</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Company / Carrier Name</label>
                             <input type="text" name="company_name" value="{{ $settings['company_name'] }}" required
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
                         </div>
@@ -73,10 +73,26 @@
                             <input type="email" name="support_email" value="{{ $settings['support_email'] }}" required
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
                         </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Hotline Dukungan Lapangan (Call Center)</label>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Field Operations Hotline (NOC Desk)</label>
                             <input type="text" name="support_phone" value="{{ $settings['support_phone'] }}" required
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Display Currency</label>
+                                <select name="currency" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary bg-white">
+                                    <option value="USD" {{ ($settings['currency'] ?? 'USD') == 'USD' ? 'selected' : '' }}>USD ($)</option>
+                                    <option value="EUR" {{ ($settings['currency'] ?? 'USD') == 'EUR' ? 'selected' : '' }}>EUR (€)</option>
+                                    <option value="GBP" {{ ($settings['currency'] ?? 'USD') == 'GBP' ? 'selected' : '' }}>GBP (£)</option>
+                                    <option value="IDR" {{ ($settings['currency'] ?? 'USD') == 'IDR' ? 'selected' : '' }}>IDR (Rp)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Default Country Dial Code</label>
+                                <input type="text" name="default_country_code" value="{{ $settings['default_country_code'] ?? '62' }}" maxlength="6"
+                                    class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary transition-all">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -85,26 +101,27 @@
                 <div class="border-t border-fsmBorder pt-6">
                     <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <ion-icon name="navigate-outline" class="text-sm"></ion-icon>
-                        2. Mesin Dispatching & Live Tracking GPS
+                        2. Dispatching Engine & Live GPS Telemetry
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Interval Polling GPS Peta (Detik)</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Map GPS Polling Interval (Seconds)</label>
                             <select name="gps_refresh_interval" 
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white">
-                                <option value="5" {{ $settings['gps_refresh_interval'] == '5' ? 'selected' : '' }}>5 Detik (Ultra Realtime)</option>
-                                <option value="15" {{ $settings['gps_refresh_interval'] == '15' ? 'selected' : '' }}>15 Detik (Rekomendasi Standar)</option>
-                                <option value="30" {{ $settings['gps_refresh_interval'] == '30' ? 'selected' : '' }}>30 Detik (Hemat Bandwidth)</option>
-                                <option value="60" {{ $settings['gps_refresh_interval'] == '60' ? 'selected' : '' }}>1 Menit</option>
+                                <option value="5" {{ $settings['gps_refresh_interval'] == '5' ? 'selected' : '' }}>5 Seconds (Ultra Real-Time)</option>
+                                <option value="15" {{ $settings['gps_refresh_interval'] == '15' ? 'selected' : '' }}>15 Seconds (Recommended Standard)</option>
+                                <option value="30" {{ $settings['gps_refresh_interval'] == '30' ? 'selected' : '' }}>30 Seconds (Bandwidth Saver)</option>
+                                <option value="60" {{ $settings['gps_refresh_interval'] == '60' ? 'selected' : '' }}>60 Seconds (1 Minute)</option>
+                                <option value="300" {{ $settings['gps_refresh_interval'] == '300' ? 'selected' : '' }}>300 Seconds (5 Minutes)</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Gaya Layer Peta Leaflet</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Leaflet Map Tile Layer Style</label>
                             <select name="map_style" 
                                 class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-white">
                                 <option value="openstreetmap" {{ $settings['map_style'] == 'openstreetmap' ? 'selected' : '' }}>OpenStreetMap Standard</option>
-                                <option value="carto" {{ $settings['map_style'] == 'carto' ? 'selected' : '' }}>CartoDB Positron (Minimalis)</option>
+                                <option value="carto" {{ $settings['map_style'] == 'carto' ? 'selected' : '' }}>CartoDB Positron (Minimalist)</option>
                                 <option value="mapbox" {{ $settings['map_style'] == 'mapbox' ? 'selected' : '' }}>Satellite Hybrid Layer</option>
                             </select>
                         </div>
@@ -142,6 +159,7 @@
                                 <option value="2" {{ $settings['sla_warning_hours'] == '2' ? 'selected' : '' }}>2 Hours (Standard Fiber Degradation)</option>
                                 <option value="4" {{ $settings['sla_warning_hours'] == '4' ? 'selected' : '' }}>4 Hours (Standard Provisioning)</option>
                                 <option value="8" {{ $settings['sla_warning_hours'] == '8' ? 'selected' : '' }}>8 Hours (Next-Business-Day Resolution)</option>
+                                <option value="24" {{ $settings['sla_warning_hours'] == '24' ? 'selected' : '' }}>24 Hours (Scheduled Maintenance)</option>
                             </select>
                             <span class="text-[10px] text-slate-400 mt-1 block">Tickets are automatically highlighted in red when progress stalls beyond this threshold.</span>
                         </div>
@@ -154,18 +172,29 @@
                                 <option value="50" {{ $settings['geofence_check_meters'] == '50' ? 'selected' : '' }}>50 Meters (Strict Urban)</option>
                                 <option value="100" {{ $settings['geofence_check_meters'] == '100' ? 'selected' : '' }}>100 Meters (Standard Recommended)</option>
                                 <option value="250" {{ $settings['geofence_check_meters'] == '250' ? 'selected' : '' }}>250 Meters (Campus / Rural)</option>
+                                <option value="500" {{ $settings['geofence_check_meters'] == '500' ? 'selected' : '' }}>500 Meters (Wide Area Backbone)</option>
                             </select>
                             <span class="text-[10px] text-slate-400 mt-1 block">Warns technician if check-in occurs outside customer premise boundary.</span>
                         </div>
 
-                        <div class="sm:col-span-2">
+                        <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <label class="flex items-start gap-3 p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 cursor-pointer select-none hover:bg-emerald-50 transition-colors">
                                 <input type="checkbox" name="require_proof_photo" value="1" 
                                     class="w-4 h-4 mt-0.5 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer" 
                                     {{ $settings['require_proof_photo'] == '1' ? 'checked' : '' }}>
                                 <div>
-                                    <span class="text-xs font-bold text-slate-800 block">Mandatory Photo Proof Before Completing Tasks (Strict Quality Gate)</span>
-                                    <span class="text-[11px] text-slate-500">Prevents technicians from closing tickets without calibrated OPM optical loss or ONT photos.</span>
+                                    <span class="text-xs font-bold text-slate-800 block">Mandatory Photo Proof Gate</span>
+                                    <span class="text-[11px] text-slate-500">Prevents technicians from closing tickets without photographic proof of work.</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-start gap-3 p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 cursor-pointer select-none hover:bg-emerald-50 transition-colors">
+                                <input type="checkbox" name="require_customer_signature" value="1" 
+                                    class="w-4 h-4 mt-0.5 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 cursor-pointer" 
+                                    {{ ($settings['require_customer_signature'] ?? '1') == '1' ? 'checked' : '' }}>
+                                <div>
+                                    <span class="text-xs font-bold text-slate-800 block">Mandatory Customer E-Signature Gate</span>
+                                    <span class="text-[11px] text-slate-500">Requires customer Sign-on-Glass digital signature before sealing BAST completion.</span>
                                 </div>
                             </label>
                         </div>
@@ -240,6 +269,7 @@
                                     <option value="14" {{ $settings['telemetry_retention_days'] == '14' ? 'selected' : '' }}>14 Days</option>
                                     <option value="30" {{ $settings['telemetry_retention_days'] == '30' ? 'selected' : '' }}>30 Days (Default)</option>
                                     <option value="90" {{ $settings['telemetry_retention_days'] == '90' ? 'selected' : '' }}>90 Days</option>
+                                    <option value="365" {{ $settings['telemetry_retention_days'] == '365' ? 'selected' : '' }}>365 Days (1 Year)</option>
                                 </select>
                             </div>
                         </div>
@@ -299,9 +329,13 @@
                         body: JSON.stringify({ webhook_url: webhookInput?.value || '' })
                     });
                     const res = await resp.json();
-                    
-                    webhookFeedback.className = 'text-[11px] mt-1.5 block text-emerald-600 font-semibold';
-                    webhookFeedback.textContent = '✅ ' + res.message;
+                    if (!resp.ok || res.status === 'error') {
+                        webhookFeedback.className = 'text-[11px] mt-1.5 block text-red-600 font-semibold';
+                        webhookFeedback.textContent = '❌ ' + (res.message || 'Webhook test failed.');
+                    } else {
+                        webhookFeedback.className = 'text-[11px] mt-1.5 block text-emerald-600 font-semibold';
+                        webhookFeedback.textContent = '✅ ' + res.message;
+                    }
                 } catch (e) {
                     webhookFeedback.className = 'text-[11px] mt-1.5 block text-red-600 font-semibold';
                     webhookFeedback.textContent = '❌ Failed to dispatch test webhook: ' + e.message;

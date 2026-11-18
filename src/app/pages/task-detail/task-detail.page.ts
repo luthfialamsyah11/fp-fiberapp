@@ -320,7 +320,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
     const desc = this.slotDescriptions[slot] || (slot === 'before' ? 'Before Photo' : 'After Photo');
     this.isUploadingSlot[slot] = true;
     try {
-      await this.api.uploadProof(this.taskId, file, desc);
+      await this.api.uploadProof(this.taskId, file, desc, slot);
       await this.showToast(`Proof photo (${slot === 'before' ? 'Before' : (slot === 'after' ? 'After' : 'Additional')}) uploaded successfully!`, 'success');
       this.slotFiles[slot] = null;
       this.slotPreviews[slot] = null;
@@ -528,9 +528,15 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   async completeTask() {
     if (this.isCompleting) return;
 
+    const cfg = this.api.getClientConfig();
     const proofs = this.task?.proof_of_work || this.task?.proofs || [];
-    if (proofs.length === 0) {
+    if (cfg.require_proof_photo && proofs.length === 0) {
       this.showToast('At least 1 proof photo is required before completing task', 'warning');
+      return;
+    }
+
+    if (cfg.require_customer_signature && !this.task?.customer_signature) {
+      this.showToast('Customer digital signature (Sign-on-Glass) is required before completing this work order', 'warning');
       return;
     }
 

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Field Technician Live Tracking')
-@section('header', 'Live Tracking Lapangan')
+@section('header', 'Field Technician Live Tracking')
 
 @push('styles')
 <!-- Leaflet CSS -->
@@ -56,7 +56,7 @@
                     Technician Fleet
                 </h3>
                 <span id="badge-tech-count" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                    {{ $technicians->where('is_online', true)->count() }} / {{ $technicians->count() }} Aktif
+                    {{ $technicians->filter(fn($t) => $t->isEffectivelyOnline(10))->count() }} / {{ $technicians->count() }} Active
                 </span>
             </div>
             
@@ -110,16 +110,14 @@
                 @endforelse
             </div>
             
-            @if($selectedTech)
-                <div class="mt-3 pt-3 border-t border-fsmBorder flex justify-between items-center">
-                    <span class="text-[10px] text-blue-700 bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded font-semibold truncate max-w-[150px]">
-                        Route: {{ $selectedTech->name }}
-                    </span>
-                    <a href="{{ route('admin.tracking') }}" class="text-[10px] text-red-500 font-semibold hover:underline">
-                        Clear Route Filter
-                    </a>
-                </div>
-            @endif
+            <div id="route-filter-bar" class="mt-3 pt-3 border-t border-fsmBorder flex justify-between items-center {{ $selectedTech ? '' : 'hidden' }}">
+                <span id="route-filter-name" class="text-[10px] text-blue-700 bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded font-semibold truncate max-w-[150px]">
+                    Route: {{ $selectedTech ? $selectedTech->name : '' }}
+                </span>
+                <button type="button" id="btn-clear-route-filter" class="text-[10px] text-red-500 font-semibold hover:underline">
+                    Clear Route Filter
+                </button>
+            </div>
         </div>
 
         <!-- Coordinates Real-time Log Feed -->
@@ -175,7 +173,7 @@
                     </span>
                     <button type="button" id="btn-recenter" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-all flex items-center gap-1">
                         <ion-icon name="locate-outline"></ion-icon>
-                        Pusatkan
+                        Recenter
                     </button>
                     <button type="button" id="btn-manual-refresh" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1">
                         <ion-icon id="refresh-icon" name="refresh-outline" class="text-sm"></ion-icon>
@@ -221,6 +219,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         let selectedTechId = @json($selectedTech ? $selectedTech->id : null);
+        let lastLogId = @json($historyLogs->first() ? $historyLogs->first()->id : 0);
         const liveDataUrl = @json(route('admin.tracking.live'));
         const mapStyle = @json($mapStyle ?? 'openstreetmap');
         const pollIntervalSec = @json($pollInterval ?? 15);
@@ -237,6 +236,9 @@
         if (mapStyle === 'carto') {
             tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
             tileAttr = '&copy; OpenStreetMap &copy; CARTO';
+        } else if (mapStyle === 'mapbox') {
+            tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+            tileAttr = 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics';
         }
 
         L.tileLayer(tileUrl, {
@@ -263,9 +265,20 @@
             shadowSize: [41, 41]
         });
 
+        const redDestinationIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
         // Dictionary to track active Leaflet markers by technician ID
         const techMarkers = {};
         let routePolyline = null;
+        let destinationMarker = null;
+        let destinationLine = null;
         let routeMarkersGroup = L.layerGroup().addTo(map);
 
         function buildPopupContent(tech) {
@@ -299,14 +312,14 @@
                     </div>
                     ${activeTaskHtml}
                     <div style="font-size: 9px; font-mono; color: #64748B; background: #F8FAFC; padding: 4px 6px; border-radius: 4px; border: 1px solid #E2E8F0; margin-top: 4px;">
-                        Koordinat: ${tech.latitude ? tech.latitude.toFixed(5) : '-'}, ${tech.longitude ? tech.longitude.toFixed(5) : '-'}
+                        Coordinates: ${tech.latitude ? tech.latitude.toFixed(5) : '-'}, ${tech.longitude ? tech.longitude.toFixed(5) : '-'}
                     </div>
                     <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #94A3B8; border-top: 1px solid #E2E8F0; padding-top: 6px;">
                         <span>Update: ${tech.last_seen || '-'}</span>
                         <div style="display: flex; gap: 6px; align-items: center;">
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${tech.latitude},${tech.longitude}" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 700; text-decoration: none;" title="Buka Google Maps">Maps</a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${tech.latitude},${tech.longitude}" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 700; text-decoration: none;" title="Open Google Maps">Maps</a>
                             <span style="color: #CBD5E1;">&bull;</span>
-                            <a href="https://waze.com/ul?ll=${tech.latitude},${tech.longitude}&navigate=yes" target="_blank" rel="noopener noreferrer" style="color: #0284C7; font-weight: 700; text-decoration: none;" title="Buka Waze">Waze</a>
+                            <a href="https://waze.com/ul?ll=${tech.latitude},${tech.longitude}&navigate=yes" target="_blank" rel="noopener noreferrer" style="color: #0284C7; font-weight: 700; text-decoration: none;" title="Open Waze">Waze</a>
                         </div>
                     </div>
                 </div>
@@ -319,19 +332,60 @@
             return String(text).replace(/[&<>"']/g, m => map[m]);
         }
 
+        function updateSidebarRosterItem(tech) {
+            const item = document.getElementById(`tech-item-${tech.id}`);
+            if (!item) return;
+            const statusDot = item.querySelector('span[title="Active Online"], span[title="Offline"]');
+            if (statusDot) {
+                statusDot.className = tech.is_online ? 'h-2 w-2 rounded-full bg-emerald-500' : 'h-2 w-2 rounded-full bg-slate-300';
+                statusDot.setAttribute('title', tech.is_online ? 'Active Online' : 'Offline');
+            }
+            const infoContainer = item.querySelector('.overflow-hidden.min-w-0');
+            if (infoContainer) {
+                let subLineHtml = '';
+                if (tech.active_task) {
+                    subLineHtml = `<span class="text-[10px] text-emerald-600 font-medium truncate block flex items-center gap-1"><ion-icon name="construct-outline"></ion-icon>${escapeHtml(tech.active_task.title)}</span>`;
+                } else if (tech.latitude !== null && tech.longitude !== null) {
+                    subLineHtml = `<span class="text-[9px] text-textSecondary truncate block">${tech.latitude.toFixed(4)}, ${tech.longitude.toFixed(4)}</span>`;
+                } else {
+                    subLineHtml = `<span class="text-[9px] text-slate-400 truncate block">No coordinates yet</span>`;
+                }
+                infoContainer.innerHTML = `<span class="text-xs font-bold text-textPrimary truncate block">${escapeHtml(tech.name)}</span>${subLineHtml}`;
+            }
+        }
+
+        function clearRouteVisuals() {
+            routeMarkersGroup.clearLayers();
+            if (routePolyline) {
+                map.removeLayer(routePolyline);
+                routePolyline = null;
+            }
+            if (destinationMarker) {
+                map.removeLayer(destinationMarker);
+                destinationMarker = null;
+            }
+            if (destinationLine) {
+                map.removeLayer(destinationLine);
+                destinationLine = null;
+            }
+        }
+
         // Live Poll Function to fetch real data from backend
         let isFetching = false;
         async function fetchLiveTrackingData(shouldFitBounds = false) {
             if (isFetching) return;
             isFetching = true;
 
-            const refreshBtn = document.getElementById('btn-manual-refresh');
             const refreshIcon = document.getElementById('refresh-icon');
             if (refreshIcon) refreshIcon.classList.add('animate-spin');
 
             try {
-                const queryParam = selectedTechId ? `?technician_id=${selectedTechId}` : '';
-                const response = await fetch(`${liveDataUrl}${queryParam}`, {
+                const params = new URLSearchParams();
+                if (selectedTechId) params.set('technician_id', String(selectedTechId));
+                if (lastLogId > 0) params.set('since_id', String(lastLogId));
+                const queryString = params.toString() ? `?${params.toString()}` : '';
+
+                const response = await fetch(`${liveDataUrl}${queryString}`, {
                     headers: { 'Accept': 'application/json' }
                 });
 
@@ -344,21 +398,26 @@
 
                 const badgeCountEl = document.getElementById('badge-tech-count');
                 if (badgeCountEl) {
-                    badgeCountEl.textContent = `${result.online_count} / ${result.total_count} Aktif`;
+                    badgeCountEl.textContent = `${result.online_count} / ${result.total_count} Active`;
                 }
 
-                // 2. Update Map Markers with Real GPS coordinates
+                // 2. Update Map Markers & Sidebar Roster with Real GPS coordinates
                 const activeCoordinates = [];
                 const incomingIds = new Set();
+                let selectedTechObj = null;
 
                 result.technicians.forEach(tech => {
                     incomingIds.add(tech.id);
+                    updateSidebarRosterItem(tech);
+                    if (selectedTechId && Number(selectedTechId) === Number(tech.id)) {
+                        selectedTechObj = tech;
+                    }
+
                     if (tech.latitude !== null && tech.longitude !== null) {
                         activeCoordinates.push([tech.latitude, tech.longitude]);
                         const iconToUse = tech.active_task ? greenIcon : blueIcon;
 
                         if (techMarkers[tech.id]) {
-                            // Smoothly update marker position
                             const existingMarker = techMarkers[tech.id];
                             const currentPos = existingMarker.getLatLng();
                             if (currentPos.lat !== tech.latitude || currentPos.lng !== tech.longitude) {
@@ -367,7 +426,6 @@
                             existingMarker.setIcon(iconToUse);
                             existingMarker.setPopupContent(buildPopupContent(tech));
                         } else {
-                            // Create new marker
                             const marker = L.marker([tech.latitude, tech.longitude], {
                                 icon: iconToUse
                             }).addTo(map);
@@ -385,49 +443,74 @@
                     }
                 });
 
-                // 3. Update Route Trail if a technician is selected
-                if (result.selected_route && result.selected_route.length > 0) {
-                    routeMarkersGroup.clearLayers();
-                    const latLngs = [];
+                // 3. Update Route Trail & Active Work Order Destination Pin if a technician is selected
+                if (!selectedTechId) {
+                    clearRouteVisuals();
+                } else {
+                    if (result.selected_route && result.selected_route.length > 0) {
+                        routeMarkersGroup.clearLayers();
+                        const latLngs = [];
 
-                    result.selected_route.forEach((pt, idx) => {
-                        latLngs.push([pt.latitude, pt.longitude]);
+                        result.selected_route.forEach((pt, idx) => {
+                            latLngs.push([pt.latitude, pt.longitude]);
 
-                        // Add small circle dots along the path
-                        L.circleMarker([pt.latitude, pt.longitude], {
-                            radius: idx === result.selected_route.length - 1 ? 6 : 4,
-                            color: '#DC2626',
-                            fillColor: '#FCA5A5',
-                            fillOpacity: 0.9,
-                            weight: 2
-                        }).addTo(routeMarkersGroup).bindPopup(`Titik GPS pukul: ${pt.time}`);
-                    });
+                            L.circleMarker([pt.latitude, pt.longitude], {
+                                radius: idx === result.selected_route.length - 1 ? 6 : 4,
+                                color: '#DC2626',
+                                fillColor: '#FCA5A5',
+                                fillOpacity: 0.9,
+                                weight: 2
+                            }).addTo(routeMarkersGroup).bindPopup(`GPS point at: ${pt.time}`);
+                        });
 
-                    if (routePolyline) {
-                        routePolyline.setLatLngs(latLngs);
-                    } else {
-                        routePolyline = L.polyline(latLngs, {
-                            color: '#DC2626',
-                            weight: 4,
-                            opacity: 0.85,
-                            smoothFactor: 1
-                        }).addTo(map);
+                        if (routePolyline) {
+                            routePolyline.setLatLngs(latLngs);
+                        } else {
+                            routePolyline = L.polyline(latLngs, {
+                                color: '#DC2626',
+                                weight: 4,
+                                opacity: 0.85,
+                                smoothFactor: 1
+                            }).addTo(map);
+                        }
                     }
 
-                    if (shouldFitBounds && latLngs.length > 0) {
-                        map.fitBounds(L.latLngBounds(latLngs), { padding: [40, 40] });
+                    // Draw active work order destination marker + dashed route line
+                    if (destinationMarker) { map.removeLayer(destinationMarker); destinationMarker = null; }
+                    if (destinationLine) { map.removeLayer(destinationLine); destinationLine = null; }
+
+                    if (selectedTechObj && selectedTechObj.active_task && selectedTechObj.active_task.latitude && selectedTechObj.active_task.longitude) {
+                        const destLat = selectedTechObj.active_task.latitude;
+                        const destLng = selectedTechObj.active_task.longitude;
+                        destinationMarker = L.marker([destLat, destLng], { icon: redDestinationIcon })
+                            .addTo(map)
+                            .bindPopup(`<b>Target Work Order:</b><br>${escapeHtml(selectedTechObj.active_task.title)}<br><small>Customer: ${escapeHtml(selectedTechObj.active_task.customer_name || '-')}</small>`);
+
+                        if (selectedTechObj.latitude !== null && selectedTechObj.longitude !== null) {
+                            destinationLine = L.polyline([
+                                [selectedTechObj.latitude, selectedTechObj.longitude],
+                                [destLat, destLng]
+                            ], { color: '#2563EB', dashArray: '6, 8', weight: 3 }).addTo(map);
+                        }
                     }
-                } else if (shouldFitBounds && activeCoordinates.length > 0) {
-                    map.fitBounds(L.latLngBounds(activeCoordinates), { padding: [50, 50] });
                 }
 
-                // 4. Update Live Log Feed in Sidebar
+                if (shouldFitBounds) {
+                    if (selectedTechId && routePolyline) {
+                        map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+                    } else if (activeCoordinates.length > 0) {
+                        map.fitBounds(L.latLngBounds(activeCoordinates), { padding: [50, 50] });
+                    }
+                }
+
+                // 4. Delta Update Live Log Feed in Sidebar
                 const logsContainer = document.getElementById('live-logs-container');
                 if (logsContainer && result.history_logs && result.history_logs.length > 0) {
-                    let logsHtml = '';
-                    result.history_logs.slice(0, 25).forEach(log => {
-                        logsHtml += `
-                            <div class="border-b border-slate-100 pb-2">
+                    let newLogsHtml = '';
+                    result.history_logs.forEach(log => {
+                        if (log.id > lastLogId) lastLogId = log.id;
+                        newLogsHtml += `
+                            <div class="border-b border-slate-100 pb-2 feed-item-flash">
                                 <div class="flex justify-between items-center mb-0.5 font-sans font-bold text-textPrimary">
                                     <span class="truncate">${escapeHtml(log.technician_name)}</span>
                                     <span class="text-[9px] text-slate-400 font-medium font-sans flex-shrink-0">${log.time}</span>
@@ -437,7 +520,16 @@
                             </div>
                         `;
                     });
-                    logsContainer.innerHTML = logsHtml;
+                    if (logsContainer.querySelector('p.text-center')) {
+                        logsContainer.innerHTML = newLogsHtml;
+                    } else {
+                        logsContainer.insertAdjacentHTML('afterbegin', newLogsHtml);
+                        while (logsContainer.children.length > 35) {
+                            logsContainer.removeChild(logsContainer.lastElementChild);
+                        }
+                    }
+                } else if (result.latest_log_id && result.latest_log_id > lastLogId) {
+                    lastLogId = result.latest_log_id;
                 }
 
             } catch (err) {
@@ -459,13 +551,16 @@
         }, pollMs);
 
         // Interactive Sidebar Technician Click: Focus on map without full page reload
+        const routeFilterBar = document.getElementById('route-filter-bar');
+        const routeFilterName = document.getElementById('route-filter-name');
+        const btnClearRoute = document.getElementById('btn-clear-route-filter');
+
         document.querySelectorAll('[id^="tech-item-"]').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
                 const techId = this.getAttribute('id').replace('tech-item-', '');
                 selectedTechId = Number(techId);
 
-                // Update active sidebar styling
                 document.querySelectorAll('[id^="tech-item-"]').forEach(el => {
                     el.classList.remove('bg-blue-50', 'border-blue-300', 'text-blue-700', 'shadow-sm');
                     el.classList.add('bg-slate-50/80', 'border-slate-200/80');
@@ -473,17 +568,34 @@
                 this.classList.remove('bg-slate-50/80', 'border-slate-200/80');
                 this.classList.add('bg-blue-50', 'border-blue-300', 'text-blue-700', 'shadow-sm');
 
-                // If marker exists, pan smoothly and open popup
+                const techNameEl = this.querySelector('.text-xs.font-bold');
+                if (routeFilterBar && routeFilterName) {
+                    routeFilterName.textContent = 'Route: ' + (techNameEl ? techNameEl.textContent.trim() : '#' + techId);
+                    routeFilterBar.classList.remove('hidden');
+                }
+
                 if (techMarkers[techId]) {
                     const marker = techMarkers[techId];
                     map.flyTo(marker.getLatLng(), 15, { duration: 1.2 });
                     marker.openPopup();
                 }
 
-                // Immediately fetch route trail for selected technician
                 fetchLiveTrackingData(false);
             });
         });
+
+        if (btnClearRoute) {
+            btnClearRoute.addEventListener('click', function() {
+                selectedTechId = null;
+                clearRouteVisuals();
+                if (routeFilterBar) routeFilterBar.classList.add('hidden');
+                document.querySelectorAll('[id^="tech-item-"]').forEach(el => {
+                    el.classList.remove('bg-blue-50', 'border-blue-300', 'text-blue-700', 'shadow-sm');
+                    el.classList.add('bg-slate-50/80', 'border-slate-200/80');
+                });
+                fetchLiveTrackingData(true);
+            });
+        }
 
         // Manual Refresh Button
         const btnManualRefresh = document.getElementById('btn-manual-refresh');

@@ -52,6 +52,10 @@ class IdempotencyMiddleware
         // Cache successful 2xx responses for idempotent replay
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
             try {
+                if (random_int(1, 50) === 1) {
+                    DB::table('idempotency_keys')->where('created_at', '<', now()->subHours(48))->delete();
+                }
+
                 DB::table('idempotency_keys')->updateOrInsert(
                     [
                         'idempotency_key' => $key,

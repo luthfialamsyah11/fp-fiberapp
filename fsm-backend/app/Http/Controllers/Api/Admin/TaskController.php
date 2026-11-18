@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Domain\Tasks\TaskStateMachine;
 use App\Http\Controllers\Controller;
+use App\Models\InventoryItem;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller
 {
@@ -83,17 +86,49 @@ class TaskController extends Controller
             $validated['location'] = $validated['address'];
         }
 
-        $targetStatus = $validated['status'] ?? $task->status;
-        $reason = $validated['override_reason'] ?? null;
-        unset($validated['status'], $validated['override_reason']);
+        $techChanged = array_key_exists('technician_id', $validated)
+            && (int) ($validated['technician_id'] ?? 0) !== (int) ($task->technician_id ?? 0);
 
-        $task->update($validated);
-
-        if ($targetStatus !== $task->status) {
-            $task = $this->stateMachine->transition($task, $targetStatus, auth()->user(), $reason);
+        if ($techChanged && in_array($task->status, ['accepted', 'on-going'], true) && !isset($validated['status'])) {
+            $validated['status'] = !empty($validated['technician_id']) ? 'assigned' : 'pending';
         }
 
+        $targetStatus = $validated['status'] ?? $task->status;
+        $reason = trim((string) ($validated['override_reason'] ?? ''));
+        unset($validated['status'], $validated['override_reason']);
+
+        if ($task->status === 'completed' && empty($reason)) {
+            throw ValidationException::withMessages([
+                'override_reason' => ['An audit override reason is required to modify a completed and BAST-sealed work order.'],
+            ]);
+        }
+
+        $task = DB::transaction(function () use ($task, $validated, $targetStatus, $reason, $techChanged) {
+            if ($targetStatus !== $task->status) {
+                $reasonToUse = $reason ?: ($techChanged ? 'Technician reassigned by dispatcher' : null);
+                $task = $this->stateMachine->transition($task, $targetStatus, auth()->user(), $reasonToUse);
+            }
+            $task->update($validated);
+            return $task->fresh(['technician', 'progressUpdates', 'proofOfWork', 'materials.inventoryItem', 'statusHistories']);
+        });
+
         return response()->json(['data' => $task]);
+    }
+
+    public function destroy(Task $task)
+    {
+        DB::transaction(function () use ($task) {
+            $materials = $task->materials()->get();
+            foreach ($materials as $material) {
+                $item = InventoryItem::lockForUpdate()->find($material->inventory_item_id);
+                if ($item) {
+                    $item->increment('stock', $material->quantity);
+                }
+            }
+            $task->delete();
+        });
+
+        return response()->json(['message' => 'Work order deleted and allocated materials restored to warehouse.']);
     }
 
     public function assign(Request $request, Task $task)

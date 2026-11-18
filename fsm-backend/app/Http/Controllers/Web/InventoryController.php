@@ -28,9 +28,7 @@ class InventoryController extends Controller
         $totalItems = InventoryItem::count();
         $totalStockUnits = InventoryItem::sum('stock');
         $lowStockCount = InventoryItem::where('stock', '<=', 10)->count();
-        $totalValuation = InventoryItem::all()->sum(function ($i) {
-            return $i->stock * $i->unit_price;
-        });
+        $totalValuation = (float) InventoryItem::selectRaw(' COALESCE(SUM(stock * unit_price), 0) as total ')->value('total');
 
         return view('inventory.index', compact('items', 'totalItems', 'totalStockUnits', 'lowStockCount', 'totalValuation'));
     }
@@ -69,6 +67,10 @@ class InventoryController extends Controller
 
     public function destroy(InventoryItem $inventory)
     {
+        if ($inventory->taskMaterials()->exists()) {
+            return back()->with('error', 'Cannot delete inventory item because it is referenced in work order BOM records. Deactivate it instead to preserve BAST certificate integrity.');
+        }
+
         $inventory->delete();
         return redirect()->route('admin.inventory.index')->with('success', 'Inventory item deleted successfully.');
     }

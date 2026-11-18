@@ -79,8 +79,15 @@ class TechnicianController extends Controller
         }
 
         $validated['is_active'] = $request->has('is_active');
+        if (!$validated['is_active']) {
+            $validated['is_online'] = false;
+        }
 
         $technician->update($validated);
+
+        if (!$technician->is_active) {
+            $technician->tokens()->delete();
+        }
 
         return redirect()->route('admin.technicians.index')->with('success', 'Technician profile updated successfully.');
     }
@@ -92,6 +99,7 @@ class TechnicianController extends Controller
         }
 
         $technician->update(['is_active' => false, 'is_online' => false]);
+        $technician->tokens()->delete();
 
         return redirect()->route('admin.technicians.index')->with('success', 'Technician deactivated successfully.');
     }

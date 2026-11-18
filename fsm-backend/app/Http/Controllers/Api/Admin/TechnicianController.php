@@ -40,13 +40,38 @@ class TechnicianController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $user->update($request->only('name', 'phone', 'is_active'));
+        if ($user->role !== 'technician') {
+            return response()->json(['message' => 'Technician not found.'], 404);
+        }
+
+        $validated = $request->validate([
+            'name'      => 'sometimes|required|string|max:255',
+            'phone'     => 'nullable|string|max:50',
+            'is_active' => 'sometimes|boolean',
+        ]);
+
+        if (array_key_exists('is_active', $validated) && !$validated['is_active']) {
+            $validated['is_online'] = false;
+        }
+
+        $user->update($validated);
+
+        if (!$user->is_active) {
+            $user->tokens()->delete();
+        }
+
         return response()->json(['data' => $user]);
     }
 
     public function destroy(User $user)
     {
+        if ($user->role !== 'technician') {
+            return response()->json(['message' => 'Technician not found.'], 404);
+        }
+
         $user->update(['is_active' => false, 'is_online' => false]);
+        $user->tokens()->delete();
+
         return response()->json(['message' => 'Technician deactivated successfully.']);
     }
 }

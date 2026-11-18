@@ -528,13 +528,26 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        var mapStyle = @json($mapStyle ?? 'openstreetmap');
+        var pollIntervalSec = @json($pollInterval ?? 15);
+        var liveDataUrl = @json(route('admin.tracking.live'));
+
         // Initialize Map
         var map = L.map('dashboard-map').setView([-6.200000, 106.816666], 11);
 
-        // OSM Tile Layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        var tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        var tileAttr = '© OpenStreetMap contributors';
+        if (mapStyle === 'carto') {
+            tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+            tileAttr = '© OpenStreetMap © CARTO';
+        } else if (mapStyle === 'mapbox') {
+            tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+            tileAttr = 'Tiles © Esri';
+        }
+
+        L.tileLayer(tileUrl, {
             maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
+            attribution: tileAttr
         }).addTo(map);
 
         // Standard Leaflet Icon Helper
@@ -566,6 +579,7 @@
         // Marker data
         var markerData = @json($markerData);
         var markers = [];
+        var markerByTechId = {};
 
         markerData.forEach(function(item) {
             if (!item.latitude || !item.longitude) return;
@@ -601,6 +615,7 @@
 
             marker.bindPopup(popupContent);
             markers.push(marker);
+            markerByTechId[item.tech_id] = marker;
         });
 
         // Auto zoom and fit bounds of all active markers
@@ -608,6 +623,31 @@
             var group = new L.featureGroup(markers);
             map.fitBounds(group.getBounds(), {padding: [50, 50]});
         }
+
+        // Background telemetry sync for Dashboard map markers
+        var dashPollMs = Math.max(8000, Number(pollIntervalSec) * 1000);
+        var dashInterval = setInterval(async function() {
+            if (document.hidden) return;
+            try {
+                var resp = await fetch(liveDataUrl, { headers: { 'Accept': 'application/json' } });
+                if (!resp.ok) return;
+                var data = await resp.json();
+                if (!data.technicians) return;
+                data.technicians.forEach(function(tech) {
+                    if (tech.latitude === null || tech.longitude === null) return;
+                    var colorKey = !tech.is_online ? 'inactive' : (tech.active_task ? 'ongoing' : 'active');
+                    var icon = icons[colorKey] || icons.active;
+                    if (markerByTechId[tech.id]) {
+                        markerByTechId[tech.id].setLatLng([tech.latitude, tech.longitude]);
+                        markerByTechId[tech.id].setIcon(icon);
+                    }
+                });
+            } catch (e) {}
+        }, dashPollMs);
+
+        window.addEventListener('beforeunload', function() {
+            clearInterval(dashInterval);
+        });
     });
 </script>
 @endpush

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { LocationService } from '../../services/location.service';
@@ -11,7 +11,7 @@ import { formatPhoneForWhatsApp } from '../../utils/phone';
   styleUrls: ['./task-list.page.scss'],
   standalone: false,
 })
-export class TaskListPage {
+export class TaskListPage implements OnDestroy {
   private api = inject(ApiService);
   private router = inject(Router);
   private locationService = inject(LocationService);
@@ -25,6 +25,7 @@ export class TaskListPage {
   isLoading = true;
   selectedFilter = 'all';
   searchQuery = '';
+  private syncTimer: any = null;
 
   filters = [
     { value: 'all', label: 'All Tasks' },
@@ -35,6 +36,30 @@ export class TaskListPage {
 
   async ionViewWillEnter() {
     await this.loadInitialData();
+    this.startForegroundSync();
+  }
+
+  ionViewDidLeave() {
+    this.stopForegroundSync();
+  }
+
+  ngOnDestroy() {
+    this.stopForegroundSync();
+  }
+
+  private startForegroundSync() {
+    this.stopForegroundSync();
+    this.syncTimer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      this.loadTasks();
+    }, 20000);
+  }
+
+  private stopForegroundSync() {
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer);
+      this.syncTimer = null;
+    }
   }
 
   async loadInitialData() {

@@ -96,7 +96,7 @@
                             @endif
 
                             @if($tech->is_active)
-                                @if($tech->is_online)
+                                @if($tech->isEffectivelyOnline(10))
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-bold bg-blue-50 text-blue-700 border border-blue-200 w-fit">
                                         <span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span> Online
                                     </span>
@@ -111,7 +111,7 @@
                     <td class="p-4">
                         <div class="flex items-center gap-2">
                             <div class="w-16 bg-slate-100 rounded-full h-1.5">
-                                <div class="bg-primary h-1.5 rounded-full" style="width: {{ min(($workloadCount/4)*100, 100) }}%"></div>
+                                <div class="bg-primary h-1.5 rounded-full" style="width: {{ min(($workloadCount/5)*100, 100) }}%"></div>
                             </div>
                             <span class="font-semibold text-textPrimary">{{ $workloadCount }} tasks</span>
                         </div>

@@ -77,12 +77,13 @@ class TaskSignatureController extends Controller
         $freshTask = $task->fresh(['materials.inventoryItem', 'proofOfWork']);
 
         return response()->json([
-            'message'              => 'Customer digital signature verified and stored.',
-            'customer_signature'   => $signatureUrl,
-            'customer_signer_name' => $task->customer_signer_name,
-            'customer_signed_at'   => $task->customer_signed_at->toIso8601String(),
-            'task'                 => $freshTask,
-            'data'                 => $freshTask,
+            'message'                => 'Customer digital signature verified and stored.',
+            'customer_signature'     => $signatureUrl,
+            'customer_signature_url' => $freshTask->customer_signature_url,
+            'customer_signer_name'   => $task->customer_signer_name,
+            'customer_signed_at'     => $task->customer_signed_at->toIso8601String(),
+            'task'                   => $freshTask,
+            'data'                   => $freshTask,
         ]);
     }
 }

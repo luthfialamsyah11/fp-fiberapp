@@ -51,7 +51,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stock Valuation</p>
-                    <h3 class="text-xl font-bold text-emerald-700 mt-1">Rp {{ number_format($totalValuation, 0, ',', '.') }}</h3>
+                    <h3 class="text-xl font-bold text-emerald-700 mt-1">{{ \App\Services\SettingService::formatCurrency((float) $totalValuation) }}</h3>
                 </div>
                 <div class="h-11 w-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
                     <ion-icon name="cash-outline"></ion-icon>
@@ -60,6 +60,19 @@
             <p class="text-[11px] text-textSecondary mt-2">Estimated warehouse asset value</p>
         </div>
     </div>
+
+    @if(session('error'))
+        <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-3 shadow-sm">
+            <ion-icon name="alert-circle" class="text-lg text-red-600 flex-shrink-0"></ion-icon>
+            <span class="font-semibold">{{ session('error') }}</span>
+        </div>
+    @endif
+    @if(session('success'))
+        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-3 shadow-sm">
+            <ion-icon name="checkmark-circle" class="text-lg text-emerald-600 flex-shrink-0"></ion-icon>
+            <span class="font-semibold">{{ session('success') }}</span>
+        </div>
+    @endif
 
     <!-- Main Content Box -->
     <div class="bg-white rounded-xl border border-fsmBorder shadow-sm overflow-hidden">
@@ -145,10 +158,10 @@
                                 </div>
                             </td>
                             <td class="p-4 font-semibold text-slate-600">
-                                Rp {{ number_format($item->unit_price, 0, ',', '.') }}
+                                {{ \App\Services\SettingService::formatCurrency((float) $item->unit_price) }}
                             </td>
                             <td class="p-4 font-bold text-emerald-700">
-                                Rp {{ number_format($item->stock * $item->unit_price, 0, ',', '.') }}
+                                {{ \App\Services\SettingService::formatCurrency((float) ($item->stock * $item->unit_price)) }}
                             </td>
                             <td class="p-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
@@ -299,7 +312,7 @@
 
 <script>
     function openEditModal(item) {
-        document.getElementById('form-edit-item').action = `/inventory/${item.id}`;
+        document.getElementById('form-edit-item').action = `{{ url('/inventory') }}/${item.id}`;
         document.getElementById('edit-code').value = item.code;
         document.getElementById('edit-name').value = item.name;
         document.getElementById('edit-category').value = item.category;

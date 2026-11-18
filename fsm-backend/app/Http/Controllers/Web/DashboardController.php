@@ -128,6 +128,9 @@ class DashboardController extends Controller
             ];
         });
 
+        $mapStyle = \App\Services\SettingService::get('map_style', 'openstreetmap');
+        $pollInterval = (int) \App\Services\SettingService::get('gps_refresh_interval', '15');
+
         return view('dashboard.index', compact(
             'stats',
             'recentTasks',
@@ -135,7 +138,9 @@ class DashboardController extends Controller
             'markerData',
             'notifications',
             'fleetRoster',
-            'filter'
+            'filter',
+            'mapStyle',
+            'pollInterval'
         ));
     }
 }

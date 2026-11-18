@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JobHistoryController extends Controller
 {
@@ -35,19 +36,19 @@ class JobHistoryController extends Controller
                 });
             })
             ->when($startDate, function ($q, $start) {
-                $q->whereDate('scheduled_at', '>=', $start);
+                $q->whereDate(DB::raw('COALESCE(scheduled_at, created_at)'), '>=', $start);
             })
             ->when($endDate, function ($q, $end) {
-                $q->whereDate('scheduled_at', '<=', $end);
+                $q->whereDate(DB::raw('COALESCE(scheduled_at, created_at)'), '<=', $end);
             });
 
         // If user wants all records for client-side exporting, avoid pagination
         if ($request->has('export')) {
-            $tasks = $query->orderBy('scheduled_at', 'desc')->get();
+            $tasks = $query->orderByRaw('COALESCE(scheduled_at, created_at) DESC')->get();
             return response()->json(['data' => $tasks]);
         }
 
-        $tasks = $query->orderBy('scheduled_at', 'desc')->paginate(20);
+        $tasks = $query->orderByRaw('COALESCE(scheduled_at, created_at) DESC')->paginate(20)->withQueryString();
 
         return view('history.index', compact('tasks', 'technicians', 'techFilter', 'statusFilter', 'search', 'startDate', 'endDate'));
     }

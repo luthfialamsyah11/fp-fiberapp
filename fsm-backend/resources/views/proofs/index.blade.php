@@ -50,10 +50,10 @@
     <!-- Metric 1: Total Proofs -->
     <div class="bg-white rounded-2xl border border-slate-200/60 p-4 shadow-sm flex items-center justify-between">
         <div>
-            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Total Foto Bukti</span>
+            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Total Proof Photos</span>
             <div class="text-2xl font-bold text-textPrimary mt-1">{{ $metrics['total_proofs'] }}</div>
             <span class="text-[10px] font-medium text-blue-600 flex items-center gap-1 mt-0.5">
-                <ion-icon name="cloud-upload-outline"></ion-icon> Tersimpan di storage
+                <ion-icon name="cloud-upload-outline"></ion-icon> Stored in cloud archive
             </span>
         </div>
         <div class="h-11 w-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
@@ -64,7 +64,7 @@
     <!-- Metric 2: Verified Tasks -->
     <div class="bg-white rounded-2xl border border-slate-200/60 p-4 shadow-sm flex items-center justify-between">
         <div>
-            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Tiket Terverifikasi</span>
+            <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Verified Tickets</span>
             <div class="text-2xl font-bold text-textPrimary mt-1">{{ $metrics['verified_tasks'] }}</div>
             <span class="text-[10px] font-medium text-emerald-600 flex items-center gap-1 mt-0.5">
                 <ion-icon name="checkmark-done-circle-outline"></ion-icon> Work 100% Completed
@@ -81,7 +81,7 @@
             <span class="text-xs font-semibold text-textSecondary uppercase tracking-wider block">Uploading Technicians</span>
             <div class="text-2xl font-bold text-textPrimary mt-1">{{ $metrics['active_techs'] }}</div>
             <span class="text-[10px] font-medium text-purple-600 flex items-center gap-1 mt-0.5">
-                <ion-icon name="people-outline"></ion-icon> Tim lapangan aktif
+                <ion-icon name="people-outline"></ion-icon> Active field crew
             </span>
         </div>
         <div class="h-11 w-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
@@ -143,9 +143,9 @@
             <!-- Date Filter -->
             <select name="date_filter" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
                 <option value="">All Time</option>
-                <option value="today" {{ request('date_filter') == 'today' ? 'selected' : '' }}>Hari Ini</option>
-                <option value="this_week" {{ request('date_filter') == 'this_week' ? 'selected' : '' }}>Minggu Ini</option>
-                <option value="this_month" {{ request('date_filter') == 'this_month' ? 'selected' : '' }}>Bulan Ini</option>
+                <option value="today" {{ request('date_filter') == 'today' ? 'selected' : '' }}>Today</option>
+                <option value="this_week" {{ request('date_filter') == 'this_week' ? 'selected' : '' }}>This Week</option>
+                <option value="this_month" {{ request('date_filter') == 'this_month' ? 'selected' : '' }}>This Month</option>
             </select>
 
             <!-- Submit Button -->
@@ -170,8 +170,32 @@
     @forelse($tasksWithProof as $task)
         @php
             $proofList = $task->proofs;
-            $before = $proofList->count() > 1 ? $proofList->first() : null;
-            $after  = $proofList->last();
+            $before = $proofList->first(fn($p) => $p->resolved_slot === 'before')
+                ?? ($proofList->count() > 1 ? $proofList->first() : null);
+            $after = $proofList->first(fn($p) => $p->resolved_slot === 'after' && (!$before || $p->id !== $before->id))
+                ?? ($proofList->count() > 1 ? $proofList->first(fn($p) => !$before || $p->id !== $before->id) : $proofList->first());
+            $modalPayload = [
+                'id'            => $task->id,
+                'title'         => $task->title,
+                'customer'      => $task->customer_name,
+                'phone'         => $task->customer_phone,
+                'address'       => $task->resolved_location,
+                'technician'    => $task->technician ? $task->technician->name : 'Unassigned',
+                'status'        => $task->status_label,
+                'raw_status'    => $task->status,
+                'priority'      => ucfirst($task->priority),
+                'updated_at'    => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
+                'signature_url' => $task->customer_signature_url,
+                'bast_hash'     => $task->bast_hash,
+                'proofs'        => $task->proofs->map(function($p) {
+                    return [
+                        'image_url'     => $p->image_url,
+                        'description'   => $p->description,
+                        'resolved_slot' => $p->resolved_slot,
+                        'created_at'    => $p->created_at ? $p->created_at->format('d M Y H:i') : '-'
+                    ];
+                })->values(),
+            ];
         @endphp
 
         <div class="proof-card bg-white rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden flex flex-col justify-between">
@@ -182,7 +206,7 @@
                         <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-200/70 text-slate-700">#TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
                         @if($task->status === 'completed')
                             <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                <ion-icon name="checkmark-circle"></ion-icon> Terverifikasi
+                                <ion-icon name="checkmark-circle"></ion-icon> Verified
                             </span>
                         @else
                             <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
@@ -197,24 +221,7 @@
 
                 <button 
                     type="button"
-                    onclick="openInspectorModal({{ json_encode([
-                        'id' => $task->id,
-                        'title' => $task->title,
-                        'customer' => $task->customer_name,
-                        'phone' => $task->customer_phone,
-                        'address' => $task->resolved_location,
-                        'technician' => $task->technician ? $task->technician->name : 'Unassigned',
-                        'status' => $task->status_label,
-                        'priority' => ucfirst($task->priority),
-                        'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
-                        'proofs' => $task->proofs->map(function($p) {
-                            return [
-                                'image_url' => $p->image_url,
-                                'description' => $p->description,
-                                'created_at' => $p->created_at ? $p->created_at->format('d M Y H:i') : '-'
-                            ];
-                        })
-                    ]) }})"
+                    onclick="openInspectorModal({{ json_encode($modalPayload) }})"
                     class="p-2 rounded-xl bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all shadow-sm flex items-center justify-center flex-shrink-0"
                     title="Open Full Resolution Proof Inspector"
                 >
@@ -232,27 +239,10 @@
             @elseif($proofList->count() === 1)
                 @php $singleProof = $proofList->first(); @endphp
                 <div class="relative h-44 img-zoom-container bg-slate-100 group border-b border-slate-100"
-                     onclick="openInspectorModal({{ json_encode([
-                        'id' => $task->id,
-                        'title' => $task->title,
-                        'customer' => $task->customer_name,
-                        'phone' => $task->customer_phone,
-                        'address' => $task->resolved_location,
-                        'technician' => $task->technician ? $task->technician->name : 'Unassigned',
-                        'status' => $task->status_label,
-                        'priority' => ucfirst($task->priority),
-                        'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
-                        'proofs' => $task->proofs->map(function($p) {
-                            return [
-                                'image_url' => $p->image_url,
-                                'description' => $p->description,
-                                'created_at' => $p->created_at ? $p->created_at->format('d M Y H:i') : '-'
-                            ];
-                        })
-                    ]) }}, 0)">
+                     onclick="openInspectorModal({{ json_encode($modalPayload) }}, 0)">
                     <img src="{{ $singleProof->image_url }}" class="w-full h-full object-cover" alt="Proof" loading="lazy">
                     <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors"></div>
-                    <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-600/95 text-white uppercase tracking-wider shadow-sm backdrop-blur-sm">Foto Bukti</span>
+                    <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-600/95 text-white uppercase tracking-wider shadow-sm backdrop-blur-sm">Proof Photo</span>
                     <div class="absolute bottom-2 right-2 p-1.5 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
                         <ion-icon name="search-outline" class="text-xs"></ion-icon>
                     </div>
@@ -262,24 +252,7 @@
                 <div class="grid grid-cols-2 border-b border-slate-100 bg-slate-900/5 divide-x divide-slate-100">
                     <!-- Before Photo Frame -->
                     <div class="relative h-44 img-zoom-container bg-slate-100 group"
-                         onclick="openInspectorModal({{ json_encode([
-                            'id' => $task->id,
-                            'title' => $task->title,
-                            'customer' => $task->customer_name,
-                            'phone' => $task->customer_phone,
-                            'address' => $task->resolved_location,
-                            'technician' => $task->technician ? $task->technician->name : 'Unassigned',
-                            'status' => $task->status_label,
-                            'priority' => ucfirst($task->priority),
-                            'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
-                            'proofs' => $task->proofs->map(function($p) {
-                                return [
-                                    'image_url' => $p->image_url,
-                                    'description' => $p->description,
-                                    'created_at' => $p->created_at ? $p->created_at->format('d M Y H:i') : '-'
-                                ];
-                            })
-                        ]) }}, 0)">
+                         onclick="openInspectorModal({{ json_encode($modalPayload) }}, 0)">
                         @if($before)
                             <img src="{{ $before->image_url }}" class="w-full h-full object-cover" alt="Before" loading="lazy">
                             <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors"></div>
@@ -298,24 +271,7 @@
 
                     <!-- After Photo Frame -->
                     <div class="relative h-44 img-zoom-container bg-slate-100 group"
-                         onclick="openInspectorModal({{ json_encode([
-                            'id' => $task->id,
-                            'title' => $task->title,
-                            'customer' => $task->customer_name,
-                            'phone' => $task->customer_phone,
-                            'address' => $task->resolved_location,
-                            'technician' => $task->technician ? $task->technician->name : 'Unassigned',
-                            'status' => $task->status_label,
-                            'priority' => ucfirst($task->priority),
-                            'updated_at' => $task->updated_at ? $task->updated_at->format('d M Y H:i') : '-',
-                            'proofs' => $task->proofs->map(function($p) {
-                                return [
-                                    'image_url' => $p->image_url,
-                                    'description' => $p->description,
-                                    'created_at' => $p->created_at ? $p->created_at->format('d M Y H:i') : '-'
-                                ];
-                            })
-                        ]) }}, {{ $before ? 1 : 0 }})">
+                         onclick="openInspectorModal({{ json_encode($modalPayload) }}, {{ $before ? 1 : 0 }})">
                         @if($after)
                             <img src="{{ $after->image_url }}" class="w-full h-full object-cover" alt="After" loading="lazy">
                             <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors"></div>
@@ -365,7 +321,7 @@
                     <!-- Technician Note / Proof Description -->
                     @if($after && $after->description)
                         <div class="text-[11px] text-slate-700 bg-slate-50 border border-slate-200/60 rounded-xl p-2.5 leading-relaxed">
-                            <span class="font-bold text-textPrimary block mb-0.5 text-[10px] uppercase tracking-wider text-slate-500">Catatan Pengerjaan:</span>
+                            <span class="font-bold text-textPrimary block mb-0.5 text-[10px] uppercase tracking-wider text-slate-500">Technician Field Notes:</span>
                             {{ $after->description }}
                         </div>
                     @endif
@@ -374,7 +330,7 @@
                 <!-- Footer Card Actions -->
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <span class="text-[10px] text-slate-400 font-medium">
-                        Diperbarui {{ $task->updated_at ? $task->updated_at->diffForHumans() : '-' }}
+                        Updated {{ $task->updated_at ? $task->updated_at->diffForHumans() : '-' }}
                     </span>
                     <div class="flex items-center gap-2">
                         <a href="{{ route('admin.tasks.show', $task->id) }}" class="text-[11px] font-bold text-primary hover:text-blue-700 transition-colors flex items-center gap-1">
@@ -395,7 +351,7 @@
                 <p class="text-xs text-textSecondary mt-1 leading-relaxed">
                     No verification photos found matching your search or filter. Ensure field technicians have attached documentation via their mobile terminal.
                 </p>
-                @if(request()->hasAny(['search', 'technician_id', 'date_filter']))
+                @if(request()->hasAny(['search', 'technician_id', 'date_filter', 'proof_status']))
                     <a href="{{ route('admin.proofs') }}" class="inline-flex items-center gap-1.5 px-4 py-2 mt-4 bg-primary text-white text-xs font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-sm">
                         <ion-icon name="refresh-outline"></ion-icon>
                         <span>Reset All Filters</span>
@@ -459,7 +415,7 @@
                     <div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Task Status</span>
                         <div class="flex items-center gap-2">
-                            <span id="modal-task-status" class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">Selesai</span>
+                            <span id="modal-task-status" class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">Completed</span>
                             <span id="modal-task-priority" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 capitalize">Normal</span>
                         </div>
                     </div>
@@ -485,10 +441,32 @@
                     </div>
 
                     <div class="pt-3 border-t border-slate-100">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Catatan Pengerjaan</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Technician Field Notes</span>
                         <div id="modal-proof-desc" class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed italic">
-                            Tidak ada catatan tambahan.
+                            No additional field notes.
                         </div>
+                    </div>
+
+                    <!-- Customer Signature & BAST Integrity Preview -->
+                    <div id="modal-signature-box" class="pt-3 border-t border-slate-100 hidden">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Customer Digital Signature & BAST</span>
+                        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2">
+                            <img id="modal-signature-img" src="" alt="Customer Signature" class="h-10 max-w-[120px] object-contain bg-white border border-slate-200 rounded p-1">
+                            <span id="modal-bast-seal" class="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold truncate">SHA-256 Sealed</span>
+                        </div>
+                    </div>
+
+                    <!-- Dispatcher Proof Rework Action -->
+                    <div id="modal-rework-section" class="pt-3 border-t border-slate-100 hidden">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 block mb-1.5">Quality Audit Override</span>
+                        <form id="modal-rework-form" method="POST" action="">
+                            @csrf
+                            <input type="text" name="reason" required maxlength="500" placeholder="Reason for rework (e.g., blurry splice photo)..." class="w-full px-3 py-1.5 mb-2 text-xs border border-amber-200 rounded-xl bg-amber-50/40 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                            <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5">
+                                <ion-icon name="refresh-circle-outline"></ion-icon>
+                                <span>Request Rework (Reopen Task)</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
 
@@ -523,6 +501,26 @@
         document.getElementById('modal-task-priority').innerText = taskData.priority || 'Normal';
         document.getElementById('modal-task-detail-link').href = "{{ url('/tasks') }}/" + taskData.id;
 
+        var sigBox = document.getElementById('modal-signature-box');
+        var sigImg = document.getElementById('modal-signature-img');
+        var bastSeal = document.getElementById('modal-bast-seal');
+        if (sigBox && taskData.signature_url) {
+            sigImg.src = taskData.signature_url;
+            bastSeal.innerText = taskData.bast_hash ? ('SHA-256: ' + String(taskData.bast_hash).substring(0, 12) + '…') : 'Signed';
+            sigBox.classList.remove('hidden');
+        } else if (sigBox) {
+            sigBox.classList.add('hidden');
+        }
+
+        var reworkSec = document.getElementById('modal-rework-section');
+        var reworkForm = document.getElementById('modal-rework-form');
+        if (reworkSec && reworkForm && (taskData.raw_status === 'completed' || taskData.raw_status === 'on-going')) {
+            reworkForm.action = "{{ url('/tasks') }}/" + taskData.id + "/request-rework";
+            reworkSec.classList.remove('hidden');
+        } else if (reworkSec) {
+            reworkSec.classList.add('hidden');
+        }
+
         // Populate Tabs
         var tabsContainer = document.getElementById('modal-tabs');
         tabsContainer.innerHTML = '';
@@ -531,7 +529,11 @@
             taskData.proofs.forEach(function(proof, idx) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
-                var label = idx === 0 && taskData.proofs.length > 1 ? 'Initial Photo (Before)' : (idx === taskData.proofs.length - 1 && taskData.proofs.length > 1 ? 'Completion Photo (After)' : 'Proof Photo #' + (idx + 1));
+                var label = proof.resolved_slot === 'before'
+                    ? 'Initial Photo (Before)'
+                    : (proof.resolved_slot === 'after'
+                        ? 'Completion Photo (After)'
+                        : (idx === 0 && taskData.proofs.length > 1 ? 'Initial Photo (Before)' : (idx === taskData.proofs.length - 1 && taskData.proofs.length > 1 ? 'Completion Photo (After)' : 'Proof Photo #' + (idx + 1))));
                 btn.className = `px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${idx === currentProofIndex ? 'bg-primary text-white shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`;
                 btn.innerText = label;
                 btn.onclick = function() {

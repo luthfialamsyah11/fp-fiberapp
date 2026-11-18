@@ -23,6 +23,7 @@ class ProofController extends Controller
         $request->validate([
             'image'       => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'description' => 'nullable|string|max:1000',
+            'slot'        => 'nullable|string|in:before,after,additional',
         ]);
 
         $path = $request->file('image')->store('proof', 'public');
@@ -30,6 +31,7 @@ class ProofController extends Controller
         $proof = ProofOfWork::create([
             'task_id'     => $task->id,
             'image'       => $path,
+            'slot'        => $request->input('slot'),
             'description' => $request->description ? strip_tags(trim($request->description)) : null,
         ]);
 
@@ -42,14 +44,7 @@ class ProofController extends Controller
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
-        $proofs = $task->proofOfWork()->get()->map(function ($proof) {
-            if (Str::startsWith($proof->image, ['http://', 'https://'])) {
-                $proof->image_url = $proof->image;
-            } else {
-                $proof->image_url = asset('storage/' . $proof->image);
-            }
-            return $proof;
-        });
+        $proofs = $task->proofOfWork()->get();
 
         return response()->json(['data' => $proofs]);
     }

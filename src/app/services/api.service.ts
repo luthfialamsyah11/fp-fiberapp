@@ -215,12 +215,14 @@ export class ApiService {
   }
 
   // Proof of Work
-  async uploadProof(taskId: number, file: File, description: string) {
+  async uploadProof(taskId: number, file: File, description: string, slot?: 'before' | 'after' | 'additional') {
     if (await this.isDemoMode()) {
       const task = this.demoTasks.find(t => t.id === Number(taskId));
       const proof = {
         id: Date.now(),
         description,
+        slot: slot || 'additional',
+        resolved_slot: slot || 'additional',
         image_url: URL.createObjectURL(file),
         created_at: new Date().toISOString(),
       };
@@ -233,6 +235,9 @@ export class ApiService {
     const formData = new FormData();
     formData.append('image', file);
     formData.append('description', description);
+    if (slot) {
+      formData.append('slot', slot);
+    }
     return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/proof`, formData, this.idempotentHeaders()));
   }
 

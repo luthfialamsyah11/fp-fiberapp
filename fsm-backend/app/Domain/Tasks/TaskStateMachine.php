@@ -77,6 +77,10 @@ class TaskStateMachine
                 $updates['completed_at']   = now();
                 $updates['bast_hash']      = $lockedTask->computeBastHash();
                 $updates['bast_sealed_at'] = now();
+            } elseif ($fromStatus === 'completed' && $toStatus !== 'completed') {
+                $updates['completed_at']   = null;
+                $updates['bast_hash']      = null;
+                $updates['bast_sealed_at'] = null;
             }
 
             $lockedTask->update($updates);
@@ -166,7 +170,14 @@ class TaskStateMachine
                 'progress_percent' => max(10, $task->progress_percent),
             ]);
         } elseif ($to === 'on-going') {
-            if ($task->progressUpdates()->where('progress_percent', '>=', 25)->doesntExist()) {
+            if ($from === 'completed' && $actor->role === 'admin') {
+                ProgressUpdate::create([
+                    'task_id'          => $task->id,
+                    'user_id'          => $actor->id,
+                    'note'             => 'Dispatcher reopened work order for field rework' . ($reason ? ": {$reason}" : '.'),
+                    'progress_percent' => 75,
+                ]);
+            } elseif ($task->progressUpdates()->where('progress_percent', '>=', 25)->doesntExist()) {
                 ProgressUpdate::create([
                     'task_id'          => $task->id,
                     'user_id'          => $actor->id,

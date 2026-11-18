@@ -82,6 +82,8 @@ class TrackingController extends Controller
                         'customer_name' => $activeTask->customer_name,
                         'location'      => $activeTask->location,
                         'priority'      => $activeTask->priority,
+                        'latitude'      => $activeTask->latitude ? (float) $activeTask->latitude : null,
+                        'longitude'     => $activeTask->longitude ? (float) $activeTask->longitude : null,
                     ] : null,
                 ];
             });
@@ -125,11 +127,14 @@ class TrackingController extends Controller
                 });
         }
 
+        $latestLogId = (int) (TechnicianLocation::max('id') ?? 0);
+
         return response()->json([
             'status'         => 'success',
             'server_time'    => now()->format('H:i:s'),
             'online_count'   => $technicians->where('is_online', true)->count(),
             'total_count'    => $technicians->count(),
+            'latest_log_id'  => $latestLogId,
             'map_style'      => SettingService::get('map_style', 'openstreetmap'),
             'poll_interval'  => (int) SettingService::get('gps_refresh_interval', '15'),
             'technicians'    => $technicians,

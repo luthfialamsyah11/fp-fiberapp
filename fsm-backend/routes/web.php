@@ -7,6 +7,12 @@ use App\Http\Controllers\Web\TaskController;
 use App\Http\Controllers\Web\TechnicianController;
 use App\Http\Controllers\Web\CustomerTrackingController;
 use App\Http\Controllers\Web\BastController;
+use App\Http\Controllers\Web\MediaController;
+
+// Public Media Streaming Route (Fixes shared hosting symlink 404s & cross-origin canvas CORS)
+Route::get('/storage/{path}', [MediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('storage.serve');
 
 // Public Customer Live Tracking Page (Uber-Style, Rate-Limited)
 Route::get('/track/{token}', [CustomerTrackingController::class, 'show'])
@@ -31,8 +37,8 @@ Route::middleware('guest')->group(function () {
         ->name('admin.login.post');
 });
 
-// Protected Admin Routes (Strict RBAC - Admin Role Only)
-Route::middleware(['auth', 'role:admin'])->group(function () {
+// Protected Admin Routes (Strict RBAC - Active Admin Role Only)
+Route::middleware(['auth', 'active', 'role:admin'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -47,6 +53,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         'as' => 'admin'
     ]);
     Route::post('tasks/{task}/assign', [TaskController::class, 'assign'])->name('admin.tasks.assign');
+    Route::post('tasks/{task}/request-rework', [TaskController::class, 'requestRework'])->name('admin.tasks.rework');
 
     // Inventory & Material Management
     Route::resource('inventory', \App\Http\Controllers\Web\InventoryController::class, [

@@ -26,6 +26,8 @@
         <a href="{{ route('admin.tasks.index', ['status' => 'accepted']) }}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap {{ request('status') == 'accepted' ? 'bg-primary text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60' }}">Accepted</a>
         <a href="{{ route('admin.tasks.index', ['status' => 'on-going']) }}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap {{ request('status') == 'on-going' ? 'bg-primary text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60' }}">On-Going</a>
         <a href="{{ route('admin.tasks.index', ['status' => 'completed']) }}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap {{ request('status') == 'completed' ? 'bg-primary text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60' }}">Completed</a>
+        <a href="{{ route('admin.tasks.index', ['status' => 'rejected']) }}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap {{ request('status') == 'rejected' ? 'bg-red-600 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60' }}">Rejected</a>
+        <a href="{{ route('admin.tasks.index', ['status' => 'sla_breach']) }}" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap {{ request('status') == 'sla_breach' ? 'bg-rose-600 text-white shadow-sm' : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200/60' }}">SLA Breach</a>
     </div>
 
     <form action="{{ route('admin.tasks.index') }}" method="GET" class="flex w-full md:w-80 relative">
@@ -37,7 +39,7 @@
         </div>
         <input type="text" name="search" value="{{ request('search') }}" 
             class="block w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all text-textPrimary" 
-            placeholder="Search task title, customer name...">
+            placeholder="Search #TSK-ID, title, customer, address...">
     </form>
 </div>
 
@@ -117,6 +119,12 @@
                             <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider {{ $pStyle }}">
                                 {{ $task->priority }} Priority
                             </span>
+
+                            @if($task->isSlaBreached())
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1">
+                                    <ion-icon name="alert-circle-outline"></ion-icon> SLA Overdue
+                                </span>
+                            @endif
                         </div>
                     </td>
                     <td class="p-4">

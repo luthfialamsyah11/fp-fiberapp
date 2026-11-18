@@ -82,6 +82,46 @@ class SettingService
     }
 
     /**
+     * Validate that a webhook URL is an external HTTP(S) target and does not resolve
+     * to loopback, link-local, RFC1918 private, or reserved IP space (SSRF protection).
+     */
+    public static function isSafeExternalUrl(string $url): bool
+    {
+        $url = trim($url);
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $parsed = parse_url($url);
+        $scheme = strtolower($parsed['scheme'] ?? '');
+        $host = strtolower(trim($parsed['host'] ?? '', '[]'));
+
+        if (!in_array($scheme, ['http', 'https'], true) || empty($host)) {
+            return false;
+        }
+
+        $blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254', 'metadata.google.internal'];
+        if (in_array($host, $blockedHosts, true) || str_ends_with($host, '.local') || str_ends_with($host, '.internal')) {
+            return false;
+        }
+
+        // If the host is an IP literal, check directly
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
+        }
+
+        // Resolve DNS A records and ensure none resolve to private/reserved ranges
+        $resolvedIp = @gethostbyname($host);
+        if ($resolvedIp && $resolvedIp !== $host) {
+            if (filter_var($resolvedIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Dispatch webhook notification safely without blocking or throwing
      */
     public static function dispatchWebhook(string $event, array $payload): bool
@@ -94,10 +134,7 @@ class SettingService
                 return false;
             }
 
-            // SSRF safety guard: only allow external http/https hosts
-            $parsed = parse_url($webhookUrl);
-            $host = strtolower($parsed['host'] ?? '');
-            if (empty($host) || in_array($host, ['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254'], true)) {
+            if (!self::isSafeExternalUrl($webhookUrl)) {
                 return false;
             }
 

@@ -28,7 +28,8 @@ class Task extends Model
         'resolved_location',
         'status_label',
         'progress_percent',
-        'tracking_url'
+        'tracking_url',
+        'customer_signature_url',
     ];
 
     protected static function booted()
@@ -54,6 +55,31 @@ class Task extends Model
         return $token ? url('/track/' . $token) : '';
     }
 
+    public function getCustomerSignatureUrlAttribute(): ?string
+    {
+        if (empty($this->customer_signature)) {
+            return null;
+        }
+        $sig = (string) $this->customer_signature;
+        if (Str::startsWith($sig, ['http://', 'https://', 'data:image/'])) {
+            return $sig;
+        }
+        $normalized = ltrim(preg_replace('#^/?storage/#', '', $sig), '/');
+        return url('/storage/' . $normalized);
+    }
+
+    public function isSlaBreached(?int $slaHours = null): bool
+    {
+        if (in_array($this->status, ['completed', 'rejected'], true)) {
+            return false;
+        }
+        $hours = $slaHours ?? (int) \App\Services\SettingService::get('sla_warning_hours', '2');
+        if ($hours <= 0 || !$this->created_at) {
+            return false;
+        }
+        return $this->created_at->lt(now()->subHours($hours));
+    }
+
     public function technician()
     {
         return $this->belongsTo(User::class, 'technician_id');
@@ -61,7 +87,9 @@ class Task extends Model
 
     public function progressUpdates()
     {
-        return $this->hasMany(ProgressUpdate::class)->orderBy('created_at', 'desc');
+        return $this->hasMany(ProgressUpdate::class)
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
     }
 
     public function latestProgressUpdate()
@@ -71,7 +99,9 @@ class Task extends Model
 
     public function statusHistories()
     {
-        return $this->hasMany(TaskStatusHistory::class)->orderBy('created_at', 'desc');
+        return $this->hasMany(TaskStatusHistory::class)
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
     }
 
     public function materials()
@@ -81,7 +111,7 @@ class Task extends Model
 
     public function proofs()
     {
-        return $this->hasMany(ProofOfWork::class);
+        return $this->hasMany(ProofOfWork::class)->orderBy('id', 'asc');
     }
 
     public function latestProof()
@@ -91,7 +121,7 @@ class Task extends Model
 
     public function proofOfWork()
     {
-        return $this->hasMany(ProofOfWork::class);
+        return $this->hasMany(ProofOfWork::class)->orderBy('id', 'asc');
     }
 
     public function scopeActive($query)

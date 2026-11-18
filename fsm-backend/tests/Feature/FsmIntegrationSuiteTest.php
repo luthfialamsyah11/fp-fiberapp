@@ -349,4 +349,193 @@ class FsmIntegrationSuiteTest extends TestCase
             'password' => 'wrong-password',
         ])->assertStatus(429);
     }
+
+    public function test_admin_task_show_renders_with_customer_phone_without_route_crash(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician();
+        $task = Task::create([
+            'title'          => 'Enterprise Fiber Splice',
+            'customer_name'  => 'Meridian Bank',
+            'customer_phone' => '081234567890',
+            'address'        => 'Financial District Block A',
+            'technician_id'  => $tech->id,
+            'status'         => 'on-going',
+            'priority'       => 'high',
+        ]);
+
+        $res = $this->actingAs($admin)->get("/tasks/{$task->id}");
+        $res->assertStatus(200);
+        $res->assertSee('Meridian Bank');
+        $res->assertSee($task->tracking_token);
+    }
+
+    public function test_media_controller_serves_public_files_and_blocks_path_traversal(): void
+    {
+        $rawPng = base64_decode(substr($this->validPngBase64, strpos($this->validPngBase64, ',') + 1));
+        $targetFile = storage_path('app/public/proof/unit_test_img.png');
+        File::ensureDirectoryExists(dirname($targetFile));
+        File::put($targetFile, $rawPng);
+
+        try {
+            $res = $this->get('/storage/proof/unit_test_img.png');
+            $res->assertStatus(200);
+            $res->assertHeader('Access-Control-Allow-Origin', '*');
+
+            // Path traversal attempt must return 404
+            $this->get('/storage/..%2F.env')->assertStatus(404);
+            $this->get('/storage/proof/../../settings.json')->assertStatus(404);
+        } finally {
+            if (File::exists($targetFile)) {
+                File::delete($targetFile);
+            }
+        }
+    }
+
+    public function test_deactivating_technician_revokes_sanctum_tokens_and_blocks_api_requests(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician();
+        $token = $tech->createToken('mobile-app')->plainTextToken;
+
+        // Active technician can access /api/me
+        $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->getJson('/api/me')
+            ->assertOk();
+
+        // Admin deactivates technician via Web controller
+        $this->actingAs($admin)->delete("/technicians/{$tech->id}")->assertRedirect();
+
+        $this->assertFalse((bool) $tech->fresh()->is_active);
+        $this->assertEquals(0, $tech->tokens()->count());
+
+        // Even if actingAs a deactivated user directly, EnsureUserIsActive returns 403
+        $this->actingAs($tech->fresh(), 'sanctum')
+            ->getJson('/api/tasks')
+            ->assertStatus(403);
+    }
+
+    public function test_admin_settings_save_preserves_signature_gate_and_currency(): void
+    {
+        $admin = $this->createAdmin();
+
+        $res = $this->actingAs($admin)->post('/settings', [
+            'company_name'               => 'FiberOps Global Carrier',
+            'support_email'              => 'noc@bentengsiber.com',
+            'support_phone'              => '+1-800-555-0199',
+            'currency'                   => 'EUR',
+            'default_country_code'       => '44',
+            'gps_refresh_interval'       => '15',
+            'map_style'                  => 'carto',
+            'sla_warning_hours'          => '4',
+            'geofence_check_meters'      => '100',
+            'require_proof_photo'        => '1',
+            'require_customer_signature' => '1',
+            'telemetry_retention_days'   => '30',
+        ]);
+
+        $res->assertRedirect();
+        $this->assertEquals('1', \App\Services\SettingService::get('require_customer_signature'));
+        $this->assertEquals('EUR', \App\Services\SettingService::get('currency'));
+        $this->assertEquals('44', \App\Services\SettingService::get('default_country_code'));
+    }
+
+    public function test_admin_request_rework_reopens_completed_task_and_clears_bast_seal(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician();
+        $task = Task::create([
+            'title'          => 'Fiber Splice Audit',
+            'customer_name'  => 'Apex Data',
+            'address'        => 'Rack 12',
+            'technician_id'  => $tech->id,
+            'status'         => 'completed',
+            'completed_at'   => now(),
+            'bast_hash'      => str_repeat('a', 64),
+            'bast_sealed_at' => now(),
+        ]);
+
+        $res = $this->actingAs($admin)->post("/tasks/{$task->id}/request-rework", [
+            'reason' => 'After photo is blurry; please re-upload OPM reading.',
+        ]);
+
+        $res->assertRedirect();
+        $fresh = $task->fresh();
+        $this->assertEquals('on-going', $fresh->status);
+        $this->assertNull($fresh->bast_hash);
+        $this->assertNull($fresh->completed_at);
+        $this->assertDatabaseHas('task_status_histories', [
+            'task_id'     => $task->id,
+            'from_status' => 'completed',
+            'to_status'   => 'on-going',
+        ]);
+    }
+
+    public function test_inventory_item_referenced_in_bom_cannot_be_hard_deleted(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician();
+        $item = InventoryItem::create([
+            'code'       => 'SFP-10G-LR',
+            'name'       => '10G LR Optical Transceiver',
+            'unit'       => 'pcs',
+            'stock'      => 20,
+            'unit_price' => 120,
+            'category'   => 'device',
+            'is_active'  => true,
+        ]);
+        $task = Task::create([
+            'title'         => 'Core Switch Upgrade',
+            'customer_name' => 'IXP Node',
+            'address'       => 'MMR 1',
+            'technician_id' => $tech->id,
+            'status'        => 'on-going',
+        ]);
+
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/materials", [
+            'inventory_item_id' => $item->id,
+            'quantity'          => 1,
+        ])->assertStatus(201);
+
+        // API delete must return 422 and keep item
+        $this->actingAs($admin, 'sanctum')
+            ->deleteJson("/api/admin/inventory/{$item->id}")
+            ->assertStatus(422);
+
+        $this->assertDatabaseHas('inventory_items', ['id' => $item->id]);
+    }
+
+    public function test_live_tracking_delta_polling_and_active_task_coordinates(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician();
+        $task = Task::create([
+            'title'         => 'Metro Ring Restoration',
+            'customer_name' => 'Carrier Corp',
+            'address'       => 'Junction 9',
+            'latitude'      => -6.2100,
+            'longitude'     => 106.8200,
+            'technician_id' => $tech->id,
+            'status'        => 'on-going',
+        ]);
+
+        $loc1 = TechnicianLocation::create([
+            'technician_id' => $tech->id,
+            'task_id'       => $task->id,
+            'latitude'      => -6.2050,
+            'longitude'     => 106.8150,
+        ]);
+        $loc2 = TechnicianLocation::create([
+            'technician_id' => $tech->id,
+            'task_id'       => $task->id,
+            'latitude'      => -6.2060,
+            'longitude'     => 106.8160,
+        ]);
+
+        $res = $this->actingAs($admin)->getJson("/tracking/live-data?since_id={$loc1->id}");
+        $res->assertOk()
+            ->assertJsonPath('latest_log_id', $loc2->id)
+            ->assertJsonCount(1, 'history_logs')
+            ->assertJsonPath('technicians.0.active_task.latitude', -6.21);
+    }
 }

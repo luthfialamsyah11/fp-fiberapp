@@ -51,17 +51,17 @@ class ReportController extends Controller
         $completedWithProof = (clone $taskQuery)->where('status', 'completed')->has('proofs')->count();
         $proofComplianceRate = $completedTasks > 0 ? round(($completedWithProof / $completedTasks) * 100, 1) : 100;
 
-        // Cross-database compatible resolution duration calculation (MySQL & SQLite)
+        // Cross-database compatible resolution duration calculation (MySQL & SQLite) using completed_at with updated_at fallback
         if (DB::getDriverName() === 'sqlite') {
             $avgMinutes = (clone $taskQuery)->where('status', 'completed')
-                ->selectRaw('AVG((julianday(updated_at) - julianday(created_at)) * 1440) as avg_min')
+                ->selectRaw('AVG((julianday(COALESCE(completed_at, updated_at)) - julianday(created_at)) * 1440) as avg_min')
                 ->value('avg_min');
         } else {
             $avgMinutes = (clone $taskQuery)->where('status', 'completed')
-                ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as avg_min')
+                ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, created_at, COALESCE(completed_at, updated_at))) as avg_min')
                 ->value('avg_min');
         }
-        $avgResolutionHours = $avgMinutes ? round($avgMinutes / 60, 1) : 0;
+        $avgResolutionHours = $avgMinutes ? round(max(0, (float) $avgMinutes) / 60, 1) : 0;
 
         $statusCounts = [
             'pending'   => (int) ($metricsRow->pending_tasks ?? 0),
@@ -92,9 +92,9 @@ class ReportController extends Controller
             ->pluck('total', 'date');
 
         $completedTrends = Task::where('status', 'completed')
-            ->where('updated_at', '>=', $fourteenDaysAgo)
+            ->where(DB::raw('COALESCE(completed_at, updated_at)'), '>=', $fourteenDaysAgo)
             ->when($technicianId, fn ($q) => $q->where('technician_id', $technicianId))
-            ->selectRaw('DATE(updated_at) as date, count(*) as total')
+            ->selectRaw('DATE(COALESCE(completed_at, updated_at)) as date, count(*) as total')
             ->groupBy('date')
             ->pluck('total', 'date');
 
@@ -204,15 +204,23 @@ class ReportController extends Controller
                 'Last Updated'
             ]);
 
-            $query->chunk(100, function ($tasks) use ($handle) {
+            $sanitizeCsvCell = function ($value) {
+                $str = (string) ($value ?? '');
+                if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                    return "'" . $str;
+                }
+                return $str;
+            };
+
+            $query->chunk(100, function ($tasks) use ($handle, $sanitizeCsvCell) {
                 foreach ($tasks as $task) {
                     fputcsv($handle, [
                         '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT),
-                        $task->title,
-                        $task->customer_name,
-                        $task->customer_phone ?? '-',
-                        $task->resolved_location,
-                        $task->technician ? $task->technician->name : 'Unassigned',
+                        $sanitizeCsvCell($task->title),
+                        $sanitizeCsvCell($task->customer_name),
+                        $sanitizeCsvCell($task->customer_phone ?? '-'),
+                        $sanitizeCsvCell($task->resolved_location),
+                        $sanitizeCsvCell($task->technician ? $task->technician->name : 'Unassigned'),
                         ucfirst($task->priority),
                         $task->status_label,
                         $task->proofs->count(),

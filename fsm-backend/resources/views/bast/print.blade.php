@@ -406,22 +406,16 @@
         <div class="section-heading">Field Photographic Proof Documentation</div>
         <div class="photo-evidence-grid">
             @php
-                $beforeProof = $task->proofOfWork->first(function($p) {
-                    return str_contains(strtolower($p->notes ?? $p->description ?? ''), 'sebelum') || 
-                           str_contains(strtolower($p->notes ?? $p->description ?? ''), 'before') ||
-                           str_contains(strtolower($p->notes ?? $p->description ?? ''), 'slot 1');
-                }) ?? $task->proofOfWork->first();
+                $beforeProof = $task->proofOfWork->first(fn($p) => $p->resolved_slot === 'before')
+                    ?? $task->proofOfWork->first();
 
-                $afterProof = $task->proofOfWork->first(function($p) {
-                    return str_contains(strtolower($p->notes ?? $p->description ?? ''), 'sesudah') || 
-                           str_contains(strtolower($p->notes ?? $p->description ?? ''), 'after') ||
-                           str_contains(strtolower($p->notes ?? $p->description ?? ''), 'slot 2');
-                }) ?? $task->proofOfWork->skip(1)->first();
+                $afterProof = $task->proofOfWork->first(fn($p) => $p->resolved_slot === 'after' && (!$beforeProof || $p->id !== $beforeProof->id))
+                    ?? $task->proofOfWork->first(fn($p) => !$beforeProof || $p->id !== $beforeProof->id);
             @endphp
 
             <div class="photo-box">
                 @if($beforeProof)
-                    <img src="{{ $beforeProof->image_url ?? asset('storage/' . $beforeProof->photo) }}" alt="Before Photo">
+                    <img src="{{ $beforeProof->image_url }}" alt="Before Photo">
                     <div class="photo-caption">[Slot 1] Initial Condition / Fault Identification</div>
                 @else
                     <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8;">
@@ -433,7 +427,7 @@
 
             <div class="photo-box">
                 @if($afterProof)
-                    <img src="{{ $afterProof->image_url ?? asset('storage/' . $afterProof->photo) }}" alt="After Photo">
+                    <img src="{{ $afterProof->image_url }}" alt="After Photo">
                     <div class="photo-caption">[Slot 2] Final State / Operational Verification</div>
                 @else
                     <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8;">
@@ -461,7 +455,7 @@
                 <div class="sig-role">Customer Acceptance Sign-Off</div>
                 <div class="sig-box">
                     @if($task->customer_signature)
-                        <img src="{{ asset($task->customer_signature) }}" alt="Customer Digital Signature">
+                        <img src="{{ $task->customer_signature_url }}" alt="Customer Digital Signature">
                     @else
                         <div style="color: #94a3b8; font-style: italic; font-size: 11px;">
                             (Digital signature pending verification)

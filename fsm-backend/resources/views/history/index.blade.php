@@ -194,39 +194,56 @@
         window.print();
     }
 
-    // Client-side CSV Exporter
-    function exportToCSV() {
-        var table = document.getElementById("history-table");
-        var rows = table.querySelectorAll("tr");
-        var csvContent = "";
+    // Full-Dataset CSV Exporter via Server Endpoint
+    async function exportToCSV() {
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('export', '1');
+            const resp = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+            if (!resp.ok) throw new Error('Export request failed');
+            const payload = await resp.json();
+            const records = payload.data || [];
 
-        for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
-            var cols = row.querySelectorAll("td, th");
-            var rowData = [];
+            const sanitizeCell = (val) => {
+                let str = String(val ?? '').trim();
+                if (str && ['=', '+', '-', '@'].includes(str[0])) {
+                    str = "'" + str;
+                }
+                return '"' + str.replace(/"/g, '""') + '"';
+            };
 
-            // Ignore the last column (Action / View button) on export
-            var colCount = cols.length;
-            if (i > 0 || colCount > 0) colCount = colCount - 1; 
+            const headers = ['Task ID', 'Work Order Title', 'Customer Name', 'Technician', 'Address / Site', 'Status', 'Scheduled / Created Date'];
+            let csvContent = headers.map(sanitizeCell).join(',') + '\r\n';
 
-            for (var j = 0; j < colCount; j++) {
-                // Escape quotes and wrap with double quotes
-                var text = cols[j].innerText.trim().replace(/"/g, '""');
-                rowData.push('"' + text + '"');
-            }
-            csvContent += rowData.join(",") + "\r\n";
+            records.forEach(t => {
+                const taskId = '#TSK-' + String(t.id).padStart(4, '0');
+                const techName = t.technician ? t.technician.name : 'Unassigned';
+                const addr = t.resolved_location || t.address || t.location || '-';
+                const status = t.status_label || t.status || '-';
+                const dateStr = t.scheduled_at ? t.scheduled_at.substring(0, 16).replace('T', ' ') : (t.created_at ? t.created_at.substring(0, 10) : '-');
+                csvContent += [
+                    sanitizeCell(taskId),
+                    sanitizeCell(t.title),
+                    sanitizeCell(t.customer_name),
+                    sanitizeCell(techName),
+                    sanitizeCell(addr),
+                    sanitizeCell(status),
+                    sanitizeCell(dateStr)
+                ].join(',') + '\r\n';
+            });
+
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement("a");
+            var blobUrl = URL.createObjectURL(blob);
+            link.setAttribute("href", blobUrl);
+            link.setAttribute("download", "ISP_FSM_Job_History_Report.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (err) {
+            console.error('CSV export error:', err);
         }
-
-        // Trigger Download
-        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        var link = document.createElement("a");
-        var url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "ISP_FSM_Job_History_Report.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     }
 </script>
 @endpush

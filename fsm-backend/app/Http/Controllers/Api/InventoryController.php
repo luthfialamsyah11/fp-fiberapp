@@ -67,6 +67,12 @@ class InventoryController extends Controller
 
     public function destroy(InventoryItem $item)
     {
+        if ($item->taskMaterials()->exists()) {
+            return response()->json([
+                'message' => 'Cannot delete inventory item referenced in work order BOM records. Deactivate it instead.',
+            ], 422);
+        }
+
         $item->delete();
         return response()->json(['message' => 'Inventory item deleted successfully.']);
     }

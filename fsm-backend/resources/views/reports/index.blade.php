@@ -67,8 +67,8 @@
                 $presets = [
                     'all'        => 'All Time',
                     'today'      => 'Today',
-                    '7_days'     => '7 Hari',
-                    '30_days'    => '30 Hari',
+                    '7_days'     => '7 Days',
+                    '30_days'    => '30 Days',
                     'this_month' => 'This Month',
                 ];
             @endphp
@@ -94,9 +94,9 @@
 
             <!-- Custom Date Inputs -->
             <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1">
-                <input type="date" name="start_date" value="{{ $startDate }}" class="bg-transparent text-xs text-slate-700 focus:outline-none" title="Tanggal Mulai">
+                <input type="date" name="start_date" value="{{ $startDate }}" class="bg-transparent text-xs text-slate-700 focus:outline-none" title="Start Date">
                 <span class="text-slate-400 text-xs">-</span>
-                <input type="date" name="end_date" value="{{ $endDate }}" class="bg-transparent text-xs text-slate-700 focus:outline-none" title="Tanggal Selesai">
+                <input type="date" name="end_date" value="{{ $endDate }}" class="bg-transparent text-xs text-slate-700 focus:outline-none" title="End Date">
                 <input type="hidden" name="timeframe" value="custom">
             </div>
 
@@ -108,7 +108,7 @@
 
             <!-- Reset Filter -->
             @if(request()->hasAny(['technician_id', 'start_date', 'end_date']) || $timeframe !== 'all')
-                <a href="{{ route('admin.reports') }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-all" title="Reset semua filter">
+                <a href="{{ route('admin.reports') }}" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-all" title="Reset all filters">
                     <ion-icon name="refresh-outline"></ion-icon>
                 </a>
             @endif
@@ -123,7 +123,7 @@
     <div class="metric-card bg-white rounded-2xl border border-slate-200/70 p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-start justify-between">
             <div>
-                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Tingkat Penyelesaian</span>
+                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Completion Rate</span>
                 <h3 class="text-2xl font-bold text-textPrimary leading-none mt-1.5">{{ $completionRate }}%</h3>
             </div>
             <div class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
@@ -135,7 +135,7 @@
                 <div class="bg-primary h-1.5 rounded-full transition-all duration-500" style="width: {{ $completionRate }}%"></div>
             </div>
             <div class="flex justify-between items-center text-[10px] text-textSecondary mt-1.5 font-medium">
-                <span>{{ $completedTasks }} Sukses</span>
+                <span>{{ $completedTasks }} Completed</span>
                 <span>Total {{ $totalTasks }} Tasks</span>
             </div>
         </div>
@@ -145,7 +145,7 @@
     <div class="metric-card bg-white rounded-2xl border border-slate-200/70 p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-start justify-between">
             <div>
-                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Kepatuhan Bukti Kerja</span>
+                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Proof Compliance</span>
                 <h3 class="text-2xl font-bold text-emerald-600 leading-none mt-1.5">{{ $proofComplianceRate }}%</h3>
             </div>
             <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
@@ -157,8 +157,8 @@
                 <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: {{ $proofComplianceRate }}%"></div>
             </div>
             <div class="flex justify-between items-center text-[10px] text-textSecondary mt-1.5 font-medium">
-                <span>Dokumentasi Foto Lengkap</span>
-                <a href="{{ route('admin.proofs') }}" class="text-blue-600 hover:underline">Lihat Proofs &rarr;</a>
+                <span>Verified Photo Evidence</span>
+                <a href="{{ route('admin.proofs') }}" class="text-blue-600 hover:underline">View Proofs &rarr;</a>
             </div>
         </div>
     </div>
@@ -186,8 +186,8 @@
     <div class="metric-card bg-white rounded-2xl border border-slate-200/70 p-4 shadow-sm flex flex-col justify-between">
         <div class="flex items-start justify-between">
             <div>
-                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Beban Kerja Aktif</span>
-                <h3 class="text-2xl font-bold text-amber-600 leading-none mt-1.5">{{ $ongoingTasks + $pendingTasks }} <span class="text-xs font-normal text-textSecondary">Tiket</span></h3>
+                <span class="text-[11px] font-semibold text-textSecondary uppercase tracking-wider block">Active Workload</span>
+                <h3 class="text-2xl font-bold text-amber-600 leading-none mt-1.5">{{ $ongoingTasks + $pendingTasks }} <span class="text-xs font-normal text-textSecondary">Tickets</span></h3>
             </div>
             <div class="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
                 <ion-icon name="construct-outline"></ion-icon>
@@ -195,9 +195,9 @@
         </div>
         <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-textSecondary">
             <span class="font-medium text-red-600 flex items-center gap-1">
-                <ion-icon name="warning-outline"></ion-icon> {{ $urgentTasks }} Prioritas Tinggi
+                <ion-icon name="warning-outline"></ion-icon> {{ $urgentTasks }} High Priority
             </span>
-            <span>{{ $pendingTasks }} Perlu Penugasan</span>
+            <span>{{ $pendingTasks }} Pending Dispatch</span>
         </div>
     </div>
 </div>
@@ -308,7 +308,7 @@
                     <td class="p-4 text-center">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold {{ $tech['is_online'] ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500' }}">
                             <span class="h-1.5 w-1.5 rounded-full {{ $tech['is_online'] ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
-                            {{ $tech['is_online'] ? 'Online di Lapangan' : 'Offline' }}
+                            {{ $tech['is_online'] ? 'Online in Field' : 'Offline' }}
                         </span>
                     </td>
                     <td class="p-4 text-center font-bold text-slate-700">{{ $tech['total_assigned'] }}</td>
@@ -330,10 +330,10 @@
                     </td>
                     <td class="p-4 text-center no-print">
                         <div class="flex items-center justify-center gap-1">
-                            <a href="{{ route('admin.tracking', ['technician_id' => $tech['id']]) }}" class="p-1.5 rounded-lg bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all" title="Lacak Live GPS">
+                            <a href="{{ route('admin.tracking', ['technician_id' => $tech['id']]) }}" class="p-1.5 rounded-lg bg-slate-100 hover:bg-primary hover:text-white text-slate-600 transition-all" title="Track Live GPS">
                                 <ion-icon name="locate-outline" class="text-sm"></ion-icon>
                             </a>
-                            <a href="{{ route('admin.proofs', ['technician_id' => $tech['id']]) }}" class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 transition-all" title="Lihat Bukti Foto">
+                            <a href="{{ route('admin.proofs', ['technician_id' => $tech['id']]) }}" class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 transition-all" title="View Proof Photos">
                                 <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
                             </a>
                         </div>
@@ -511,9 +511,9 @@
         new Chart(document.getElementById('priorityChart'), {
             type: 'bar',
             data: {
-                labels: ['Low', 'Medium', 'High / Darurat'],
+                labels: ['Low', 'Medium', 'High / Emergency'],
                 datasets: [{
-                    label: 'Jumlah Tiket',
+                    label: 'Ticket Volume',
                     data: [
                         {{ $priorityCounts['low'] ?? 0 }},
                         {{ $priorityCounts['medium'] ?? 0 }},

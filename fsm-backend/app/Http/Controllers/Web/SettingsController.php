@@ -70,32 +70,51 @@ class SettingsController extends Controller
         $settings = SettingService::all();
         $targetUrl = trim((string) ($request->input('webhook_url') ?: ($settings['webhook_url'] ?? '')));
 
-        if ($targetUrl && filter_var($targetUrl, FILTER_VALIDATE_URL)) {
-            $parsed = parse_url($targetUrl);
-            $host = strtolower($parsed['host'] ?? '');
-            if (!in_array($host, ['localhost', '127.0.0.1', '0.0.0.0', '169.254.169.254'], true)) {
-                try {
-                    Http::timeout(2.5)->post($targetUrl, [
-                        'event'     => 'TEST_DISPATCH_ALERT',
-                        'sender'    => 'FiberOps Command Center',
-                        'message'   => 'FSM telemetry webhook connectivity verified. Endpoint ready for dispatch alerts.',
-                        'timestamp' => now()->toIso8601String(),
-                    ]);
-                } catch (\Exception $e) {
-                    // Handled gracefully
-                }
+        if (empty($targetUrl)) {
+            return response()->json([
+                'status'    => 'error',
+                'message'   => 'Please enter a valid external HTTP(S) webhook URL before testing.',
+                'timestamp' => now()->format('H:i:s'),
+            ], 422);
+        }
+
+        if (!SettingService::isSafeExternalUrl($targetUrl)) {
+            return response()->json([
+                'status'    => 'error',
+                'message'   => 'Webhook URL rejected: Only external public HTTP/HTTPS endpoints are permitted (SSRF guard).',
+                'timestamp' => now()->format('H:i:s'),
+            ], 422);
+        }
+
+        $payload = [
+            'event'     => 'TEST_DISPATCH_ALERT',
+            'sender'    => 'FiberOps Command Center',
+            'message'   => 'FSM telemetry webhook connectivity verified. Endpoint ready for dispatch alerts.',
+            'timestamp' => now()->toIso8601String(),
+        ];
+
+        try {
+            $resp = Http::timeout(3.5)->post($targetUrl, $payload);
+            if ($resp->failed()) {
+                return response()->json([
+                    'status'    => 'error',
+                    'message'   => 'Webhook endpoint returned HTTP ' . $resp->status() . ' during connectivity test.',
+                    'timestamp' => now()->format('H:i:s'),
+                ], 422);
             }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'    => 'error',
+                'message'   => 'Webhook connection failed: ' . $e->getMessage(),
+                'timestamp' => now()->format('H:i:s'),
+            ], 422);
         }
 
         return response()->json([
             'status'    => 'success',
-            'message'   => 'Test notification dispatched to webhook: ' . ($targetUrl ?: 'Simulated Dispatcher Hook'),
+            'message'   => 'Test notification delivered to webhook: ' . $targetUrl,
             'timestamp' => now()->format('H:i:s'),
-            'payload'   => [
-                'event'   => 'TEST_DISPATCH_ALERT',
-                'sender'  => 'FiberOps Command Center',
-                'message' => 'FSM telemetry webhook connectivity verified. Endpoint ready for dispatch alerts.',
-            ],
+            'payload'   => $payload,
         ]);
     }
 

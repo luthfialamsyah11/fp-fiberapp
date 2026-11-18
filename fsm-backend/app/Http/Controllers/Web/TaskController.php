@@ -12,6 +12,7 @@ use App\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller
 {
@@ -23,17 +24,43 @@ class TaskController extends Controller
     {
         $status = $request->get('status');
         $search = $request->get('search');
+        $slaHours = (int) SettingService::get('sla_warning_hours', '2');
 
         $tasks = Task::with('technician')
-            ->when($status, fn ($q, $status) => $q->where('status', $status))
+            ->when($status === 'sla_breach', function ($q) use ($slaHours) {
+                $cutoff = now()->subHours($slaHours);
+                $q->whereIn('status', ['pending', 'assigned', 'accepted', 'on-going'])
+                  ->where(function ($sub) use ($cutoff) {
+                      $sub->whereNotNull('scheduled_at')->where('scheduled_at', '<=', $cutoff)
+                          ->orWhere(function ($fb) use ($cutoff) {
+                              $fb->whereNull('scheduled_at')->where('created_at', '<=', $cutoff);
+                          });
+                  });
+            })
+            ->when($status && $status !== 'sla_breach', fn ($q) => $q->where('status', $status))
             ->when($search, function ($q, $search) {
-                $q->where(function ($subQ) use ($search) {
-                    $subQ->where('title', 'like', "%{$search}%")
-                         ->orWhere('customer_name', 'like', "%{$search}%");
+                $trimmed = trim((string) $search);
+                $numericId = null;
+                if (preg_match('/^(?:#?TSK-?)?0*(\d+)$/i', $trimmed, $m)) {
+                    $numericId = (int) $m[1];
+                }
+
+                $q->where(function ($subQ) use ($trimmed, $numericId) {
+                    if ($numericId !== null && $numericId > 0) {
+                        $subQ->where('id', $numericId)
+                             ->orWhere('title', 'like', "%{$trimmed}%");
+                    } else {
+                        $subQ->where('title', 'like', "%{$trimmed}%");
+                    }
+                    $subQ->orWhere('customer_name', 'like', "%{$trimmed}%")
+                         ->orWhere('customer_phone', 'like', "%{$trimmed}%")
+                         ->orWhere('address', 'like', "%{$trimmed}%")
+                         ->orWhere('location', 'like', "%{$trimmed}%");
                 });
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return view('tasks.index', compact('tasks'));
     }
@@ -125,15 +152,31 @@ class TaskController extends Controller
             $validated['status'] = 'assigned';
         }
 
+        // If technician changes on an accepted or on-going task without explicit status change, reset to assigned
+        $techChanged = array_key_exists('technician_id', $validated)
+            && (int) ($validated['technician_id'] ?? 0) !== (int) ($task->technician_id ?? 0);
+
+        if ($techChanged && in_array($task->status, ['accepted', 'on-going'], true) && $validated['status'] === $task->status) {
+            $validated['status'] = !empty($validated['technician_id']) ? 'assigned' : 'pending';
+        }
+
         $targetStatus = $validated['status'];
-        $overrideReason = $validated['override_reason'] ?? null;
+        $overrideReason = trim((string) ($validated['override_reason'] ?? ''));
         unset($validated['status'], $validated['override_reason']);
 
-        $task->update($validated);
-
-        if ($targetStatus !== $task->status) {
-            $this->stateMachine->transition($task, $targetStatus, auth()->user(), $overrideReason);
+        if ($task->status === 'completed' && empty($overrideReason)) {
+            throw ValidationException::withMessages([
+                'override_reason' => ['An audit override reason is required to modify a completed and BAST-sealed work order.'],
+            ]);
         }
+
+        DB::transaction(function () use ($task, $validated, $targetStatus, $overrideReason, $techChanged) {
+            if ($targetStatus !== $task->status) {
+                $reasonToUse = $overrideReason ?: ($techChanged ? 'Technician reassigned by dispatcher' : null);
+                $this->stateMachine->transition($task, $targetStatus, auth()->user(), $reasonToUse);
+            }
+            $task->update($validated);
+        });
 
         return redirect()->route('admin.tasks.index')->with('success', 'Work order updated successfully.');
     }
@@ -163,7 +206,18 @@ class TaskController extends Controller
 
     public function assign(Request $request, Task $task)
     {
-        if ($task->technician_id && $task->status === 'pending') {
+        if ($request->filled('technician_id')) {
+            $request->validate([
+                'technician_id' => [
+                    'required',
+                    Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
+                ],
+            ]);
+            $task->update(['technician_id' => $request->technician_id]);
+            $task->refresh();
+        }
+
+        if ($task->technician_id && in_array($task->status, ['pending', 'rejected'], true)) {
             $this->stateMachine->transition(
                 $task,
                 'assigned',
@@ -173,6 +227,35 @@ class TaskController extends Controller
             return back()->with('success', 'Work order dispatched and notification sent.');
         }
         return back()->with('error', 'Work order does not have a designated technician or status has already changed.');
+    }
+
+    public function requestRework(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        if (!in_array($task->status, ['completed', 'on-going'], true)) {
+            return back()->with('error', 'Rework can only be requested on in-progress or completed work orders.');
+        }
+
+        if ($task->status === 'completed') {
+            $this->stateMachine->transition(
+                $task,
+                'on-going',
+                auth()->user(),
+                'Proof Rework Requested: ' . $validated['reason']
+            );
+        } else {
+            ProgressUpdate::create([
+                'task_id'          => $task->id,
+                'user_id'          => auth()->id(),
+                'note'             => 'Dispatcher requested proof rework: ' . strip_tags(trim($validated['reason'])),
+                'progress_percent' => min(75, (int) $task->progress_percent),
+            ]);
+        }
+
+        return back()->with('success', 'Work order #' . str_pad($task->id, 4, '0', STR_PAD_LEFT) . ' reopened for field rework and technician notified.');
     }
 
     private function findRecommendedTechnician(?float $lat, ?float $lng): ?User

@@ -339,11 +339,11 @@
               <span>Stored Digital Signature</span>
             </div>
             <div class="signed-img-frame">
-              <img [src]="task.customer_signature" alt="Customer Signature" class="signed-img" />
+              <img [src]="task.customer_signature_url || task.customer_signature" alt="Customer Signature" class="signed-img" />
             </div>
             <div class="signed-meta">
               <div><strong>Signer Name:</strong> {{ task.customer_signer_name || task.customer_name }}</div>
-              <div *ngIf="task.customer_signed_at"><strong>Timestamp:</strong> {{ task.customer_signed_at | date:'dd MMM yyyy, HH:mm' }} WIB</div>
+              <div *ngIf="task.customer_signed_at"><strong>Timestamp:</strong> {{ task.customer_signed_at | date:'dd MMM yyyy, HH:mm' }} UTC</div>
             </div>
           </div>
 
@@ -448,7 +448,7 @@
               <span>Scheduled</span>
             </div>
             <p class="info-value">{{ task.scheduled_at | date:'dd MMM yyyy' }}</p>
-            <p class="info-sub">{{ task.scheduled_at | date:'HH:mm' }} WIB</p>
+            <p class="info-sub">{{ task.scheduled_at | date:'HH:mm' }} UTC</p>
           </div>
         </div>
 

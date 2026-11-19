@@ -53,6 +53,38 @@
       </div>
     </header>
 
+    <!-- Demo Mode Warning Banner (Prevents mistaking local mock data for live NOC dispatches) -->
+    <div class="demo-mode-banner" *ngIf="isDemoMode">
+      <div class="demo-banner-left">
+        <ion-icon name="flask-outline"></ion-icon>
+        <div>
+          <strong>Demo Mode Active</strong>
+          <span>Showing local mock tasks. Sign out &amp; log in with your real technician account to receive live NOC dispatches.</span>
+        </div>
+      </div>
+      <button type="button" class="btn-exit-demo" (click)="exitDemoMode()">Sign Out</button>
+    </div>
+
+    <!-- Instant Live New Work Order Arrival Banner (Visible even when a filter chip is active) -->
+    <div class="instant-dispatch-banner" *ngIf="newTaskAlert" (click)="openNewTaskAlert()">
+      <div class="dispatch-left">
+        <div class="dispatch-icon">
+          <ion-icon name="notifications"></ion-icon>
+        </div>
+        <div class="dispatch-copy">
+          <span class="dispatch-kicker">NEW DISPATCH JUST ARRIVED</span>
+          <strong>{{ formatTaskCode(newTaskAlert.id) }} &bull; {{ newTaskAlert.title }}</strong>
+          <span class="dispatch-sub" *ngIf="newTaskAlert.customer_name">{{ newTaskAlert.customer_name }}</span>
+        </div>
+      </div>
+      <div class="dispatch-actions">
+        <span class="dispatch-open-pill">Open &rarr;</span>
+        <button type="button" class="dispatch-close" (click)="dismissNewTaskAlert($event)" aria-label="Dismiss">
+          <ion-icon name="close"></ion-icon>
+        </button>
+      </div>
+    </div>
+
     <!-- Actionable GPS Health Warning Banner -->
     <button type="button" class="gps-health-banner" *ngIf="hasGpsWarning" (click)="fixGpsIssue()">
       <div class="gps-health-left">

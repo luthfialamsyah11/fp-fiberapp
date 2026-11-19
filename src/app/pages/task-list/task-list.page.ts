@@ -3,8 +3,10 @@ import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { GpsHealthStatus, LocationService } from '../../services/location.service';
 import { NavigationService } from '../../services/navigation.service';
+import { TaskSyncService } from '../../services/task-sync.service';
 import { formatPhoneForWhatsApp } from '../../utils/phone';
 
 @Component({
@@ -15,13 +17,16 @@ import { formatPhoneForWhatsApp } from '../../utils/phone';
 })
 export class TaskListPage implements OnDestroy {
   private api = inject(ApiService);
+  private auth = inject(AuthService);
   private router = inject(Router);
   private toastCtrl = inject(ToastController);
   private locationService = inject(LocationService);
   private navigationService = inject(NavigationService);
+  private taskSync = inject(TaskSyncService);
 
   user: any = null;
   isOnline = true;
+  isDemoMode = false;
   gpsStatus: GpsHealthStatus = 'offline';
   gpsStatusMessage = 'Offline';
   gpsAccuracy: number | null = null;
@@ -31,14 +36,12 @@ export class TaskListPage implements OnDestroy {
   tasks: any[] = [];
   filteredTasks: any[] = [];
   activeMission: any = null;
+  newTaskAlert: any = null;
   completedCount = 0;
   isLoading = true;
   selectedFilter = 'all';
   searchQuery = '';
 
-  private syncTimer: any = null;
-  private knownAssignedIds = new Set<number>();
-  private hasLoadedOnce = false;
   private subs = new Subscription();
 
   filters = [
@@ -62,19 +65,30 @@ export class TaskListPage implements OnDestroy {
         this.refreshGpsAccuracy();
       })
     );
+    this.subs.add(
+      this.taskSync.tasks$.subscribe(list => {
+        this.applySyncedTasks(list);
+      })
+    );
+    this.subs.add(
+      this.taskSync.lastSyncTime$.subscribe(t => {
+        if (t) this.lastSyncTime = t;
+      })
+    );
+    this.subs.add(
+      this.taskSync.newTaskAlert$.subscribe(task => {
+        this.newTaskAlert = task;
+      })
+    );
   }
 
   async ionViewWillEnter() {
+    this.isDemoMode = await this.api.isDemoMode();
+    this.taskSync.start();
     await this.loadInitialData();
-    this.startForegroundSync();
-  }
-
-  ionViewDidLeave() {
-    this.stopForegroundSync();
   }
 
   ngOnDestroy() {
-    this.stopForegroundSync();
     this.subs.unsubscribe();
   }
 
@@ -141,23 +155,35 @@ export class TaskListPage implements OnDestroy {
     await this.locationService.startTracking();
   }
 
-  private startForegroundSync() {
-    this.stopForegroundSync();
-    this.syncTimer = setInterval(() => {
-      if (typeof document !== 'undefined' && document.hidden) return;
-      this.loadTasks(true);
-    }, 15000);
+  async exitDemoMode() {
+    await this.auth.logout();
   }
 
-  private stopForegroundSync() {
-    if (this.syncTimer) {
-      clearInterval(this.syncTimer);
-      this.syncTimer = null;
-    }
+  openNewTaskAlert() {
+    if (!this.newTaskAlert) return;
+    const id = this.newTaskAlert.id;
+    this.taskSync.dismissNewTaskAlert();
+    this.goToDetail(id);
+  }
+
+  dismissNewTaskAlert(event?: Event) {
+    if (event) event.stopPropagation();
+    this.taskSync.dismissNewTaskAlert();
+  }
+
+  private applySyncedTasks(nextTasks: any[]) {
+    this.tasks = Array.isArray(nextTasks) ? nextTasks : [];
+    this.refreshGpsAccuracy();
+
+    this.activeMission = this.tasks.find(t => t.status === 'on-going')
+      || this.tasks.find(t => t.status === 'accepted')
+      || null;
+
+    this.applyFilter();
   }
 
   async loadInitialData() {
-    this.isLoading = true;
+    this.isLoading = this.tasks.length === 0;
     try {
       const [meRes, historyRes] = await Promise.all([
         this.api.getMe().catch((err) => {
@@ -165,7 +191,7 @@ export class TaskListPage implements OnDestroy {
           return null;
         }),
         this.api.getHistory().catch(() => null),
-        this.loadTasks(),
+        this.taskSync.refreshTasks(false),
       ]);
 
       const uRes: any = meRes;
@@ -190,7 +216,7 @@ export class TaskListPage implements OnDestroy {
     if (this.isSyncing) return;
     this.isSyncing = true;
     try {
-      await this.loadTasks(false);
+      await this.taskSync.refreshTasks(true);
       this.refreshGpsAccuracy();
       const toast = await this.toastCtrl.create({
         message: 'Work orders & telemetry synced',
@@ -228,53 +254,7 @@ export class TaskListPage implements OnDestroy {
   }
 
   async loadTasks(isBackgroundPoll = false) {
-    try {
-      const res: any = await this.api.getTasks();
-      const nextTasks = Array.isArray(res) ? res : (res?.data ?? []);
-      const assignedNow = nextTasks.filter((t: any) => t.status === 'assigned');
-
-      if (isBackgroundPoll && this.hasLoadedOnce) {
-        const newlyDispatched = assignedNow.filter((t: any) => !this.knownAssignedIds.has(Number(t.id)));
-        if (newlyDispatched.length > 0) {
-          const first = newlyDispatched[0];
-          const code = `#TSK-${String(first.id).padStart(4, '0')}`;
-          const msg = newlyDispatched.length === 1
-            ? `New work order assigned: ${code} — ${first.title}`
-            : `${newlyDispatched.length} new work orders dispatched to you!`;
-          this.showDispatchToast(msg);
-        }
-      }
-
-      this.knownAssignedIds = new Set(assignedNow.map((t: any) => Number(t.id)));
-      this.api.setAssignedCount(assignedNow.length);
-      this.hasLoadedOnce = true;
-      this.tasks = nextTasks;
-
-      const now = new Date();
-      this.lastSyncTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      this.refreshGpsAccuracy();
-
-      this.activeMission = this.tasks.find(t => t.status === 'on-going')
-        || this.tasks.find(t => t.status === 'accepted')
-        || null;
-
-      this.locationService.setActiveTaskId(this.activeMission?.id || null);
-
-      this.applyFilter();
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  private async showDispatchToast(message: string) {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 4500,
-      position: 'top',
-      color: 'primary',
-      icon: 'notifications-outline',
-    });
-    await toast.present();
+    await this.taskSync.refreshTasks(isBackgroundPoll);
   }
 
   applyFilter() {

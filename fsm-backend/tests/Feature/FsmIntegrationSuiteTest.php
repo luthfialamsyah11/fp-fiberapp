@@ -1510,4 +1510,48 @@ class FsmIntegrationSuiteTest extends TestCase
             $this->actingAs($admin)->get('/dashboard?filter=' . $filterTab)->assertOk();
         }
     }
+
+    public function test_new_task_dispatch_triggers_instant_sync_signal_change_and_no_cache_headers(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => 'Dimas Splicer', 'email' => 'dimas@fsm.com']);
+
+        // 1. Initial sync-signal before any task is assigned
+        $sig1 = $this->actingAs($tech, 'sanctum')->getJson('/api/tasks/sync-signal')->assertOk();
+        $sig1->assertJsonPath('active_count', 0)
+            ->assertJsonPath('assigned_count', 0);
+        $this->assertStringContainsString('no-store', (string) $sig1->headers->get('Cache-Control'));
+        $v1 = $sig1->json('version');
+
+        // 2. Admin creates a new work order and selects Dimas Splicer
+        $createRes = $this->actingAs($admin)->post('/tasks', [
+            'title'          => 'Instant Dispatch FTTH Cut',
+            'customer_name'  => 'PT Cepat Sambung',
+            'customer_phone' => '+62812000999',
+            'address'        => 'Jl. Thamrin No. 1',
+            'priority'       => 'high',
+            'technician_id'  => $tech->id,
+        ])->assertRedirect(route('admin.tasks.index'));
+
+        $createRes->assertSessionHas('success', function (string $msg) {
+            return str_contains($msg, 'Dimas Splicer');
+        });
+
+        $createdTask = Task::where('title', 'Instant Dispatch FTTH Cut')->firstOrFail();
+        $this->assertEquals('assigned', $createdTask->status);
+        $this->assertEquals($tech->id, $createdTask->technician_id);
+
+        // 3. Immediately polling /api/tasks/sync-signal returns a brand-new version hash
+        $sig2 = $this->actingAs($tech, 'sanctum')->getJson('/api/tasks/sync-signal')->assertOk();
+        $sig2->assertJsonPath('active_count', 1)
+            ->assertJsonPath('assigned_count', 1)
+            ->assertJsonPath('latest_task_id', $createdTask->id);
+        $this->assertNotEquals($v1, $sig2->json('version'));
+
+        // 4. GET /api/tasks returns the new task immediately with no-store cache headers
+        $listRes = $this->actingAs($tech, 'sanctum')->getJson('/api/tasks')->assertOk();
+        $this->assertStringContainsString('no-store', (string) $listRes->headers->get('Cache-Control'));
+        $ids = collect($listRes->json('data'))->pluck('id')->all();
+        $this->assertContains($createdTask->id, $ids);
+    }
 }

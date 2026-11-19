@@ -21,14 +21,52 @@ class TaskController extends Controller
             ->when(
                 $request->filled('status'),
                 fn ($q) => $q->where('status', $request->status),
-                fn ($q) => $q->whereIn('status', ['assigned', 'accepted', 'on-going'])
+                fn ($q) => $q->whereIn('status', ['pending', 'assigned', 'accepted', 'on-going'])
             )
             ->with(['latestProgressUpdate'])
             ->withCount(['proofOfWork', 'materials'])
             ->orderByDesc('created_at')
             ->get();
 
-        return response()->json(['data' => $tasks]);
+        return response()->json(['data' => $tasks])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
+    }
+
+    /**
+     * Ultra-lightweight live sync signal (~120 bytes) polled by the Technician APK
+     * every 3 seconds to detect newly dispatched or updated work orders instantly.
+     */
+    public function syncSignal()
+    {
+        $techId = auth()->id();
+
+        $agg = Task::where('technician_id', $techId)
+            ->whereIn('status', ['pending', 'assigned', 'accepted', 'on-going'])
+            ->selectRaw("
+                COUNT(*) as active_count,
+                SUM(CASE WHEN status IN ('pending', 'assigned') THEN 1 ELSE 0 END) as assigned_count,
+                COALESCE(MAX(id), 0) as latest_task_id,
+                MAX(updated_at) as latest_updated_at
+            ")
+            ->first();
+
+        $activeCount = (int) ($agg->active_count ?? 0);
+        $assignedCount = (int) ($agg->assigned_count ?? 0);
+        $latestTaskId = (int) ($agg->latest_task_id ?? 0);
+        $latestUpdatedAt = (string) ($agg->latest_updated_at ?? '');
+        $version = sha1("{$techId}|{$activeCount}|{$assignedCount}|{$latestTaskId}|{$latestUpdatedAt}");
+
+        return response()->json([
+            'version'           => $version,
+            'active_count'      => $activeCount,
+            'assigned_count'    => $assignedCount,
+            'latest_task_id'    => $latestTaskId,
+            'latest_updated_at' => $latestUpdatedAt ?: null,
+            'server_time'       => now()->toIso8601String(),
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function show(Task $task)

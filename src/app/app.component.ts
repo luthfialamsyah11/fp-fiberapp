@@ -7,6 +7,7 @@ import { Capacitor } from '@capacitor/core';
 import { AuthService } from './services/auth.service';
 import { ApiService } from './services/api.service';
 import { LocationService } from './services/location.service';
+import { TaskSyncService } from './services/task-sync.service';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,7 @@ export class AppComponent {
   private auth = inject(AuthService);
   private api = inject(ApiService);
   private locationService = inject(LocationService);
+  private taskSync = inject(TaskSyncService);
 
   private lastTimeBackPress = 0;
   private timePeriodToExit = 2000;
@@ -75,26 +77,13 @@ export class AppComponent {
     try {
       if (!(await this.auth.isLoggedIn())) return;
 
-      const [meRes, tasksRes]: [any, any] = await Promise.all([
-        this.api.getMe().catch(() => null),
-        this.api.getTasks().catch(() => null),
-      ]);
+      // Start global 3-second instant task sync across all routes
+      this.taskSync.start();
 
+      const meRes: any = await this.api.getMe().catch(() => null);
       const user = meRes?.data ?? meRes;
       if (user && user.is_online !== false) {
         this.locationService.startTracking();
-      }
-
-      const list = Array.isArray(tasksRes) ? tasksRes : (tasksRes?.data ?? []);
-      if (Array.isArray(list)) {
-        const assignedCount = list.filter((t: any) => t.status === 'assigned').length;
-        this.api.setAssignedCount(assignedCount);
-
-        const active = list.find((t: any) => t.status === 'on-going')
-          || list.find((t: any) => t.status === 'accepted');
-        if (active?.id) {
-          this.locationService.setActiveTaskId(active.id);
-        }
       }
     } catch {
       // Non-fatal startup fallback

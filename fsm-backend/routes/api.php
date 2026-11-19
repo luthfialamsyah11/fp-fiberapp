@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Technician - Tasks & Deterministic State Machine
     Route::get('/tasks', [TaskController::class, 'index']);
+    Route::get('/tasks/sync-signal', [TaskController::class, 'syncSignal'])->middleware('throttle:120,1');
     Route::get('/tasks/history', [TaskController::class, 'history']);
     Route::get('/tasks/{task}', [TaskController::class, 'show']);
     Route::post('/tasks/{task}/accept', [TaskController::class, 'accept'])->middleware('idempotent');

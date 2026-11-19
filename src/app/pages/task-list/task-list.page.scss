@@ -1040,3 +1040,171 @@
 .footer-space {
   height: 36px;
 }
+
+
+// ─── Demo Mode & Instant Live New-Task Arrival Banners ──────────────────────────
+.demo-mode-banner {
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  .demo-banner-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+
+    ion-icon {
+      font-size: 20px;
+      color: #D97706;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: #92400E;
+    }
+
+    span {
+      display: block;
+      font-size: 11px;
+      color: #B45309;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+  }
+
+  .btn-exit-demo {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border-radius: 10px;
+    background: #D97706;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+.instant-dispatch-banner {
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+  cursor: pointer;
+  animation: slideDownFade 260ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  .dispatch-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .dispatch-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 18px;
+      color: #FFFFFF;
+    }
+  }
+
+  .dispatch-copy {
+    min-width: 0;
+
+    .dispatch-kicker {
+      display: block;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #BFDBFE;
+    }
+
+    strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dispatch-sub {
+      display: block;
+      font-size: 11px;
+      color: #DBEAFE;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .dispatch-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .dispatch-open-pill {
+    padding: 6px 10px;
+    border-radius: 9px;
+    background: #FFFFFF;
+    color: #1D4ED8;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .dispatch-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    border: none;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

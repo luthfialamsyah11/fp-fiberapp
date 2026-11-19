@@ -72,7 +72,16 @@ export class ApiService {
     };
   }
 
-  private async isDemoMode(): Promise<boolean> {
+  private noCacheHeaders(): { headers: HttpHeaders } {
+    return {
+      headers: new HttpHeaders({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      }),
+    };
+  }
+
+  async isDemoMode(): Promise<boolean> {
     return (await this.storage.get('demo_mode')) === true;
   }
 
@@ -139,8 +148,33 @@ export class ApiService {
         : this.demoTasks.filter(t => t.status !== 'completed');
       return { data: list };
     }
-    const params = status ? `?status=${status}` : '';
-    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks${params}`));
+    const qs = new URLSearchParams();
+    if (status) qs.set('status', status);
+    qs.set('_ts', String(Date.now()));
+    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks?${qs.toString()}`, this.noCacheHeaders()));
+  }
+
+  async getTaskSyncSignal(): Promise<{
+    version: string;
+    active_count: number;
+    assigned_count: number;
+    latest_task_id: number;
+    latest_updated_at: string | null;
+  }> {
+    if (await this.isDemoMode()) {
+      const active = this.demoTasks.filter(t => t.status !== 'completed');
+      const assigned = active.filter(t => t.status === 'assigned');
+      return {
+        version: `demo-${active.length}-${assigned.length}`,
+        active_count: active.length,
+        assigned_count: assigned.length,
+        latest_task_id: active[0]?.id || 0,
+        latest_updated_at: null,
+      };
+    }
+    return firstValueFrom(
+      this.http.get<any>(`${this.baseUrl}/tasks/sync-signal?_ts=${Date.now()}`, this.noCacheHeaders())
+    );
   }
 
   async getTaskById(id: number) {
@@ -148,7 +182,7 @@ export class ApiService {
       const found = this.demoTasks.find(t => t.id === Number(id)) || this.demoTasks[0];
       return { data: found };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${id}`));
+    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${id}?_ts=${Date.now()}`, this.noCacheHeaders()));
   }
 
   private updateDemoTaskStatus(id: number, status: string, progress?: number) {

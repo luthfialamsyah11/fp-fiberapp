@@ -3,6 +3,7 @@ import { StorageService } from './storage.service';
 import { ApiService } from './api.service';
 import { Router } from '@angular/router';
 import { LocationService } from './location.service';
+import { TaskSyncService } from './task-sync.service';
 import { environment } from '../../environments/environment';
 import { DEMO_USER } from './demo-mock.data';
 
@@ -14,6 +15,7 @@ export class AuthService {
   private api = inject(ApiService);
   private router = inject(Router);
   private locationService = inject(LocationService);
+  private taskSync = inject(TaskSyncService);
 
   async login(email: string, password: string): Promise<any> {
     try {
@@ -37,10 +39,11 @@ export class AuthService {
       await this.storage.set('token', res.token);
       await this.storage.set('user', res.user);
 
-      // Start GPS telemetry right on login if technician is online (independent of route)
+      // Start GPS telemetry & global instant task sync right on login
       if (res.user?.is_online !== false) {
         this.locationService.startTracking();
       }
+      this.taskSync.start();
       return res;
     } catch (error: any) {
       if (isDebug) console.error('[AuthService] Login error:', error);
@@ -78,6 +81,7 @@ export class AuthService {
   async logout() {
     try {
       this.locationService.stopTracking();
+      this.taskSync.stop();
       await this.api.logout();
     } catch (e) {
       console.warn('[AuthService] Logout API failed, continuing local logout:', e);

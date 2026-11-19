@@ -152,7 +152,12 @@ class TaskController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.tasks.index')->with('success', 'Work order created successfully.');
+        $taskCode = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+        $dispatchMsg = $task->technician
+            ? "Work order {$taskCode} created and dispatched to {$task->technician->name}."
+            : "Work order {$taskCode} created and queued in Pending Dispatch.";
+
+        return redirect()->route('admin.tasks.index')->with('success', $dispatchMsg);
     }
 
     public function edit(Task $task)

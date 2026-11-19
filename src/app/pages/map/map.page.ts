@@ -37,6 +37,7 @@ export class MapPage implements OnDestroy {
   assignedTasks: any[] = [];
   selectedTask: any = null;
   isSatellite = false;
+  private userToggledStyle = false;
 
   private map: L.Map | null = null;
   private streetLayer: L.TileLayer | null = null;
@@ -141,7 +142,17 @@ export class MapPage implements OnDestroy {
       attributionControl: false,
     });
 
-    this.streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const configuredStyle = (this.api.getClientConfig().map_style || 'openstreetmap').toLowerCase();
+    if (!this.userToggledStyle) {
+      this.isSatellite = configuredStyle === 'mapbox';
+    }
+
+    const baseTileUrl =
+      configuredStyle === 'carto'
+        ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+    this.streetLayer = L.tileLayer(baseTileUrl, {
       maxZoom: 19,
     });
     this.satelliteLayer = L.tileLayer(
@@ -154,6 +165,7 @@ export class MapPage implements OnDestroy {
   }
 
   toggleMapStyle() {
+    this.userToggledStyle = true;
     this.isSatellite = !this.isSatellite;
     if (!this.map || !this.streetLayer || !this.satelliteLayer) return;
     if (this.isSatellite) {

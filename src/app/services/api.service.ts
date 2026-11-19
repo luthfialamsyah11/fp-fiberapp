@@ -40,7 +40,7 @@ export class ApiService {
     gps_refresh_interval: 15,
     geofence_check_meters: 0,
     require_proof_photo: true,
-    require_customer_signature: false,
+    require_customer_signature: true,
     currency: 'USD',
     default_country_code: '62',
   };

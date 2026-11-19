@@ -148,7 +148,7 @@ class TaskStateMachine
             ]);
         }
 
-        $requireSignature = SettingService::get('require_customer_signature', '0');
+        $requireSignature = SettingService::get('require_customer_signature', '1');
         if ($requireSignature == '1' && empty($task->customer_signature)) {
             throw ValidationException::withMessages([
                 'signature' => ['Customer digital acceptance signature (Sign-on-Glass) is required before completing the work order.']

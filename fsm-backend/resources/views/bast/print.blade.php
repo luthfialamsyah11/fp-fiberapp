@@ -307,11 +307,17 @@
     <!-- BAST Container -->
     <div class="bast-container">
         
+        @php
+            $bastCompany = \App\Services\SettingService::get('company_name', 'FiberOps Global Carrier');
+            $bastEmail   = \App\Services\SettingService::get('support_email', 'noc@bentengsiber.com');
+            $bastPhone   = \App\Services\SettingService::get('support_phone', '+1-800-555-0199');
+        @endphp
         <!-- Header -->
         <div class="bast-header">
             <div class="brand-logo-title">
-                <h2>BENTENG SIBER FIBEROPS</h2>
+                <h2>{{ strtoupper($bastCompany) }}</h2>
                 <span>Field Service &amp; Network Infrastructure Solutions</span>
+                <div style="font-size: 11px; color: #64748b; margin-top: 3px;">NOC Support: {{ $bastPhone }} &bull; {{ $bastEmail }}</div>
             </div>
             <div class="doc-meta">
                 <div class="bast-badge">OFFICIAL ACCEPTANCE CERTIFICATE</div>

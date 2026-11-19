@@ -31,7 +31,8 @@ class Kernel extends ConsoleKernel
                 $protectedIds = array_merge($protectedIds, $recent);
             }
 
-            TechnicianLocation::where('created_at', '<', now()->subDays($retentionDays))
+            $cutoff = now()->subDays($retentionDays)->format('Y-m-d H:i:s');
+            TechnicianLocation::whereRaw('COALESCE(captured_at, created_at) < ?', [$cutoff])
                 ->when(!empty($protectedIds), fn ($q) => $q->whereNotIn('id', $protectedIds))
                 ->delete();
 

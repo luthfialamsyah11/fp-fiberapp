@@ -1315,4 +1315,135 @@ class FsmIntegrationSuiteTest extends TestCase
         $this->assertEquals(1, $tech->tokens()->count());
         $this->assertNotEmpty($staleToken);
     }
+
+    public function test_settings_ssrf_validation_country_code_normalization_and_dynamic_purge_window(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => 'GPS Tech', 'email' => 'gpstech@fsm.com']);
+
+        $basePayload = [
+            'company_name'               => 'Benteng Siber NOC',
+            'support_email'              => 'noc@bentengsiber.com',
+            'support_phone'              => '+62811000222',
+            'currency'                   => 'IDR',
+            'default_country_code'       => '+62 ',
+            'gps_refresh_interval'       => '15',
+            'map_style'                  => 'carto',
+            'auto_assign'                => '1',
+            'sla_warning_hours'          => '4',
+            'require_proof_photo'        => '1',
+            'require_customer_signature' => '1',
+            'geofence_check_meters'      => '100',
+            'telemetry_retention_days'   => '30',
+        ];
+
+        // 1. SSRF webhook URL must be rejected on Save (not only on Test)
+        $this->actingAs($admin)->post('/settings', array_merge($basePayload, [
+            'webhook_url' => 'http://127.0.0.1:8080/internal-hook',
+        ]))->assertSessionHasErrors('webhook_url');
+
+        $this->actingAs($admin)->post('/settings', array_merge($basePayload, [
+            'webhook_url' => 'http://169.254.169.254/latest/meta-data/',
+        ]))->assertSessionHasErrors('webhook_url');
+
+        // 2. Non-numeric country dial code must be rejected
+        $this->actingAs($admin)->post('/settings', array_merge($basePayload, [
+            'default_country_code' => 'abc',
+        ]))->assertSessionHasErrors('default_country_code');
+
+        // 3. Valid payload succeeds and normalizes "+62 " -> "62"
+        $this->actingAs($admin)->post('/settings', $basePayload)
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertEquals('62', \App\Services\SettingService::get('default_country_code'));
+        $this->assertEquals('carto', \App\Services\SettingService::get('map_style'));
+
+        // 4. Seed 55 GPS points captured 20 days ago for this technician
+        $oldTs = now()->subDays(20);
+        for ($i = 0; $i < 55; $i++) {
+            TechnicianLocation::create([
+                'technician_id' => $tech->id,
+                'latitude'      => -6.2000 + ($i * 0.0001),
+                'longitude'     => 106.8000 + ($i * 0.0001),
+                'captured_at'   => $oldTs->copy()->addMinutes($i),
+            ]);
+        }
+
+        // Purge with 30-day window deletes 0 records
+        $this->actingAs($admin)->postJson('/settings/purge-cache', [
+            'telemetry_retention_days' => '30',
+        ])->assertOk()
+            ->assertJsonPath('deleted_count', 0)
+            ->assertJsonPath('total_remaining', 55);
+
+        // Purge with 7-day window overrides unsaved dropdown, deletes 5 oldest, safeguards latest 50 per tech
+        $this->actingAs($admin)->postJson('/settings/purge-cache', [
+            'telemetry_retention_days' => '7',
+        ])->assertOk()
+            ->assertJsonPath('deleted_count', 5)
+            ->assertJsonPath('total_remaining', 50)
+            ->assertJsonPath('retention_days', 7)
+            ->assertJsonStructure(['oldest_ping_label']);
+
+        // 5. GET /settings renders in-page modal & live KPI elements without native confirm()
+        $page = $this->actingAs($admin)->get('/settings')->assertOk();
+        $page->assertSee('id="purge-confirm-modal"', false)
+            ->assertSee('id="gps-total-points"', false)
+            ->assertSee('id="gps-oldest-ping"', false)
+            ->assertDontSee('if (!confirm(', false);
+    }
+
+    public function test_admin_operations_guide_syncs_live_settings_and_accurate_v2_documentation(): void
+    {
+        $admin = $this->createAdmin();
+
+        $this->actingAs($admin)->post('/settings', [
+            'company_name'               => 'Nusantara Fiber Backbone',
+            'support_email'              => 'ops@nusantarafiber.id',
+            'support_phone'              => '+62-21-5009-888',
+            'currency'                   => 'IDR',
+            'default_country_code'       => '62',
+            'gps_refresh_interval'       => '15',
+            'map_style'                  => 'openstreetmap',
+            'auto_assign'                => '1',
+            'sla_warning_hours'          => '4',
+            'require_proof_photo'        => '1',
+            'require_customer_signature' => '1',
+            'geofence_check_meters'      => '100',
+            'telemetry_retention_days'   => '30',
+        ])->assertRedirect();
+
+        $guide = $this->actingAs($admin)->get('/guide')->assertOk();
+        $guide->assertSee('Nusantara Fiber Backbone')
+            ->assertSee('+62-21-5009-888')
+            ->assertSee('ops@nusantarafiber.id')
+            ->assertSee('4 Hours')
+            ->assertSee('2 minutes (120 seconds)')
+            ->assertSee('Green Marker')
+            ->assertSee('Adaptive Delta Polling')
+            ->assertSee('Inventory &amp; Materials Ledger', false)
+            ->assertSee('Assignment Monitoring &amp; 1-Click Auto-Dispatch', false)
+            ->assertSee('SHA-256')
+            ->assertSee('Android Background Geolocation')
+            ->assertSee('id="guide-search-empty"', false)
+            ->assertDontSee('+1 (800) 555-0199')
+            ->assertDontSee('Gold Marker')
+            ->assertDontSee('last 30 minutes')
+            ->assertDontSee('Telemetry Socket Feed')
+            ->assertDontSee('`/tracking`', false);
+
+        // Verify BAST printout also honors dynamic company_name from Settings
+        $task = Task::create([
+            'title'         => 'BAST Branding Verification',
+            'customer_name' => 'PT Pelanggan Jaya',
+            'address'       => 'Jl. Sudirman 10',
+            'status'        => 'completed',
+            'priority'      => 'medium',
+        ]);
+        $this->actingAs($admin)->get("/tasks/{$task->id}/bast")
+            ->assertOk()
+            ->assertSee('NUSANTARA FIBER BACKBONE')
+            ->assertSee('+62-21-5009-888');
+    }
 }

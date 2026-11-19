@@ -183,7 +183,7 @@ class AuthController extends Controller
             'gps_refresh_interval'       => (int) SettingService::get('gps_refresh_interval', '15'),
             'geofence_check_meters'      => (int) SettingService::get('geofence_check_meters', '0'),
             'require_proof_photo'        => SettingService::get('require_proof_photo', '1') === '1',
-            'require_customer_signature' => SettingService::get('require_customer_signature', '0') === '1',
+            'require_customer_signature' => SettingService::get('require_customer_signature', '1') === '1',
             'currency'                   => (string) SettingService::get('currency', 'USD'),
             'default_country_code'       => (string) SettingService::get('default_country_code', '62'),
         ];

@@ -24,36 +24,45 @@ export class TaskListPage implements OnDestroy {
   isOnline = true;
   gpsStatus: GpsHealthStatus = 'offline';
   gpsStatusMessage = 'Offline';
+  gpsAccuracy: number | null = null;
+  lastSyncTime = '';
+  isSyncing = false;
+
   tasks: any[] = [];
   filteredTasks: any[] = [];
   activeMission: any = null;
+  completedCount = 0;
   isLoading = true;
   selectedFilter = 'all';
   searchQuery = '';
+
   private syncTimer: any = null;
   private knownAssignedIds = new Set<number>();
   private hasLoadedOnce = false;
   private subs = new Subscription();
 
+  filters = [
+    { value: 'all', label: 'All' },
+    { value: 'assigned', label: 'Assigned' },
+    { value: 'accepted', label: 'Accepted' },
+    { value: 'on-going', label: 'In Progress' },
+    { value: 'urgent', label: 'Urgent' },
+  ];
+
   constructor() {
     this.subs.add(
       this.locationService.status$.subscribe(s => {
         this.gpsStatus = s;
+        this.refreshGpsAccuracy();
       })
     );
     this.subs.add(
       this.locationService.statusMessage$.subscribe(m => {
         this.gpsStatusMessage = m;
+        this.refreshGpsAccuracy();
       })
     );
   }
-
-  filters = [
-    { value: 'all', label: 'All Tasks' },
-    { value: 'assigned', label: 'Assigned' },
-    { value: 'accepted', label: 'Accepted' },
-    { value: 'on-going', label: 'In Progress' },
-  ];
 
   async ionViewWillEnter() {
     await this.loadInitialData();
@@ -69,6 +78,42 @@ export class TaskListPage implements OnDestroy {
     this.subs.unsubscribe();
   }
 
+  get greetingText(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  get userInitials(): string {
+    const name = String(this.user?.name || 'FT').trim();
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase() || 'FT';
+  }
+
+  get assignedCount(): number {
+    return this.tasks.filter(t => t.status === 'assigned').length;
+  }
+
+  get inProgressCount(): number {
+    return this.tasks.filter(t => t.status === 'on-going' || t.status === 'accepted').length;
+  }
+
+  get urgentCount(): number {
+    return this.tasks.filter(t => t.priority === 'high').length;
+  }
+
+  getFilterCount(value: string): number {
+    switch (value) {
+      case 'all': return this.tasks.length;
+      case 'urgent': return this.urgentCount;
+      default: return this.tasks.filter(t => t.status === value).length;
+    }
+  }
+
   get hasGpsWarning(): boolean {
     return (
       this.isOnline &&
@@ -77,6 +122,11 @@ export class TaskListPage implements OnDestroy {
         this.gpsStatus === 'no_network' ||
         this.gpsStatus === 'stale')
     );
+  }
+
+  private refreshGpsAccuracy() {
+    const pos = this.locationService.getLastKnownPosition();
+    this.gpsAccuracy = pos?.coords?.accuracy ? Math.round(pos.coords.accuracy) : null;
   }
 
   async fixGpsIssue() {
@@ -109,11 +159,12 @@ export class TaskListPage implements OnDestroy {
   async loadInitialData() {
     this.isLoading = true;
     try {
-      const [meRes] = await Promise.all([
+      const [meRes, historyRes] = await Promise.all([
         this.api.getMe().catch((err) => {
           console.warn('Could not load user profile in task list', err);
           return null;
         }),
+        this.api.getHistory().catch(() => null),
         this.loadTasks(),
       ]);
 
@@ -127,8 +178,29 @@ export class TaskListPage implements OnDestroy {
           this.locationService.stopTracking();
         }
       }
+
+      const hList = Array.isArray(historyRes) ? historyRes : ((historyRes as any)?.data ?? []);
+      this.completedCount = Array.isArray(hList) ? hList.length : 0;
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  async manualSync() {
+    if (this.isSyncing) return;
+    this.isSyncing = true;
+    try {
+      await this.loadTasks(false);
+      this.refreshGpsAccuracy();
+      const toast = await this.toastCtrl.create({
+        message: 'Work orders & telemetry synced',
+        duration: 1800,
+        position: 'top',
+        color: 'dark',
+      });
+      await toast.present();
+    } finally {
+      this.isSyncing = false;
     }
   }
 
@@ -178,6 +250,10 @@ export class TaskListPage implements OnDestroy {
       this.hasLoadedOnce = true;
       this.tasks = nextTasks;
 
+      const now = new Date();
+      this.lastSyncTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      this.refreshGpsAccuracy();
+
       this.activeMission = this.tasks.find(t => t.status === 'on-going')
         || this.tasks.find(t => t.status === 'accepted')
         || null;
@@ -203,17 +279,24 @@ export class TaskListPage implements OnDestroy {
 
   applyFilter() {
     let list = this.tasks;
-    if (this.selectedFilter !== 'all') {
+    if (this.selectedFilter === 'urgent') {
+      list = list.filter(t => t.priority === 'high');
+    } else if (this.selectedFilter !== 'all') {
       list = list.filter(t => t.status === this.selectedFilter);
     }
     if (this.searchQuery.trim()) {
-      const q = this.searchQuery.toLowerCase();
-      list = list.filter(t =>
-        t.title?.toLowerCase().includes(q) ||
-        (t.location || t.address || t.resolved_location)?.toLowerCase().includes(q) ||
-        t.customer_name?.toLowerCase().includes(q) ||
-        t.customer_phone?.toLowerCase().includes(q)
-      );
+      const q = this.searchQuery.trim().toLowerCase();
+      list = list.filter(t => {
+        const code = `#tsk-${String(t.id).padStart(4, '0')}`;
+        return (
+          code.includes(q) ||
+          String(t.id).includes(q) ||
+          t.title?.toLowerCase().includes(q) ||
+          (t.location || t.address || t.resolved_location)?.toLowerCase().includes(q) ||
+          t.customer_name?.toLowerCase().includes(q) ||
+          t.customer_phone?.toLowerCase().includes(q)
+        );
+      });
     }
     this.filteredTasks = list;
   }
@@ -223,13 +306,36 @@ export class TaskListPage implements OnDestroy {
     this.applyFilter();
   }
 
+  clearSearch() {
+    this.searchQuery = '';
+    this.applyFilter();
+  }
+
+  resetFilters() {
+    this.selectedFilter = 'all';
+    this.searchQuery = '';
+    this.applyFilter();
+  }
+
   onSearch(event: any) {
-    this.searchQuery = event.target.value;
+    this.searchQuery = event.target.value || '';
     this.applyFilter();
   }
 
   goToDetail(id: number) {
     this.router.navigate(['/task-detail', id]);
+  }
+
+  goToMap() {
+    this.router.navigate(['/map'], { replaceUrl: true });
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile'], { replaceUrl: true });
+  }
+
+  formatTaskCode(id: number): string {
+    return `#TSK-${String(id).padStart(4, '0')}`;
   }
 
   openWhatsApp(task: any, event?: Event) {
@@ -279,8 +385,8 @@ export class TaskListPage implements OnDestroy {
     switch (status) {
       case 'pending': return 'Pending';
       case 'assigned': return 'Assigned';
-      case 'accepted': return 'Accepted';
-      case 'on-going': return 'In Progress';
+      case 'accepted': return 'En Route';
+      case 'on-going': return 'On-Site';
       case 'completed': return 'Completed';
       case 'rejected': return 'Declined';
       default: return status;
@@ -290,7 +396,7 @@ export class TaskListPage implements OnDestroy {
   getPriorityColor(priority: string): string {
     switch (priority) {
       case 'high': return '#DC2626';
-      case 'medium': return '#F59E0B';
+      case 'medium': return '#D97706';
       case 'low': return '#16A34A';
       default: return '#94A3B8';
     }

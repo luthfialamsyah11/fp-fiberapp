@@ -1,19 +1,21 @@
 <div class="tab-bar" role="navigation" aria-label="Primary Navigation">
-  <button
-    *ngFor="let tab of tabs"
-    type="button"
-    class="tab-item"
-    [class.active]="activeTab === tab.key"
-    (click)="navigate(tab)"
-  >
-    <div class="tab-icon-wrap">
-      <div class="tab-indicator" *ngIf="activeTab === tab.key"></div>
-      <ion-icon [name]="getIcon(tab)"></ion-icon>
-      <span class="tab-badge" *ngIf="tab.key === 'tasks' && assignedCount > 0">
-        {{ assignedCount > 99 ? '99+' : assignedCount }}
-      </span>
-      <span class="tab-warn-dot" *ngIf="tab.key === 'map' && gpsWarning" title="GPS attention required"></span>
-    </div>
-    <span class="tab-label">{{ tab.label }}</span>
-  </button>
+  <div class="tab-bar-inner">
+    <button
+      *ngFor="let tab of tabs"
+      type="button"
+      class="tab-item"
+      [class.active]="activeTab === tab.key"
+      (click)="navigate(tab)"
+    >
+      <div class="tab-icon-wrap">
+        <div class="tab-indicator" *ngIf="activeTab === tab.key"></div>
+        <ion-icon [name]="getIcon(tab)"></ion-icon>
+        <span class="tab-badge" *ngIf="tab.key === 'tasks' && assignedCount > 0">
+          {{ assignedCount > 99 ? '99+' : assignedCount }}
+        </span>
+        <span class="tab-warn-dot" *ngIf="tab.key === 'map' && gpsWarning" title="GPS attention required"></span>
+      </div>
+      <span class="tab-label">{{ tab.label }}</span>
+    </button>
+  </div>
 </div>

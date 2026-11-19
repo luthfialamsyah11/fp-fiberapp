@@ -4,165 +4,319 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- Top Greeting & Online Status Bar -->
-  <div class="tech-top-bar">
-    <div class="tech-info">
-      <span class="greeting-sub">Welcome back</span>
-      <h2 class="tech-name">{{ user?.name || 'FiberOps Specialist' }}</h2>
-    </div>
-    <button
-      class="status-pill"
-      [class.online]="isOnline && !hasGpsWarning"
-      [class.warn]="hasGpsWarning"
-      (click)="toggleOnlineStatus()"
-    >
-      <span class="status-dot"></span>
-      <span class="status-text">
-        {{ !isOnline ? 'Offline' : (hasGpsWarning ? (gpsStatus === 'no_permission' ? 'No GPS Perm' : 'GPS Issue') : 'Online') }}
-      </span>
-    </button>
-  </div>
-
-  <!-- Actionable GPS Health Warning Banner (AP-5) -->
-  <div class="gps-health-banner" *ngIf="hasGpsWarning" (click)="fixGpsIssue()">
-    <div class="gps-health-left">
-      <ion-icon name="warning-outline"></ion-icon>
-      <span>{{ gpsStatusMessage }}</span>
-    </div>
-    <span class="gps-health-cta">Fix &rarr;</span>
-  </div>
-
-  <!-- Active Mission Card (Sticky Hero when in progress or accepted) -->
-  <div class="active-mission-card" *ngIf="activeMission" (click)="goToDetail(activeMission.id)">
-    <div class="mission-badge-row">
-      <span class="mission-tag">
-        <span class="pulse-dot"></span>
-        ACTIVE MISSION ({{ getStatusLabel(activeMission.status) }})
-      </span>
-      <span class="mission-priority" [style.color]="getPriorityColor(activeMission.priority)">
-        ● Priority {{ activeMission.priority | uppercase }}
-      </span>
-    </div>
-
-    <h3 class="mission-title">{{ activeMission.title }}</h3>
-
-    <div class="mission-meta-list">
-      <div class="meta-row" *ngIf="activeMission.customer_name">
-        <ion-icon name="person-circle-outline"></ion-icon>
-        <span class="cust-name">{{ activeMission.customer_name }}</span>
-        <span class="cust-phone" *ngIf="activeMission.customer_phone">({{ activeMission.customer_phone }})</span>
-      </div>
-      <div class="meta-row" *ngIf="activeMission.location || activeMission.address">
-        <ion-icon name="location-outline"></ion-icon>
-        <span>{{ activeMission.location || activeMission.address }}</span>
-      </div>
-    </div>
-
-    <!-- Quick Action Shortcuts -->
-    <div class="mission-actions-row">
-      <button class="btn-quick btn-gps" *ngIf="activeMission.latitude && activeMission.longitude" (click)="openNavigation(activeMission, $event)">
-        <ion-icon name="navigate-outline"></ion-icon>
-        <span>GPS Route</span>
-      </button>
-
-      <button class="btn-quick btn-wa" *ngIf="activeMission.customer_phone" (click)="openWhatsApp(activeMission, $event)">
-        <ion-icon name="logo-whatsapp"></ion-icon>
-        <span>WhatsApp</span>
-      </button>
-
-      <button class="btn-quick btn-open" (click)="goToDetail(activeMission.id)">
-        <span>Open Task</span>
-        <ion-icon name="arrow-forward-outline"></ion-icon>
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Section Header -->
-  <div class="tl-header-section">
-    <div class="tl-title-row">
-      <h1>Task Queue</h1>
-      <span class="task-count" *ngIf="!isLoading">{{ filteredTasks.length }} tasks</span>
-    </div>
-
-    <!-- Search Bar -->
-    <div class="search-box">
-      <ion-icon name="search-outline"></ion-icon>
-      <input
-        type="text"
-        placeholder="Search tasks, customer, or address..."
-        (input)="onSearch($event)"
-      />
-    </div>
-  </div>
-
-  <!-- Filter Chips -->
-  <div class="filter-scroll">
-    <button
-      *ngFor="let f of filters"
-      class="filter-chip"
-      [class.active]="selectedFilter === f.value"
-      (click)="setFilter(f.value)"
-    >
-      {{ f.label }}
-    </button>
-  </div>
-
-  <!-- Skeleton -->
-  <div *ngIf="isLoading" class="skeleton-wrap">
-    <div class="skeleton-item" *ngFor="let i of [1,2,3,4]"></div>
-  </div>
-
-  <!-- Empty State -->
-  <div *ngIf="!isLoading && filteredTasks.length === 0" class="empty-state">
-    <div class="empty-icon-wrap">
-      <ion-icon name="clipboard-outline"></ion-icon>
-    </div>
-    <h3>No tasks found</h3>
-    <p>There are no tasks matching this filter criteria</p>
-  </div>
-
-  <!-- Task Cards -->
-  <div class="task-list" *ngIf="!isLoading && filteredTasks.length > 0">
-    <div
-      class="task-card"
-      *ngFor="let task of filteredTasks; trackBy: trackByTaskId"
-      (click)="goToDetail(task.id)"
-    >
-      <div class="priority-bar" [style.background]="getPriorityColor(task.priority)"></div>
-      <div class="card-body">
-        <div class="card-top">
-          <span class="task-title">{{ task.title }}</span>
-          <ion-badge [color]="getStatusColor(task.status)">
-            {{ getStatusLabel(task.status) }}
-          </ion-badge>
+  <div class="tl-shell">
+    <!-- Top Technician Command Header -->
+    <header class="tech-top-bar">
+      <div class="tech-identity">
+        <div class="tech-avatar" [class.online]="isOnline && !hasGpsWarning">
+          <span>{{ userInitials }}</span>
+          <span class="avatar-dot" [class.online]="isOnline && !hasGpsWarning" [class.warn]="hasGpsWarning"></span>
         </div>
+        <div class="tech-info">
+          <span class="greeting-sub">{{ greetingText }}</span>
+          <h2 class="tech-name">{{ user?.name || 'FiberOps Technician' }}</h2>
+          <div class="gps-subline">
+            <ion-icon [name]="hasGpsWarning ? 'alert-circle-outline' : (isOnline ? 'radio-outline' : 'moon-outline')"></ion-icon>
+            <span *ngIf="!isOnline">Shift Offline</span>
+            <span *ngIf="isOnline && hasGpsWarning" class="warn-txt">{{ gpsStatusMessage }}</span>
+            <span *ngIf="isOnline && !hasGpsWarning">
+              GPS Live<ng-container *ngIf="gpsAccuracy"> &bull; &plusmn;{{ gpsAccuracy }}m</ng-container><ng-container *ngIf="lastSyncTime"> &bull; {{ lastSyncTime }}</ng-container>
+            </span>
+          </div>
+        </div>
+      </div>
 
-        <div class="card-meta">
-          <span class="meta-item" *ngIf="task.customer_name">
-            <ion-icon name="person-outline"></ion-icon>
-            {{ task.customer_name }}
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn-sync-icon"
+          [class.spinning]="isSyncing"
+          (click)="manualSync()"
+          aria-label="Sync tasks"
+          title="Sync now"
+        >
+          <ion-icon name="refresh-outline"></ion-icon>
+        </button>
+
+        <button
+          type="button"
+          class="status-pill"
+          [class.online]="isOnline && !hasGpsWarning"
+          [class.warn]="hasGpsWarning"
+          (click)="toggleOnlineStatus()"
+        >
+          <span class="status-dot"></span>
+          <span class="status-text">
+            {{ !isOnline ? 'Offline' : (hasGpsWarning ? 'GPS Alert' : 'Online') }}
           </span>
-          <span class="meta-item" *ngIf="task.location">
+        </button>
+      </div>
+    </header>
+
+    <!-- Actionable GPS Health Warning Banner -->
+    <button type="button" class="gps-health-banner" *ngIf="hasGpsWarning" (click)="fixGpsIssue()">
+      <div class="gps-health-left">
+        <ion-icon name="warning-outline"></ion-icon>
+        <span>{{ gpsStatusMessage }}</span>
+      </div>
+      <span class="gps-health-cta">Fix GPS &rarr;</span>
+    </button>
+
+    <!-- Shift Summary KPI Strip (4 Clickable Metric Tiles) -->
+    <section class="kpi-grid" *ngIf="!isLoading">
+      <button type="button" class="kpi-tile" [class.active]="selectedFilter === 'assigned'" (click)="setFilter('assigned')">
+        <span class="kpi-label">New</span>
+        <span class="kpi-value blue">{{ assignedCount }}</span>
+      </button>
+      <button type="button" class="kpi-tile" [class.active]="selectedFilter === 'on-going'" (click)="setFilter('on-going')">
+        <span class="kpi-label">Active</span>
+        <span class="kpi-value indigo">{{ inProgressCount }}</span>
+      </button>
+      <button type="button" class="kpi-tile" [class.active]="selectedFilter === 'urgent'" [class.alert]="urgentCount > 0" (click)="setFilter('urgent')">
+        <span class="kpi-label">Urgent</span>
+        <span class="kpi-value" [class.red]="urgentCount > 0">{{ urgentCount }}</span>
+      </button>
+      <button type="button" class="kpi-tile" (click)="goToProfile()">
+        <span class="kpi-label">Done</span>
+        <span class="kpi-value green">{{ completedCount }}</span>
+      </button>
+    </section>
+
+    <!-- KPI Skeleton while loading -->
+    <section class="kpi-grid" *ngIf="isLoading">
+      <div class="kpi-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+    </section>
+
+    <!-- Active Mission Hero Card -->
+    <section class="active-mission-card" *ngIf="!isLoading && activeMission" (click)="goToDetail(activeMission.id)">
+      <div class="mission-top-row">
+        <span class="mission-tag">
+          <span class="pulse-dot"></span>
+          {{ activeMission.status === 'on-going' ? 'ON-SITE EXECUTION' : 'EN ROUTE TO SITE' }}
+        </span>
+        <span class="mission-code">{{ formatTaskCode(activeMission.id) }}</span>
+      </div>
+
+      <h3 class="mission-title">{{ activeMission.title }}</h3>
+
+      <div class="mission-meta-list">
+        <div class="meta-row" *ngIf="activeMission.customer_name">
+          <ion-icon name="person-outline"></ion-icon>
+          <span class="cust-name">{{ activeMission.customer_name }}</span>
+          <span class="cust-phone" *ngIf="activeMission.customer_phone">&bull; {{ activeMission.customer_phone }}</span>
+        </div>
+        <div class="meta-row" *ngIf="activeMission.resolved_location || activeMission.location || activeMission.address">
+          <ion-icon name="location-outline"></ion-icon>
+          <span class="truncate-line">{{ activeMission.resolved_location || activeMission.location || activeMission.address }}</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mission-progress-wrap">
+        <div class="progress-head">
+          <span>Execution Progress</span>
+          <span class="progress-pct">{{ activeMission.progress_percent || 0 }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="activeMission.progress_percent || 0"></div>
+        </div>
+      </div>
+
+      <!-- 44px Thumb-Zone Quick Actions -->
+      <div class="mission-actions-row">
+        <button type="button" class="btn-quick btn-gps" *ngIf="activeMission.latitude && activeMission.longitude" (click)="openNavigation(activeMission, $event)">
+          <ion-icon name="navigate-outline"></ion-icon>
+          <span>Navigate</span>
+        </button>
+
+        <button type="button" class="btn-quick btn-wa" *ngIf="activeMission.customer_phone" (click)="openWhatsApp(activeMission, $event)">
+          <ion-icon name="logo-whatsapp"></ion-icon>
+          <span>WhatsApp</span>
+        </button>
+
+        <button type="button" class="btn-quick btn-open" (click)="goToDetail(activeMission.id)">
+          <span>Continue</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </button>
+      </div>
+    </section>
+
+    <!-- Standby Telemetry Strip when no active mission -->
+    <section class="standby-card" *ngIf="!isLoading && !activeMission" (click)="goToMap()">
+      <div class="standby-icon">
+        <ion-icon name="compass-outline"></ion-icon>
+      </div>
+      <div class="standby-body">
+        <span class="standby-title">{{ assignedCount > 0 ? assignedCount + ' New Work Order(s) Ready' : 'Standby for Dispatch' }}</span>
+        <span class="standby-sub">
+          {{ assignedCount > 0 ? 'Tap an assigned ticket below to accept and start navigation.' : 'Live GPS telemetry is active. Open Route Map to check signal.' }}
+        </span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="standby-chevron"></ion-icon>
+    </section>
+
+    <!-- Work Order Queue Header & Search -->
+    <section class="tl-header-section">
+      <div class="tl-title-row">
+        <div>
+          <span class="section-kicker">FIELD OPERATIONS</span>
+          <h1>Work Order Queue</h1>
+        </div>
+        <span class="task-count" *ngIf="!isLoading">{{ filteredTasks.length }} active</span>
+      </div>
+
+      <div class="search-box">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          type="text"
+          [value]="searchQuery"
+          placeholder="Search #TSK, title, customer, or address..."
+          (input)="onSearch($event)"
+        />
+        <button type="button" class="search-clear" *ngIf="searchQuery" (click)="clearSearch()" aria-label="Clear search">
+          <ion-icon name="close-circle"></ion-icon>
+        </button>
+      </div>
+    </section>
+
+    <!-- Filter Chips with Live Counts -->
+    <div class="filter-scroll">
+      <button
+        *ngFor="let f of filters"
+        type="button"
+        class="filter-chip"
+        [class.active]="selectedFilter === f.value"
+        (click)="setFilter(f.value)"
+      >
+        <span>{{ f.label }}</span>
+        <span class="chip-count">{{ getFilterCount(f.value) }}</span>
+      </button>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div *ngIf="isLoading" class="skeleton-wrap">
+      <div class="skeleton-item" *ngFor="let i of [1,2,3]"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredTasks.length === 0" class="empty-state">
+      <div class="empty-icon-wrap">
+        <ion-icon name="clipboard-outline"></ion-icon>
+      </div>
+      <h3>{{ tasks.length === 0 ? 'No active work orders' : 'No matching work orders' }}</h3>
+      <p>
+        {{ tasks.length === 0
+          ? 'You are all caught up. New jobs dispatched by NOC will appear here automatically.'
+          : 'Try clearing your search keyword or switching to All tasks.' }}
+      </p>
+      <button type="button" class="btn-empty-cta" *ngIf="selectedFilter !== 'all' || searchQuery" (click)="resetFilters()">
+        Reset Filters
+      </button>
+      <button type="button" class="btn-empty-cta" *ngIf="tasks.length === 0" (click)="manualSync()">
+        Refresh Queue
+      </button>
+    </div>
+
+    <!-- Work Order Cards -->
+    <div class="task-list" *ngIf="!isLoading && filteredTasks.length > 0">
+      <article
+        class="task-card"
+        *ngFor="let task of filteredTasks; trackBy: trackByTaskId"
+        (click)="goToDetail(task.id)"
+      >
+        <div class="priority-bar" [style.background]="getPriorityColor(task.priority)"></div>
+
+        <div class="card-body">
+          <!-- Top Meta Row: Code + Priority + Status -->
+          <div class="card-badges">
+            <div class="badge-left">
+              <span class="code-chip">{{ formatTaskCode(task.id) }}</span>
+              <span class="prio-pill" [ngClass]="'prio-' + (task.priority || 'low')">
+                {{ (task.priority || 'low') | uppercase }}
+              </span>
+            </div>
+            <span class="status-tag" [ngClass]="'st-' + task.status">
+              {{ getStatusLabel(task.status) }}
+            </span>
+          </div>
+
+          <h4 class="task-title">{{ task.title }}</h4>
+
+          <div class="card-meta">
+            <span class="meta-item" *ngIf="task.customer_name">
+              <ion-icon name="person-outline"></ion-icon>
+              <span>{{ task.customer_name }}</span>
+            </span>
+            <span class="meta-item" *ngIf="task.scheduled_at">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ task.scheduled_at | date:'dd MMM, HH:mm' }}</span>
+            </span>
+          </div>
+
+          <div class="card-address" *ngIf="task.resolved_location || task.location || task.address">
             <ion-icon name="location-outline"></ion-icon>
-            {{ task.location }}
-          </span>
-          <span class="meta-item" *ngIf="task.scheduled_at">
-            <ion-icon name="calendar-outline"></ion-icon>
-            {{ task.scheduled_at | date:'dd MMM yyyy' }}
-          </span>
-        </div>
+            <span>{{ task.resolved_location || task.location || task.address }}</span>
+          </div>
 
-        <div class="card-desc" *ngIf="task.description">
-          {{ task.description }}
+          <!-- Card Footer: Progress + Evidence/BOM Counters + Quick Action Icons -->
+          <div class="card-footer">
+            <div class="footer-stats">
+              <div class="mini-progress" *ngIf="(task.progress_percent || 0) > 0">
+                <div class="mini-track">
+                  <div class="mini-fill" [style.width.%]="task.progress_percent || 0"></div>
+                </div>
+                <span class="mini-pct">{{ task.progress_percent }}%</span>
+              </div>
+              <span class="stat-pill" *ngIf="(task.proof_of_work_count || 0) > 0">
+                <ion-icon name="images-outline"></ion-icon>{{ task.proof_of_work_count }}
+              </span>
+              <span class="stat-pill" *ngIf="(task.materials_count || 0) > 0">
+                <ion-icon name="cube-outline"></ion-icon>{{ task.materials_count }}
+              </span>
+            </div>
+
+            <div class="footer-quick-btns">
+              <button
+                type="button"
+                class="icon-mini"
+                *ngIf="task.customer_phone"
+                (click)="callCustomer(task, $event)"
+                title="Call Customer"
+                aria-label="Call Customer"
+              >
+                <ion-icon name="call-outline"></ion-icon>
+              </button>
+              <button
+                type="button"
+                class="icon-mini wa"
+                *ngIf="task.customer_phone"
+                (click)="openWhatsApp(task, $event)"
+                title="WhatsApp Customer"
+                aria-label="WhatsApp Customer"
+              >
+                <ion-icon name="logo-whatsapp"></ion-icon>
+              </button>
+              <button
+                type="button"
+                class="icon-mini nav"
+                *ngIf="task.latitude && task.longitude"
+                (click)="openNavigation(task, $event)"
+                title="Navigate GPS"
+                aria-label="Navigate GPS"
+              >
+                <ion-icon name="navigate-outline"></ion-icon>
+              </button>
+              <span class="open-chevron">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="card-arrow">
-        <ion-icon name="chevron-forward-outline"></ion-icon>
-      </div>
+      </article>
     </div>
-  </div>
 
-  <div class="footer-space"></div>
+    <div class="footer-space"></div>
+  </div>
 </ion-content>
 
 <app-tab-bar activeTab="tasks"></app-tab-bar>

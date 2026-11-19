@@ -3,16 +3,24 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 68px;
-  background: #FFFFFF;
+  min-height: 68px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
   border-top: 1px solid #E2E8F0;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  z-index: 9999;
+  box-shadow: 0 -2px 16px rgba(15, 23, 42, 0.05);
+}
+
+.tab-bar-inner {
+  width: 100%;
+  max-width: 600px;
+  height: 68px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 4px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
-  z-index: 9999;
-  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .tab-item {

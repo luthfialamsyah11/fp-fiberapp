@@ -1446,4 +1446,65 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertSee('NUSANTARA FIBER BACKBONE')
             ->assertSee('+62-21-5009-888');
     }
+
+    public function test_admin_dashboard_renders_live_analytics_sla_filter_and_unified_map_controls(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => 'Raka Fiber', 'email' => 'raka@fsm.com']);
+
+        TechnicianLocation::create([
+            'technician_id' => $tech->id,
+            'latitude'      => -6.2100,
+            'longitude'     => 106.8200,
+            'accuracy_m'    => 12,
+            'captured_at'   => now(),
+        ]);
+
+        // Seed 1 SLA-breached urgent task + 1 completed today task + 1 low-stock material
+        $slaTask = Task::create([
+            'title'         => 'Backbone Cut Urgent',
+            'customer_name' => 'PT Telko Mandiri',
+            'address'       => 'Jl. Gatot Subroto',
+            'status'        => 'pending',
+            'priority'      => 'high',
+        ]);
+        $slaTask->forceFill(['created_at' => now()->subHours(5)])->save();
+
+        Task::create([
+            'title'         => 'ONT Replacement Done',
+            'customer_name' => 'Budi Santoso',
+            'address'       => 'Jl. Kemang 8',
+            'technician_id' => $tech->id,
+            'status'        => 'completed',
+            'priority'      => 'medium',
+            'completed_at'  => now(),
+        ]);
+
+        InventoryItem::create([
+            'code'       => 'MAT-LOW-01',
+            'name'       => 'Patchcord SC/APC',
+            'unit'       => 'pcs',
+            'stock'      => 3,
+            'unit_price' => 15000,
+            'is_active'  => true,
+        ]);
+
+        $res = $this->actingAs($admin)->get('/dashboard')->assertOk();
+        $res->assertSee('NOC Field Operations Command Center')
+            ->assertSee('7-Day Work Order Throughput')
+            ->assertSee('Work Order Pipeline')
+            ->assertSee('Live Fleet Telemetry Map')
+            ->assertSee('1 SLA Breached')
+            ->assertSee('1 Low-Stock Materials')
+            ->assertSee('+1 closed today')
+            ->assertSee('focusTechOnMap(' . $tech->id . ')', false)
+            ->assertSee('id="btn-map-sync"', false)
+            ->assertSee('id="dash-task-search"', false)
+            ->assertDontSee("createMarkerIcon('gold')", false);
+
+        // Verify all server filter tabs return 200 OK including the new `sla` filter
+        foreach (['all', 'pending', 'ongoing', 'urgent', 'sla', 'completed'] as $filterTab) {
+            $this->actingAs($admin)->get('/dashboard?filter=' . $filterTab)->assertOk();
+        }
+    }
 }

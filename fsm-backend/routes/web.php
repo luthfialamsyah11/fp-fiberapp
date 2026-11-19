@@ -42,6 +42,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/live-pulse', [DashboardController::class, 'livePulse'])->name('admin.live_pulse');
 
     // Technicians
     Route::resource('technicians', TechnicianController::class, [

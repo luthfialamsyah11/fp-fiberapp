@@ -31,6 +31,9 @@ class ProgressController extends Controller
             'progress_percent' => $request->progress_percent,
         ]);
 
+        // Bump parent task updated_at so Admin & APK sync signals detect the progress update immediately
+        $task->touch();
+
         return response()->json(['data' => $progress], 201);
     }
 }

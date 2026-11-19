@@ -112,7 +112,7 @@ export class ApiService {
     if (await this.isDemoMode()) {
       return { data: this.demoUser, config: this.clientConfig };
     }
-    const res: any = await firstValueFrom(this.http.get(`${this.baseUrl}/me`));
+    const res: any = await firstValueFrom(this.http.get(`${this.baseUrl}/me?_ts=${Date.now()}`, this.noCacheHeaders()));
     if (res?.config) {
       this.applyClientConfig(res.config);
     }
@@ -243,7 +243,7 @@ export class ApiService {
     if (await this.isDemoMode()) {
       return { data: this.demoTasks.filter(t => t.status === 'completed') };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/history`));
+    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/history?_ts=${Date.now()}`, this.noCacheHeaders()));
   }
 
   // GPS Telemetry (Single & Offline Batch Queue Flush)
@@ -307,7 +307,7 @@ export class ApiService {
       const task = this.demoTasks.find(t => t.id === Number(taskId));
       return { data: task?.proof_of_work || [] };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/proof`));
+    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/proof?_ts=${Date.now()}`, this.noCacheHeaders()));
   }
 
   // Inventory & Materials (BOM)
@@ -315,7 +315,7 @@ export class ApiService {
     if (await this.isDemoMode()) {
       return { data: this.demoInventory };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/inventory`));
+    return firstValueFrom(this.http.get(`${this.baseUrl}/inventory?_ts=${Date.now()}`, this.noCacheHeaders()));
   }
 
   async getTaskMaterials(taskId: number): Promise<any> {
@@ -325,7 +325,7 @@ export class ApiService {
       const totalCost = materials.reduce((sum: number, m: any) => sum + ((m.inventory_item?.unit_price || 0) * m.quantity), 0);
       return { data: materials, total_cost: totalCost };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/materials`));
+    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/materials?_ts=${Date.now()}`, this.noCacheHeaders()));
   }
 
   async addTaskMaterial(

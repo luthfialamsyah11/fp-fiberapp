@@ -7,6 +7,7 @@ use App\Models\InventoryItem;
 use App\Models\ProgressUpdate;
 use App\Models\ProofOfWork;
 use App\Models\Task;
+use App\Models\TaskMaterial;
 use App\Models\User;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
@@ -228,5 +229,168 @@ class DashboardController extends Controller
             'maxTrendValue',
             'statusBreakdown'
         ));
+    }
+
+    /**
+     * Global Admin Portal Live Sync Pulse (GET /live-pulse).
+     * Polled every 4 seconds by all Admin pages to detect field APK mutations
+     * (task completion, proof upload, BOM inventory deduction, progress log, status transition)
+     * and trigger instant in-place DOM updates + live NOC toast alerts.
+     */
+    public function livePulse()
+    {
+        $taskStats = Task::selectRaw("
+            COUNT(*) as total_tasks,
+            COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
+            COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+            COUNT(CASE WHEN status = 'assigned' THEN 1 END) as assigned,
+            COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted,
+            COUNT(CASE WHEN status = 'on-going' THEN 1 END) as ongoing,
+            COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected,
+            COUNT(CASE WHEN priority = 'high' AND status NOT IN ('completed', 'rejected') THEN 1 END) as urgent_active,
+            COALESCE(MAX(id), 0) as max_task_id,
+            MAX(updated_at) as max_task_updated
+        ")->first();
+
+        $proofAgg = ProofOfWork::selectRaw("COUNT(*) as total_proofs, COALESCE(MAX(id), 0) as max_proof_id, MAX(created_at) as max_proof_created")->first();
+        $progAgg = ProgressUpdate::selectRaw("COUNT(*) as total_progress, COALESCE(MAX(id), 0) as max_prog_id, MAX(created_at) as max_prog_created")->first();
+        $matAgg = TaskMaterial::selectRaw("COUNT(*) as total_materials, COALESCE(MAX(id), 0) as max_mat_id, MAX(created_at) as max_mat_created")->first();
+        $invAgg = InventoryItem::selectRaw("
+            COUNT(*) as total_items,
+            COALESCE(SUM(stock), 0) as total_stock,
+            COUNT(CASE WHEN is_active = 1 AND stock <= 5 THEN 1 END) as low_stock,
+            MAX(updated_at) as max_inv_updated
+        ")->first();
+
+        $technicians = User::technicians()->with('latestLocation')->get();
+        $activeTechsCount = $technicians->where('is_active', true)->count();
+        $onlineTechsCount = $technicians->filter(fn ($t) => $t->is_active && $t->isEffectivelyOnline())->count();
+
+        $tasksScope = sha1(implode('|', [
+            (int) ($taskStats->total_tasks ?? 0),
+            (int) ($taskStats->completed ?? 0),
+            (int) ($taskStats->pending ?? 0),
+            (int) ($taskStats->assigned ?? 0),
+            (int) ($taskStats->accepted ?? 0),
+            (int) ($taskStats->ongoing ?? 0),
+            (int) ($taskStats->rejected ?? 0),
+            (int) ($taskStats->max_task_id ?? 0),
+            (string) ($taskStats->max_task_updated ?? ''),
+            (int) ($progAgg->total_progress ?? 0),
+            (int) ($progAgg->max_prog_id ?? 0),
+        ]));
+
+        $proofsScope = sha1(implode('|', [
+            (int) ($proofAgg->total_proofs ?? 0),
+            (int) ($proofAgg->max_proof_id ?? 0),
+            (string) ($proofAgg->max_proof_created ?? ''),
+        ]));
+
+        $inventoryScope = sha1(implode('|', [
+            (int) ($invAgg->total_items ?? 0),
+            (float) ($invAgg->total_stock ?? 0),
+            (int) ($invAgg->low_stock ?? 0),
+            (string) ($invAgg->max_inv_updated ?? ''),
+            (int) ($matAgg->total_materials ?? 0),
+            (int) ($matAgg->max_mat_id ?? 0),
+        ]));
+
+        $techScope = sha1("{$activeTechsCount}|{$onlineTechsCount}");
+        $globalVersion = sha1("{$tasksScope}|{$proofsScope}|{$inventoryScope}|{$techScope}");
+
+        // Identify the single most recent operational event for live toast notification
+        $candidates = [];
+
+        $latestProof = ProofOfWork::with('task')->latest('id')->first();
+        if ($latestProof && $latestProof->created_at) {
+            $code = $latestProof->task ? '#TSK-' . str_pad($latestProof->task->id, 4, '0', STR_PAD_LEFT) : 'Task';
+            $slotLabel = strtoupper((string) ($latestProof->slot ?: 'PROOF'));
+            $candidates[] = [
+                'ts'       => $latestProof->created_at->timestamp,
+                'key'      => 'proof-' . $latestProof->id,
+                'type'     => 'proof',
+                'title'    => "New Proof of Work ({$slotLabel}) uploaded on {$code}",
+                'subtitle' => $latestProof->description ?: ($latestProof->task->title ?? 'Photographic evidence attached'),
+                'url'      => $latestProof->task ? route('admin.tasks.show', $latestProof->task->id) : route('admin.proofs'),
+                'time_ago' => $latestProof->created_at->diffForHumans(),
+            ];
+        }
+
+        $latestCompleted = Task::with('technician')->where('status', 'completed')->whereNotNull('completed_at')->latest('completed_at')->first();
+        if ($latestCompleted && $latestCompleted->completed_at) {
+            $code = '#TSK-' . str_pad($latestCompleted->id, 4, '0', STR_PAD_LEFT);
+            $techName = $latestCompleted->technician?->name ?? 'Technician';
+            $candidates[] = [
+                'ts'       => $latestCompleted->completed_at->timestamp,
+                'key'      => 'completed-' . $latestCompleted->id . '-' . $latestCompleted->completed_at->timestamp,
+                'type'     => 'completed',
+                'title'    => "Work Order {$code} Completed by {$techName}",
+                'subtitle' => $latestCompleted->title . ' — SHA-256 BAST sealed',
+                'url'      => route('admin.tasks.show', $latestCompleted->id),
+                'time_ago' => $latestCompleted->completed_at->diffForHumans(),
+            ];
+        }
+
+        $latestMat = TaskMaterial::with(['task', 'inventoryItem'])->latest('id')->first();
+        if ($latestMat && $latestMat->created_at) {
+            $code = $latestMat->task ? '#TSK-' . str_pad($latestMat->task->id, 4, '0', STR_PAD_LEFT) : 'Task';
+            $itemName = $latestMat->inventoryItem?->name ?? 'Material';
+            $unit = $latestMat->inventoryItem?->unit ?? 'unit';
+            $candidates[] = [
+                'ts'       => $latestMat->created_at->timestamp,
+                'key'      => 'mat-' . $latestMat->id,
+                'type'     => 'inventory',
+                'title'    => "BOM Material Deducted on {$code}",
+                'subtitle' => "{$latestMat->quantity} {$unit} of {$itemName} recorded",
+                'url'      => $latestMat->task ? route('admin.tasks.show', $latestMat->task->id) : route('admin.inventory.index'),
+                'time_ago' => $latestMat->created_at->diffForHumans(),
+            ];
+        }
+
+        $latestProg = ProgressUpdate::with(['task', 'user'])->latest('id')->first();
+        if ($latestProg && $latestProg->created_at) {
+            $code = $latestProg->task ? '#TSK-' . str_pad($latestProg->task->id, 4, '0', STR_PAD_LEFT) : 'Task';
+            $actor = $latestProg->user?->name ?? 'Technician';
+            $candidates[] = [
+                'ts'       => $latestProg->created_at->timestamp,
+                'key'      => 'prog-' . $latestProg->id,
+                'type'     => 'progress',
+                'title'    => "{$actor} updated {$code} ({$latestProg->progress_percent}%)",
+                'subtitle' => \Illuminate\Support\Str::limit((string) $latestProg->note, 70),
+                'url'      => $latestProg->task ? route('admin.tasks.show', $latestProg->task->id) : route('admin.tasks.index'),
+                'time_ago' => $latestProg->created_at->diffForHumans(),
+            ];
+        }
+
+        usort($candidates, fn ($a, $b) => $b['ts'] <=> $a['ts']);
+        $latestEvent = $candidates[0] ?? null;
+
+        return response()->json([
+            'version'      => $globalVersion,
+            'scopes'       => [
+                'tasks'       => $tasksScope,
+                'proofs'      => $proofsScope,
+                'inventory'   => $inventoryScope,
+                'technicians' => $techScope,
+            ],
+            'counts'       => [
+                'total_tasks'        => (int) ($taskStats->total_tasks ?? 0),
+                'pending'            => (int) ($taskStats->pending ?? 0),
+                'assigned'           => (int) ($taskStats->assigned ?? 0),
+                'accepted'           => (int) ($taskStats->accepted ?? 0),
+                'on_going'           => (int) ($taskStats->ongoing ?? 0),
+                'completed'          => (int) ($taskStats->completed ?? 0),
+                'rejected'           => (int) ($taskStats->rejected ?? 0),
+                'urgent_active'      => (int) ($taskStats->urgent_active ?? 0),
+                'total_proofs'       => (int) ($proofAgg->total_proofs ?? 0),
+                'low_stock_items'    => (int) ($invAgg->low_stock ?? 0),
+                'online_technicians' => $onlineTechsCount,
+                'active_technicians' => $activeTechsCount,
+            ],
+            'latest_event' => $latestEvent,
+            'server_time'  => now()->format('H:i:s'),
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 }

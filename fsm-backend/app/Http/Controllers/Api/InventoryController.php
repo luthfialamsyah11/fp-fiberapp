@@ -23,7 +23,9 @@ class InventoryController extends Controller
                 return $arr;
             });
 
-        return response()->json(['data' => $items]);
+        return response()->json(['data' => $items])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function adminIndex(Request $request)
@@ -38,7 +40,9 @@ class InventoryController extends Controller
             ->orderBy('name')
             ->get();
 
-        return response()->json(['data' => $items]);
+        return response()->json(['data' => $items])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function store(Request $request)

@@ -27,7 +27,9 @@ class TaskMaterialController extends Controller
             'data'                 => $materials,
             'total_cost'           => $totalCost,
             'formatted_total_cost' => SettingService::formatCurrency($totalCost),
-        ]);
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function store(Request $request, Task $task)
@@ -75,6 +77,7 @@ class TaskMaterialController extends Controller
             ]);
 
             $taskMaterial->load('inventoryItem');
+            $task->touch();
 
             return response()->json([
                 'message'       => 'Material consumption recorded and warehouse inventory deducted.',
@@ -105,12 +108,13 @@ class TaskMaterialController extends Controller
             return response()->json(['message' => 'Material record does not belong to this work order.'], 422);
         }
 
-        DB::transaction(function () use ($material) {
+        DB::transaction(function () use ($task, $material) {
             $item = InventoryItem::lockForUpdate()->find($material->inventory_item_id);
             if ($item) {
                 $item->increment('stock', $material->quantity);
             }
             $material->delete();
+            $task->touch();
         });
 
         return response()->json(['message' => 'Material entry removed and warehouse stock restored.']);

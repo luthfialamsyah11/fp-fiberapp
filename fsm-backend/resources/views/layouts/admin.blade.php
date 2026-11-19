@@ -276,7 +276,7 @@
                         <div class="px-4 py-3">
                             <p class="text-xs font-bold text-slate-900">Recent Notifications</p>
                         </div>
-                        <div class="py-1 max-h-64 overflow-y-auto">
+                        <div id="notification-list-container" class="py-1 max-h-64 overflow-y-auto">
                             @if(isset($notifications) && count($notifications) > 0)
                                 @foreach($notifications as $notif)
                                     <a href="{{ $notif['url'] }}" class="block px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
@@ -286,7 +286,7 @@
                                     </a>
                                 @endforeach
                             @else
-                                <div class="px-4 py-6 text-center text-slate-400 text-xs">
+                                <div id="notification-empty-state" class="px-4 py-6 text-center text-slate-400 text-xs">
                                     <ion-icon name="notifications-off-outline" class="text-2xl mb-1 text-slate-300"></ion-icon>
                                     <p>No new notifications.</p>
                                 </div>
@@ -311,7 +311,7 @@
         </header>
 
         <!-- Main Viewport Scroll Container -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-fsmBg p-4 sm:p-6">
+        <main id="admin-main-content" class="flex-1 overflow-x-hidden overflow-y-auto bg-fsmBg p-4 sm:p-6">
             
             <!-- Session Messages -->
             @if(session('success'))
@@ -328,9 +328,14 @@
                 </div>
             @endif
 
-            @yield('content')
+            <div id="admin-live-page-root">
+                @yield('content')
+            </div>
         </main>
     </div>
+
+    <!-- Global Live Field Update Toast Container (APK -> Admin Instant Sync) -->
+    <div id="admin-live-toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
 
     <!-- Global Logout Confirmation Modal -->
     <div id="admin-logout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -450,6 +455,189 @@
                     el.addEventListener('blur', hideTip);
                 });
             }
+
+            // ─── Global Bi-Directional Admin Live Pulse Engine (APK -> Admin Instant Sync) ───
+            var livePulseUrl = @json(route('admin.live_pulse'));
+            var toastContainer = document.getElementById('admin-live-toast-container');
+            var notifListContainer = document.getElementById('notification-list-container');
+            var livePageRoot = document.getElementById('admin-live-page-root');
+            var mainScrollContainer = document.getElementById('admin-main-content');
+            var lastGlobalVersion = null;
+            var lastEventKey = null;
+            var isPollingPulse = false;
+
+            function escHtmlAdmin(str) {
+                if (!str) return '';
+                var d = document.createElement('div');
+                d.textContent = String(str);
+                return d.innerHTML;
+            }
+
+            function showAdminLiveToast(evt) {
+                if (!toastContainer || !evt) return;
+                var iconMap = {
+                    completed: { icon: 'checkmark-done-circle', bg: 'bg-emerald-600', ring: 'border-emerald-500/40' },
+                    proof:     { icon: 'camera',                bg: 'bg-amber-500',   ring: 'border-amber-400/40' },
+                    inventory: { icon: 'cube',                  bg: 'bg-violet-600',  ring: 'border-violet-500/40' },
+                    progress:  { icon: 'pulse',                 bg: 'bg-blue-600',    ring: 'border-blue-500/40' }
+                };
+                var style = iconMap[evt.type] || iconMap.progress;
+
+                var card = document.createElement('div');
+                card.className = 'pointer-events-auto bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-3.5 shadow-2xl border ' + style.ring + ' flex items-start gap-3 transition-all duration-200';
+                card.innerHTML =
+                    '<div class="w-9 h-9 rounded-xl ' + style.bg + ' text-white flex items-center justify-center flex-shrink-0 mt-0.5">'
+                    + '<ion-icon name="' + style.icon + '" class="text-lg"></ion-icon>'
+                    + '</div>'
+                    + '<div class="flex-1 min-w-0">'
+                    + '<div class="flex items-center justify-between gap-2">'
+                    + '<span class="text-[9px] font-extrabold uppercase tracking-wider text-blue-300">Live Field Sync</span>'
+                    + '<span class="text-[10px] text-slate-400">Just now</span>'
+                    + '</div>'
+                    + '<p class="text-xs font-bold text-white truncate mt-0.5">' + escHtmlAdmin(evt.title) + '</p>'
+                    + '<p class="text-[11px] text-slate-300 truncate mt-0.5">' + escHtmlAdmin(evt.subtitle || '') + '</p>'
+                    + (evt.url ? '<a href="' + escHtmlAdmin(evt.url) + '" class="inline-flex items-center gap-1 mt-1.5 text-[11px] font-bold text-blue-400 hover:text-blue-300">Inspect Update &rarr;</a>' : '')
+                    + '</div>'
+                    + '<button type="button" class="text-slate-400 hover:text-white p-1 cursor-pointer" aria-label="Close">'
+                    + '<ion-icon name="close" class="text-sm"></ion-icon>'
+                    + '</button>';
+
+                var closeBtn = card.querySelector('button');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        card.remove();
+                    });
+                }
+
+                toastContainer.prepend(card);
+                setTimeout(function() {
+                    if (card.parentNode) card.remove();
+                }, 6500);
+
+                // Prepend to topbar Notification Bell dropdown list
+                if (notifListContainer) {
+                    var emptyEl = document.getElementById('notification-empty-state');
+                    if (emptyEl) emptyEl.remove();
+                    var item = document.createElement('a');
+                    item.href = evt.url || '#';
+                    item.className = 'block px-4 py-3 bg-blue-50/40 hover:bg-slate-50 transition-colors border-b border-slate-100';
+                    item.innerHTML =
+                        '<p class="text-xs font-bold text-slate-900">' + escHtmlAdmin(evt.title) + '</p>'
+                        + '<p class="text-[10px] text-slate-600 mt-0.5">' + escHtmlAdmin(evt.subtitle || '') + '</p>'
+                        + '<p class="text-[9px] text-blue-600 font-semibold mt-0.5">Live &bull; Just now</p>';
+                    notifListContainer.prepend(item);
+                }
+            }
+
+            function canSafelyHotRefreshListPage() {
+                var path = window.location.pathname || '';
+                // Skip form-editor pages, settings, guide, and pages with their own dedicated Leaflet/live timers
+                if (
+                    path.endsWith('/create') ||
+                    path.endsWith('/edit') ||
+                    path.includes('/settings') ||
+                    path.includes('/guide') ||
+                    path.includes('/tracking') ||
+                    /\/tasks\/\d+$/.test(path)
+                ) {
+                    return false;
+                }
+                // Do not interrupt if any modal is currently open
+                var openModals = document.querySelectorAll('.fixed.inset-0:not(.hidden)');
+                if (openModals.length > 0) return false;
+
+                // Do not interrupt if the admin is typing or interacting with an input/select/textarea
+                var active = document.activeElement;
+                if (active && (['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName) || active.isContentEditable)) {
+                    return false;
+                }
+                return true;
+            }
+
+            async function hotRefreshCurrentAdminPage() {
+                if (!canSafelyHotRefreshListPage() || !livePageRoot) return;
+                var path = window.location.pathname || '';
+
+                try {
+                    var scrollTop = mainScrollContainer ? mainScrollContainer.scrollTop : 0;
+                    var resp = await fetch(window.location.href, {
+                        headers: { 'Accept': 'text/html', 'Cache-Control': 'no-cache' }
+                    });
+                    if (!resp.ok) return;
+                    var html = await resp.text();
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var nextRoot = doc.getElementById('admin-live-page-root');
+                    if (!nextRoot || !canSafelyHotRefreshListPage()) return;
+
+                    // On /dashboard, preserve the live Leaflet #dashboard-map instance while hot-swapping KPIs, charts, roster, timeline & table
+                    if (path.endsWith('/dashboard') && document.getElementById('dashboard-map')) {
+                        var curSections = livePageRoot.querySelectorAll('section');
+                        var nextSections = nextRoot.querySelectorAll('section');
+                        curSections.forEach(function(sec, idx) {
+                            if (!sec.querySelector('#dashboard-map') && nextSections[idx]) {
+                                sec.innerHTML = nextSections[idx].innerHTML;
+                            }
+                        });
+                        ['tab-content-roster', 'tab-content-timeline'].forEach(function(id) {
+                            var curEl = document.getElementById(id);
+                            var nextEl = doc.getElementById(id);
+                            if (curEl && nextEl) curEl.innerHTML = nextEl.innerHTML;
+                        });
+                        document.getElementById('btn-map-sync')?.click();
+                        return;
+                    }
+
+                    livePageRoot.innerHTML = nextRoot.innerHTML;
+                    if (mainScrollContainer) {
+                        mainScrollContainer.scrollTop = scrollTop;
+                    }
+                    // Re-bind backdrop click-to-close on swapped modal overlays
+                    livePageRoot.querySelectorAll('.fixed.inset-0').forEach(function(modal) {
+                        modal.addEventListener('click', function(e) {
+                            if (e.target === modal) modal.classList.add('hidden');
+                        });
+                    });
+                } catch (e) {}
+            }
+
+            async function checkAdminLivePulse() {
+                if (document.hidden || isPollingPulse) return;
+                isPollingPulse = true;
+                try {
+                    var resp = await fetch(livePulseUrl + '?_ts=' + Date.now(), {
+                        headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+                    });
+                    if (!resp.ok) return;
+                    var data = await resp.json();
+                    if (!data || !data.version) return;
+
+                    if (lastGlobalVersion === null) {
+                        lastGlobalVersion = data.version;
+                        lastEventKey = data.latest_event ? data.latest_event.key : null;
+                        return;
+                    }
+
+                    if (data.version !== lastGlobalVersion) {
+                        lastGlobalVersion = data.version;
+                        if (data.latest_event && data.latest_event.key !== lastEventKey) {
+                            lastEventKey = data.latest_event.key;
+                            showAdminLiveToast(data.latest_event);
+                        }
+                        await hotRefreshCurrentAdminPage();
+                    }
+                } catch (e) {
+                } finally {
+                    isPollingPulse = false;
+                }
+            }
+
+            checkAdminLivePulse();
+            setInterval(checkAdminLivePulse, 4000);
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) checkAdminLivePulse();
+            });
+            window.addEventListener('focus', checkAdminLivePulse);
         });
     </script>
 </body>

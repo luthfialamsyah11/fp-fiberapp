@@ -425,6 +425,7 @@ class TaskController extends Controller
             'note'             => '[NOC Dispatcher] ' . strip_tags(trim($validated['note'])),
             'progress_percent' => $percent,
         ]);
+        $task->touch();
 
         return back()->with('success', 'Dispatcher note posted to work order timeline.');
     }
@@ -458,6 +459,7 @@ class TaskController extends Controller
                 'serial_number'     => isset($validated['serial_number']) ? strip_tags(trim($validated['serial_number'])) : null,
                 'notes'             => isset($validated['notes']) ? strip_tags(trim($validated['notes'])) : null,
             ]);
+            $task->touch();
         });
 
         if ($errorMsg) {
@@ -477,12 +479,13 @@ class TaskController extends Controller
             abort(404);
         }
 
-        DB::transaction(function () use ($material) {
+        DB::transaction(function () use ($task, $material) {
             $item = InventoryItem::lockForUpdate()->find($material->inventory_item_id);
             if ($item) {
                 $item->increment('stock', $material->quantity);
             }
             $material->delete();
+            $task->touch();
         });
 
         return back()->with('success', 'Material removed and stock restored to warehouse.');
@@ -490,7 +493,8 @@ class TaskController extends Controller
 
     public function liveStatus(Task $task)
     {
-        $task->load(['technician.latestLocation', 'latestProgressUpdate']);
+        $task->load(['technician.latestLocation', 'latestProgressUpdate'])
+            ->loadCount(['proofs', 'materials', 'progressUpdates']);
         $tech = $task->technician;
         $loc = $tech?->latestLocation;
 
@@ -508,14 +512,37 @@ class TaskController extends Controller
         }
 
         $capturedAt = $loc ? ($loc->captured_at ?? $loc->created_at) : null;
+        $proofsCount = (int) ($task->proofs_count ?? 0);
+        $materialsCount = (int) ($task->materials_count ?? 0);
+        $progressUpdatesCount = (int) ($task->progress_updates_count ?? 0);
+        $hasSignature = !empty($task->customer_signature);
+        $bastHash = (string) ($task->bast_hash ?? '');
+        $stateSignature = sha1(implode('|', [
+            $task->status,
+            (int) $task->progress_percent,
+            $proofsCount,
+            $materialsCount,
+            $progressUpdatesCount,
+            $hasSignature ? '1' : '0',
+            $bastHash,
+            (int) ($task->technician_id ?? 0),
+            (string) ($task->updated_at?->toIso8601String() ?? ''),
+        ]));
 
         return response()->json([
-            'task_id'          => $task->id,
-            'status'           => $task->status,
-            'status_label'     => $task->status_label,
-            'progress_percent' => $task->progress_percent,
-            'server_time'      => now()->format('H:i:s'),
-            'technician'       => $tech ? [
+            'task_id'                => $task->id,
+            'status'                 => $task->status,
+            'status_label'           => $task->status_label,
+            'progress_percent'       => (int) $task->progress_percent,
+            'proofs_count'           => $proofsCount,
+            'materials_count'        => $materialsCount,
+            'progress_updates_count' => $progressUpdatesCount,
+            'has_signature'          => $hasSignature,
+            'bast_hash'              => $bastHash ?: null,
+            'state_signature'        => $stateSignature,
+            'updated_at'             => $task->updated_at?->toIso8601String(),
+            'server_time'            => now()->format('H:i:s'),
+            'technician'             => $tech ? [
                 'id'              => $tech->id,
                 'name'            => $tech->name,
                 'is_online'       => $tech->isEffectivelyOnline(),
@@ -527,7 +554,9 @@ class TaskController extends Controller
                 'distance_km'     => $distanceMeters !== null ? round($distanceMeters / 1000, 2) : null,
                 'eta_minutes'     => $etaMinutes,
             ] : null,
-        ]);
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function requestRework(Request $request, Task $task)

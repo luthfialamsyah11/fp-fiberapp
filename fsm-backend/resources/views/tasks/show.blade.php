@@ -792,45 +792,96 @@
             upsertTechPosition(taskMeta.tech_lat, taskMeta.tech_lng, taskMeta.tech_name, taskMeta.tech_updated, true);
         }
 
-        // Live auto-polling for active tasks
-        if (['assigned', 'accepted', 'on-going'].includes(taskMeta.status)) {
-            const pollMs = Math.max(8000, Number(pollIntervalSec) * 1000);
-            const liveTimer = setInterval(async () => {
-                if (document.hidden) return;
-                try {
-                    const resp = await fetch(liveStatusUrl, { headers: { 'Accept': 'application/json' } });
-                    if (!resp.ok) return;
-                    const data = await resp.json();
-
-                    const pill = document.getElementById('live-status-pill');
-                    if (pill && data.status_label) pill.textContent = data.status_label;
-                    const progLabel = document.getElementById('live-progress-label');
-                    if (progLabel) progLabel.textContent = `Status: ${data.progress_percent}% Completed`;
-                    const progBar = document.getElementById('live-progress-bar');
-                    if (progBar) progBar.style.width = `${data.progress_percent}%`;
-
-                    if (data.technician) {
-                        upsertTechPosition(data.technician.latitude, data.technician.longitude, data.technician.name, data.technician.last_seen, false);
-                        const etaEl = document.getElementById('live-distance-eta');
-                        if (etaEl && data.technician.distance_km !== null) {
-                            etaEl.textContent = `${data.technician.distance_km} km away • ETA ~${data.technician.eta_minutes} min`;
-                        }
-                        const presEl = document.getElementById('live-tech-presence');
-                        if (presEl) {
-                            presEl.innerHTML = data.technician.is_online
-                                ? '<span class="text-emerald-600 flex items-center gap-1 font-semibold"><span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span> Tech Online</span>'
-                                : `<span class="text-slate-400">Last ping ${escHtml(data.technician.last_seen)}</span>`;
-                        }
-                    }
-                    if (data.status === 'completed') clearInterval(liveTimer);
-                } catch (e) {}
-            }, pollMs);
-
-            window.addEventListener('beforeunload', () => clearInterval(liveTimer));
-        }
+        window.fsmUpdateTaskMapTechPosition = upsertTechPosition;
     });
 </script>
 @endif
+
+@php
+    $liveStatusEndpoint = route('admin.tasks.live_status', $task->id);
+@endphp
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const liveStatusUrl = @json($liveStatusEndpoint);
+        let initialSignature = null;
+        let isCheckingLive = false;
+
+        function escHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+        }
+
+        function isUserBusyOnTaskShow() {
+            const active = document.activeElement;
+            if (active && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)) {
+                return true;
+            }
+            const openModals = document.querySelectorAll('#proof-lightbox:not(.hidden), #rework-modal:not(.hidden), #remove-bom-modal:not(.hidden)');
+            return openModals.length > 0;
+        }
+
+        async function pollTaskLiveStatus() {
+            if (document.hidden || isCheckingLive) return;
+            isCheckingLive = true;
+            try {
+                const resp = await fetch(liveStatusUrl + '?_ts=' + Date.now(), {
+                    headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+                });
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                const pill = document.getElementById('live-status-pill');
+                if (pill && data.status_label) pill.textContent = data.status_label;
+                const progLabel = document.getElementById('live-progress-label');
+                if (progLabel) progLabel.textContent = `Status: ${data.progress_percent}% Completed`;
+                const progBar = document.getElementById('live-progress-bar');
+                if (progBar) progBar.style.width = `${data.progress_percent}%`;
+
+                if (data.technician) {
+                    if (typeof window.fsmUpdateTaskMapTechPosition === 'function') {
+                        window.fsmUpdateTaskMapTechPosition(
+                            data.technician.latitude,
+                            data.technician.longitude,
+                            data.technician.name,
+                            data.technician.last_seen,
+                            false
+                        );
+                    }
+                    const etaEl = document.getElementById('live-distance-eta');
+                    if (etaEl && data.technician.distance_km !== null) {
+                        etaEl.textContent = `${data.technician.distance_km} km away • ETA ~${data.technician.eta_minutes} min`;
+                    }
+                    const presEl = document.getElementById('live-tech-presence');
+                    if (presEl) {
+                        presEl.innerHTML = data.technician.is_online
+                            ? '<span class="text-emerald-600 flex items-center gap-1 font-semibold"><span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span> Tech Online</span>'
+                            : `<span class="text-slate-400">Last ping ${escHtml(data.technician.last_seen)}</span>`;
+                    }
+                }
+
+                if (initialSignature === null) {
+                    initialSignature = data.state_signature || '';
+                } else if (data.state_signature && data.state_signature !== initialSignature) {
+                    if (!isUserBusyOnTaskShow()) {
+                        initialSignature = data.state_signature;
+                        window.location.reload();
+                    }
+                }
+            } catch (e) {
+            } finally {
+                isCheckingLive = false;
+            }
+        }
+
+        pollTaskLiveStatus();
+        const liveTimer = setInterval(pollTaskLiveStatus, 4000);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) pollTaskLiveStatus();
+        });
+        window.addEventListener('focus', pollTaskLiveStatus);
+        window.addEventListener('beforeunload', () => clearInterval(liveTimer));
+    });
+</script>
 
 <script>
     function copyTrackingUrl() {

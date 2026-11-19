@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Domain\Tasks\TaskStateMachine;
 use App\Http\Controllers\Controller;
+use App\Models\InventoryItem;
 use App\Models\Task;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
@@ -55,10 +56,21 @@ class TaskController extends Controller
         $assignedCount = (int) ($agg->assigned_count ?? 0);
         $latestTaskId = (int) ($agg->latest_task_id ?? 0);
         $latestUpdatedAt = (string) ($agg->latest_updated_at ?? '');
+
+        $invAgg = InventoryItem::where('is_active', true)
+            ->selectRaw("COUNT(*) as item_count, COALESCE(SUM(stock), 0) as total_stock, MAX(updated_at) as max_updated")
+            ->first();
+        $invVersion = sha1(
+            (int) ($invAgg->item_count ?? 0) . '|' .
+            (float) ($invAgg->total_stock ?? 0) . '|' .
+            (string) ($invAgg->max_updated ?? '')
+        );
+
         $version = sha1("{$techId}|{$activeCount}|{$assignedCount}|{$latestTaskId}|{$latestUpdatedAt}");
 
         return response()->json([
             'version'           => $version,
+            'inventory_version' => $invVersion,
             'active_count'      => $activeCount,
             'assigned_count'    => $assignedCount,
             'latest_task_id'    => $latestTaskId,
@@ -76,7 +88,9 @@ class TaskController extends Controller
         }
         $task->ensureTrackingToken();
         $task->load(['technician', 'progressUpdates.user', 'proofOfWork', 'materials.inventoryItem', 'statusHistories']);
-        return response()->json(['data' => $task]);
+        return response()->json(['data' => $task])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function accept(Task $task)
@@ -175,6 +189,8 @@ class TaskController extends Controller
             ->orderByDesc('updated_at')
             ->get();
 
-        return response()->json(['data' => $tasks]);
+        return response()->json(['data' => $tasks])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 }

@@ -4,8 +4,10 @@ import { AlertController, LoadingController, NavController, ToastController } fr
 import { ApiService } from '../../services/api.service';
 import { LocationService } from '../../services/location.service';
 import { NavigationService } from '../../services/navigation.service';
+import { TaskSyncService } from '../../services/task-sync.service';
 import { formatPhoneForWhatsApp } from '../../utils/phone';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-task-detail',
@@ -23,6 +25,8 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
   private navigationService = inject(NavigationService);
+  private taskSync = inject(TaskSyncService);
+  private syncSubs = new Subscription();
 
   task: any = null;
   user: any = null;
@@ -100,11 +104,40 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   private mouseUpHandler = () => this.handleCanvasMouse(null, 'end');
   private mouseLeaveHandler = () => this.handleCanvasMouse(null, 'end');
 
+  private hasInitialDetailLoaded = false;
+
   async ngOnInit() {
     this.taskId = Number(this.route.snapshot.paramMap.get('id'));
+
+    // Live sync: when Admin updates inventory stock/status on /inventory, refresh BOM dropdown immediately
+    this.syncSubs.add(
+      this.taskSync.inventoryVersion$.subscribe(v => {
+        if (v && this.hasInitialDetailLoaded) {
+          this.loadInventory();
+        }
+      })
+    );
+
+    // Live sync: when Admin posts a note, modifies BOM, or requests rework on /tasks/{id}, refresh task in-place
+    this.syncSubs.add(
+      this.taskSync.taskVersion$.subscribe(v => {
+        if (
+          v &&
+          this.hasInitialDetailLoaded &&
+          !this.isDrawing &&
+          !this.isSavingSignature &&
+          !this.isActioning &&
+          !this.isAddingMaterial &&
+          !this.isCompleting
+        ) {
+          this.loadTask(true);
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
+    this.syncSubs.unsubscribe();
     this.removeCanvasListeners();
     this.signatureTimeouts.forEach(t => clearTimeout(t));
     this.signatureTimeouts = [];
@@ -119,8 +152,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ionViewWillEnter() {
-    await this.loadTask();
+    this.taskSync.start();
+    await this.loadTask(false);
     await this.loadInventory();
+    this.hasInitialDetailLoaded = true;
   }
 
   ngAfterViewInit() {
@@ -128,8 +163,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
     this.signatureTimeouts.push(t);
   }
 
-  async loadTask() {
-    this.isLoading = true;
+  async loadTask(silentBackgroundRefresh = false) {
+    if (!silentBackgroundRefresh) {
+      this.isLoading = true;
+    }
     try {
       // 1. Get Me profile
       try {
@@ -147,7 +184,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
         this.locationService.setActiveTaskId(this.task.id);
       }
 
-      if (this.task?.progress_percent) {
+      if (this.task?.progress_percent && !silentBackgroundRefresh) {
         this.progressPercent = this.task.progress_percent;
       }
 
@@ -155,10 +192,18 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
         this.customerSignerName = this.task.customer_name;
       }
 
-      const t = setTimeout(() => this.initSignatureCanvas(), 300);
-      this.signatureTimeouts.push(t);
+      if (!this.isCanvasDrawn) {
+        const t = setTimeout(() => this.initSignatureCanvas(), 300);
+        this.signatureTimeouts.push(t);
+      }
+
+      if (!silentBackgroundRefresh && this.hasInitialDetailLoaded) {
+        this.taskSync.refreshTasks(false);
+      }
     } catch (e) {
-      this.showToast('Failed to load task details', 'danger');
+      if (!silentBackgroundRefresh) {
+        this.showToast('Failed to load task details', 'danger');
+      }
     } finally {
       this.isLoading = false;
     }

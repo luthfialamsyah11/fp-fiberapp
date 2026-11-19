@@ -20,11 +20,14 @@ export class TaskSyncService {
   readonly tasks$ = new BehaviorSubject<any[]>([]);
   readonly lastSyncTime$ = new BehaviorSubject<string>('');
   readonly newTaskAlert$ = new BehaviorSubject<any | null>(null);
+  readonly taskVersion$ = new BehaviorSubject<string>('');
+  readonly inventoryVersion$ = new BehaviorSubject<string>('');
 
   private isRunning = false;
   private isChecking = false;
   private pollTimer: any = null;
   private lastVersion: string | null = null;
+  private lastInventoryVersion: string | null = null;
   private knownTaskIds = new Set<number>();
   private hasHydrated = false;
   private appStateHandle: any = null;
@@ -100,10 +103,13 @@ export class TaskSyncService {
       this.appStateHandle = null;
     }
     this.lastVersion = null;
+    this.lastInventoryVersion = null;
     this.knownTaskIds.clear();
     this.hasHydrated = false;
     this.tasks$.next([]);
     this.newTaskAlert$.next(null);
+    this.taskVersion$.next('');
+    this.inventoryVersion$.next('');
     this.api.setAssignedCount(0);
   }
 
@@ -119,12 +125,18 @@ export class TaskSyncService {
 
     this.isChecking = true;
     try {
-      const signal = await this.api.getTaskSyncSignal();
+      const signal: any = await this.api.getTaskSyncSignal();
       const versionChanged = this.lastVersion === null || signal.version !== this.lastVersion;
       this.lastVersion = signal.version;
       this.api.setAssignedCount(signal.assigned_count);
 
+      if (signal.inventory_version && signal.inventory_version !== this.lastInventoryVersion) {
+        this.lastInventoryVersion = signal.inventory_version;
+        this.inventoryVersion$.next(signal.inventory_version);
+      }
+
       if (versionChanged || forceFullOnSameVersion) {
+        this.taskVersion$.next(signal.version || String(Date.now()));
         await this.refreshTasks(this.hasHydrated);
       }
     } catch {

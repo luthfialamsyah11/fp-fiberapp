@@ -35,6 +35,9 @@ class ProofController extends Controller
             'description' => $request->description ? strip_tags(trim($request->description)) : null,
         ]);
 
+        // Bump parent task updated_at so both Admin & APK sync signals detect the new proof immediately
+        $task->touch();
+
         return response()->json(['data' => $proof], 201);
     }
 
@@ -46,6 +49,8 @@ class ProofController extends Controller
 
         $proofs = $task->proofOfWork()->get();
 
-        return response()->json(['data' => $proofs]);
+        return response()->json(['data' => $proofs])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 }

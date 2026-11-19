@@ -1554,4 +1554,106 @@ class FsmIntegrationSuiteTest extends TestCase
         $ids = collect($listRes->json('data'))->pluck('id')->all();
         $this->assertContains($createdTask->id, $ids);
     }
+
+    public function test_bidirectional_apk_to_admin_live_pulse_proof_bom_completion_and_inventory_sync(): void
+    {
+        Storage::fake('public');
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => 'Fajar Field', 'email' => 'fajar@fsm.com']);
+
+        $item = InventoryItem::create([
+            'code'       => 'INV-SYNC-01',
+            'name'       => 'Drop Core 1C',
+            'unit'       => 'm',
+            'stock'      => 100,
+            'unit_price' => 2500,
+            'category'   => 'material',
+            'is_active'  => true,
+        ]);
+
+        $task = Task::create([
+            'title'         => 'Bi-Directional Sync Fiber Install',
+            'customer_name' => 'PT Sinar Baru',
+            'address'       => 'Jl. Rasuna Said 12',
+            'technician_id' => $tech->id,
+            'status'        => 'on-going',
+            'priority'      => 'high',
+        ]);
+
+        // 1. Initial Admin /live-pulse & /tasks/{id}/live-status snapshots
+        $pulse1 = $this->actingAs($admin)->getJson('/live-pulse')->assertOk();
+        $this->assertStringContainsString('no-store', (string) $pulse1->headers->get('Cache-Control'));
+        $vPulse1 = $pulse1->json('version');
+        $vInvScope1 = $pulse1->json('scopes.inventory');
+        $vProofScope1 = $pulse1->json('scopes.proofs');
+
+        $liveStat1 = $this->actingAs($admin)->getJson("/tasks/{$task->id}/live-status")->assertOk();
+        $sig1 = $liveStat1->json('state_signature');
+
+        $apkSig1 = $this->actingAs($tech, 'sanctum')->getJson('/api/tasks/sync-signal')->assertOk();
+        $apkTaskVer1 = $apkSig1->json('version');
+        $apkInvVer1 = $apkSig1->json('inventory_version');
+
+        // 2. Technician uploads a Proof of Work photo from APK -> bumps task.updated_at, Admin /live-pulse, and /tasks/{id}/live-status
+        $pngBytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('opm_after.png', $pngBytes);
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/proof", [
+            'image'       => $file,
+            'slot'        => 'after',
+            'description' => 'OPM reading -18.2 dBm verified',
+        ])->assertCreated();
+
+        $pulse2 = $this->actingAs($admin)->getJson('/live-pulse')->assertOk();
+        $this->assertNotEquals($vPulse1, $pulse2->json('version'));
+        $this->assertNotEquals($vProofScope1, $pulse2->json('scopes.proofs'));
+        $this->assertEquals('proof', $pulse2->json('latest_event.type'));
+
+        $liveStat2 = $this->actingAs($admin)->getJson("/tasks/{$task->id}/live-status")->assertOk();
+        $this->assertEquals(1, $liveStat2->json('proofs_count'));
+        $this->assertNotEquals($sig1, $liveStat2->json('state_signature'));
+
+        // 3. Technician deducts 25m of Drop Core 1C from APK -> updates Admin inventory scope & APK inventory_version
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/materials", [
+            'inventory_item_id' => $item->id,
+            'quantity'          => 25,
+            'notes'             => 'Outdoor span',
+        ])->assertCreated();
+
+        $pulse3 = $this->actingAs($admin)->getJson('/live-pulse')->assertOk();
+        $this->assertNotEquals($vInvScope1, $pulse3->json('scopes.inventory'));
+
+        $apkSig2 = $this->actingAs($tech, 'sanctum')->getJson('/api/tasks/sync-signal')->assertOk();
+        $this->assertNotEquals($apkInvVer1, $apkSig2->json('inventory_version'));
+
+        // 4. Admin posts a Dispatcher Note on /tasks/{id} -> bumps task.updated_at so APK sync-signal version changes immediately
+        $apkTaskVerBeforeNote = $apkSig2->json('version');
+        $this->travel(2)->seconds();
+        $this->actingAs($admin)->post("/tasks/{$task->id}/notes", [
+            'note'             => 'OPM photo verified, proceed to customer sign-off.',
+            'progress_percent' => 90,
+        ])->assertRedirect();
+
+        $apkSig3 = $this->actingAs($tech, 'sanctum')->getJson('/api/tasks/sync-signal')->assertOk();
+        $this->assertNotEquals($apkTaskVerBeforeNote, $apkSig3->json('version'));
+
+        // 5. Technician captures signature and completes task -> Admin /live-pulse immediately reports completed & BAST sealed
+        $pngBytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/signature", [
+            'signature'   => 'data:image/png;base64,' . base64_encode($pngBytes),
+            'signer_name' => 'Bapak Hendra',
+        ])->assertOk();
+
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/complete")->assertOk();
+
+        $pulse4 = $this->actingAs($admin)->getJson('/live-pulse')->assertOk();
+        $this->assertEquals(1, $pulse4->json('counts.completed'));
+        $this->assertEquals('completed', $pulse4->json('latest_event.type'));
+
+        $liveStatFinal = $this->actingAs($admin)->getJson("/tasks/{$task->id}/live-status")->assertOk();
+        $liveStatFinal->assertJsonPath('status', 'completed')
+            ->assertJsonPath('has_signature', true)
+            ->assertJsonPath('proofs_count', 1)
+            ->assertJsonPath('materials_count', 1);
+        $this->assertNotEmpty($liveStatFinal->json('bast_hash'));
+    }
 }

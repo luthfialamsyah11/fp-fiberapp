@@ -261,8 +261,8 @@
               <label>Select Item from Warehouse Catalog</label>
               <select [(ngModel)]="selectedInventoryId" class="bom-select">
                 <option [ngValue]="null">-- Select Material or Device --</option>
-                <option *ngFor="let item of inventoryItems" [ngValue]="item.id">
-                  [{{ item.code || item.sku }}] {{ item.name }} (Stock: {{ item.stock }} {{ item.unit }})
+                <option *ngFor="let item of inventoryItems" [ngValue]="item.id" [disabled]="item.stock <= 0">
+                  [{{ item.code || item.sku }}] {{ item.name }} ({{ item.stock > 0 ? 'Stock: ' + item.stock + ' ' + item.unit : 'OUT OF STOCK' }})
                 </option>
               </select>
             </div>

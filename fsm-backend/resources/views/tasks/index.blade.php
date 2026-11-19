@@ -16,25 +16,11 @@
             Assignment Board
         </a>
         <a href="{{ route('admin.tasks.create') }}" class="bg-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-blue-500/15 transition-all inline-flex items-center gap-1.5">
-            <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
+            <ion-icon name="add-circle-outline" class="text-base pointer-events-none"></ion-icon>
             Create New Task
         </a>
     </div>
 </div>
-
-<!-- Flash Notifications -->
-@if(session('success'))
-    <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2.5 shadow-sm">
-        <ion-icon name="checkmark-circle" class="text-base text-emerald-600 flex-shrink-0"></ion-icon>
-        <span>{{ session('success') }}</span>
-    </div>
-@endif
-@if(session('error'))
-    <div class="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center gap-2.5 shadow-sm">
-        <ion-icon name="alert-circle" class="text-base text-red-600 flex-shrink-0"></ion-icon>
-        <span>{{ session('error') }}</span>
-    </div>
-@endif
 
 <!-- Executive KPI Strip (5 Clickable Cards) -->
 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
@@ -291,25 +277,50 @@
                         </div>
                     </td>
                     <td class="p-4">
+                        @php
+                            $taskCode = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+                            $trackingUrl = $task->tracking_token ? route('customer.tracking', $task->tracking_token) : '';
+                        @endphp
                         <div class="flex justify-center items-center gap-1.5">
-                            <a href="{{ route('admin.tasks.show', $task->id) }}" class="p-1.5 text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:text-primary hover:border-blue-200 transition-all" title="View Task Command Details">
-                                <ion-icon name="eye-outline" class="text-sm"></ion-icon>
+                            <a href="{{ route('admin.tasks.show', $task->id) }}"
+                               class="w-8 h-8 inline-flex items-center justify-center text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-blue-50 hover:text-primary hover:border-blue-200 transition-all"
+                               title="View Task Command Details" aria-label="View {{ $taskCode }}">
+                                <ion-icon name="eye-outline" class="text-sm pointer-events-none"></ion-icon>
                             </a>
+                            @if($trackingUrl)
+                                <button type="button"
+                                    onclick="copyTaskTrackingLink(this)"
+                                    data-url="{{ $trackingUrl }}"
+                                    data-code="{{ $taskCode }}"
+                                    class="w-8 h-8 inline-flex items-center justify-center text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all"
+                                    title="Copy Customer Live Tracking Link" aria-label="Copy Tracking Link {{ $taskCode }}">
+                                    <ion-icon name="link-outline" class="text-sm pointer-events-none"></ion-icon>
+                                </button>
+                            @endif
                             @if($task->status === 'completed' || $task->customer_signature)
-                                <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" class="p-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-all" title="Print Official BAST PDF">
-                                    <ion-icon name="document-text-outline" class="text-sm"></ion-icon>
+                                <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}"
+                                   target="_blank" rel="noopener"
+                                   class="w-8 h-8 inline-flex items-center justify-center text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 hover:border-emerald-300 transition-all"
+                                   title="Open Official BAST PDF Certificate" aria-label="Print BAST {{ $taskCode }}">
+                                    <ion-icon name="document-text-outline" class="text-sm pointer-events-none"></ion-icon>
                                 </a>
                             @endif
-                            <a href="{{ route('admin.tasks.edit', $task->id) }}" class="p-1.5 text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 hover:text-blue-600 transition-all" title="Edit Work Order">
-                                <ion-icon name="create-outline" class="text-sm"></ion-icon>
+                            <a href="{{ route('admin.tasks.edit', $task->id) }}"
+                               class="w-8 h-8 inline-flex items-center justify-center text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 hover:text-blue-600 hover:border-blue-200 transition-all"
+                               title="Edit Work Order" aria-label="Edit {{ $taskCode }}">
+                                <ion-icon name="create-outline" class="text-sm pointer-events-none"></ion-icon>
                             </a>
-                            <form action="{{ route('admin.tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Delete work order #TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}? Any allocated warehouse materials will be restored.');" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-1.5 text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all" title="Delete Work Order">
-                                    <ion-icon name="trash-outline" class="text-sm"></ion-icon>
-                                </button>
-                            </form>
+                            <button type="button"
+                                onclick="openDeleteTaskModal(this)"
+                                data-delete-url="{{ route('admin.tasks.destroy', $task->id) }}"
+                                data-task-code="{{ $taskCode }}"
+                                data-task-title="{{ $task->title }}"
+                                data-task-status="{{ $task->status }}"
+                                data-bom-count="{{ (int) ($task->materials_count ?? 0) }}"
+                                class="w-8 h-8 inline-flex items-center justify-center text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+                                title="Delete Work Order" aria-label="Delete {{ $taskCode }}">
+                                <ion-icon name="trash-outline" class="text-sm pointer-events-none"></ion-icon>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -377,6 +388,49 @@
     </div>
 </div>
 
+<!-- Delete Work Order Confirmation Modal (Reliable across all browsers & webviews) -->
+<div id="delete-task-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-start gap-3 pb-3 mb-4 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center flex-shrink-0">
+                <ion-icon name="trash-outline" class="text-xl pointer-events-none"></ion-icon>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-bold text-textPrimary">Delete Work Order</h3>
+                <p id="del-task-label" class="text-[11px] text-textSecondary truncate mt-0.5">#TSK</p>
+            </div>
+            <button type="button" onclick="closeDeleteTaskModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                <ion-icon name="close-outline" class="text-xl pointer-events-none"></ion-icon>
+            </button>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+            This will permanently remove the work order, its status audit trail, and uploaded proof references.
+        </p>
+        <div id="del-task-bom-note" class="hidden mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 font-medium flex items-start gap-2">
+            <ion-icon name="cube-outline" class="text-base text-amber-600 flex-shrink-0 mt-0.5"></ion-icon>
+            <span id="del-task-bom-text">Allocated warehouse BOM materials will be automatically restored to inventory stock.</span>
+        </div>
+
+        <form id="del-task-form" method="POST" action="" class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            @csrf
+            @method('DELETE')
+            <button type="button" onclick="closeDeleteTaskModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50">
+                Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm inline-flex items-center gap-1.5">
+                <ion-icon name="trash-outline" class="pointer-events-none"></ion-icon> Confirm Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Copy Toast Feedback -->
+<div id="task-action-toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold shadow-xl items-center gap-2">
+    <ion-icon name="checkmark-circle" class="text-emerald-400 text-base"></ion-icon>
+    <span id="task-action-toast-text">Copied!</span>
+</div>
+
 <style>
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -400,8 +454,100 @@
         document.getElementById('quick-assign-modal').classList.add('hidden');
     }
 
+    function openDeleteTaskModal(btn) {
+        const modal = document.getElementById('delete-task-modal');
+        const form = document.getElementById('del-task-form');
+        const label = document.getElementById('del-task-label');
+        const bomBox = document.getElementById('del-task-bom-note');
+        const bomText = document.getElementById('del-task-bom-text');
+
+        const code = btn.getAttribute('data-task-code') || '';
+        const title = btn.getAttribute('data-task-title') || '';
+        const bomCount = parseInt(btn.getAttribute('data-bom-count') || '0', 10);
+
+        form.action = btn.getAttribute('data-delete-url');
+        label.textContent = `${code} — ${title}`;
+
+        if (bomCount > 0) {
+            bomText.textContent = `${bomCount} BOM material record(s) allocated to this ticket will be automatically restored to warehouse stock.`;
+            bomBox.classList.remove('hidden');
+        } else {
+            bomBox.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeDeleteTaskModal() {
+        document.getElementById('delete-task-modal').classList.add('hidden');
+    }
+
+    let actionToastTimer = null;
+    function showActionToast(message) {
+        const toast = document.getElementById('task-action-toast');
+        const txt = document.getElementById('task-action-toast-text');
+        if (!toast || !txt) return;
+        txt.textContent = message;
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        if (actionToastTimer) clearTimeout(actionToastTimer);
+        actionToastTimer = setTimeout(() => {
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
+        }, 2600);
+    }
+
+    function copyTaskTrackingLink(btn) {
+        const url = btn.getAttribute('data-url');
+        const code = btn.getAttribute('data-code') || '';
+        if (!url) return;
+
+        const onSuccess = () => {
+            const icon = btn.querySelector('ion-icon');
+            if (icon) icon.setAttribute('name', 'checkmark-outline');
+            btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+            showActionToast(`Tracking link for ${code} copied to clipboard.`);
+            setTimeout(() => {
+                if (icon) icon.setAttribute('name', 'link-outline');
+                btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+            }, 1800);
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(onSuccess).catch(() => fallbackCopy(url, onSuccess));
+        } else {
+            fallbackCopy(url, onSuccess);
+        }
+    }
+
+    function fallbackCopy(text, cb) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            if (cb) cb();
+        } finally {
+            document.body.removeChild(ta);
+        }
+    }
+
     document.getElementById('quick-assign-modal')?.addEventListener('click', function(e) {
         if (e.target === this) closeQuickAssignModal();
+    });
+
+    document.getElementById('delete-task-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteTaskModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeQuickAssignModal();
+            closeDeleteTaskModal();
+        }
     });
 </script>
 @endpush

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\InventoryItem;
 use App\Models\ProofOfWork;
 use App\Models\Task;
+use App\Models\TaskMaterial;
 use App\Models\TaskStatusHistory;
 use App\Models\TechnicianLocation;
 use App\Models\User;
@@ -760,5 +761,215 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Unassigned High Priority Cut')
             ->assertDontSee("Fiber Fix at O'Neill Plaza");
+    }
+
+    public function test_task_management_actions_tracking_token_recovery_and_modal_delete_restores_stock(): void
+    {
+        $admin = $this->createAdmin();
+        $item = InventoryItem::create([
+            'code'       => 'CBL-ACT-01',
+            'name'       => 'Action Test Cable',
+            'unit'       => 'meter',
+            'stock'      => 100,
+            'unit_price' => 2.5,
+            'category'   => 'material',
+            'is_active'  => true,
+        ]);
+
+        $task = Task::create([
+            'title'              => 'Completed Fiber Drop with Null Token',
+            'customer_name'      => 'PT Nusantara',
+            'address'            => 'Jl. Sudirman 10',
+            'status'             => 'completed',
+            'priority'           => 'medium',
+            'customer_signature' => 'data:image/png;base64,iVBORw0KGgo=',
+        ]);
+
+        // Simulate legacy task with null tracking_token
+        \Illuminate\Support\Facades\DB::table('tasks')->where('id', $task->id)->update(['tracking_token' => null]);
+
+        // Allocate BOM material manually to confirm deletion restores warehouse stock
+        TaskMaterial::create([
+            'task_id'           => $task->id,
+            'inventory_item_id' => $item->id,
+            'quantity'          => 15,
+            'unit_price'        => 2.5,
+            'total_price'       => 37.5,
+        ]);
+        $item->decrement('stock', 15);
+        $this->assertEquals(85.0, (float) $item->fresh()->stock);
+
+        // 1. Index auto-heals null tracking_token & renders reliable modal delete + BAST + Copy Link actions
+        $res = $this->actingAs($admin)->get('/tasks');
+        $res->assertStatus(200)
+            ->assertSee('openDeleteTaskModal')
+            ->assertSee('copyTaskTrackingLink')
+            ->assertDontSee('return confirm(');
+
+        $freshToken = $task->fresh()->tracking_token;
+        $this->assertNotEmpty($freshToken);
+        $res->assertSee("token={$freshToken}");
+
+        // 2. Delete action removes task and restores BOM stock atomically
+        $this->actingAs($admin)->delete("/tasks/{$task->id}")
+            ->assertRedirect(route('admin.tasks.index'));
+
+        $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
+        $this->assertEquals(100.0, (float) $item->fresh()->stock);
+    }
+
+    public function test_inventory_atomic_adjust_stock_toggle_status_export_and_apk_sync(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician();
+
+        $inStockItem = InventoryItem::create([
+            'code'       => 'ONT-ZTE-F670',
+            'name'       => 'ZTE F670L Dual-Band ONT',
+            'unit'       => 'unit',
+            'stock'      => 12,
+            'unit_price' => 24.50,
+            'category'   => 'device',
+            'is_active'  => true,
+        ]);
+
+        $zeroStockItem = InventoryItem::create([
+            'code'       => 'SFP-10G-LR',
+            'name'       => '10G SFP+ Transceiver',
+            'unit'       => 'pcs',
+            'stock'      => 0,
+            'unit_price' => 45.00,
+            'category'   => 'device',
+            'is_active'  => true,
+        ]);
+
+        // 1. Atomic restock (+8 -> 20)
+        $this->actingAs($admin)
+            ->post("/inventory/{$inStockItem->id}/adjust-stock", ['mode' => 'add', 'quantity' => 8])
+            ->assertRedirect();
+        $this->assertEquals(20.0, (float) $inStockItem->fresh()->stock);
+
+        // 2. Atomic subtract (-5 -> 15)
+        $this->actingAs($admin)
+            ->post("/inventory/{$inStockItem->id}/adjust-stock", ['mode' => 'subtract', 'quantity' => 5])
+            ->assertRedirect();
+        $this->assertEquals(15.0, (float) $inStockItem->fresh()->stock);
+
+        // 3. Reject negative subtraction (-999 -> stays 15 with error flash)
+        $this->actingAs($admin)
+            ->post("/inventory/{$inStockItem->id}/adjust-stock", ['mode' => 'subtract', 'quantity' => 999])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+        $this->assertEquals(15.0, (float) $inStockItem->fresh()->stock);
+
+        // 4. Atomic set exact (= 7)
+        $this->actingAs($admin)
+            ->post("/inventory/{$inStockItem->id}/adjust-stock", ['mode' => 'set', 'quantity' => 7])
+            ->assertRedirect();
+        $this->assertEquals(7.0, (float) $inStockItem->fresh()->stock);
+
+        // 5. APK API orders in-stock items ahead of 0-stock items and includes in_stock flag
+        $apiRes = $this->actingAs($tech, 'sanctum')->getJson('/api/inventory')->assertOk();
+        $apiData = $apiRes->json('data');
+        $this->assertCount(2, $apiData);
+        $this->assertEquals('ONT-ZTE-F670', $apiData[0]['code']);
+        $this->assertTrue($apiData[0]['in_stock']);
+        $this->assertEquals('SFP-10G-LR', $apiData[1]['code']);
+        $this->assertFalse($apiData[1]['in_stock']);
+
+        // 6. Toggle status deactivates item and hides it from Technician APK
+        $this->actingAs($admin)
+            ->post("/inventory/{$inStockItem->id}/toggle-status")
+            ->assertRedirect();
+        $this->assertFalse((bool) $inStockItem->fresh()->is_active);
+
+        $apiAfterToggle = $this->actingAs($tech, 'sanctum')->getJson('/api/inventory')->assertOk()->json('data');
+        $this->assertCount(1, $apiAfterToggle);
+        $this->assertEquals('SFP-10G-LR', $apiAfterToggle[0]['code']);
+
+        // 7. Inventory page & CSV export render cleanly
+        $this->actingAs($admin)->get('/inventory?active_status=inactive')
+            ->assertStatus(200)
+            ->assertSee('ONT-ZTE-F670')
+            ->assertDontSee('return confirm(');
+
+        $this->actingAs($admin)->get('/inventory/export')
+            ->assertStatus(200)
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+    }
+
+    public function test_assignment_monitoring_priority_order_queue_isolation_and_gps_auto_dispatch(): void
+    {
+        $admin = $this->createAdmin();
+
+        $nearTech = $this->createTechnician(['name' => 'Near Tech', 'email' => 'near@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+        $farTech = $this->createTechnician(['name' => 'Far Tech', 'email' => 'far@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+
+        // Near Tech is right next to customer (-6.2005, 106.8455); Far Tech is 15km away (-6.3300, 106.9500)
+        TechnicianLocation::create([
+            'technician_id' => $nearTech->id,
+            'latitude'      => -6.2005,
+            'longitude'     => 106.8455,
+        ]);
+        TechnicianLocation::create([
+            'technician_id' => $farTech->id,
+            'latitude'      => -6.3300,
+            'longitude'     => 106.9500,
+        ]);
+
+        $lowTask = Task::create([
+            'title'         => 'Low Priority Maintenance',
+            'customer_name' => 'Client Low',
+            'address'       => 'Addr Low',
+            'status'        => 'pending',
+            'priority'      => 'low',
+        ]);
+        $mediumTask = Task::create([
+            'title'         => 'Medium Priority Install',
+            'customer_name' => 'Client Med',
+            'address'       => 'Addr Med',
+            'status'        => 'pending',
+            'priority'      => 'medium',
+        ]);
+        $highTask = Task::create([
+            'title'         => 'Emergency Backbone Fiber Cut',
+            'customer_name' => 'Client High',
+            'address'       => 'Jl. Thamrin',
+            'latitude'      => -6.2000,
+            'longitude'     => 106.8450,
+            'status'        => 'pending',
+            'priority'      => 'high',
+        ]);
+        $completedUnassigned = Task::create([
+            'title'         => 'Legacy Completed Unassigned Ticket',
+            'customer_name' => 'Old Client',
+            'address'       => 'Old Addr',
+            'technician_id' => null,
+            'status'        => 'completed',
+            'priority'      => 'high',
+        ]);
+
+        // 1. GET /assignments sorts pendingQueue strictly High -> Medium -> Low and excludes completed unassigned task
+        $res = $this->actingAs($admin)->get('/assignments')->assertStatus(200);
+        $pendingQueue = $res->viewData('pendingQueue');
+
+        $queueIds = $pendingQueue->pluck('id')->all();
+        $this->assertEquals([$highTask->id, $mediumTask->id, $lowTask->id], $queueIds);
+        $this->assertNotContains($completedUnassigned->id, $queueIds);
+
+        // 2. 1-Click Auto-Dispatch picks Near Tech via Haversine GPS and transitions task to assigned
+        $this->actingAs($admin)
+            ->post("/assignments/{$highTask->id}/auto-dispatch")
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $dispatched = $highTask->fresh();
+        $this->assertEquals('assigned', $dispatched->status);
+        $this->assertEquals($nearTech->id, $dispatched->technician_id);
+        $this->assertDatabaseHas('task_status_histories', [
+            'task_id'     => $highTask->id,
+            'from_status' => 'pending',
+            'to_status'   => 'assigned',
+        ]);
     }
 }

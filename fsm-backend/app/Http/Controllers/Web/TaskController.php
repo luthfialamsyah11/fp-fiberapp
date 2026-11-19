@@ -60,6 +60,13 @@ class TaskController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        // Ensure every displayed work order has a valid tracking token for BAST PDF & Customer Tracking actions
+        $tasks->getCollection()->each(function (Task $task) {
+            if (empty($task->tracking_token)) {
+                $task->ensureTrackingToken();
+            }
+        });
+
         $countsRow = Task::selectRaw("
             COUNT(*) as total,
             COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,

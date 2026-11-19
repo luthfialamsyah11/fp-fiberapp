@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryItem;
+use App\Services\SettingService;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -11,9 +12,16 @@ class InventoryController extends Controller
     public function index()
     {
         $items = InventoryItem::where('is_active', true)
+            ->orderByRaw('CASE WHEN stock > 0 THEN 0 ELSE 1 END ASC')
             ->orderBy('category')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function (InventoryItem $item) {
+                $arr = $item->toArray();
+                $arr['in_stock'] = (float) $item->stock > 0;
+                $arr['formatted_price'] = SettingService::formatCurrency((float) $item->unit_price);
+                return $arr;
+            });
 
         return response()->json(['data' => $items]);
     }

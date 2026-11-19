@@ -60,12 +60,16 @@ Route::middleware(['auth', 'active', 'role:admin'])->group(function () {
     Route::get('tasks/{task}/live-status', [TaskController::class, 'liveStatus'])->name('admin.tasks.live_status');
 
     // Inventory & Material Management
+    Route::get('inventory/export', [\App\Http\Controllers\Web\InventoryController::class, 'export'])->name('admin.inventory.export');
     Route::resource('inventory', \App\Http\Controllers\Web\InventoryController::class, [
         'as' => 'admin'
     ]);
+    Route::post('inventory/{inventory}/adjust-stock', [\App\Http\Controllers\Web\InventoryController::class, 'adjustStock'])->name('admin.inventory.adjust_stock');
+    Route::post('inventory/{inventory}/toggle-status', [\App\Http\Controllers\Web\InventoryController::class, 'toggleStatus'])->name('admin.inventory.toggle_status');
 
     // FSM Admin Console Routes
     Route::get('/assignments', [\App\Http\Controllers\Web\AssignmentController::class, 'index'])->name('admin.assignments');
+    Route::post('/assignments/{task}/auto-dispatch', [\App\Http\Controllers\Web\AssignmentController::class, 'autoDispatch'])->name('admin.assignments.auto_dispatch');
     Route::get('/tracking', [\App\Http\Controllers\Web\TrackingController::class, 'index'])->name('admin.tracking');
     Route::get('/tracking/live-data', [\App\Http\Controllers\Web\TrackingController::class, 'liveData'])->name('admin.tracking.live');
     Route::get('/proofs', [\App\Http\Controllers\Web\ProofController::class, 'index'])->name('admin.proofs');

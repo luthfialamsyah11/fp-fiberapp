@@ -1,5 +1,6 @@
 import { Component, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import { ApiService } from '../../services/api.service';
 import { LocationService } from '../../services/location.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -14,6 +15,7 @@ import { formatPhoneForWhatsApp } from '../../utils/phone';
 export class TaskListPage implements OnDestroy {
   private api = inject(ApiService);
   private router = inject(Router);
+  private toastCtrl = inject(ToastController);
   private locationService = inject(LocationService);
   private navigationService = inject(NavigationService);
 
@@ -26,6 +28,8 @@ export class TaskListPage implements OnDestroy {
   selectedFilter = 'all';
   searchQuery = '';
   private syncTimer: any = null;
+  private knownAssignedIds = new Set<number>();
+  private hasLoadedOnce = false;
 
   filters = [
     { value: 'all', label: 'All Tasks' },
@@ -51,8 +55,8 @@ export class TaskListPage implements OnDestroy {
     this.stopForegroundSync();
     this.syncTimer = setInterval(() => {
       if (typeof document !== 'undefined' && document.hidden) return;
-      this.loadTasks();
-    }, 20000);
+      this.loadTasks(true);
+    }, 15000);
   }
 
   private stopForegroundSync() {
@@ -111,10 +115,27 @@ export class TaskListPage implements OnDestroy {
     }
   }
 
-  async loadTasks() {
+  async loadTasks(isBackgroundPoll = false) {
     try {
       const res: any = await this.api.getTasks();
-      this.tasks = Array.isArray(res) ? res : (res?.data ?? []);
+      const nextTasks = Array.isArray(res) ? res : (res?.data ?? []);
+      const assignedNow = nextTasks.filter((t: any) => t.status === 'assigned');
+
+      if (isBackgroundPoll && this.hasLoadedOnce) {
+        const newlyDispatched = assignedNow.filter((t: any) => !this.knownAssignedIds.has(Number(t.id)));
+        if (newlyDispatched.length > 0) {
+          const first = newlyDispatched[0];
+          const code = `#TSK-${String(first.id).padStart(4, '0')}`;
+          const msg = newlyDispatched.length === 1
+            ? `New work order assigned: ${code} — ${first.title}`
+            : `${newlyDispatched.length} new work orders dispatched to you!`;
+          this.showDispatchToast(msg);
+        }
+      }
+
+      this.knownAssignedIds = new Set(assignedNow.map((t: any) => Number(t.id)));
+      this.hasLoadedOnce = true;
+      this.tasks = nextTasks;
 
       this.activeMission = this.tasks.find(t => t.status === 'on-going')
         || this.tasks.find(t => t.status === 'accepted')
@@ -126,6 +147,17 @@ export class TaskListPage implements OnDestroy {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  private async showDispatchToast(message: string) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 4500,
+      position: 'top',
+      color: 'primary',
+      icon: 'notifications-outline',
+    });
+    await toast.present();
   }
 
   applyFilter() {

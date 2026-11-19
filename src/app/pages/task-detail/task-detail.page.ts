@@ -168,8 +168,12 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
     try {
       const res: any = await this.api.getInventory();
       this.inventoryItems = res?.data ?? [];
-      if (this.inventoryItems.length > 0 && !this.selectedInventoryId) {
-        this.selectedInventoryId = this.inventoryItems[0].id;
+      const currentValid = this.inventoryItems.find(
+        (i: any) => Number(i.id) === Number(this.selectedInventoryId) && Number(i.stock) > 0
+      );
+      if (!currentValid) {
+        const firstInStock = this.inventoryItems.find((i: any) => Number(i.stock) > 0);
+        this.selectedInventoryId = firstInStock ? firstInStock.id : null;
       }
     } catch (e) {
       console.warn('Failed to load inventory catalog', e);
@@ -335,19 +339,38 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   // ─── STAGE 3.5: MATERIAL & INVENTORY (BOM) ──────────────────────────────────
   async addMaterial() {
     if (!this.selectedInventoryId) {
-      this.showToast('Please select a material / device first', 'warning');
+      this.showToast('Please select an in-stock material / device first', 'warning');
       return;
     }
-    if (this.materialQuantity <= 0) {
+    const qty = Number(this.materialQuantity);
+    if (!Number.isFinite(qty) || qty <= 0) {
       this.showToast('Quantity must be greater than 0', 'warning');
       return;
+    }
+
+    const selectedItem = this.inventoryItems.find(
+      (i: any) => Number(i.id) === Number(this.selectedInventoryId)
+    );
+    if (selectedItem) {
+      const availableStock = Number(selectedItem.stock ?? 0);
+      if (availableStock <= 0) {
+        this.showToast(`[${selectedItem.code}] ${selectedItem.name} is currently out of stock.`, 'warning');
+        return;
+      }
+      if (qty > availableStock) {
+        this.showToast(
+          `Only ${availableStock} ${selectedItem.unit || 'unit'} remaining in warehouse for [${selectedItem.code}].`,
+          'warning'
+        );
+        return;
+      }
     }
 
     this.isAddingMaterial = true;
     try {
       await this.api.addTaskMaterial(this.taskId, {
         inventory_item_id: Number(this.selectedInventoryId),
-        quantity: Number(this.materialQuantity),
+        quantity: qty,
         serial_number: this.materialSerialNumber || undefined,
         notes: this.materialNotes || undefined,
       });

@@ -170,13 +170,10 @@
                     <p class="text-[10px] text-slate-400 truncate">Administrator</p>
                 </div>
             </div>
-            <form action="{{ route('admin.logout') }}" method="POST" onsubmit="return confirm('Are you sure you want to log out?')">
-                @csrf
-                <button type="submit" class="flex items-center px-3 py-2 w-full text-left rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs font-medium">
-                    <ion-icon name="log-out-outline" class="text-sm mr-2"></ion-icon>
-                    <span>Log Out</span>
-                </button>
-            </form>
+            <button type="button" onclick="document.getElementById('admin-logout-modal').classList.remove('hidden')" class="flex items-center px-3 py-2 w-full text-left rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs font-medium">
+                <ion-icon name="log-out-outline" class="text-sm mr-2 pointer-events-none"></ion-icon>
+                <span>Log Out</span>
+            </button>
         </div>
     </aside>
 
@@ -266,6 +263,21 @@
 
             @yield('content')
         </main>
+    </div>
+
+    <!-- Global Logout Confirmation Modal -->
+    <div id="admin-logout-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
+            <h3 class="text-sm font-bold text-textPrimary mb-1">Confirm Sign Out</h3>
+            <p class="text-xs text-textSecondary mb-5">Are you sure you want to log out of the FiberOps Admin Portal?</p>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('admin-logout-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50">Cancel</button>
+                <form action="{{ route('admin.logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm">Log Out</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     @stack('scripts')

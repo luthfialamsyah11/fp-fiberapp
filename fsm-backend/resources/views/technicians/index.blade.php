@@ -96,7 +96,7 @@
                             @endif
 
                             @if($tech->is_active)
-                                @if($tech->isEffectivelyOnline(10))
+                                @if($tech->isEffectivelyOnline())
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-bold bg-blue-50 text-blue-700 border border-blue-200 w-fit">
                                         <span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span> Online
                                     </span>

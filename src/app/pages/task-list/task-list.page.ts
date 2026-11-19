@@ -1,8 +1,9 @@
 import { Component, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { Subscription } from 'rxjs';
 import { ApiService } from '../../services/api.service';
-import { LocationService } from '../../services/location.service';
+import { GpsHealthStatus, LocationService } from '../../services/location.service';
 import { NavigationService } from '../../services/navigation.service';
 import { formatPhoneForWhatsApp } from '../../utils/phone';
 
@@ -21,6 +22,8 @@ export class TaskListPage implements OnDestroy {
 
   user: any = null;
   isOnline = true;
+  gpsStatus: GpsHealthStatus = 'offline';
+  gpsStatusMessage = 'Offline';
   tasks: any[] = [];
   filteredTasks: any[] = [];
   activeMission: any = null;
@@ -30,6 +33,20 @@ export class TaskListPage implements OnDestroy {
   private syncTimer: any = null;
   private knownAssignedIds = new Set<number>();
   private hasLoadedOnce = false;
+  private subs = new Subscription();
+
+  constructor() {
+    this.subs.add(
+      this.locationService.status$.subscribe(s => {
+        this.gpsStatus = s;
+      })
+    );
+    this.subs.add(
+      this.locationService.statusMessage$.subscribe(m => {
+        this.gpsStatusMessage = m;
+      })
+    );
+  }
 
   filters = [
     { value: 'all', label: 'All Tasks' },
@@ -49,6 +66,29 @@ export class TaskListPage implements OnDestroy {
 
   ngOnDestroy() {
     this.stopForegroundSync();
+    this.subs.unsubscribe();
+  }
+
+  get hasGpsWarning(): boolean {
+    return (
+      this.isOnline &&
+      (this.gpsStatus === 'no_permission' ||
+        this.gpsStatus === 'gps_off' ||
+        this.gpsStatus === 'no_network' ||
+        this.gpsStatus === 'stale')
+    );
+  }
+
+  async fixGpsIssue() {
+    if (this.gpsStatus === 'no_permission') {
+      const perm = await this.locationService.ensurePermissions();
+      if (perm === 'denied') {
+        await this.locationService.openLocationSettings();
+        return;
+      }
+    }
+    await this.locationService.stopTracking();
+    await this.locationService.startTracking();
   }
 
   private startForegroundSync() {
@@ -134,6 +174,7 @@ export class TaskListPage implements OnDestroy {
       }
 
       this.knownAssignedIds = new Set(assignedNow.map((t: any) => Number(t.id)));
+      this.api.setAssignedCount(assignedNow.length);
       this.hasLoadedOnce = true;
       this.tasks = nextTasks;
 

@@ -10,6 +10,11 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
+    /**
+     * Technician heartbeat expiry window in seconds (2 minutes = 8 missed 15s heartbeats).
+     */
+    public const ONLINE_WINDOW_SECONDS = 120;
+
     protected $fillable = [
         'name', 'email', 'password', 'role', 'phone', 'is_active', 'is_online', 'last_seen_at'
     ];
@@ -34,7 +39,8 @@ class User extends Authenticatable
 
     public function latestLocation()
     {
-        return $this->hasOne(TechnicianLocation::class, 'technician_id')->latestOfMany();
+        return $this->hasOne(TechnicianLocation::class, 'technician_id')
+            ->ofMany(['captured_at' => 'max', 'id' => 'max']);
     }
 
     public function progressUpdates()
@@ -58,22 +64,25 @@ class User extends Authenticatable
     }
 
     /**
-     * Determine whether technician is effectively online (has not gone stale).
+     * Determine whether technician is effectively online (has sent a heartbeat or GPS fix within window).
+     * Defaults to ONLINE_WINDOW_SECONDS (120 seconds / 2 minutes).
      */
-    public function isEffectivelyOnline(int $windowMinutes = 10): bool
+    public function isEffectivelyOnline(?int $windowSeconds = null): bool
     {
         if (!$this->is_online) {
             return false;
         }
 
-        $cutoff = now()->subMinutes($windowMinutes);
+        $seconds = $windowSeconds ?? self::ONLINE_WINDOW_SECONDS;
+        $cutoff = now()->subSeconds($seconds);
 
         if ($this->last_seen_at && $this->last_seen_at->gt($cutoff)) {
             return true;
         }
 
         $latest = $this->relationLoaded('latestLocation') ? $this->latestLocation : $this->latestLocation()->first();
-        if ($latest && $latest->created_at && $latest->created_at->gt($cutoff)) {
+        $latestTimestamp = $latest ? ($latest->captured_at ?? $latest->created_at) : null;
+        if ($latestTimestamp && $latestTimestamp->gt($cutoff)) {
             return true;
         }
 

@@ -62,19 +62,32 @@ class TrackingController extends Controller
             ->map(function ($tech) {
                 $activeTask = $tech->tasks->first();
                 $latest = $tech->latestLocation;
-                $onlineStatus = $tech->isEffectivelyOnline(10);
+                $onlineStatus = $tech->isEffectivelyOnline();
+                $capturedAt = $latest ? ($latest->captured_at ?? $latest->created_at) : null;
+                $ageSeconds = $capturedAt ? max(0, (int) now()->diffInSeconds($capturedAt, false) * -1) : null;
+                if ($capturedAt && $capturedAt->lte(now())) {
+                    $ageSeconds = (int) $capturedAt->diffInSeconds(now());
+                } elseif ($capturedAt) {
+                    $ageSeconds = 0;
+                }
+                $isPositionStale = $ageSeconds !== null && $ageSeconds > User::ONLINE_WINDOW_SECONDS;
+                $lowAccuracy = $latest && $latest->accuracy_m !== null && (float) $latest->accuracy_m > 250;
 
                 return [
-                    'id'             => $tech->id,
-                    'name'           => $tech->name,
-                    'phone'          => $tech->phone ?? '-',
-                    'is_online'      => $onlineStatus,
-                    'last_seen'      => $latest ? $latest->created_at->diffForHumans() : 'No telemetry yet',
-                    'last_seen_time' => $latest ? $latest->created_at->format('H:i:s') : '-',
-                    'latitude'       => $latest ? (float) $latest->latitude : null,
-                    'longitude'      => $latest ? (float) $latest->longitude : null,
-                    'accuracy_m'     => $latest ? $latest->accuracy_m : null,
-                    'speed_mps'      => $latest ? $latest->speed_mps : null,
+                    'id'                   => $tech->id,
+                    'name'                 => $tech->name,
+                    'phone'                => $tech->phone ?? '-',
+                    'is_online'            => $onlineStatus,
+                    'last_seen'            => $capturedAt ? $capturedAt->diffForHumans() : 'No telemetry yet',
+                    'last_seen_time'       => $capturedAt ? $capturedAt->format('H:i:s') : '-',
+                    'captured_at'          => $capturedAt ? $capturedAt->toIso8601String() : null,
+                    'position_age_seconds' => $ageSeconds,
+                    'is_position_stale'    => $isPositionStale,
+                    'low_accuracy'         => $lowAccuracy,
+                    'latitude'             => $latest ? (float) $latest->latitude : null,
+                    'longitude'            => $latest ? (float) $latest->longitude : null,
+                    'accuracy_m'           => $latest ? $latest->accuracy_m : null,
+                    'speed_mps'            => $latest ? $latest->speed_mps : null,
                     'active_task'    => $activeTask ? [
                         'id'            => $activeTask->id,
                         'title'         => $activeTask->title,

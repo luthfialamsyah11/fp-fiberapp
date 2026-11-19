@@ -1,8 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { Platform, ToastController } from '@ionic/angular';
+import { AlertController, Platform, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+import { AuthService } from './services/auth.service';
+import { ApiService } from './services/api.service';
+import { LocationService } from './services/location.service';
 
 @Component({
   selector: 'app-root',
@@ -15,41 +19,103 @@ export class AppComponent {
   private router = inject(Router);
   private location = inject(Location);
   private toastCtrl = inject(ToastController);
-  
+  private alertCtrl = inject(AlertController);
+  private auth = inject(AuthService);
+  private api = inject(ApiService);
+  private locationService = inject(LocationService);
+
   private lastTimeBackPress = 0;
   private timePeriodToExit = 2000;
+  private hasShownPermissionPrompt = false;
 
   constructor() {
     this.initializeApp();
   }
 
   initializeApp() {
-    this.platform.ready().then(() => {
-      // Register Android back button / swipe gesture
-      this.platform.backButton.subscribeWithPriority(10, async (processNextHandler) => {
-        const currentUrl = this.router.url;
-        
-        // Define root pages where back button should exit the app
-        const rootUrls = ['/dashboard', '/login'];
-        
-        // If current page is a root page
-        if (rootUrls.some(url => currentUrl.includes(url)) || currentUrl === '/') {
+    this.platform.ready().then(async () => {
+      // 1. Register Android hardware back button / swipe gesture
+      this.platform.backButton.subscribeWithPriority(10, async () => {
+        const currentUrl = (this.router.url || '').split('?')[0];
+
+        // Root tabs where back button confirms app exit
+        const rootUrls = ['/task-list', '/map', '/profile', '/login', '/'];
+
+        if (rootUrls.includes(currentUrl)) {
           if (new Date().getTime() - this.lastTimeBackPress < this.timePeriodToExit) {
             App.exitApp();
           } else {
             const toast = await this.toastCtrl.create({
               message: 'Press back again to exit',
               duration: 2000,
-              position: 'bottom'
+              position: 'bottom',
             });
             await toast.present();
             this.lastTimeBackPress = new Date().getTime();
           }
         } else {
-          // If not a root page, let normal back navigation happen
           this.location.back();
         }
       });
+
+      // 2. App-level GPS & badge bootstrap so tracking works regardless of which route the APK opens on (AP-3)
+      await this.bootstrapSessionTelemetry();
+
+      // 3. Prompt native Android background location guidance once if permission is denied (AP-5)
+      this.locationService.status$.subscribe(status => {
+        if (status === 'no_permission' && Capacitor.isNativePlatform() && !this.hasShownPermissionPrompt) {
+          this.hasShownPermissionPrompt = true;
+          this.presentBackgroundPermissionGuide();
+        }
+      });
     });
+  }
+
+  private async bootstrapSessionTelemetry() {
+    try {
+      if (!(await this.auth.isLoggedIn())) return;
+
+      const [meRes, tasksRes]: [any, any] = await Promise.all([
+        this.api.getMe().catch(() => null),
+        this.api.getTasks().catch(() => null),
+      ]);
+
+      const user = meRes?.data ?? meRes;
+      if (user && user.is_online !== false) {
+        this.locationService.startTracking();
+      }
+
+      const list = Array.isArray(tasksRes) ? tasksRes : (tasksRes?.data ?? []);
+      if (Array.isArray(list)) {
+        const assignedCount = list.filter((t: any) => t.status === 'assigned').length;
+        this.api.setAssignedCount(assignedCount);
+
+        const active = list.find((t: any) => t.status === 'on-going')
+          || list.find((t: any) => t.status === 'accepted');
+        if (active?.id) {
+          this.locationService.setActiveTaskId(active.id);
+        }
+      }
+    } catch {
+      // Non-fatal startup fallback
+    }
+  }
+
+  private async presentBackgroundPermissionGuide() {
+    const alert = await this.alertCtrl.create({
+      header: 'Background GPS Required',
+      message:
+        'To share accurate live position with NOC Dispatch even when the screen is locked, please enable Location -> "Allow all the time" and set Battery to "Unrestricted" in App Settings.',
+      buttons: [
+        { text: 'Later', role: 'cancel' },
+        {
+          text: 'Open Settings',
+          handler: () => {
+            this.locationService.openLocationSettings();
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

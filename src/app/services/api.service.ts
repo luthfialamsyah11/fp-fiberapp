@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { StorageService } from './storage.service';
 import { environment } from '../../environments/environment';
 import { DEMO_INVENTORY, DEMO_USER, createInitialDemoTasks } from './demo-mock.data';
@@ -36,6 +36,12 @@ export class ApiService {
     currency: 'USD',
     default_country_code: '62',
   };
+
+  readonly assignedCount$ = new BehaviorSubject<number>(0);
+
+  setAssignedCount(count: number) {
+    this.assignedCount$.next(Math.max(0, Number(count) || 0));
+  }
 
   getBaseUrl(): string {
     return this.baseUrl.replace(/\/api$/, '');

@@ -56,7 +56,7 @@
                     Technician Fleet
                 </h3>
                 <span id="badge-tech-count" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                    {{ $technicians->filter(fn($t) => $t->isEffectivelyOnline(10))->count() }} / {{ $technicians->count() }} Active
+                    {{ $technicians->filter(fn($t) => $t->isEffectivelyOnline())->count() }} / {{ $technicians->count() }} Active
                 </span>
             </div>
             
@@ -98,7 +98,7 @@
                         </div>
                         
                         <div class="flex items-center gap-1.5 flex-shrink-0">
-                            @if($tech->isEffectivelyOnline(10))
+                            @if($tech->isEffectivelyOnline())
                                 <span class="h-2 w-2 rounded-full bg-emerald-500" title="Active Online"></span>
                             @else
                                 <span class="h-2 w-2 rounded-full bg-slate-300" title="Offline"></span>
@@ -274,8 +274,17 @@
             shadowSize: [41, 41]
         });
 
-        // Dictionary to track active Leaflet markers by technician ID
+        // Dictionary to track active Leaflet markers & GPS accuracy circles by technician ID
         const techMarkers = {};
+        const techCircles = {};
+        const greyIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
         let routePolyline = null;
         let destinationMarker = null;
         let destinationLine = null;
@@ -299,8 +308,15 @@
                 `;
             }
 
+            const accuracyBadge = tech.accuracy_m
+                ? `<div style="font-size: 9px; margin-top: 3px; color: ${tech.low_accuracy ? '#B45309' : '#64748B'}; font-weight: ${tech.low_accuracy ? '700' : '500'};">
+                    Accuracy: &plusmn;${Math.round(tech.accuracy_m)}m ${tech.low_accuracy ? '(Low Accuracy)' : ''}
+                    ${tech.is_position_stale ? ' &bull; <span style="color:#DC2626;font-weight:700;">Stale GPS</span>' : ''}
+                   </div>`
+                : '';
+
             return `
-                <div style="font-family: 'Inter', sans-serif; padding: 12px; width: 220px;">
+                <div style="font-family: 'Inter', sans-serif; padding: 12px; width: 230px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                         <h4 style="margin: 0; font-weight: 700; font-size: 13px; color: #0F172A;">${escapeHtml(tech.name)}</h4>
                         <span style="font-size: 9px; padding: 2px 6px; border-radius: 9999px; font-weight: 600; background: ${tech.is_online ? '#DCFCE7; color: #166534;' : '#F1F5F9; color: #64748B;'}">
@@ -311,11 +327,12 @@
                         📞 ${escapeHtml(tech.phone || '-')}
                     </div>
                     ${activeTaskHtml}
-                    <div style="font-size: 9px; font-mono; color: #64748B; background: #F8FAFC; padding: 4px 6px; border-radius: 4px; border: 1px solid #E2E8F0; margin-top: 4px;">
+                    <div style="font-size: 9px; font-family: monospace; color: #64748B; background: #F8FAFC; padding: 4px 6px; border-radius: 4px; border: 1px solid #E2E8F0; margin-top: 4px;">
                         Coordinates: ${tech.latitude ? tech.latitude.toFixed(5) : '-'}, ${tech.longitude ? tech.longitude.toFixed(5) : '-'}
+                        ${accuracyBadge}
                     </div>
                     <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #94A3B8; border-top: 1px solid #E2E8F0; padding-top: 6px;">
-                        <span>Update: ${tech.last_seen || '-'}</span>
+                        <span>Fix: ${tech.last_seen || '-'}</span>
                         <div style="display: flex; gap: 6px; align-items: center;">
                             <a href="https://www.google.com/maps/dir/?api=1&destination=${tech.latitude},${tech.longitude}" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 700; text-decoration: none;" title="Open Google Maps">Maps</a>
                             <span style="color: #CBD5E1;">&bull;</span>
@@ -415,7 +432,9 @@
 
                     if (tech.latitude !== null && tech.longitude !== null) {
                         activeCoordinates.push([tech.latitude, tech.longitude]);
-                        const iconToUse = tech.active_task ? greenIcon : blueIcon;
+                        const iconToUse = (!tech.is_online || tech.is_position_stale)
+                            ? greyIcon
+                            : (tech.active_task ? greenIcon : blueIcon);
 
                         if (techMarkers[tech.id]) {
                             const existingMarker = techMarkers[tech.id];
@@ -432,14 +451,42 @@
                             marker.bindPopup(buildPopupContent(tech), { className: 'custom-tech-popup' });
                             techMarkers[tech.id] = marker;
                         }
+
+                        // GPS Accuracy Radius Circle
+                        if (tech.accuracy_m && tech.accuracy_m > 10) {
+                            const circleColor = tech.low_accuracy ? '#D97706' : (tech.is_online ? '#2563EB' : '#94A3B8');
+                            if (techCircles[tech.id]) {
+                                techCircles[tech.id].setLatLng([tech.latitude, tech.longitude]);
+                                techCircles[tech.id].setRadius(Math.min(tech.accuracy_m, 1000));
+                                techCircles[tech.id].setStyle({ color: circleColor, fillColor: circleColor });
+                            } else {
+                                techCircles[tech.id] = L.circle([tech.latitude, tech.longitude], {
+                                    radius: Math.min(tech.accuracy_m, 1000),
+                                    color: circleColor,
+                                    fillColor: circleColor,
+                                    fillOpacity: tech.low_accuracy ? 0.14 : 0.08,
+                                    weight: 1,
+                                    dashArray: tech.low_accuracy ? '4, 4' : null
+                                }).addTo(map);
+                            }
+                        } else if (techCircles[tech.id]) {
+                            map.removeLayer(techCircles[tech.id]);
+                            delete techCircles[tech.id];
+                        }
                     }
                 });
 
-                // Prune stale markers for removed technicians
+                // Prune stale markers & circles for removed technicians
                 Object.keys(techMarkers).forEach(id => {
                     if (!incomingIds.has(Number(id))) {
                         map.removeLayer(techMarkers[id]);
                         delete techMarkers[id];
+                    }
+                });
+                Object.keys(techCircles).forEach(id => {
+                    if (!incomingIds.has(Number(id))) {
+                        map.removeLayer(techCircles[id]);
+                        delete techCircles[id];
                     }
                 });
 

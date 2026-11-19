@@ -36,6 +36,11 @@ export class AuthService {
       await this.storage.remove('demo_mode');
       await this.storage.set('token', res.token);
       await this.storage.set('user', res.user);
+
+      // Start GPS telemetry right on login if technician is online (independent of route)
+      if (res.user?.is_online !== false) {
+        this.locationService.startTracking();
+      }
       return res;
     } catch (error: any) {
       if (isDebug) console.error('[AuthService] Login error:', error);

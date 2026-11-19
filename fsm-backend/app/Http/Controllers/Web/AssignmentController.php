@@ -39,7 +39,7 @@ class AssignmentController extends Controller
             ->get();
 
         foreach ($technicians as $tech) {
-            $tech->effectively_online = $tech->isEffectivelyOnline(10);
+            $tech->effectively_online = $tech->isEffectivelyOnline();
         }
 
         // Pending / Rejected queue strictly excluding completed tasks, ordered High -> Medium -> Low
@@ -151,7 +151,7 @@ class AssignmentController extends Controller
         }
 
         foreach ($technicians as $tech) {
-            $tech->effectively_online = $tech->isEffectivelyOnline(10);
+            $tech->effectively_online = $tech->isEffectivelyOnline();
         }
 
         $best = $this->findOptimalTechnician($task, $technicians);

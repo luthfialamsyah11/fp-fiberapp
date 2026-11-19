@@ -62,6 +62,34 @@
   height: 28px;
 }
 
+.tab-badge {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  box-shadow: 0 0 0 2px #FFFFFF;
+}
+
+.tab-warn-dot {
+  position: absolute;
+  top: 0;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #F59E0B;
+  box-shadow: 0 0 0 2px #FFFFFF;
+}
+
 .tab-indicator {
   position: absolute;
   top: -2px;

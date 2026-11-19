@@ -28,6 +28,15 @@ class TechnicianLocation extends Model
         'captured_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (TechnicianLocation $location) {
+            if (empty($location->captured_at)) {
+                $location->captured_at = now();
+            }
+        });
+    }
+
     public function technician()
     {
         return $this->belongsTo(User::class, 'technician_id');

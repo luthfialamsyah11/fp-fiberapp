@@ -32,8 +32,8 @@ class LocationController extends Controller
             return response()->json(['message' => 'Invalid GPS coordinates (Null Island rejected).'], 422);
         }
 
-        if ($request->filled('accuracy_m') && (float) $request->accuracy_m > 250) {
-            return response()->json(['message' => 'GPS reading accuracy is too low (> 250m).'], 422);
+        if ($request->filled('accuracy_m') && (float) $request->accuracy_m > 1000) {
+            return response()->json(['message' => 'GPS reading accuracy is too low (> 1000m).'], 422);
         }
 
         if ($request->filled('speed_mps') && (float) $request->speed_mps > 70) {
@@ -125,7 +125,7 @@ class LocationController extends Controller
                 $skipped++;
                 continue;
             }
-            if (isset($pt['accuracy_m']) && (float) $pt['accuracy_m'] > 250) {
+            if (isset($pt['accuracy_m']) && (float) $pt['accuracy_m'] > 1000) {
                 $skipped++;
                 continue;
             }

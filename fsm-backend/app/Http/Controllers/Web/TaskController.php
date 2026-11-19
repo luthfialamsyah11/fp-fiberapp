@@ -179,18 +179,19 @@ class TaskController extends Controller
 
         $technicianFleet = $technicians->map(function ($tech) {
             $loc = $tech->latestLocation;
+            $capturedAt = $loc ? ($loc->captured_at ?? $loc->created_at) : null;
             $activeTask = $tech->tasks->first();
             return [
                 'id'                 => $tech->id,
                 'name'               => $tech->name,
                 'email'              => $tech->email,
                 'phone'              => $tech->phone ?? '',
-                'is_online'          => $tech->isEffectivelyOnline(10),
+                'is_online'          => $tech->isEffectivelyOnline(),
                 'active_tasks_count' => (int) ($tech->active_tasks_count ?? 0),
                 'active_task_title'  => $activeTask ? $activeTask->title : null,
                 'latitude'           => ($loc && $loc->latitude) ? (float) $loc->latitude : null,
                 'longitude'          => ($loc && $loc->longitude) ? (float) $loc->longitude : null,
-                'last_seen'          => $loc ? $loc->created_at->diffForHumans() : 'No GPS signal yet',
+                'last_seen'          => $capturedAt ? $capturedAt->diffForHumans() : 'No GPS signal yet',
             ];
         })->values();
 
@@ -501,6 +502,8 @@ class TaskController extends Controller
             $etaMinutes = max(1, (int) ceil(($distanceMeters / $speedMps) / 60));
         }
 
+        $capturedAt = $loc ? ($loc->captured_at ?? $loc->created_at) : null;
+
         return response()->json([
             'task_id'          => $task->id,
             'status'           => $task->status,
@@ -510,10 +513,11 @@ class TaskController extends Controller
             'technician'       => $tech ? [
                 'id'              => $tech->id,
                 'name'            => $tech->name,
-                'is_online'       => $tech->isEffectivelyOnline(10),
+                'is_online'       => $tech->isEffectivelyOnline(),
                 'latitude'        => ($loc && $loc->latitude) ? (float) $loc->latitude : null,
                 'longitude'       => ($loc && $loc->longitude) ? (float) $loc->longitude : null,
-                'last_seen'       => $loc ? $loc->created_at->diffForHumans() : 'No GPS signal',
+                'last_seen'       => $capturedAt ? $capturedAt->diffForHumans() : 'No GPS signal',
+                'captured_at'     => $capturedAt ? $capturedAt->toIso8601String() : null,
                 'distance_meters' => $distanceMeters !== null ? round($distanceMeters) : null,
                 'distance_km'     => $distanceMeters !== null ? round($distanceMeters / 1000, 2) : null,
                 'eta_minutes'     => $etaMinutes,

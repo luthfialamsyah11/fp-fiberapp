@@ -30,7 +30,7 @@ class DashboardController extends Controller
             ->get();
 
         $activeTechsCount = $technicians->where('is_active', true)->count();
-        $onlineTechsCount = $technicians->filter(fn ($t) => $t->is_active && $t->isEffectivelyOnline(10))->count();
+        $onlineTechsCount = $technicians->filter(fn ($t) => $t->is_active && $t->isEffectivelyOnline())->count();
 
         $totalProofs = ProofOfWork::count();
         $totalTasksCount = (int) ($taskStats->total_tasks ?? 0);
@@ -79,7 +79,9 @@ class DashboardController extends Controller
 
         $fleetRoster = $technicians->map(function ($tech) {
             $ongoingTask = $tech->tasks->firstWhere('status', 'on-going') ?? $tech->tasks->firstWhere('status', 'accepted');
-            $effectiveOnline = $tech->isEffectivelyOnline(10);
+            $effectiveOnline = $tech->isEffectivelyOnline();
+            $loc = $tech->latestLocation;
+            $capturedAt = $loc ? ($loc->captured_at ?? $loc->updated_at ?? $loc->created_at) : null;
             return [
                 'id'               => $tech->id,
                 'name'             => $tech->name,
@@ -89,9 +91,9 @@ class DashboardController extends Controller
                 'active_task'      => $ongoingTask ? $ongoingTask->title : null,
                 'active_task_id'   => $ongoingTask ? $ongoingTask->id : null,
                 'active_tasks_qty' => $tech->tasks->count(),
-                'last_ping'        => $tech->latestLocation ? $tech->latestLocation->updated_at->diffForHumans() : 'No signal yet',
-                'latitude'         => $tech->latestLocation ? (float) $tech->latestLocation->latitude : null,
-                'longitude'        => $tech->latestLocation ? (float) $tech->latestLocation->longitude : null,
+                'last_ping'        => $capturedAt ? $capturedAt->diffForHumans() : 'No signal yet',
+                'latitude'         => $loc ? (float) $loc->latitude : null,
+                'longitude'        => $loc ? (float) $loc->longitude : null,
             ];
         });
 
@@ -101,7 +103,7 @@ class DashboardController extends Controller
                 return null;
             }
 
-            $isOnline = $tech->isEffectivelyOnline(10);
+            $isOnline = $tech->isEffectivelyOnline();
             $ongoingTask = $tech->tasks->firstWhere('status', 'on-going');
             $hasOngoing = !is_null($ongoingTask);
             $activeTask = $ongoingTask ?? $tech->tasks->firstWhere('status', 'accepted');

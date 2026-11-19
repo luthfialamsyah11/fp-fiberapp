@@ -18,8 +18,13 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $tasks = Task::where('technician_id', auth()->id())
-            ->when($request->status, fn ($q) => $q->where('status', $request->status))
-            ->with(['progressUpdates', 'proofOfWork'])
+            ->when(
+                $request->filled('status'),
+                fn ($q) => $q->where('status', $request->status),
+                fn ($q) => $q->whereIn('status', ['assigned', 'accepted', 'on-going'])
+            )
+            ->with(['latestProgressUpdate'])
+            ->withCount(['proofOfWork', 'materials'])
             ->orderByDesc('created_at')
             ->get();
 

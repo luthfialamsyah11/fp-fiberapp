@@ -10,10 +10,26 @@
       <span class="greeting-sub">Welcome back</span>
       <h2 class="tech-name">{{ user?.name || 'FiberOps Specialist' }}</h2>
     </div>
-    <button class="status-pill" [class.online]="isOnline" (click)="toggleOnlineStatus()">
+    <button
+      class="status-pill"
+      [class.online]="isOnline && !hasGpsWarning"
+      [class.warn]="hasGpsWarning"
+      (click)="toggleOnlineStatus()"
+    >
       <span class="status-dot"></span>
-      <span class="status-text">{{ isOnline ? 'Online' : 'Offline' }}</span>
+      <span class="status-text">
+        {{ !isOnline ? 'Offline' : (hasGpsWarning ? (gpsStatus === 'no_permission' ? 'No GPS Perm' : 'GPS Issue') : 'Online') }}
+      </span>
     </button>
+  </div>
+
+  <!-- Actionable GPS Health Warning Banner (AP-5) -->
+  <div class="gps-health-banner" *ngIf="hasGpsWarning" (click)="fixGpsIssue()">
+    <div class="gps-health-left">
+      <ion-icon name="warning-outline"></ion-icon>
+      <span>{{ gpsStatusMessage }}</span>
+    </div>
+    <span class="gps-health-cta">Fix &rarr;</span>
   </div>
 
   <!-- Active Mission Card (Sticky Hero when in progress or accepted) -->

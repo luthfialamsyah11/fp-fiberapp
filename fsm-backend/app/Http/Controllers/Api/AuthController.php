@@ -27,9 +27,10 @@ class AuthController extends Controller
             return response()->json(['message' => 'Your account has been deactivated.'], 403);
         }
 
+        // Preserve technician's explicit offline preference across logins; default new/null accounts to online
         $user->update([
-            'is_online'     => true,
-            'last_seen_at'  => now(),
+            'is_online'    => $user->is_online === null ? true : (bool) $user->is_online,
+            'last_seen_at' => now(),
         ]);
         $token = $user->createToken('auth_token')->plainTextToken;
 

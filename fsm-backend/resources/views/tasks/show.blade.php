@@ -615,12 +615,12 @@
                 <div class="p-3 bg-slate-50 border-t border-fsmBorder text-[10px] text-textSecondary font-medium flex justify-between items-center gap-2">
                     <span class="font-mono">Pin: {{ number_format($task->latitude, 5) }}, {{ number_format($task->longitude, 5) }}</span>
                     <span id="live-tech-presence">
-                        @if($task->technician && $task->technician->isEffectivelyOnline(10))
+                        @if($task->technician && $task->technician->isEffectivelyOnline())
                             <span class="text-emerald-600 flex items-center gap-1 font-semibold">
                                 <span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span> Tech Online
                             </span>
                         @elseif($task->technician && $task->technician->latestLocation)
-                            <span class="text-slate-400">Last ping {{ $task->technician->latestLocation->created_at->diffForHumans() }}</span>
+                            <span class="text-slate-400">Last ping {{ ($task->technician->latestLocation->captured_at ?? $task->technician->latestLocation->created_at)->diffForHumans() }}</span>
                         @else
                             <span class="text-slate-400">No GPS telemetry</span>
                         @endif

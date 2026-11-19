@@ -4,11 +4,14 @@ const config: CapacitorConfig = {
   appId: 'com.fsm.TechnicianApp',
   appName: 'FsmTechnicianApp',
   webDir: 'www',
+  android: {
+    useLegacyBridge: true,
+  },
   plugins: {
     CapacitorHttp: {
-      enabled: true
-    }
-  }
+      enabled: true,
+    },
+  },
 };
 
 export default config;

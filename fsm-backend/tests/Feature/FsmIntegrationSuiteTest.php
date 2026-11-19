@@ -225,7 +225,7 @@ class FsmIntegrationSuiteTest extends TestCase
                 [
                     'latitude'    => -6.2090,
                     'longitude'   => 106.8458,
-                    'accuracy_m'  => 500.0, // > 250m accuracy threshold
+                    'accuracy_m'  => 1500.0, // > 1000m accuracy threshold
                     'client_uuid' => 'uuid-point-2',
                 ],
             ],
@@ -240,13 +240,16 @@ class FsmIntegrationSuiteTest extends TestCase
         $this->assertNotNull($loc);
         $this->assertEquals($task->id, $loc->task_id);
 
-        // Technician is currently effectively online
-        $this->assertTrue($tech->fresh()->isEffectivelyOnline(10));
+        // Technician is currently effectively online (2-minute heartbeat window)
+        $this->assertTrue($tech->fresh()->isEffectivelyOnline());
 
-        // Simulate phone dying 25 minutes ago: even with is_online=true, effective online becomes false
-        $tech->update(['last_seen_at' => now()->subMinutes(25)]);
-        TechnicianLocation::where('technician_id', $tech->id)->update(['created_at' => now()->subMinutes(25)]);
-        $this->assertFalse($tech->fresh()->isEffectivelyOnline(10));
+        // Simulate phone dying 3 minutes ago: even with is_online=true, effective online becomes false
+        $tech->update(['last_seen_at' => now()->subMinutes(3)]);
+        TechnicianLocation::where('technician_id', $tech->id)->update([
+            'created_at'  => now()->subMinutes(3),
+            'captured_at' => now()->subMinutes(3),
+        ]);
+        $this->assertFalse($tech->fresh()->isEffectivelyOnline());
     }
 
     public function test_customer_tracking_privacy_redaction_and_24h_expiry(): void
@@ -1053,5 +1056,179 @@ class FsmIntegrationSuiteTest extends TestCase
         $this->actingAs($admin)->getJson('/tracking/live-data')->assertOk();
         $this->actingAs($admin)->get('/inventory/export')->assertStatus(200);
         $this->actingAs($admin)->get('/reports/export')->assertStatus(200);
+    }
+
+    public function test_apk_gps_replay_preserves_newest_position_and_2min_offline_window(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['email' => 'gpstech@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+
+        // 1. Fresh GPS fix posted FIRST
+        $freshTime = now()->subSeconds(10)->toIso8601String();
+        $this->actingAs($tech, 'sanctum')->postJson('/api/location', [
+            'latitude'    => -6.2000,
+            'longitude'   => 106.8000,
+            'accuracy_m'  => 18.0,
+            'captured_at' => $freshTime,
+            'client_uuid' => 'fresh-fix-uuid',
+            'source'      => 'foreground',
+        ])->assertOk();
+
+        // 2. Older offline buffered batch replayed AFTERWARD (gets higher DB id!)
+        $olderTime = now()->subMinutes(5)->toIso8601String();
+        $this->actingAs($tech, 'sanctum')->postJson('/api/location/batch', [
+            'points' => [
+                [
+                    'latitude'    => -6.9999,
+                    'longitude'   => 107.9999,
+                    'accuracy_m'  => 420.0, // indoor low-accuracy (< 1000m accepted)
+                    'captured_at' => $olderTime,
+                    'client_uuid' => 'replayed-old-uuid',
+                    'source'      => 'background',
+                ],
+            ],
+        ])->assertOk()->assertJson(['accepted' => 1, 'skipped' => 0]);
+
+        // 3. Admin live tracking MUST show the FRESH position (-6.2, 106.8), NOT the older replayed point!
+        $liveRes = $this->actingAs($admin)->getJson('/tracking/live-data')->assertOk();
+        $techRow = collect($liveRes->json('technicians'))->firstWhere('id', $tech->id);
+        $this->assertNotNull($techRow);
+        $this->assertEquals(-6.2, round((float) $techRow['latitude'], 4));
+        $this->assertEquals(106.8, round((float) $techRow['longitude'], 4));
+        $this->assertTrue($techRow['is_online']);
+        $this->assertFalse($techRow['is_position_stale']);
+        $this->assertNotNull($techRow['captured_at']);
+
+        // 4. After 3 minutes without heartbeat, Admin marks technician Offline & GPS stale
+        $tech->update(['last_seen_at' => now()->subMinutes(3)]);
+        TechnicianLocation::where('technician_id', $tech->id)->update([
+            'captured_at' => now()->subMinutes(3),
+            'created_at'  => now()->subMinutes(3),
+        ]);
+
+        $staleRes = $this->actingAs($admin)->getJson('/tracking/live-data')->assertOk();
+        $staleRow = collect($staleRes->json('technicians'))->firstWhere('id', $tech->id);
+        $this->assertFalse($staleRow['is_online']);
+        $this->assertTrue($staleRow['is_position_stale']);
+
+        // 5. Explicit Offline preference is preserved across login (AP-10)
+        $tech->update(['is_online' => false]);
+        $loginRes = $this->postJson('/api/login', [
+            'email'    => 'gpstech@fsm.com',
+            'password' => 'password123',
+        ])->assertOk();
+        $this->assertFalse((bool) $loginRes->json('user.is_online'));
+    }
+
+    public function test_apk_queue_filters_active_only_and_end_to_end_admin_apk_sync(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['email' => 'e2etech@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+        $item = InventoryItem::create([
+            'code'       => 'E2E-ONT-01',
+            'name'       => 'FiberOps ONT Router',
+            'unit'       => 'unit',
+            'stock'      => 10,
+            'unit_price' => 30.0,
+            'category'   => 'device',
+            'is_active'  => true,
+        ]);
+
+        // Seed an already-completed task and a rejected task for this tech
+        $oldCompleted = Task::create([
+            'title'         => 'Old Completed Job',
+            'customer_name' => 'Past Client',
+            'address'       => 'Old Rd',
+            'technician_id' => $tech->id,
+            'status'        => 'completed',
+            'priority'      => 'low',
+        ]);
+        $oldRejected = Task::create([
+            'title'         => 'Old Rejected Job',
+            'customer_name' => 'Declined Client',
+            'address'       => 'No Rd',
+            'technician_id' => $tech->id,
+            'status'        => 'rejected',
+            'priority'      => 'low',
+        ]);
+
+        // 1. Admin creates & dispatches new work order
+        $this->actingAs($admin)->post('/tasks', [
+            'title'          => 'E2E Fiber Activation',
+            'customer_name'  => 'PT Siber Maju',
+            'customer_phone' => '+6281234567890',
+            'address'        => 'Jl. Gatot Subroto 99',
+            'latitude'       => -6.2200,
+            'longitude'      => 106.8200,
+            'technician_id'  => $tech->id,
+            'priority'       => 'high',
+        ])->assertRedirect();
+
+        $task = Task::where('title', 'E2E Fiber Activation')->firstOrFail();
+
+        // 2. APK active queue excludes completed & rejected tasks (AP-6), while /tasks/history returns completed
+        $queueIds = collect($this->actingAs($tech, 'sanctum')->getJson('/api/tasks')->assertOk()->json('data'))
+            ->pluck('id')->all();
+        $this->assertContains($task->id, $queueIds);
+        $this->assertNotContains($oldCompleted->id, $queueIds);
+        $this->assertNotContains($oldRejected->id, $queueIds);
+
+        $historyIds = collect($this->actingAs($tech, 'sanctum')->getJson('/api/tasks/history')->assertOk()->json('data'))
+            ->pluck('id')->all();
+        $this->assertContains($oldCompleted->id, $historyIds);
+
+        // 3. APK executes full lifecycle: accept -> start -> progress -> proof -> BOM -> signature -> complete
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/accept")->assertOk();
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/start")->assertOk();
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/progress", [
+            'note'             => 'Spliced dropcore at ODP-12',
+            'progress_percent' => 60,
+        ])->assertCreated();
+
+        $pngFile = \Illuminate\Http\UploadedFile::fake()->createWithContent(
+            'after.png',
+            base64_decode(str_replace('data:image/png;base64,', '', $this->validPngBase64))
+        );
+        $this->actingAs($tech, 'sanctum')->post("/api/tasks/{$task->id}/proof", [
+            'image'       => $pngFile,
+            'description' => 'ONT online -17 dBm',
+            'slot'        => 'after',
+        ])->assertCreated();
+
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/materials", [
+            'inventory_item_id' => $item->id,
+            'quantity'          => 1,
+            'serial_number'     => 'SN-E2E-99',
+        ])->assertCreated();
+
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/signature", [
+            'signature'   => $this->validPngBase64,
+            'signer_name' => 'Bapak Andi',
+        ])->assertOk();
+
+        $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/complete")->assertOk();
+
+        // 4. Verify Admin Portal reflects every mutation immediately
+        $freshTask = $task->fresh();
+        $this->assertEquals('completed', $freshTask->status);
+        $this->assertEquals(9.0, (float) $item->fresh()->stock);
+
+        $this->actingAs($admin)->get("/tasks/{$task->id}")
+            ->assertStatus(200)
+            ->assertSee('E2E Fiber Activation')
+            ->assertSee('SN-E2E-99');
+
+        $this->actingAs($admin)->get('/proofs')
+            ->assertStatus(200)
+            ->assertSee('E2E Fiber Activation');
+
+        $this->actingAs($admin)->get('/history')
+            ->assertStatus(200)
+            ->assertSee('PT Siber Maju')
+            ->assertSee('#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT));
+
+        $this->getJson("/tasks/{$task->id}/bast/verify?token={$freshTask->tracking_token}")
+            ->assertOk()
+            ->assertJson(['verified' => true]);
     }
 }

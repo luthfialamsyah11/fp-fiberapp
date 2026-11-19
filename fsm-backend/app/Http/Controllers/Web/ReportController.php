@@ -134,7 +134,7 @@ class ReportController extends Controller
                     'name'            => $tech->name,
                     'email'           => $tech->email,
                     'phone'           => $tech->phone ?? '-',
-                    'is_online'       => $tech->isEffectivelyOnline(10),
+                    'is_online'       => $tech->isEffectivelyOnline(),
                     'total_assigned'  => $total,
                     'completed'       => $completed,
                     'active'          => $active,

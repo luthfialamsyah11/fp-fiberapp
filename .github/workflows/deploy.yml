@@ -54,7 +54,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          timeout: 60000
+          timeout: 120000
           local-dir: ./landing-page/
           server-dir: ${{ vars.FTP_LANDING_DIR || './' }}
           log-level: standard
@@ -62,7 +62,7 @@ jobs:
 
       - name: 🔁 Retry Root Landing Page (if transient FTP drop)
         if: steps.ftp_landing.outcome == 'failure'
-        run: sleep 15
+        run: sleep 25
 
       - name: 🚀 Deploy Root Landing Page (Retry)
         if: steps.ftp_landing.outcome == 'failure'
@@ -72,13 +72,13 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          timeout: 60000
+          timeout: 120000
           local-dir: ./landing-page/
           server-dir: ${{ vars.FTP_LANDING_DIR || './' }}
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 12
+        run: sleep 15
 
       # 5. Deploy Compiled Frontend PWA to app/ (public_html/app)
       - name: 🚀 Deploy PWA Client
@@ -90,14 +90,14 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          timeout: 60000
+          timeout: 120000
           local-dir: ./www/
           server-dir: ${{ vars.FTP_APP_DIR || 'app/' }}
           dry-run: false
 
       - name: 🔁 Retry PWA Client (if transient FTP drop)
         if: steps.ftp_pwa.outcome == 'failure'
-        run: sleep 15
+        run: sleep 25
 
       - name: 🚀 Deploy PWA Client (Retry)
         if: steps.ftp_pwa.outcome == 'failure'
@@ -107,29 +107,48 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          timeout: 60000
+          timeout: 120000
           local-dir: ./www/
           server-dir: ${{ vars.FTP_APP_DIR || 'app/' }}
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 12
+        run: sleep 15
 
       # 6. Deploy Admin Public bootstrap assets to admin/ (public_html/admin)
       - name: 🚀 Deploy Admin Public
+        id: ftp_admin
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          timeout: 60000
+          timeout: 120000
+          local-dir: ./admin-public/
+          server-dir: ${{ vars.FTP_ADMIN_DIR || 'admin/' }}
+          dry-run: false
+
+      - name: 🔁 Retry Admin Public (if transient FTP drop)
+        if: steps.ftp_admin.outcome == 'failure'
+        run: sleep 25
+
+      - name: 🚀 Deploy Admin Public (Retry)
+        if: steps.ftp_admin.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          timeout: 120000
           local-dir: ./admin-public/
           server-dir: ${{ vars.FTP_ADMIN_DIR || 'admin/' }}
           dry-run: false
 
       - name: ⏳ Cooldown FTP Connection
-        run: sleep 12
+        run: sleep 15
 
       # 7. Deploy Backend Core Laravel to laravel-core/ (public_html/laravel-core)
       - name: 🚀 Deploy Laravel Backend Core
@@ -141,7 +160,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
-          timeout: 60000
+          timeout: 120000
           local-dir: ./fsm-backend/
           server-dir: ${{ vars.FTP_CORE_DIR || 'laravel-core/' }}
           dry-run: false

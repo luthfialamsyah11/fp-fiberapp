@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -355,17 +355,28 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const TOKEN = "{{ $task->tracking_token }}";
+        const TOKEN = @json($task->tracking_token);
+        const CUSTOMER_NAME = @json($task->customer_name);
         const IS_EXPIRED = {{ ($isExpired ?? false) ? 'true' : 'false' }};
         const HAS_INITIAL_TECH_LOC = {{ $latestLocation ? 'true' : 'false' }};
-        const destLat = {{ (float) ($task->latitude ?? -6.2088) }};
-        const destLng = {{ (float) ($task->longitude ?? 106.8456) }};
+        const HAS_DEST_COORDS = {{ ($task->latitude && $task->longitude) ? 'true' : 'false' }};
+        const destLat = {{ $task->latitude ? (float) $task->latitude : 'null' }};
+        const destLng = {{ $task->longitude ? (float) $task->longitude : 'null' }};
 
         let techLat = {{ $latestLocation ? (float) $latestLocation->latitude : 'null' }};
         let techLng = {{ $latestLocation ? (float) $latestLocation->longitude : 'null' }};
 
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+        }
+
+        const initialCenter = HAS_DEST_COORDS
+            ? [destLat, destLng]
+            : (HAS_INITIAL_TECH_LOC ? [techLat, techLng] : [-6.2088, 106.8456]);
+
         // Initialize Map
-        const map = L.map('map-viewport', { zoomControl: false }).setView([destLat, destLng], 14);
+        const map = L.map('map-viewport', { zoomControl: false }).setView(initialCenter, 14);
 
         // Tile layer (Dark Cyber Theme by CartoDB)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -394,10 +405,12 @@
             iconAnchor: [20, 20]
         });
 
-        // Add Customer Marker
-        const destMarker = L.marker([destLat, destLng], { icon: customerIcon })
-            .addTo(map)
-            .bindPopup("<b>Subscriber Location:</b><br>{{ $task->customer_name }}");
+        // Add Customer Marker only when premise coordinates exist
+        if (HAS_DEST_COORDS) {
+            L.marker([destLat, destLng], { icon: customerIcon })
+                .addTo(map)
+                .bindPopup(`<b>Subscriber Location:</b><br>${escapeHtml(CUSTOMER_NAME)}`);
+        }
 
         let techMarker = null;
         let routeLine = null;
@@ -407,17 +420,23 @@
                 techMarker = L.marker([lat, lng], { icon: techIcon })
                     .addTo(map)
                     .bindPopup("<b>Field Technician Location</b>");
-                routeLine = L.polyline([[lat, lng], [destLat, destLng]], {
-                    color: '#00f2fe',
-                    weight: 4,
-                    opacity: 0.7,
-                    dashArray: '6, 8'
-                }).addTo(map);
-                const bounds = L.latLngBounds([[lat, lng], [destLat, destLng]]);
-                map.fitBounds(bounds, { padding: [60, 60] });
+                if (HAS_DEST_COORDS) {
+                    routeLine = L.polyline([[lat, lng], [destLat, destLng]], {
+                        color: '#00f2fe',
+                        weight: 4,
+                        opacity: 0.7,
+                        dashArray: '6, 8'
+                    }).addTo(map);
+                    const bounds = L.latLngBounds([[lat, lng], [destLat, destLng]]);
+                    map.fitBounds(bounds, { padding: [60, 60] });
+                } else {
+                    map.setView([lat, lng], 15);
+                }
             } else {
                 techMarker.setLatLng([lat, lng]);
-                routeLine.setLatLngs([[lat, lng], [destLat, destLng]]);
+                if (HAS_DEST_COORDS && routeLine) {
+                    routeLine.setLatLngs([[lat, lng], [destLat, destLng]]);
+                }
             }
         }
 

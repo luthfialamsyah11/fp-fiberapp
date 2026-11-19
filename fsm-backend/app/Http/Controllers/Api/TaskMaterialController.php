@@ -37,7 +37,13 @@ class TaskMaterialController extends Controller
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
-        // Prevent post-completion BOM tampering
+        // Prevent post-completion BOM tampering for all roles to preserve SHA-256 BAST integrity
+        if ($task->status === 'completed') {
+            return response()->json([
+                'message' => 'Materials cannot be modified on a completed and BAST-sealed work order. Request rework to reopen the task first.',
+            ], 409);
+        }
+
         if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && $user->role !== 'admin') {
             return response()->json(['message' => 'Materials cannot be modified after a work order is completed or closed.'], 422);
         }
@@ -83,6 +89,12 @@ class TaskMaterialController extends Controller
         $user = auth()->user();
         if ($task->technician_id !== $user->id && $user->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
+        }
+
+        if ($task->status === 'completed') {
+            return response()->json([
+                'message' => 'Materials cannot be removed from a completed and BAST-sealed work order. Request rework to reopen the task first.',
+            ], 409);
         }
 
         if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && $user->role !== 'admin') {

@@ -315,7 +315,7 @@
             </div>
             <div class="doc-meta">
                 <div class="bast-badge">OFFICIAL ACCEPTANCE CERTIFICATE</div>
-                <div>Certificate No: BAST/FSM/{{ date('Y') }}/{{ str_pad($task->id, 5, '0', STR_PAD_LEFT) }}</div>
+                <div>Certificate No: BAST/FSM/{{ $task->created_at?->format('Y') ?? date('Y') }}/{{ str_pad($task->id, 5, '0', STR_PAD_LEFT) }}</div>
                 <div>Date: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d/m/Y') : date('d/m/Y') }}</div>
             </div>
         </div>
@@ -344,7 +344,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">GPS Coordinates</span>
-                    <span class="info-val">{{ $task->latitude }}, {{ $task->longitude }}</span>
+                    <span class="info-val">{{ ($task->latitude && $task->longitude) ? ($task->latitude . ', ' . $task->longitude) : 'Not Recorded' }}</span>
                 </div>
             </div>
 
@@ -352,11 +352,11 @@
                 <h4>Work Order Details</h4>
                 <div class="info-row">
                     <span class="info-label">Ticket ID</span>
-                    <span class="info-val">#TSK-{{ $task->id }}</span>
+                    <span class="info-val">#TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Lead Technician</span>
-                    <span class="info-val">{{ $task->technician?->name ?? 'Field Specialist' }}</span>
+                    <span class="info-val">{{ $task->technician?->name ?? 'Unassigned Technician' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Execution Status</span>
@@ -364,7 +364,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">Completed Timestamp</span>
-                    <span class="info-val">{{ $task->updated_at->format('d/m/Y H:i') }} WIB</span>
+                    <span class="info-val">{{ ($task->completed_at ?? $task->updated_at)?->format('d/m/Y H:i') ?? '-' }} UTC</span>
                 </div>
             </div>
         </div>
@@ -444,11 +444,11 @@
                 <div class="sig-role">Lead Field Technician</div>
                 <div class="sig-box">
                     <div style="font-family: cursive; font-size: 20px; color: #0284c7;">
-                        {{ $task->technician?->name ?? 'Alex Gunawan' }}
+                        {{ $task->technician?->name ?? 'Unassigned Technician' }}
                     </div>
                 </div>
-                <div class="sig-name">{{ $task->technician?->name ?? 'Field Lead Technician' }}</div>
-                <div class="sig-date">Date: {{ date('d/m/Y') }}</div>
+                <div class="sig-name">{{ $task->technician?->name ?? 'Unassigned Technician' }}</div>
+                <div class="sig-date">Date: {{ ($task->completed_at ?? $task->updated_at)?->format('d/m/Y') ?? date('d/m/Y') }}</div>
             </div>
 
             <div class="sig-col">
@@ -476,7 +476,13 @@
                 <div style="word-break: break-all;">DIGEST: {{ $task->bast_hash ?? $task->computeBastHash() }}</div>
             </div>
             <div style="text-align: right;">
-                <div style="color: #059669; font-weight: 700;">&#10003; INTEGRITY VERIFIED</div>
+                @if($task->status !== 'completed')
+                    <div style="color: #d97706; font-weight: 700;">&#9203; DRAFT / PENDING COMPLETION SEAL</div>
+                @elseif($isIntegrityVerified ?? false)
+                    <div style="color: #059669; font-weight: 700;">&#10003; INTEGRITY VERIFIED</div>
+                @else
+                    <div style="color: #dc2626; font-weight: 700;">&#9888; SEAL MISMATCH DETECTED</div>
+                @endif
                 <div><a href="{{ route('admin.tasks.bast.verify', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" style="color: #0284c7; text-decoration: none;">Verify JSON Seal &rarr;</a></div>
             </div>
         </div>

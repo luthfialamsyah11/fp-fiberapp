@@ -22,6 +22,7 @@ class BastController extends Controller
             return redirect()->route('admin.login');
         }
 
+        $task->ensureTrackingToken();
         $task->load(['technician', 'materials.inventoryItem', 'proofOfWork']);
 
         // Ensure cryptographic seal is computed if task is completed
@@ -30,9 +31,12 @@ class BastController extends Controller
                 'bast_hash'      => $task->computeBastHash(),
                 'bast_sealed_at' => $task->completed_at ?? $task->updated_at ?? now(),
             ]);
+            $task->refresh();
         }
 
-        return view('bast.print', compact('task'));
+        $isIntegrityVerified = $task->isBastIntegrityValid();
+
+        return view('bast.print', compact('task', 'isIntegrityVerified'));
     }
 
     /**

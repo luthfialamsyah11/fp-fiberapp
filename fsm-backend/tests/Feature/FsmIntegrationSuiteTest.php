@@ -327,7 +327,7 @@ class FsmIntegrationSuiteTest extends TestCase
 
         $this->actingAs($tech, 'sanctum')
             ->deleteJson("/api/tasks/{$task->id}/materials/{$matId}")
-            ->assertStatus(422);
+            ->assertStatus(409);
 
         $this->assertEquals(8, (float) $item->fresh()->stock);
     }
@@ -595,5 +595,170 @@ class FsmIntegrationSuiteTest extends TestCase
             'technician_id' => $tech->id,
             'status'        => 'assigned',
         ]);
+    }
+
+    public function test_sla_single_source_of_truth_between_model_and_filter(): void
+    {
+        $admin = $this->createAdmin();
+
+        // Future scheduled task created 6h ago -> MUST NOT be SLA breached
+        $futureScheduled = Task::create([
+            'title'         => 'Future Scheduled Install',
+            'customer_name' => 'Future Client',
+            'address'       => 'Block F',
+            'status'        => 'pending',
+            'priority'      => 'medium',
+            'scheduled_at'  => now()->addDay(),
+        ]);
+        \Illuminate\Support\Facades\DB::table('tasks')
+            ->where('id', $futureScheduled->id)
+            ->update(['created_at' => now()->subHours(6)]);
+
+        // Overdue scheduled task -> MUST be SLA breached
+        $overdueTask = Task::create([
+            'title'         => 'Overdue Splice Repair',
+            'customer_name' => 'Overdue Client',
+            'address'       => 'Block O',
+            'status'        => 'pending',
+            'priority'      => 'high',
+            'scheduled_at'  => now()->subHours(5),
+        ]);
+
+        $this->assertFalse($futureScheduled->fresh()->isSlaBreached(2));
+        $this->assertTrue($overdueTask->fresh()->isSlaBreached(2));
+
+        $res = $this->actingAs($admin)->get('/tasks?status=sla_breach');
+        $res->assertStatus(200)
+            ->assertSee('Overdue Splice Repair')
+            ->assertDontSee('Future Scheduled Install');
+    }
+
+    public function test_completed_task_override_reseals_bast_and_blocks_bom_tampering(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician();
+        $item = InventoryItem::create([
+            'code'       => 'DROP-1C-50M',
+            'name'       => 'Dropcore 1C Cable',
+            'unit'       => 'meter',
+            'stock'      => 100,
+            'unit_price' => 2.5,
+            'category'   => 'material',
+            'is_active'  => true,
+        ]);
+
+        $task = Task::create([
+            'title'         => 'Core Fiber Closure',
+            'customer_name' => 'Initial Client',
+            'address'       => 'Site 1',
+            'technician_id' => $tech->id,
+            'status'        => 'on-going',
+            'priority'      => 'high',
+        ]);
+
+        // Admin updates customer_name AND completes via override in one request
+        $this->actingAs($admin)->put("/tasks/{$task->id}", [
+            'title'           => 'Core Fiber Closure',
+            'customer_name'   => 'Corrected Client Name',
+            'address'         => 'Site 1',
+            'technician_id'   => $tech->id,
+            'priority'        => 'high',
+            'status'          => 'completed',
+            'override_reason' => 'Supervisor corrected customer name during closure',
+        ])->assertRedirect("/tasks/{$task->id}");
+
+        $fresh = $task->fresh();
+        $this->assertEquals('completed', $fresh->status);
+        $this->assertTrue($fresh->isBastIntegrityValid());
+
+        // Public BAST JSON verification confirms hash matches corrected customer name
+        $this->getJson("/tasks/{$task->id}/bast/verify?token={$fresh->tracking_token}")
+            ->assertOk()
+            ->assertJson(['verified' => true]);
+
+        // Admin attempting to tamper BOM on completed task via API gets HTTP 409 Conflict
+        $this->actingAs($admin, 'sanctum')
+            ->postJson("/api/tasks/{$task->id}/materials", [
+                'inventory_item_id' => $item->id,
+                'quantity'          => 5,
+            ])
+            ->assertStatus(409);
+    }
+
+    public function test_task_detail_inline_notes_bom_live_status_and_special_chars(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => "O'Connor Tech"]);
+        $item = InventoryItem::create([
+            'code'       => 'CONN-SC-APC',
+            'name'       => 'SC/APC Fast Connector',
+            'unit'       => 'pcs',
+            'stock'      => 50,
+            'unit_price' => 3,
+            'category'   => 'material',
+            'is_active'  => true,
+        ]);
+
+        $task = Task::create([
+            'title'          => "Fiber Fix at O'Neill Plaza",
+            'customer_name'  => "O'Neill Corp",
+            'customer_phone' => '+628123456789',
+            'address'        => "O'Neill Tower\nFloor 5, Suite `A`",
+            'latitude'       => -6.2088,
+            'longitude'      => 106.8456,
+            'technician_id'  => $tech->id,
+            'status'         => 'on-going',
+            'priority'       => 'high',
+        ]);
+
+        // Clear tracking_token to prove legacy task auto-recovery without 500 crash
+        \Illuminate\Support\Facades\DB::table('tasks')->where('id', $task->id)->update(['tracking_token' => null]);
+
+        // 1. Task detail renders cleanly and recovers tracking token
+        $showRes = $this->actingAs($admin)->get("/tasks/{$task->id}");
+        $showRes->assertStatus(200)->assertSee('Work Order Command Details');
+        $this->assertNotEmpty($task->fresh()->tracking_token);
+
+        // 2. Post inline NOC dispatcher note
+        $this->actingAs($admin)->post("/tasks/{$task->id}/notes", [
+            'note' => 'Please verify ODP-04 splitter loss before closing.',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('progress_updates', [
+            'task_id' => $task->id,
+            'note'    => '[NOC Dispatcher] Please verify ODP-04 splitter loss before closing.',
+        ]);
+
+        // 3. Add BOM material inline and verify stock deduction
+        $this->actingAs($admin)->post("/tasks/{$task->id}/materials", [
+            'inventory_item_id' => $item->id,
+            'quantity'          => 4,
+            'serial_number'     => 'SN-FAST-01',
+        ])->assertRedirect();
+        $this->assertEquals(46, (float) $item->fresh()->stock);
+
+        // 4. Live status JSON endpoint returns task & technician telemetry
+        TechnicianLocation::create([
+            'technician_id' => $tech->id,
+            'task_id'       => $task->id,
+            'latitude'      => -6.2000,
+            'longitude'     => 106.8400,
+        ]);
+        $this->actingAs($admin)->getJson("/tasks/{$task->id}/live-status")
+            ->assertOk()
+            ->assertJsonPath('task_id', $task->id)
+            ->assertJsonPath('technician.name', "O'Connor Tech");
+
+        // 5. Task list multi-facet filter (priority + unassigned)
+        Task::create([
+            'title'         => 'Unassigned High Priority Cut',
+            'customer_name' => 'Metro Bank',
+            'address'       => 'Main St',
+            'status'        => 'pending',
+            'priority'      => 'high',
+        ]);
+        $this->actingAs($admin)->get('/tasks?priority=high&technician_id=unassigned')
+            ->assertStatus(200)
+            ->assertSee('Unassigned High Priority Cut')
+            ->assertDontSee("Fiber Fix at O'Neill Plaza");
     }
 }

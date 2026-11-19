@@ -54,6 +54,10 @@ Route::middleware(['auth', 'active', 'role:admin'])->group(function () {
     ]);
     Route::post('tasks/{task}/assign', [TaskController::class, 'assign'])->name('admin.tasks.assign');
     Route::post('tasks/{task}/request-rework', [TaskController::class, 'requestRework'])->name('admin.tasks.rework');
+    Route::post('tasks/{task}/notes', [TaskController::class, 'addProgressNote'])->name('admin.tasks.notes.store');
+    Route::post('tasks/{task}/materials', [TaskController::class, 'addMaterial'])->name('admin.tasks.materials.store');
+    Route::delete('tasks/{task}/materials/{material}', [TaskController::class, 'removeMaterial'])->name('admin.tasks.materials.destroy');
+    Route::get('tasks/{task}/live-status', [TaskController::class, 'liveStatus'])->name('admin.tasks.live_status');
 
     // Inventory & Material Management
     Route::resource('inventory', \App\Http\Controllers\Web\InventoryController::class, [

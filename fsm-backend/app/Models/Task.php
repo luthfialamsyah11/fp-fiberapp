@@ -74,10 +74,35 @@ class Task extends Model
             return false;
         }
         $hours = $slaHours ?? (int) \App\Services\SettingService::get('sla_warning_hours', '2');
-        if ($hours <= 0 || !$this->created_at) {
+        $referenceTime = $this->scheduled_at ?? $this->created_at;
+        if ($hours <= 0 || !$referenceTime) {
             return false;
         }
-        return $this->created_at->lt(now()->subHours($hours));
+        return $referenceTime->lt(now()->subHours($hours));
+    }
+
+    public function scopeSlaBreached($query, ?int $slaHours = null)
+    {
+        $hours = $slaHours ?? (int) \App\Services\SettingService::get('sla_warning_hours', '2');
+        if ($hours <= 0) {
+            return $query->whereRaw('1 = 0');
+        }
+        $cutoff = now()->subHours($hours);
+        return $query->whereIn('status', ['pending', 'assigned', 'accepted', 'on-going'])
+            ->where(function ($sub) use ($cutoff) {
+                $sub->whereNotNull('scheduled_at')->where('scheduled_at', '<=', $cutoff)
+                    ->orWhere(function ($fb) use ($cutoff) {
+                        $fb->whereNull('scheduled_at')->where('created_at', '<=', $cutoff);
+                    });
+            });
+    }
+
+    public function isBastIntegrityValid(): bool
+    {
+        if ($this->status !== 'completed' || empty($this->bast_hash)) {
+            return false;
+        }
+        return hash_equals((string) $this->bast_hash, $this->computeBastHash());
     }
 
     public function technician()

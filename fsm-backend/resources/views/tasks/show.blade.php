@@ -1,63 +1,155 @@
 @extends('layouts.admin')
 
-@section('title', 'Task Details')
-@section('header', 'Task Details')
+@section('title', 'Task Details #TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT))
+@section('header', 'Work Order Command Details')
 
 @push('styles')
-<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-    #task-map { height: 350px; border-radius: 12px; z-index: 1; border: 1px solid #E2E8F0; }
+    #task-map { height: 360px; border-radius: 12px; z-index: 1; border: 1px solid #E2E8F0; }
+    .proof-thumb { cursor: zoom-in; transition: transform 0.25s ease; }
+    .proof-thumb:hover { transform: scale(1.03); }
 </style>
 @endpush
 
 @section('content')
+@php
+    $steps = ['pending', 'assigned', 'accepted', 'on-going', 'completed'];
+    $stepLabels = ['Pending', 'Assigned', 'Accepted', 'In Progress', 'Completed'];
+    $currentStepIndex = array_search($task->status, $steps, true);
+    if ($currentStepIndex === false) {
+        $currentStepIndex = -1;
+    }
+    $statusColors = [
+        'pending'   => 'bg-slate-100 text-slate-700 border-slate-200',
+        'assigned'  => 'bg-blue-50 text-blue-700 border-blue-200',
+        'accepted'  => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'on-going'  => 'bg-amber-50 text-amber-700 border-amber-200',
+        'completed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'rejected'  => 'bg-red-50 text-red-700 border-red-200',
+    ];
+    $latestProgress = (int) $task->progress_percent;
+@endphp
+
+<!-- Top Navigation & Action Toolbar -->
 <div class="mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
     <div>
-        <a href="{{ route('admin.tasks.index') }}" class="text-xs font-semibold text-primary hover:text-blue-700 flex items-center gap-1.5">
-            <ion-icon name="arrow-back-outline"></ion-icon> Back to Task List
+        <a href="{{ route('admin.tasks.index') }}" class="text-xs font-semibold text-primary hover:text-blue-700 inline-flex items-center gap-1.5">
+            <ion-icon name="arrow-back-outline"></ion-icon> Back to Task Management
         </a>
     </div>
-    <div class="flex items-center gap-2">
-        <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-100 transition-all flex items-center gap-1.5 shadow-sm">
+    <div class="flex flex-wrap items-center gap-2">
+        @if($task->status === 'completed')
+            <button type="button" id="btn-verify-seal" onclick="verifyBastSeal()" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition-all inline-flex items-center gap-1.5 shadow-sm">
+                <ion-icon name="shield-checkmark-outline"></ion-icon>
+                <span>Verify SHA-256 Seal</span>
+            </button>
+        @endif
+
+        @if(in_array($task->status, ['completed', 'on-going'], true))
+            <button type="button" onclick="document.getElementById('rework-modal').classList.remove('hidden')" class="bg-amber-50 border border-amber-200 text-amber-800 px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-amber-100 transition-all inline-flex items-center gap-1.5 shadow-sm">
+                <ion-icon name="refresh-circle-outline"></ion-icon>
+                <span>Request Rework</span>
+            </button>
+        @endif
+
+        <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-100 transition-all inline-flex items-center gap-1.5 shadow-sm">
             <ion-icon name="print-outline"></ion-icon> Print Official BAST (PDF)
         </a>
-        <a href="{{ route('admin.tasks.edit', $task->id) }}" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition-all flex items-center gap-1.5">
-            <ion-icon name="create-outline"></ion-icon> Edit Task Details
+
+        <a href="{{ route('admin.tasks.edit', $task->id) }}" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition-all inline-flex items-center gap-1.5">
+            <ion-icon name="create-outline"></ion-icon> Edit Task
         </a>
     </div>
 </div>
 
+<!-- Flash & Inline Seal Verification Alerts -->
+@if(session('success'))
+    <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2.5 shadow-sm">
+        <ion-icon name="checkmark-circle" class="text-base text-emerald-600 flex-shrink-0"></ion-icon>
+        <span>{{ session('success') }}</span>
+    </div>
+@endif
+@if(session('error'))
+    <div class="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center gap-2.5 shadow-sm">
+        <ion-icon name="alert-circle" class="text-base text-red-600 flex-shrink-0"></ion-icon>
+        <span>{{ session('error') }}</span>
+    </div>
+@endif
+@if($errors->any())
+    <div class="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs shadow-sm">
+        <ul class="list-disc pl-4 space-y-0.5">
+            @foreach($errors->all() as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+<div id="bast-seal-banner" class="hidden mb-5 p-3.5 rounded-xl border text-xs font-semibold flex items-center justify-between gap-3 shadow-sm"></div>
+
+<!-- 5-Step Lifecycle Stepper -->
+<div class="bg-white rounded-xl border border-fsmBorder p-4 sm:p-5 shadow-sm mb-6">
+    <div class="flex items-center justify-between gap-2 overflow-x-auto">
+        @foreach($steps as $idx => $stepKey)
+            @php
+                $isDone = $currentStepIndex > $idx || ($currentStepIndex === $idx && $stepKey === 'completed');
+                $isCurrent = $currentStepIndex === $idx && $stepKey !== 'completed';
+            @endphp
+            <div class="flex items-center gap-2 flex-1 min-w-[95px]">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
+                    {{ $isDone ? 'bg-emerald-600 text-white' : ($isCurrent ? 'bg-primary text-white ring-4 ring-blue-100' : 'bg-slate-100 text-slate-400 border border-slate-200') }}">
+                    @if($isDone)
+                        <ion-icon name="checkmark-outline"></ion-icon>
+                    @else
+                        {{ $idx + 1 }}
+                    @endif
+                </div>
+                <div class="min-w-0">
+                    <div class="text-[11px] font-bold {{ $isDone ? 'text-emerald-700' : ($isCurrent ? 'text-primary' : 'text-slate-400') }} truncate">
+                        {{ $stepLabels[$idx] }}
+                    </div>
+                    <div class="text-[9px] text-slate-400 truncate">
+                        @if($isCurrent) Active Stage @elseif($isDone) Completed @else Upcoming @endif
+                    </div>
+                </div>
+                @if(!$loop->last)
+                    <div class="hidden sm:block flex-1 h-0.5 {{ $currentStepIndex > $idx ? 'bg-emerald-500' : 'bg-slate-200' }} mx-1"></div>
+                @endif
+            </div>
+        @endforeach
+    </div>
+</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    
-    <!-- Left 2 Columns: Task Metadata, Progress, and Proofs -->
+
+    <!-- Left 2 Columns: Metadata, Timeline, Proofs, BOM, Signature & Audit History -->
     <div class="lg:col-span-2 space-y-6">
-        
+
         <!-- Task Header & Meta -->
         <div class="bg-white rounded-xl border border-fsmBorder p-6 shadow-sm">
             <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
                 <div>
                     <h2 class="text-lg font-bold text-textPrimary leading-snug">{{ $task->title }}</h2>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="text-[10px] font-mono font-bold text-slate-500 uppercase">#TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
-                        <span class="text-slate-300">•</span>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <span class="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded uppercase">#TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
                         <span class="text-xs text-textSecondary flex items-center gap-1">
                             <ion-icon name="calendar-outline"></ion-icon> Created {{ $task->created_at->format('d M Y H:i') }}
                         </span>
+                        @if($task->scheduled_at)
+                            <span class="text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                                <ion-icon name="alarm-outline"></ion-icon> Due {{ $task->scheduled_at->format('d M Y H:i') }}
+                            </span>
+                        @endif
+                        @if($task->isSlaBreached())
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-200">SLA Overdue</span>
+                        @endif
                     </div>
                 </div>
-                <div>
-                    @php
-                        $statusColors = [
-                            'pending' => 'bg-slate-100 text-slate-700 border-slate-200',
-                            'assigned' => 'bg-blue-50 text-blue-700 border-blue-200',
-                            'accepted' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                            'on-going' => 'bg-amber-50 text-amber-700 border-amber-200',
-                            'completed' => 'bg-green-50 text-green-700 border-green-200',
-                            'rejected' => 'bg-red-50 text-red-700 border-red-200',
-                        ];
-                    @endphp
-                    <span class="px-3.5 py-1 rounded-full text-xs font-bold border {{ $statusColors[$task->status] ?? 'bg-slate-100 text-slate-700' }}">
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase {{ $task->priority === 'high' ? 'bg-red-50 text-red-700 border border-red-200' : ($task->priority === 'medium' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600 border border-slate-200') }}">
+                        {{ $task->priority }} Priority
+                    </span>
+                    <span id="live-status-pill" class="px-3.5 py-1 rounded-full text-xs font-bold border {{ $statusColors[$task->status] ?? 'bg-slate-100 text-slate-700' }}">
                         {{ $task->status_label }}
                     </span>
                 </div>
@@ -65,7 +157,7 @@
 
             <!-- Description -->
             <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-6">
-                <h4 class="text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">Description</h4>
+                <h4 class="text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">Description &amp; Field Instructions</h4>
                 <p class="text-xs text-textPrimary whitespace-pre-line leading-relaxed">{{ $task->description ?: 'No specific description provided.' }}</p>
             </div>
 
@@ -98,31 +190,39 @@
             </div>
         </div>
 
-        <!-- Progress Monitoring Module -->
+        <!-- Progress Monitoring & Dispatcher Note Composer -->
         <div class="bg-white rounded-xl border border-fsmBorder p-6 shadow-sm">
-            <div class="flex justify-between items-center mb-6 pb-2 border-b border-fsmBorder">
-                <h3 class="text-sm font-bold text-textPrimary">Progress & Timeline</h3>
-                @php
-                    $latestProgress = $task->progressUpdates->first() ? $task->progressUpdates->first()->progress_percent : 0;
-                @endphp
-                <span class="text-xs font-semibold text-primary bg-blue-50 px-2 py-0.5 rounded">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-fsmBorder">
+                <h3 class="text-sm font-bold text-textPrimary">Progress &amp; Operational Timeline</h3>
+                <span id="live-progress-label" class="text-xs font-semibold text-primary bg-blue-50 px-2.5 py-0.5 rounded">
                     Status: {{ $latestProgress }}% Completed
                 </span>
             </div>
 
             <!-- Main Progress Bar -->
-            <div class="mb-8">
-                <div class="w-full bg-slate-100 rounded-full h-2">
-                    <div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: {{ $latestProgress }}%"></div>
+            <div class="mb-6">
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div id="live-progress-bar" class="bg-primary h-2 rounded-full transition-all duration-500" style="width: {{ $latestProgress }}%"></div>
                 </div>
             </div>
+
+            <!-- Inline Dispatcher Note Composer -->
+            <form action="{{ route('admin.tasks.notes.store', $task->id) }}" method="POST" class="mb-6 p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+                @csrf
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" name="note" required maxlength="1000" placeholder="Post NOC dispatcher note or site instruction to timeline..."
+                        class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/25">
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all inline-flex items-center justify-center gap-1.5 flex-shrink-0">
+                        <ion-icon name="send-outline"></ion-icon> Post Note
+                    </button>
+                </div>
+            </form>
 
             <!-- Progress Updates Logs -->
             @if($task->progressUpdates && $task->progressUpdates->count() > 0)
                 <div class="space-y-5">
                     @foreach($task->progressUpdates as $update)
                         <div class="flex gap-4 relative">
-                            <!-- timeline line -->
                             @if(!$loop->last)
                                 <div class="absolute left-[13px] top-7 bottom-[-20px] w-0.5 bg-slate-200"></div>
                             @endif
@@ -151,10 +251,13 @@
             @endif
         </div>
 
-        <!-- Proof of Work Gallery (Before vs After Photos) -->
+        <!-- Proof of Work Gallery with Click-to-Zoom Lightbox -->
         <div class="bg-white rounded-xl border border-fsmBorder p-6 shadow-sm">
-            <h3 class="text-sm font-bold text-textPrimary mb-5 pb-2 border-b border-fsmBorder">Proof of Work Verification</h3>
-            
+            <div class="flex items-center justify-between mb-5 pb-2 border-b border-fsmBorder">
+                <h3 class="text-sm font-bold text-textPrimary">Proof of Work Verification</h3>
+                <span class="text-xs font-semibold text-slate-500">{{ $task->proofs->count() }} Photos</span>
+            </div>
+
             @if($task->proofs && $task->proofs->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($task->proofs as $index => $proof)
@@ -165,26 +268,32 @@
                                 $labelBg = 'bg-amber-50 text-amber-700 border-amber-200';
                             } elseif ($resolvedSlot === 'after') {
                                 $label = 'After Photo';
-                                $labelBg = 'bg-green-50 text-green-700 border-green-200';
+                                $labelBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                             } else {
                                 $label = $index === 0 ? 'Before Photo' : ($index === 1 ? 'After Photo' : 'Additional Photo');
                                 $labelBg = $index === 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200';
                             }
                         @endphp
-                        <div class="border border-slate-200 rounded-xl overflow-hidden flex flex-col">
-                            <!-- Image Frame -->
-                            <div class="relative h-48 bg-slate-50 flex items-center justify-center">
-                                <img src="{{ $proof->image_url }}" class="w-full h-full object-cover" alt="{{ $label }}">
-                                
-                                <span class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold uppercase border {{ $labelBg }}">
+                        <div class="border border-slate-200 rounded-xl overflow-hidden flex flex-col group">
+                            <div class="relative h-48 bg-slate-100 overflow-hidden"
+                                onclick="openProofLightbox({{ json_encode($proof->image_url) }}, {{ json_encode($label) }}, {{ json_encode($proof->description ?: 'No comment attached.') }}, {{ json_encode($proof->created_at->format('d M Y H:i')) }})">
+                                <img src="{{ $proof->image_url }}" class="w-full h-full object-cover proof-thumb" alt="{{ $label }}">
+                                <span class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold uppercase border {{ $labelBg }} shadow-sm">
                                     {{ $label }}
                                 </span>
+                                <span class="absolute bottom-2.5 right-2.5 p-1.5 rounded-lg bg-slate-900/70 text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs inline-flex items-center gap-1">
+                                    <ion-icon name="scan-outline"></ion-icon> Zoom
+                                </span>
                             </div>
-                            
-                            <!-- Image Metadata -->
-                            <div class="p-3 bg-slate-50 border-t border-slate-100 flex-1">
+
+                            <div class="p-3 bg-slate-50 border-t border-slate-100 flex-1 flex flex-col justify-between">
                                 <p class="text-xs text-textPrimary leading-snug">{{ $proof->description ?: 'No comment attached.' }}</p>
-                                <span class="text-[9px] text-textSecondary mt-2 block font-medium">Uploaded at: {{ $proof->created_at->format('d M Y H:i') }}</span>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-[9px] text-textSecondary font-medium">Uploaded: {{ $proof->created_at->format('d M Y H:i') }}</span>
+                                    <a href="{{ $proof->image_url }}" target="_blank" download class="text-[10px] font-bold text-primary hover:underline inline-flex items-center gap-0.5">
+                                        <ion-icon name="download-outline"></ion-icon> Download
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -197,7 +306,7 @@
             @endif
         </div>
 
-        <!-- Material & Equipment (BOM) Tracking Module -->
+        <!-- Material & Equipment (BOM) Tracking Module with Admin Inline Controls -->
         <div class="bg-white rounded-xl border border-fsmBorder p-6 shadow-sm">
             <div class="flex justify-between items-center mb-4 pb-2 border-b border-fsmBorder">
                 <div>
@@ -209,6 +318,39 @@
                 </span>
             </div>
 
+            @if($task->status !== 'completed' && isset($inventoryItems) && $inventoryItems->count() > 0)
+                <form action="{{ route('admin.tasks.materials.store', $task->id) }}" method="POST" class="mb-5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+                    @csrf
+                    <div class="sm:col-span-5">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Warehouse Item</label>
+                        <select name="inventory_item_id" required class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-800">
+                            <option value="">-- Select Material / ONT --</option>
+                            @foreach($inventoryItems as $inv)
+                                <option value="{{ $inv->id }}">[{{ $inv->code }}] {{ $inv->name }} ({{ $inv->stock }} {{ $inv->unit }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Qty</label>
+                        <input type="number" name="quantity" step="any" min="0.01" value="1" required class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-800">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Serial / Note</label>
+                        <input type="text" name="serial_number" placeholder="Optional SN" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-800">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button type="submit" class="w-full py-2 px-3 rounded-lg bg-primary hover:bg-blue-700 text-white text-xs font-bold transition-all">
+                            + Add
+                        </button>
+                    </div>
+                </form>
+            @elseif($task->status === 'completed')
+                <div class="mb-4 p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-[11px] text-emerald-800 flex items-center gap-2">
+                    <ion-icon name="lock-closed-outline" class="text-sm flex-shrink-0"></ion-icon>
+                    <span>BOM ledger is locked by the SHA-256 BAST seal. Use <strong>Request Rework</strong> to reopen this ticket before modifying materials.</span>
+                </div>
+            @endif
+
             @if($task->materials->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs border-collapse">
@@ -218,12 +360,15 @@
                                 <th class="pb-2">Qty</th>
                                 <th class="pb-2">Serial Number / Note</th>
                                 <th class="pb-2 text-right">Est. Cost</th>
+                                @if($task->status !== 'completed')
+                                    <th class="pb-2 text-right">Action</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @php $totalMatCost = 0; @endphp
                             @foreach($task->materials as $mat)
-                                @php 
+                                @php
                                     $cost = ($mat->inventoryItem->unit_price ?? 0) * $mat->quantity;
                                     $totalMatCost += $cost;
                                 @endphp
@@ -241,6 +386,17 @@
                                     <td class="py-2.5 text-right font-semibold text-emerald-600">
                                         {{ \App\Services\SettingService::formatCurrency((float) $cost) }}
                                     </td>
+                                    @if($task->status !== 'completed')
+                                        <td class="py-2.5 text-right">
+                                            <form action="{{ route('admin.tasks.materials.destroy', ['task' => $task->id, 'material' => $mat->id]) }}" method="POST" onsubmit="return confirm('Remove material and restore warehouse stock?');" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="p-1 text-red-500 hover:bg-red-50 rounded" title="Remove & Restore Stock">
+                                                    <ion-icon name="trash-outline"></ion-icon>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>
@@ -250,6 +406,9 @@
                                 <td class="pt-2 text-right text-emerald-700 font-bold">
                                     {{ \App\Services\SettingService::formatCurrency((float) $totalMatCost) }}
                                 </td>
+                                @if($task->status !== 'completed')
+                                    <td></td>
+                                @endif
                             </tr>
                         </tfoot>
                     </table>
@@ -257,7 +416,7 @@
             @else
                 <div class="text-center py-6 text-textSecondary">
                     <ion-icon name="cube-outline" class="text-3xl mb-1 text-slate-300"></ion-icon>
-                    <p class="text-xs">No materials have been logged by the technician for this work order.</p>
+                    <p class="text-xs">No materials have been logged for this work order.</p>
                 </div>
             @endif
         </div>
@@ -291,6 +450,11 @@
                             <ion-icon name="time-outline" class="text-slate-400"></ion-icon>
                             Signed at: {{ $task->customer_signed_at ? $task->customer_signed_at->format('d M Y H:i') : '-' }} UTC
                         </div>
+                        @if($task->bast_hash)
+                            <div class="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded w-fit">
+                                SHA-256: {{ substr($task->bast_hash, 0, 18) }}&hellip;
+                            </div>
+                        @endif
                         <div class="pt-2">
                             <a href="{{ route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
                                 <ion-icon name="document-text-outline"></ion-icon> View Official BAST Certificate
@@ -344,7 +508,7 @@
 
     </div>
 
-    <!-- Right 1 Column: Dispatch Assignee & Map Tracker -->
+    <!-- Right 1 Column: Customer Tracking, Inline Assign/Reassign & Live Auto-Polling Map -->
     <div class="space-y-6">
 
         <!-- Customer Live Tracking Link Widget -->
@@ -382,48 +546,57 @@
                 @endif
             </div>
         </div>
-        
-        <!-- Technician Assignment Module -->
+
+        <!-- Inline Technician Assignment / Reassignment Module -->
         <div class="bg-white rounded-xl border border-fsmBorder p-5 shadow-sm">
-            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 border-b border-fsmBorder pb-1.5">Assigned Dispatcher</h3>
-            
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 border-b border-fsmBorder pb-1.5">Assigned Field Technician</h3>
+
             @if($task->technician)
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="h-10 w-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm flex-shrink-0">
                         {{ strtoupper(substr($task->technician->name, 0, 1)) }}
                     </div>
-                    <div class="overflow-hidden">
+                    <div class="overflow-hidden min-w-0">
                         <p class="text-xs font-bold text-textPrimary truncate">{{ $task->technician->name }}</p>
                         <p class="text-[10px] text-textSecondary truncate">{{ $task->technician->email }}</p>
                         <p class="text-[10px] text-textSecondary font-medium truncate mt-0.5">{{ $task->technician->phone ?: 'No phone' }}</p>
                     </div>
                 </div>
-
-                @if($task->status === 'pending')
-                    <form action="{{ route('admin.tasks.assign', $task->id) }}" method="POST" class="mt-4">
-                        @csrf
-                        <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white py-2 rounded-xl text-xs font-semibold transition-all">
-                            Trigger Manual Notification Dispatch
-                        </button>
-                    </form>
-                @endif
             @else
-                <div class="text-center py-4">
-                    <div class="inline-flex items-center justify-center p-2.5 rounded-full bg-slate-100 text-slate-400 mb-2">
-                        <ion-icon name="people-outline" class="text-xl"></ion-icon>
-                    </div>
-                    <p class="text-xs font-semibold text-textSecondary mb-3">No field technician assigned</p>
-                    <a href="{{ route('admin.tasks.edit', $task->id) }}" class="inline-block bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all">
-                        Assign Technician
-                    </a>
+                <div class="text-center py-3 mb-3 bg-amber-50/50 rounded-xl border border-amber-200/70">
+                    <p class="text-xs font-bold text-amber-800">Unassigned — Pending Dispatch</p>
+                    <p class="text-[10px] text-amber-700 mt-0.5">Select an active field technician below</p>
                 </div>
+            @endif
+
+            @if($task->status !== 'completed' && isset($technicians) && $technicians->count() > 0)
+                <form action="{{ route('admin.tasks.assign', $task->id) }}" method="POST" class="space-y-2.5 pt-3 border-t border-slate-100">
+                    @csrf
+                    <label class="block text-[10px] font-bold uppercase text-slate-500">
+                        {{ $task->technician ? 'Reassign / Dispatch Technician' : 'Assign Technician Now' }}
+                    </label>
+                    <select name="technician_id" required class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/25">
+                        <option value="">-- Choose Technician --</option>
+                        @foreach($technicians as $tech)
+                            <option value="{{ $tech->id }}" {{ $task->technician_id == $tech->id ? 'selected' : '' }}>
+                                {{ $tech->name }} ({{ $tech->active_tasks_count }} active)
+                            </option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white py-2 rounded-xl text-xs font-bold transition-all shadow-sm">
+                        {{ $task->technician ? 'Update Dispatch Assignee' : 'Dispatch Technician' }}
+                    </button>
+                </form>
             @endif
         </div>
 
-        <!-- Task & Technician Coordinates Map -->
+        <!-- Live Auto-Polling Location Monitoring Map -->
         <div class="bg-white rounded-xl border border-fsmBorder overflow-hidden shadow-sm flex flex-col">
             <div class="px-5 py-3 border-b border-fsmBorder bg-slate-50/50 flex items-center justify-between">
-                <h3 class="text-xs font-semibold text-textPrimary uppercase tracking-wider">Location Monitoring</h3>
+                <div>
+                    <h3 class="text-xs font-semibold text-textPrimary uppercase tracking-wider">Live Location Monitoring</h3>
+                    <span id="live-distance-eta" class="text-[10px] text-blue-600 font-semibold"></span>
+                </div>
                 @if($task->latitude && $task->longitude)
                     <div class="flex items-center gap-1.5">
                         <a href="https://www.google.com/maps/dir/?api=1&destination={{ $task->latitude }},{{ $task->longitude }}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-[10px] font-bold transition-all flex items-center gap-1" title="Open route in Google Maps">
@@ -435,27 +608,30 @@
                     </div>
                 @endif
             </div>
-            
+
             @if($task->latitude && $task->longitude)
                 <div id="task-map"></div>
-                <div class="p-3 bg-slate-50 border-t border-fsmBorder text-[10px] text-textSecondary font-medium flex justify-between">
-                    <span>Task Coords: {{ number_format($task->latitude, 5) }}, {{ number_format($task->longitude, 5) }}</span>
-                    @if($task->technician && $task->technician->isEffectivelyOnline(10))
-                        <span class="text-green-600 flex items-center gap-0.5">
-                            <span class="h-1.5 w-1.5 bg-green-500 rounded-full animate-ping"></span>
-                            Tech Online
-                        </span>
-                    @elseif($task->technician && $task->technician->latestLocation)
-                        <span class="text-slate-400 flex items-center gap-1">
-                            <span class="h-1.5 w-1.5 bg-slate-300 rounded-full"></span>
-                            Last ping {{ $task->technician->latestLocation->created_at->diffForHumans() }}
-                        </span>
-                    @endif
+                <div class="p-3 bg-slate-50 border-t border-fsmBorder text-[10px] text-textSecondary font-medium flex justify-between items-center gap-2">
+                    <span class="font-mono">Pin: {{ number_format($task->latitude, 5) }}, {{ number_format($task->longitude, 5) }}</span>
+                    <span id="live-tech-presence">
+                        @if($task->technician && $task->technician->isEffectivelyOnline(10))
+                            <span class="text-emerald-600 flex items-center gap-1 font-semibold">
+                                <span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span> Tech Online
+                            </span>
+                        @elseif($task->technician && $task->technician->latestLocation)
+                            <span class="text-slate-400">Last ping {{ $task->technician->latestLocation->created_at->diffForHumans() }}</span>
+                        @else
+                            <span class="text-slate-400">No GPS telemetry</span>
+                        @endif
+                    </span>
                 </div>
             @else
                 <div class="p-8 text-center text-textSecondary bg-slate-50/30">
                     <ion-icon name="map-outline" class="text-3xl mb-1 text-slate-300"></ion-icon>
-                    <p class="text-xs">Location coordinates are missing.</p>
+                    <p class="text-xs font-semibold">Location coordinates are missing.</p>
+                    <a href="{{ route('admin.tasks.edit', $task->id) }}" class="inline-flex items-center gap-1 mt-2 text-xs font-bold text-primary hover:underline">
+                        Pin Location on Map &rarr;
+                    </a>
                 </div>
             @endif
         </div>
@@ -463,69 +639,198 @@
     </div>
 </div>
 
+<!-- Proof Lightbox Modal -->
+<div id="proof-lightbox" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl border border-slate-700/30">
+        <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span id="lb-slot" class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold uppercase">Photo</span>
+                <span id="lb-time" class="text-xs text-slate-500 font-mono">-</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <a id="lb-download" href="#" target="_blank" download class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:text-primary inline-flex items-center gap-1">
+                    <ion-icon name="download-outline"></ion-icon> Download
+                </a>
+                <button type="button" onclick="closeProofLightbox()" class="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-red-600">
+                    <ion-icon name="close-outline" class="text-lg"></ion-icon>
+                </button>
+            </div>
+        </div>
+        <div class="bg-slate-950 flex items-center justify-center p-4">
+            <img id="lb-img" src="" alt="Proof High Resolution" class="max-h-[68vh] max-w-full object-contain rounded-lg">
+        </div>
+        <div class="px-5 py-3.5 bg-white border-t border-slate-100 text-xs text-slate-700" id="lb-desc">-</div>
+    </div>
+</div>
+
+<!-- Request Rework Modal -->
+<div id="rework-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+            <h3 class="text-sm font-bold text-textPrimary">Request Field Rework</h3>
+            <button type="button" onclick="document.getElementById('rework-modal').classList.add('hidden')" class="p-1 text-slate-400 hover:text-slate-700">
+                <ion-icon name="close-outline" class="text-xl"></ion-icon>
+            </button>
+        </div>
+        <p class="text-xs text-textSecondary mb-4 leading-relaxed">
+            Reopening this work order returns it to <strong>In Progress</strong>, clears the existing SHA-256 BAST seal, and notifies the field technician to resubmit verification evidence.
+        </p>
+        <form action="{{ route('admin.tasks.rework', $task->id) }}" method="POST" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Audit Rework Reason *</label>
+                <textarea name="reason" required rows="3" maxlength="500" placeholder="e.g. After photo does not clearly display OPM dBm reading or serial number mismatch..."
+                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('rework-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm">Confirm Rework</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 @if($task->latitude && $task->longitude)
-<!-- Leaflet JS -->
+@php
+    $taskMapMeta = [
+        'id'            => $task->id,
+        'customer_name' => $task->customer_name,
+        'address'       => $task->resolved_location,
+        'latitude'      => (float) $task->latitude,
+        'longitude'     => (float) $task->longitude,
+        'status'        => $task->status,
+        'tech_name'     => $task->technician?->name,
+        'tech_lat'      => $task->technician?->latestLocation?->latitude ? (float) $task->technician->latestLocation->latitude : null,
+        'tech_lng'      => $task->technician?->latestLocation?->longitude ? (float) $task->technician->latestLocation->longitude : null,
+        'tech_updated'  => $task->technician?->latestLocation?->created_at?->diffForHumans(),
+    ];
+@endphp
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var taskLat = {{ $task->latitude }};
-        var taskLng = {{ $task->longitude }};
-        
-        // Initialize Map
-        var map = L.map('task-map').setView([taskLat, taskLng], 13);
+        const taskMeta = @json($taskMapMeta);
+        const mapStyle = @json($mapStyle ?? 'openstreetmap');
+        const geofenceRadius = @json($geofenceRadius ?? 100);
+        const pollIntervalSec = @json($pollInterval ?? 15);
+        const liveStatusUrl = @json(route('admin.tasks.live_status', $task->id));
 
-        // OSM Tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        function escHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+        }
 
-        // Icons
-        var taskIcon = L.icon({
+        const map = L.map('task-map').setView([taskMeta.latitude, taskMeta.longitude], 14);
+
+        let tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        let tileAttr = '&copy; OpenStreetMap contributors';
+        if (mapStyle === 'carto') {
+            tileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+            tileAttr = '&copy; OpenStreetMap &copy; CARTO';
+        } else if (mapStyle === 'mapbox') {
+            tileUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+            tileAttr = 'Tiles &copy; Esri';
+        }
+        L.tileLayer(tileUrl, { maxZoom: 19, attribution: tileAttr }).addTo(map);
+
+        const taskIcon = L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+        const techIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
 
-        // Add Task Pin
-        L.marker([taskLat, taskLng], {icon: taskIcon}).addTo(map)
-            .bindPopup(`<b>Work Order Target:</b><br>{{ $task->customer_name }}<br><small>{{ $task->address }}</small>`)
+        L.marker([taskMeta.latitude, taskMeta.longitude], { icon: taskIcon }).addTo(map)
+            .bindPopup(`<b>Work Order Target:</b><br>${escHtml(taskMeta.customer_name)}<br><small>${escHtml(taskMeta.address)}</small>`)
             .openPopup();
 
-        // Add Technician Pin if coordinates are present
-        @if($task->technician && $task->technician->latestLocation)
-            var techLat = {{ $task->technician->latestLocation->latitude }};
-            var techLng = {{ $task->technician->latestLocation->longitude }};
-            
-            var techIcon = L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            });
+        if (geofenceRadius > 0) {
+            L.circle([taskMeta.latitude, taskMeta.longitude], {
+                radius: geofenceRadius,
+                color: '#2563EB',
+                fillColor: '#3B82F6',
+                fillOpacity: 0.1,
+                weight: 1.5,
+                dashArray: '5, 5'
+            }).addTo(map);
+        }
 
-            var techMarker = L.marker([techLat, techLng], {icon: techIcon}).addTo(map)
-                .bindPopup('<b>Technician Dispatch:</b><br>{{ $task->technician->name }}<br><small>Updated: {{ $task->technician->latestLocation->created_at->diffForHumans() }}</small>');
+        let techMarker = null;
+        let routeLine = null;
 
-            // Draw link line between tech and task site if active
-            @if(in_array($task->status, ['assigned', 'accepted', 'on-going']))
-                var routeLine = L.polyline([
-                    [techLat, techLng],
-                    [taskLat, taskLng]
-                ], {color: '#2563EB', dashArray: '5, 8', weight: 3}).addTo(map);
-                
-                map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
-            @endif
-        @endif
+        function upsertTechPosition(lat, lng, techName, updatedText, fitInitial = false) {
+            if (lat === null || lng === null) return;
+            const popupHtml = `<b>Technician Dispatch:</b><br>${escHtml(techName || 'Technician')}<br><small>Updated: ${escHtml(updatedText || 'Just now')}</small>`;
+
+            if (!techMarker) {
+                techMarker = L.marker([lat, lng], { icon: techIcon }).addTo(map).bindPopup(popupHtml);
+            } else {
+                techMarker.setLatLng([lat, lng]);
+                techMarker.setPopupContent(popupHtml);
+            }
+
+            if (['assigned', 'accepted', 'on-going'].includes(taskMeta.status)) {
+                if (!routeLine) {
+                    routeLine = L.polyline([[lat, lng], [taskMeta.latitude, taskMeta.longitude]], {
+                        color: '#2563EB', dashArray: '5, 8', weight: 3
+                    }).addTo(map);
+                } else {
+                    routeLine.setLatLngs([[lat, lng], [taskMeta.latitude, taskMeta.longitude]]);
+                }
+                if (fitInitial) {
+                    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+                }
+            }
+        }
+
+        if (taskMeta.tech_lat !== null && taskMeta.tech_lng !== null) {
+            upsertTechPosition(taskMeta.tech_lat, taskMeta.tech_lng, taskMeta.tech_name, taskMeta.tech_updated, true);
+        }
+
+        // Live auto-polling for active tasks
+        if (['assigned', 'accepted', 'on-going'].includes(taskMeta.status)) {
+            const pollMs = Math.max(8000, Number(pollIntervalSec) * 1000);
+            const liveTimer = setInterval(async () => {
+                if (document.hidden) return;
+                try {
+                    const resp = await fetch(liveStatusUrl, { headers: { 'Accept': 'application/json' } });
+                    if (!resp.ok) return;
+                    const data = await resp.json();
+
+                    const pill = document.getElementById('live-status-pill');
+                    if (pill && data.status_label) pill.textContent = data.status_label;
+                    const progLabel = document.getElementById('live-progress-label');
+                    if (progLabel) progLabel.textContent = `Status: ${data.progress_percent}% Completed`;
+                    const progBar = document.getElementById('live-progress-bar');
+                    if (progBar) progBar.style.width = `${data.progress_percent}%`;
+
+                    if (data.technician) {
+                        upsertTechPosition(data.technician.latitude, data.technician.longitude, data.technician.name, data.technician.last_seen, false);
+                        const etaEl = document.getElementById('live-distance-eta');
+                        if (etaEl && data.technician.distance_km !== null) {
+                            etaEl.textContent = `${data.technician.distance_km} km away • ETA ~${data.technician.eta_minutes} min`;
+                        }
+                        const presEl = document.getElementById('live-tech-presence');
+                        if (presEl) {
+                            presEl.innerHTML = data.technician.is_online
+                                ? '<span class="text-emerald-600 flex items-center gap-1 font-semibold"><span class="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping"></span> Tech Online</span>'
+                                : `<span class="text-slate-400">Last ping ${escHtml(data.technician.last_seen)}</span>`;
+                        }
+                    }
+                    if (data.status === 'completed') clearInterval(liveTimer);
+                } catch (e) {}
+            }, pollMs);
+
+            window.addEventListener('beforeunload', () => clearInterval(liveTimer));
+        }
     });
 </script>
 @endif
+
 <script>
     function copyTrackingUrl() {
         var input = document.getElementById('customer-tracking-url');
@@ -539,6 +844,55 @@
             }
         });
     }
+
+    function openProofLightbox(imgUrl, slotLabel, desc, timeStr) {
+        document.getElementById('lb-img').src = imgUrl;
+        document.getElementById('lb-download').href = imgUrl;
+        document.getElementById('lb-slot').textContent = slotLabel;
+        document.getElementById('lb-desc').textContent = desc;
+        document.getElementById('lb-time').textContent = timeStr;
+        document.getElementById('proof-lightbox').classList.remove('hidden');
+    }
+
+    function closeProofLightbox() {
+        document.getElementById('proof-lightbox').classList.add('hidden');
+    }
+
+    document.getElementById('proof-lightbox')?.addEventListener('click', function(e) {
+        if (e.target === this) closeProofLightbox();
+    });
+
+    async function verifyBastSeal() {
+        const banner = document.getElementById('bast-seal-banner');
+        const btn = document.getElementById('btn-verify-seal');
+        if (btn) btn.disabled = true;
+        try {
+            const url = @json(route('admin.tasks.bast.verify', ['task' => $task->id, 'token' => $task->tracking_token]));
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await resp.json();
+            banner.classList.remove('hidden');
+            if (data.verified) {
+                banner.className = 'mb-5 p-3.5 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between gap-3 shadow-sm';
+                banner.innerHTML = `<div class="flex items-center gap-2"><ion-icon name="shield-checkmark" class="text-base text-emerald-600"></ion-icon><span>Cryptographic SHA-256 BAST Seal Verified (${data.certificate})</span></div><span class="font-mono text-[10px]">${String(data.stored_hash).substring(0, 20)}...</span>`;
+            } else {
+                banner.className = 'mb-5 p-3.5 rounded-xl border bg-red-50 border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between gap-3 shadow-sm';
+                banner.innerHTML = `<div class="flex items-center gap-2"><ion-icon name="warning" class="text-base text-red-600"></ion-icon><span>Seal Verification Mismatch! Reopen via Request Rework or inspect BAST audit trail.</span></div>`;
+            }
+        } catch (err) {
+            banner.classList.remove('hidden');
+            banner.className = 'mb-5 p-3.5 rounded-xl border bg-red-50 border-red-200 text-red-800 text-xs font-semibold flex items-center gap-2 shadow-sm';
+            banner.textContent = 'Unable to verify cryptographic seal right now.';
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeProofLightbox();
+            document.getElementById('rework-modal')?.classList.add('hidden');
+        }
+    });
 </script>
 @endpush
 @endsection

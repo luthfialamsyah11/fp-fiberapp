@@ -7,19 +7,6 @@ define('LARAVEL_START', microtime(true));
 
 /*
 |--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
-| Laravel core is placed outside the public HTML webroot: /home/benp5534/laravel-core
-|
-*/
-
-/*
-|--------------------------------------------------------------------------
 | Locate Laravel Core Bootstrap
 |--------------------------------------------------------------------------
 |
@@ -46,6 +33,52 @@ foreach ($coreCandidates as $candidate) {
 if (!$laravelCore) {
     http_response_code(500);
     die('Critical Error: Laravel core bootstrap not found. Please verify laravel-core deployment path.');
+}
+
+/*
+|--------------------------------------------------------------------------
+| Self-Healing FTP Deploy Cache Sync (Pre-Bootstrap)
+|--------------------------------------------------------------------------
+|
+| Shared hosting FTP deployments update routes/*.php and resources/views/*
+| without shell access to run `php artisan route:clear` or `view:clear`.
+| Clearing stale bootstrap route/config/view caches BEFORE Laravel boots
+| guarantees every new Admin/API route registers immediately (zero 404/500).
+|
+*/
+$deployCacheVersion = '2026-11-19-v5.4';
+$stampFile = $laravelCore . '/storage/framework/deploy_cache.version';
+$cacheDir = $laravelCore . '/bootstrap/cache';
+$routeCacheFiles = glob($cacheDir . '/routes-*.php') ?: [];
+
+$routesStale = false;
+$webRoutesMtime = @filemtime($laravelCore . '/routes/web.php') ?: 0;
+$apiRoutesMtime = @filemtime($laravelCore . '/routes/api.php') ?: 0;
+$latestRouteMtime = max($webRoutesMtime, $apiRoutesMtime);
+
+foreach ($routeCacheFiles as $rf) {
+    if ((@filemtime($rf) ?: 0) <= $latestRouteMtime) {
+        $routesStale = true;
+        break;
+    }
+}
+
+$versionStale = !file_exists($stampFile) || trim((string) @file_get_contents($stampFile)) !== $deployCacheVersion;
+
+if ($versionStale || $routesStale) {
+    foreach ($routeCacheFiles as $rf) {
+        @unlink($rf);
+    }
+    foreach (['config.php', 'events.php'] as $cf) {
+        if (file_exists($cacheDir . '/' . $cf)) {
+            @unlink($cacheDir . '/' . $cf);
+        }
+    }
+    $compiledViews = glob($laravelCore . '/storage/framework/views/*.php') ?: [];
+    foreach ($compiledViews as $vf) {
+        @unlink($vf);
+    }
+    @file_put_contents($stampFile, $deployCacheVersion);
 }
 
 if (file_exists($maintenance = $laravelCore . '/storage/framework/maintenance.php')) {

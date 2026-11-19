@@ -388,13 +388,14 @@
                                     </td>
                                     @if($task->status !== 'completed')
                                         <td class="py-2.5 text-right">
-                                            <form action="{{ route('admin.tasks.materials.destroy', ['task' => $task->id, 'material' => $mat->id]) }}" method="POST" onsubmit="return confirm('Remove material and restore warehouse stock?');" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="p-1 text-red-500 hover:bg-red-50 rounded" title="Remove & Restore Stock">
-                                                    <ion-icon name="trash-outline"></ion-icon>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                onclick="openRemoveBomModal(this)"
+                                                data-remove-url="{{ route('admin.tasks.materials.destroy', ['task' => $task->id, 'material' => $mat->id]) }}"
+                                                data-item-name="{{ $mat->inventoryItem->name ?? 'Material' }} ({{ $mat->quantity }} {{ $mat->inventoryItem->unit ?? 'pcs' }})"
+                                                class="w-7 h-7 inline-flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-all"
+                                                title="Remove & Restore Stock">
+                                                <ion-icon name="trash-outline" class="pointer-events-none"></ion-icon>
+                                            </button>
                                         </td>
                                     @endif
                                 </tr>
@@ -891,8 +892,30 @@
         if (e.key === 'Escape') {
             closeProofLightbox();
             document.getElementById('rework-modal')?.classList.add('hidden');
+            document.getElementById('remove-bom-modal')?.classList.add('hidden');
         }
     });
+
+    function openRemoveBomModal(btn) {
+        document.getElementById('remove-bom-form').action = btn.getAttribute('data-remove-url');
+        document.getElementById('remove-bom-label').textContent = btn.getAttribute('data-item-name') || 'Selected BOM item';
+        document.getElementById('remove-bom-modal').classList.remove('hidden');
+    }
 </script>
 @endpush
+
+<!-- Remove BOM Material Confirmation Modal -->
+<div id="remove-bom-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
+        <h3 class="text-sm font-bold text-textPrimary mb-1">Remove BOM Material</h3>
+        <p id="remove-bom-label" class="text-xs font-semibold text-slate-700 mb-2"></p>
+        <p class="text-xs text-textSecondary mb-5">This material record will be removed from the work order and its quantity restored to warehouse stock.</p>
+        <form id="remove-bom-form" method="POST" action="" class="flex justify-end gap-2">
+            @csrf
+            @method('DELETE')
+            <button type="button" onclick="document.getElementById('remove-bom-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50">Cancel</button>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm">Remove &amp; Restore</button>
+        </form>
+    </div>
+</div>
 @endsection

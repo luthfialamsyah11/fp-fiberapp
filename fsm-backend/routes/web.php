@@ -46,7 +46,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->group(function () {
     // Technicians
     Route::resource('technicians', TechnicianController::class, [
         'as' => 'admin'
-    ]);
+    ])->except(['show']);
 
     // Tasks
     Route::resource('tasks', TaskController::class, [
@@ -63,7 +63,7 @@ Route::middleware(['auth', 'active', 'role:admin'])->group(function () {
     Route::get('inventory/export', [\App\Http\Controllers\Web\InventoryController::class, 'export'])->name('admin.inventory.export');
     Route::resource('inventory', \App\Http\Controllers\Web\InventoryController::class, [
         'as' => 'admin'
-    ]);
+    ])->only(['index', 'store', 'update', 'destroy']);
     Route::post('inventory/{inventory}/adjust-stock', [\App\Http\Controllers\Web\InventoryController::class, 'adjustStock'])->name('admin.inventory.adjust_stock');
     Route::post('inventory/{inventory}/toggle-status', [\App\Http\Controllers\Web\InventoryController::class, 'toggleStatus'])->name('admin.inventory.toggle_status');
 

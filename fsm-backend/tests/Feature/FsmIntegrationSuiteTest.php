@@ -972,4 +972,86 @@ class FsmIntegrationSuiteTest extends TestCase
             'to_status'   => 'assigned',
         ]);
     }
+
+    public function test_all_admin_portal_navigation_routes_return_200_ok(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['email' => 'navtech@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+
+        $item = InventoryItem::create([
+            'code'       => 'NAV-CBL-01',
+            'name'       => 'Navigation Test Dropcore',
+            'unit'       => 'meter',
+            'stock'      => 250,
+            'unit_price' => 1.5,
+            'category'   => 'material',
+            'is_active'  => true,
+        ]);
+
+        $task = Task::create([
+            'title'          => 'Full Navigation Smoke Ticket',
+            'customer_name'  => 'Smoke Test Client',
+            'customer_phone' => '+628111111111',
+            'address'        => 'Jl. Merdeka No. 1',
+            'latitude'       => -6.2088,
+            'longitude'      => 106.8456,
+            'technician_id'  => $tech->id,
+            'status'         => 'on-going',
+            'priority'       => 'high',
+        ]);
+
+        TaskMaterial::create([
+            'task_id'           => $task->id,
+            'inventory_item_id' => $item->id,
+            'quantity'          => 10,
+            'unit_price'        => 1.5,
+            'total_price'       => 15,
+        ]);
+
+        TechnicianLocation::create([
+            'technician_id' => $tech->id,
+            'task_id'       => $task->id,
+            'latitude'      => -6.2080,
+            'longitude'     => 106.8450,
+        ]);
+
+        ProofOfWork::create([
+            'task_id'     => $task->id,
+            'image'       => 'proofs/smoke.png',
+            'description' => 'Before install photo',
+            'slot'        => 'before',
+        ]);
+
+        $htmlRoutes = [
+            '/dashboard',
+            '/tasks',
+            '/tasks/create',
+            "/tasks/{$task->id}",
+            "/tasks/{$task->id}/edit",
+            "/tasks/{$task->id}/bast?token={$task->tracking_token}",
+            '/inventory',
+            '/assignments',
+            '/technicians',
+            '/technicians/create',
+            "/technicians/{$tech->id}/edit",
+            '/tracking',
+            '/proofs',
+            '/history',
+            '/reports',
+            '/settings',
+            '/guide',
+        ];
+
+        foreach ($htmlRoutes as $route) {
+            $resp = $this->actingAs($admin)->get($route);
+            $resp->assertStatus(200);
+            $resp->assertDontSee('return confirm(');
+        }
+
+        // JSON & CSV endpoints
+        $this->actingAs($admin)->getJson("/tasks/{$task->id}/live-status")->assertOk();
+        $this->actingAs($admin)->getJson('/tracking/live-data')->assertOk();
+        $this->actingAs($admin)->get('/inventory/export')->assertStatus(200);
+        $this->actingAs($admin)->get('/reports/export')->assertStatus(200);
+    }
 }

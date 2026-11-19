@@ -179,10 +179,19 @@ jobs:
             **/laravel.zip
             **/resources.zip
 
-      # 8. Trigger Production Schema Auto-Sync & Smoke Check
-      - name: ✅ Trigger Schema Sync & Verify Live Endpoints
+      # 8. Trigger Production Cache/Schema Auto-Sync & Smoke Check
+      - name: ✅ Trigger Cache/Schema Sync & Verify Live Endpoints
         run: |
           sleep 5
           curl -sS -I https://bentengsiber.com/ | head -n 5
           curl -sS -I https://admin.bentengsiber.com/login | head -n 5
           curl -sS -I https://app.bentengsiber.com/ | head -n 5
+          # Verify new Admin routes are registered (expect 302 redirect to /login, never 404/500)
+          for ep in "/tasks/1/live-status" "/inventory" "/inventory/export" "/assignments"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "https://admin.bentengsiber.com${ep}")
+            echo "Route check ${ep} -> HTTP ${code}"
+            if [ "$code" != "302" ] && [ "$code" != "200" ]; then
+              echo "::error::Route ${ep} returned unexpected HTTP ${code} (stale route cache or server error)!"
+              exit 1
+            fi
+          done

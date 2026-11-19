@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public const SCHEMA_VERSION = 'v5.3-admin-sync';
+    public const SCHEMA_VERSION = 'v5.4-routes-and-admin-sync';
 
     public function register(): void
     {

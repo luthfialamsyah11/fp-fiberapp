@@ -1,198 +1,330 @@
 <ion-content class="prof-content has-tab-bar">
-  <!-- Loading Skeleton -->
-  <div *ngIf="isLoading" class="skeleton-wrap">
-    <div class="sk-avatar"></div>
-    <div class="sk-form">
+
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="prof-shell">
+    <!-- Loading Skeleton -->
+    <div *ngIf="isLoading" class="skeleton-wrap">
+      <div class="sk-card"></div>
       <div class="sk-input"></div>
       <div class="sk-input"></div>
       <div class="sk-input"></div>
     </div>
-  </div>
 
-  <!-- Form Content -->
-  <div *ngIf="!isLoading" class="prof-body">
+    <!-- Profile Body -->
+    <div *ngIf="!isLoading" class="prof-body">
 
-    <!-- Header -->
-    <div class="prof-header-section">
-      <h1>My Profile</h1>
-    </div>
-
-    <!-- VIEW MODE -->
-    <ng-container *ngIf="!isEditing">
-      <!-- Profile Summary Card -->
-      <div class="profile-hero-card">
-        <div class="profile-main-info">
-          <div class="avatar-circle">
-            {{ name ? name.substring(0, 1).toUpperCase() : 'T' }}
-          </div>
-          <div class="user-meta">
-            <h3>{{ name || 'Field Specialist' }}</h3>
-            <p>{{ email }}</p>
-            <div class="role-badge">
-              <ion-icon name="shield-checkmark"></ion-icon>
-              <span>Verified Specialist</span>
-            </div>
-          </div>
+      <!-- Sticky Top Header -->
+      <header class="prof-header-section">
+        <div>
+          <span class="section-kicker">TECHNICIAN ACCOUNT</span>
+          <h1>My Profile</h1>
         </div>
-
-        <!-- Driver Performance Stats Row -->
-        <div class="stats-row">
-          <div class="stat-box">
-            <span class="stat-num">4.9 ★</span>
-            <span class="stat-lbl">Rating</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-box">
-            <span class="stat-num">100%</span>
-            <span class="stat-lbl">Acceptance</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-box">
-            <span class="stat-num">{{ completedTasks.length }}</span>
-            <span class="stat-lbl">Completed</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Completed History (Integrated History) -->
-      <div class="fo-section-header">Completed Work Orders ({{ completedTasks.length }})</div>
-      <div class="fo-list-group" *ngIf="completedTasks.length > 0">
-        <div class="fo-list-item history-item" *ngFor="let h of completedTasks.slice(0, 6)" (click)="goToDetail(h.id)">
-          <div class="item-icon-wrap green">
-            <ion-icon name="checkmark-done-outline"></ion-icon>
-          </div>
-          <div class="item-content">
-            <div class="item-title truncate">{{ h.title }}</div>
-            <div class="item-sub">
-              {{ h.customer_name || 'Customer' }} &bull; {{ h.updated_at | date:'dd MMM yyyy, HH:mm' }}
-            </div>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
-        </div>
-      </div>
-      <div class="empty-history-box" *ngIf="completedTasks.length === 0">
-        <p>No completed work orders yet.</p>
-      </div>
-
-      <!-- Settings List Category: Account -->
-      <div class="fo-section-header">Account Settings</div>
-      <div class="fo-list-group">
-        <div class="fo-list-item" (click)="isEditing = true">
-          <div class="item-icon-wrap blue">
-            <ion-icon name="person-outline"></ion-icon>
-          </div>
-          <div class="item-content">
-            <div class="item-title">Edit Personal Details</div>
-            <div class="item-sub">Full name &amp; active telephone number</div>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
-        </div>
-
-        <div class="fo-list-item" (click)="changePassword()">
-          <div class="item-icon-wrap orange">
-            <ion-icon name="key-outline"></ion-icon>
-          </div>
-          <div class="item-content">
-            <div class="item-title">Security &amp; Password</div>
-            <div class="item-sub">Update enterprise security credentials</div>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
-        </div>
-      </div>
-
-      <!-- Settings List Category: Support & App -->
-      <div class="fo-section-header">Support &amp; Application</div>
-      <div class="fo-list-group">
-        <div class="fo-list-item" (click)="helpCenter()">
-          <div class="item-icon-wrap green">
-            <ion-icon name="help-circle-outline"></ion-icon>
-          </div>
-          <div class="item-content">
-            <div class="item-title">Help Center</div>
-            <div class="item-sub">24/7 Field technical support &amp; dispatch assistance</div>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
-        </div>
-
-        <div class="fo-list-item" (click)="appInfo()">
-          <div class="item-icon-wrap slate">
-            <ion-icon name="information-circle-outline"></ion-icon>
-          </div>
-          <div class="item-content">
-            <div class="item-title">About FiberOps</div>
-            <div class="item-sub">Application version &amp; ecosystem copyright</div>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
-        </div>
-      </div>
-
-      <!-- Logout Button -->
-      <div class="logout-container">
-        <button class="btn-logout-premium" (click)="doLogout()">
-          <ion-icon name="log-out-outline"></ion-icon>
-          <span>Log Out of Account</span>
+        <button
+          type="button"
+          class="shift-pill"
+          [class.online]="isOnline && !hasGpsWarning"
+          [class.warn]="hasGpsWarning"
+          (click)="toggleOnlineStatus()"
+        >
+          <span class="pill-dot"></span>
+          <span>{{ !isOnline ? 'Offline' : (hasGpsWarning ? 'GPS Alert' : 'Online') }}</span>
         </button>
-      </div>
-    </ng-container>
+      </header>
 
-    <!-- EDIT MODE -->
-    <ng-container *ngIf="isEditing">
-      <div class="edit-card">
-        <div class="edit-header">
-          <h3>Edit Personal Details</h3>
-          <p>Update your display name and cellular contact number</p>
-        </div>
+      <!-- VIEW MODE -->
+      <ng-container *ngIf="!isEditing && !isChangingPassword">
+        <!-- Profile Summary Card with Real DB KPIs (PR-1) -->
+        <section class="profile-hero-card">
+          <div class="profile-main-info">
+            <div class="avatar-circle">
+              {{ userInitials }}
+            </div>
+            <div class="user-meta">
+              <h3>{{ user?.name || 'Field Technician' }}</h3>
+              <p>{{ email }}</p>
+              <p class="phone-line" *ngIf="phone">
+                <ion-icon name="call-outline"></ion-icon>
+                <span>{{ phone }}</span>
+              </p>
+              <div class="role-badge">
+                <ion-icon name="shield-checkmark"></ion-icon>
+                <span>Verified Field Specialist</span>
+              </div>
+            </div>
+          </div>
 
-        <div class="input-group">
-          <label>Full Name</label>
-          <div class="input-container" [class.focused]="nameFocused">
-            <ion-icon name="person-outline"></ion-icon>
-            <input
-              type="text"
-              [(ngModel)]="name"
-              placeholder="Your full legal name..."
-              [disabled]="isSaving"
-              (focus)="nameFocused = true"
-              (blur)="nameFocused = false"
-            />
+          <!-- Real Database Performance Stats Row -->
+          <div class="stats-row">
+            <div class="stat-box">
+              <span class="stat-num">{{ stats.acceptance_rate }}%</span>
+              <span class="stat-lbl">Acceptance</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-box">
+              <span class="stat-num">{{ stats.proof_compliance_rate }}%</span>
+              <span class="stat-lbl">Proof SLA</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-box">
+              <span class="stat-num">{{ stats.completed_count }}</span>
+              <span class="stat-lbl">Completed</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Live Telemetry & Shift Diagnostics Card (PR-4) -->
+        <div class="fo-section-header">GPS Telemetry &amp; Shift Status</div>
+        <div class="diag-card">
+          <div class="diag-row">
+            <div class="diag-left">
+              <span class="diag-dot" [class.ok]="isOnline && !hasGpsWarning" [class.warn]="hasGpsWarning"></span>
+              <div>
+                <div class="diag-title">{{ isOnline ? gpsStatusMessage : 'Shift Offline (GPS Paused)' }}</div>
+                <div class="diag-sub">
+                  {{ pendingOfflineCount > 0 ? pendingOfflineCount + ' offline GPS point(s) queued' : 'No pending offline GPS buffer' }}
+                </div>
+              </div>
+            </div>
+            <button type="button" class="diag-btn" (click)="syncGpsNow()" *ngIf="isOnline">
+              <ion-icon name="sync-outline"></ion-icon>
+              <span>Sync</span>
+            </button>
+          </div>
+
+          <div class="diag-actions" *ngIf="pendingOfflineCount > 0 || isNative">
+            <button type="button" class="diag-chip warn" *ngIf="pendingOfflineCount > 0" (click)="flushOfflineBuffer()">
+              <ion-icon name="cloud-upload-outline"></ion-icon>
+              <span>Flush Offline Buffer ({{ pendingOfflineCount }})</span>
+            </button>
+            <button type="button" class="diag-chip" *ngIf="isNative" (click)="openNativeLocationSettings()">
+              <ion-icon name="settings-outline"></ion-icon>
+              <span>Background GPS Settings</span>
+            </button>
           </div>
         </div>
 
-        <div class="input-group">
-          <label>Phone Number</label>
-          <div class="input-container" [class.focused]="phoneFocused">
-            <ion-icon name="call-outline"></ion-icon>
-            <input
-              type="tel"
-              [(ngModel)]="phone"
-              placeholder="Active phone number..."
-              [disabled]="isSaving"
-              (focus)="phoneFocused = true"
-              (blur)="phoneFocused = false"
-            />
+        <!-- Completed Work Orders History with Show All & BAST PDF Shortcut (PR-5) -->
+        <div class="section-row-head">
+          <span class="fo-section-header">Completed Work Orders ({{ completedTasks.length }})</span>
+          <button
+            type="button"
+            class="toggle-history-btn"
+            *ngIf="completedTasks.length > 5"
+            (click)="showAllHistory = !showAllHistory"
+          >
+            {{ showAllHistory ? 'Show Less' : 'Show All (' + completedTasks.length + ')' }}
+          </button>
+        </div>
+
+        <div class="fo-list-group" *ngIf="completedTasks.length > 0">
+          <div class="fo-list-item history-item" *ngFor="let h of visibleCompletedTasks" (click)="goToDetail(h.id)">
+            <div class="item-icon-wrap green">
+              <ion-icon name="checkmark-done-outline"></ion-icon>
+            </div>
+            <div class="item-content">
+              <div class="item-title">{{ h.title }}</div>
+              <div class="item-sub">
+                <span class="mono-id">{{ formatTaskCode(h.id) }}</span>
+                &bull; {{ h.customer_name || 'Customer' }}
+                &bull; {{ (h.completed_at || h.updated_at) | date:'dd MMM yyyy, HH:mm' }}
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-bast-mini"
+              (click)="openBastPdf(h, $event)"
+              title="Open BAST PDF"
+              aria-label="Open BAST PDF"
+            >
+              <ion-icon name="document-text-outline"></ion-icon>
+            </button>
+            <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+          </div>
+        </div>
+        <div class="empty-history-box" *ngIf="completedTasks.length === 0">
+          <p>No completed work orders yet.</p>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="fo-section-header">Account Settings</div>
+        <div class="fo-list-group">
+          <div class="fo-list-item" (click)="openEditMode()">
+            <div class="item-icon-wrap blue">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <div class="item-content">
+              <div class="item-title">Edit Personal Details</div>
+              <div class="item-sub">Full name &amp; active telephone number</div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+          </div>
+
+          <div class="fo-list-item" (click)="openChangePassword()">
+            <div class="item-icon-wrap orange">
+              <ion-icon name="key-outline"></ion-icon>
+            </div>
+            <div class="item-content">
+              <div class="item-title">Security &amp; Password</div>
+              <div class="item-sub">Change password and revoke stale device sessions</div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="edit-actions">
-          <button class="btn-cancel" (click)="isEditing = false" [disabled]="isSaving">
-            Cancel
-          </button>
-          <button class="btn-save" (click)="saveProfile()" [disabled]="isSaving">
-            <ion-spinner name="crescent" *ngIf="isSaving" class="btn-spinner"></ion-spinner>
-            <span>{{ isSaving ? 'Saving...' : 'Save Changes' }}</span>
+        <!-- Support & App -->
+        <div class="fo-section-header">Support &amp; Application</div>
+        <div class="fo-list-group">
+          <div class="fo-list-item" (click)="helpCenter()">
+            <div class="item-icon-wrap green">
+              <ion-icon name="help-circle-outline"></ion-icon>
+            </div>
+            <div class="item-content">
+              <div class="item-title">NOC Help Center</div>
+              <div class="item-sub">24/7 Field dispatch hotline &amp; support email</div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+          </div>
+
+          <div class="fo-list-item" (click)="appInfo()">
+            <div class="item-icon-wrap slate">
+              <ion-icon name="information-circle-outline"></ion-icon>
+            </div>
+            <div class="item-content">
+              <div class="item-title">About FiberOps</div>
+              <div class="item-sub">Application version &amp; platform details</div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="item-chevron"></ion-icon>
+          </div>
+        </div>
+
+        <!-- Logout Button -->
+        <div class="logout-container">
+          <button type="button" class="btn-logout-premium" (click)="doLogout()">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>Log Out of Account</span>
           </button>
         </div>
-      </div>
-    </ng-container>
+      </ng-container>
 
-    <!-- App version label -->
-    <div class="app-version-label" *ngIf="!isEditing">
-      <p>FiberOps v1.0.4-premium</p>
-      <p class="copyright">&copy; 2026 FiberOps. All rights reserved.</p>
+      <!-- EDIT PROFILE MODE (PR-2 & PR-3) -->
+      <ng-container *ngIf="isEditing">
+        <div class="edit-card">
+          <div class="edit-header">
+            <h3>Edit Personal Details</h3>
+            <p>Update your display name and cellular contact number</p>
+          </div>
+
+          <div class="input-group">
+            <label>Full Name</label>
+            <div class="input-container" [class.focused]="nameFocused">
+              <ion-icon name="person-outline"></ion-icon>
+              <input
+                type="text"
+                [(ngModel)]="name"
+                placeholder="Your full name..."
+                [disabled]="isSaving"
+                (focus)="nameFocused = true"
+                (blur)="nameFocused = false"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Phone Number</label>
+            <div class="input-container" [class.focused]="phoneFocused">
+              <ion-icon name="call-outline"></ion-icon>
+              <input
+                type="tel"
+                [(ngModel)]="phone"
+                placeholder="Active phone number..."
+                [disabled]="isSaving"
+                (focus)="phoneFocused = true"
+                (blur)="phoneFocused = false"
+              />
+            </div>
+          </div>
+
+          <div class="edit-actions">
+            <button type="button" class="btn-cancel" (click)="cancelEdit()" [disabled]="isSaving">
+              Cancel
+            </button>
+            <button type="button" class="btn-save" (click)="saveProfile()" [disabled]="isSaving">
+              <ion-spinner name="crescent" *ngIf="isSaving" class="btn-spinner"></ion-spinner>
+              <span>{{ isSaving ? 'Saving...' : 'Save Changes' }}</span>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- CHANGE PASSWORD MODE (PR-6) -->
+      <ng-container *ngIf="isChangingPassword">
+        <div class="edit-card">
+          <div class="edit-header">
+            <h3>Update Security Password</h3>
+            <p>Minimum 8 characters. Other logged-in devices will be signed out automatically.</p>
+          </div>
+
+          <div class="input-group">
+            <label>Current Password</label>
+            <div class="input-container">
+              <ion-icon name="lock-closed-outline"></ion-icon>
+              <input
+                type="password"
+                [(ngModel)]="currentPassword"
+                placeholder="Enter current password..."
+                [disabled]="isSavingPassword"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>New Password</label>
+            <div class="input-container">
+              <ion-icon name="key-outline"></ion-icon>
+              <input
+                type="password"
+                [(ngModel)]="newPassword"
+                placeholder="At least 8 characters..."
+                [disabled]="isSavingPassword"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Confirm New Password</label>
+            <div class="input-container">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+              <input
+                type="password"
+                [(ngModel)]="confirmPassword"
+                placeholder="Re-enter new password..."
+                [disabled]="isSavingPassword"
+              />
+            </div>
+          </div>
+
+          <div class="edit-actions">
+            <button type="button" class="btn-cancel" (click)="cancelChangePassword()" [disabled]="isSavingPassword">
+              Cancel
+            </button>
+            <button type="button" class="btn-save" (click)="submitPasswordChange()" [disabled]="isSavingPassword">
+              <ion-spinner name="crescent" *ngIf="isSavingPassword" class="btn-spinner"></ion-spinner>
+              <span>{{ isSavingPassword ? 'Updating...' : 'Update Password' }}</span>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="app-version-label" *ngIf="!isEditing && !isChangingPassword">
+        <p>FiberOps Field Technician v2.0.0</p>
+        <p class="copyright">&copy; 2026 FiberOps. All rights reserved.</p>
+      </div>
+
+      <div class="footer-space"></div>
     </div>
-
-    <div class="footer-space"></div>
   </div>
 </ion-content>
 

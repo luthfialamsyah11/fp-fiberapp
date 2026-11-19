@@ -1231,4 +1231,88 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertOk()
             ->assertJson(['verified' => true]);
     }
+
+    public function test_profile_me_returns_real_stats_and_settings_and_password_change_revokes_other_tokens(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['email' => 'proftech@fsm.com', 'is_online' => true]);
+
+        // Save custom NOC support info in Admin Settings
+        $this->actingAs($admin)->post('/settings', [
+            'company_name'               => 'Benteng Siber Fiber',
+            'support_email'              => 'helpdesk@bentengsiber.com',
+            'support_phone'              => '+6289900011122',
+            'currency'                   => 'USD',
+            'default_country_code'       => '62',
+            'gps_refresh_interval'       => '15',
+            'map_style'                  => 'openstreetmap',
+            'auto_assign'                => '1',
+            'sla_warning_hours'          => '2',
+            'require_proof_photo'        => '1',
+            'require_customer_signature' => '0',
+            'geofence_check_meters'      => '0',
+            'telemetry_retention_days'   => '30',
+        ])->assertRedirect();
+
+        // Seed 1 completed task with proof + 1 declined history event => 50% acceptance, 100% proof compliance
+        $doneTask = Task::create([
+            'title'         => 'Completed Drop Install',
+            'customer_name' => 'Client Done',
+            'address'       => 'Addr 1',
+            'technician_id' => $tech->id,
+            'status'        => 'completed',
+            'priority'      => 'medium',
+        ]);
+        ProofOfWork::create([
+            'task_id'     => $doneTask->id,
+            'image'       => 'proofs/done.png',
+            'description' => 'Verified',
+            'slot'        => 'after',
+        ]);
+        TaskStatusHistory::create([
+            'task_id'     => $doneTask->id,
+            'actor_id'    => $tech->id,
+            'actor_role'  => 'technician',
+            'from_status' => 'assigned',
+            'to_status'   => 'pending',
+            'reason'      => 'Busy on another outage',
+        ]);
+
+        // 1. GET /api/me returns real DB stats & dynamic Admin support contact
+        $meRes = $this->actingAs($tech, 'sanctum')->getJson('/api/me')->assertOk();
+        $meRes->assertJsonPath('stats.completed_count', 1)
+            ->assertJsonPath('stats.declined_count', 1)
+            ->assertJsonPath('stats.acceptance_rate', 50)
+            ->assertJsonPath('stats.proof_compliance_rate', 100)
+            ->assertJsonPath('config.company_name', 'Benteng Siber Fiber')
+            ->assertJsonPath('config.support_email', 'helpdesk@bentengsiber.com')
+            ->assertJsonPath('config.support_phone', '+6289900011122');
+
+        // 2. Issue two real Sanctum tokens (current device + stale device) and reset test auth guard
+        $this->app['auth']->forgetGuards();
+        $currentToken = $tech->createToken('current_device')->plainTextToken;
+        $staleToken = $tech->createToken('stale_device')->plainTextToken;
+
+        // Wrong current_password rejected with 422
+        $this->withHeader('Authorization', 'Bearer ' . $currentToken)
+            ->putJson('/api/profile/password', [
+                'current_password'      => 'wrongpass',
+                'password'              => 'newSecurePass123',
+                'password_confirmation' => 'newSecurePass123',
+            ])
+            ->assertStatus(422);
+
+        // Valid password update succeeds & revokes stale device token while keeping current token
+        $this->withHeader('Authorization', 'Bearer ' . $currentToken)
+            ->putJson('/api/profile/password', [
+                'current_password'      => 'password123',
+                'password'              => 'newSecurePass123',
+                'password_confirmation' => 'newSecurePass123',
+            ])
+            ->assertOk();
+
+        $this->assertTrue(Hash::check('newSecurePass123', $tech->fresh()->password));
+        $this->assertEquals(1, $tech->tokens()->count());
+        $this->assertNotEmpty($staleToken);
+    }
 }

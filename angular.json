@@ -15,7 +15,8 @@
           "options": {
             "outputPath": "www",
             "allowedCommonJsDependencies": [
-              "localforage"
+              "localforage",
+              "leaflet"
             ],
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -35,7 +36,11 @@
               },
               "src/.htaccess"
             ],
-            "styles": ["src/global.scss", "src/theme/variables.scss"],
+            "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
+              "src/global.scss",
+              "src/theme/variables.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -115,7 +120,11 @@
                 "output": "./svg"
               }
             ],
-            "styles": ["src/global.scss", "src/theme/variables.scss"],
+            "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
+              "src/global.scss",
+              "src/theme/variables.scss"
+            ],
             "scripts": []
           },
           "configurations": {

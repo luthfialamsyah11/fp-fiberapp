@@ -36,6 +36,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/profile/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
 
     // Technician - Tasks & Deterministic State Machine
     Route::get('/tasks', [TaskController::class, 'index']);

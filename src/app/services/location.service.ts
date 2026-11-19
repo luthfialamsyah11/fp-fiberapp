@@ -401,6 +401,30 @@ export class LocationService {
     return pos;
   }
 
+  /**
+   * Capture a fresh GPS fix AND immediately push it to POST /api/location + flush offline queue (MP-2).
+   */
+  async forceSyncNow(): Promise<Position | null> {
+    await this.offlineQueue.init();
+    const perm = await this.ensurePermissions();
+    if (perm === 'denied') {
+      throw { code: 1, message: 'Location permission denied' };
+    }
+
+    const pos = await this.getCurrentPosition();
+    if (pos?.coords) {
+      this.lastKnownPosition = pos;
+      this.lastUpdateTime = Date.now();
+      await this.dispatchPosition(pos, 'foreground');
+      return pos;
+    }
+    return null;
+  }
+
+  async getPendingOfflineCount(): Promise<number> {
+    return this.offlineQueue.getPendingCount();
+  }
+
   async stopTracking() {
     this.isTracking = false;
     if (this.bgWatcherId !== null) {

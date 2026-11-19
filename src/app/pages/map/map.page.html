@@ -1,88 +1,177 @@
 <ion-content class="map-content has-tab-bar">
 
-  <!-- Map Visual Area -->
-  <div class="map-viewport">
-    <div class="map-grid">
-      <div class="grid-line h" *ngFor="let i of [1,2,3,4,5,6,7]"></div>
-      <div class="grid-line v" *ngFor="let i of [1,2,3,4,5,6,7]"></div>
-    </div>
-    
-    <!-- Center Pin -->
-    <div class="center-pin" [class.pulsing]="!isLocating">
-      <div class="pin-ring"></div>
-      <div class="pin-dot"></div>
-    </div>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-    <!-- Floating Controls -->
-    <div class="map-controls">
-      <button class="map-ctrl-btn" (click)="refreshLocation()" [class.spinning]="isLocating">
-        <ion-icon name="locate-outline"></ion-icon>
-      </button>
-      <button class="map-ctrl-btn" (click)="openInMaps()">
-        <ion-icon name="navigate-outline"></ion-icon>
-      </button>
-    </div>
+  <div class="map-shell">
+    <!-- Real Interactive Leaflet Route Map Viewport (MP-1) -->
+    <div class="map-viewport">
+      <div #mapContainer class="leaflet-map-host"></div>
 
-    <!-- Coordinates Overlay -->
-    <div class="coords-overlay" *ngIf="latitude !== null && longitude !== null">
-      <div class="coords-badge">
-        <ion-icon name="location"></ion-icon>
-        <span>{{ latitude.toFixed(6) }}, {{ longitude.toFixed(6) }}</span>
+      <!-- Top Left Live Status Chip -->
+      <div class="map-top-chip" [class.error]="hasGpsError" [class.ok]="!hasGpsError && latitude !== null">
+        <span class="chip-dot"></span>
+        <span *ngIf="!hasGpsError && latitude !== null">
+          GPS Live<ng-container *ngIf="accuracy"> &bull; &plusmn;{{ accuracy }}m</ng-container>
+        </span>
+        <span *ngIf="!hasGpsError && latitude === null">Acquiring GPS...</span>
+        <span *ngIf="hasGpsError">{{ gpsStatusMessage }}</span>
       </div>
-    </div>
-  </div>
 
-  <!-- Bottom Sheet -->
-  <div class="map-sheet">
-
-    <!-- Location Status -->
-    <div class="location-status-card">
-      <div class="loc-header">
-        <div class="loc-icon" [class.active]="!locationError" [class.error]="locationError">
-          <ion-icon [name]="locationError ? 'warning-outline' : 'radio-outline'"></ion-icon>
-        </div>
-        <div class="loc-info">
-          <h3 *ngIf="!locationError">GPS Active</h3>
-          <h3 *ngIf="locationError">GPS Unavailable</h3>
-          <p *ngIf="accuracy">Accuracy: ±{{ accuracy }}m</p>
-          <p *ngIf="lastUpdated">Updated: {{ lastUpdated | date:'HH:mm:ss' }}</p>
-          <p *ngIf="!lastUpdated && !locationError">Acquiring satellite fix...</p>
-        </div>
-        <button class="refresh-btn" (click)="refreshLocation()" [disabled]="isLocating">
-          <ion-icon name="refresh-outline" [class.spin]="isLocating"></ion-icon>
+      <!-- Floating Map Controls (Safe-area aware) -->
+      <div class="map-controls">
+        <button type="button" class="map-ctrl-btn" (click)="centerOnMe()" title="Center on My GPS" aria-label="Center on My GPS">
+          <ion-icon name="locate-outline"></ion-icon>
+        </button>
+        <button type="button" class="map-ctrl-btn" (click)="fitAllMarkers()" title="Fit Route & Pins" aria-label="Fit Route">
+          <ion-icon name="scan-outline"></ion-icon>
+        </button>
+        <button type="button" class="map-ctrl-btn" [class.active]="isSatellite" (click)="toggleMapStyle()" title="Toggle Satellite / Street" aria-label="Toggle Map Style">
+          <ion-icon name="layers-outline"></ion-icon>
+        </button>
+        <button type="button" class="map-ctrl-btn" (click)="refreshLocation(true)" [class.spinning]="isLocating" title="Force Sync GPS to NOC" aria-label="Sync GPS">
+          <ion-icon name="sync-outline"></ion-icon>
         </button>
       </div>
+
+      <!-- Coordinates Overlay -->
+      <div class="coords-overlay" *ngIf="latitude !== null && longitude !== null">
+        <div class="coords-badge">
+          <ion-icon name="pin-outline"></ion-icon>
+          <span>{{ latitude.toFixed(5) }}, {{ longitude.toFixed(5) }}</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Active Task Card -->
-    <div class="active-task-card" *ngIf="activeTask" (click)="navigateToTask()">
-      <div class="task-indicator">
-        <div class="pulse-dot"></div>
+    <!-- Bottom Telemetry & Route Sheet -->
+    <div class="map-sheet">
+
+      <!-- Actionable GPS Error / Permission Banner (MP-4) -->
+      <button type="button" class="gps-alert-bar" *ngIf="hasGpsError" (click)="fixGpsIssue()">
+        <div class="alert-left">
+          <ion-icon name="warning-outline"></ion-icon>
+          <span>{{ gpsStatusMessage }}</span>
+        </div>
+        <span class="alert-cta">Fix GPS &rarr;</span>
+      </button>
+
+      <!-- GPS Telemetry & Admin Sync Card -->
+      <div class="telemetry-card">
+        <div class="loc-header">
+          <div class="loc-icon" [class.active]="!hasGpsError && latitude !== null" [class.error]="hasGpsError">
+            <ion-icon [name]="hasGpsError ? 'warning-outline' : 'radio-outline'"></ion-icon>
+          </div>
+          <div class="loc-info">
+            <h3>
+              {{ hasGpsError ? 'GPS Needs Attention' : (latitude !== null ? 'Live Telemetry Synced' : 'Locating Satellite...') }}
+            </h3>
+            <p *ngIf="lastUpdated">
+              Fix {{ lastUpdated | date:'HH:mm:ss' }}
+              <ng-container *ngIf="accuracy"> &bull; &plusmn;{{ accuracy }}m{{ accuracy > 250 ? ' (Low)' : '' }}</ng-container>
+            </p>
+            <p *ngIf="!lastUpdated">Waiting for first coordinate lock...</p>
+          </div>
+          <button type="button" class="sync-btn" (click)="refreshLocation(true)" [disabled]="isLocating">
+            <ion-icon name="refresh-outline" [class.spin]="isLocating"></ion-icon>
+            <span>Sync</span>
+          </button>
+        </div>
+
+        <!-- Offline Queue Buffer Indicator -->
+        <div class="buffer-row" *ngIf="pendingOfflineCount > 0">
+          <span class="buffer-txt">
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            {{ pendingOfflineCount }} offline GPS point(s) queued
+          </span>
+          <button type="button" class="buffer-btn" (click)="flushOfflineBuffer()">Flush Now</button>
+        </div>
       </div>
-      <div class="task-info">
-        <span class="task-label">Active Mission</span>
-        <h4>{{ activeTask.title }}</h4>
-        <p *ngIf="activeTask.location">
+
+      <!-- Focused Mission / Selected Destination Card -->
+      <div class="focused-task-card" *ngIf="focusedTask">
+        <div class="ft-top">
+          <span class="ft-badge" [class.live]="activeTask?.id === focusedTask.id">
+            <span class="pulse-dot" *ngIf="activeTask?.id === focusedTask.id"></span>
+            {{ activeTask?.id === focusedTask.id ? 'ACTIVE MISSION' : 'SELECTED STOP' }}
+          </span>
+          <span class="ft-code">{{ formatTaskCode(focusedTask.id) }}</span>
+        </div>
+
+        <h4 class="ft-title" (click)="navigateToTask(focusedTask)">{{ focusedTask.title }}</h4>
+
+        <div class="ft-address">
           <ion-icon name="location-outline"></ion-icon>
-          {{ activeTask.location }}
-        </p>
+          <span>{{ focusedTask.resolved_location || focusedTask.location || focusedTask.address || 'No premise address' }}</span>
+        </div>
+
+        <div class="ft-metrics" *ngIf="distanceToFocusedLabel">
+          <span class="metric-chip">
+            <ion-icon name="navigate-circle-outline"></ion-icon>
+            {{ distanceToFocusedLabel }} away
+          </span>
+          <span class="metric-chip" *ngIf="etaMinutesToFocused">
+            <ion-icon name="time-outline"></ion-icon>
+            ~{{ etaMinutesToFocused }} min drive
+          </span>
+        </div>
+
+        <div class="ft-actions">
+          <button type="button" class="btn-nav-primary" (click)="openInMaps(focusedTask)">
+            <ion-icon name="navigate-outline"></ion-icon>
+            <span>Start Navigation</span>
+          </button>
+          <button type="button" class="btn-open-secondary" (click)="navigateToTask(focusedTask)">
+            <span>Open Task</span>
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </button>
+        </div>
       </div>
-      <ion-icon name="chevron-forward-outline" class="task-arrow"></ion-icon>
-    </div>
 
-    <!-- No Active Task -->
-    <div class="no-task-card" *ngIf="!activeTask">
-      <ion-icon name="checkmark-circle-outline"></ion-icon>
-      <p>No active missions at the moment</p>
-    </div>
+      <!-- Empty Mission Card -->
+      <div class="no-task-card" *ngIf="!focusedTask">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <h4>No Active Route Stops</h4>
+        <p>When NOC dispatches a work order with GPS coordinates, its route pin and ETA appear here automatically.</p>
+      </div>
 
-    <!-- Quick Navigate Button -->
-    <button class="btn-navigate" (click)="openInMaps()">
-      <ion-icon name="navigate-outline"></ion-icon>
-      Open in Google Maps
-    </button>
+      <!-- Upcoming Assigned Stops List (MP-5) -->
+      <section class="stops-section" *ngIf="assignedTasks.length > 0">
+        <div class="stops-header">
+          <span>Upcoming Assigned Stops ({{ assignedTasks.length }})</span>
+          <span class="stops-hint">Tap to preview on map</span>
+        </div>
+
+        <div class="stops-list">
+          <div
+            class="stop-row"
+            *ngFor="let t of assignedTasks"
+            [class.selected]="focusedTask?.id === t.id"
+            (click)="selectTaskOnMap(t)"
+          >
+            <div class="stop-pin" [class.high]="t.priority === 'high'">
+              <ion-icon name="location"></ion-icon>
+            </div>
+            <div class="stop-body">
+              <div class="stop-title-row">
+                <span class="stop-title">{{ t.title }}</span>
+                <span class="stop-dist" *ngIf="getTaskDistanceLabel(t)">{{ getTaskDistanceLabel(t) }}</span>
+              </div>
+              <div class="stop-sub">
+                {{ formatTaskCode(t.id) }} &bull; {{ t.customer_name || 'Customer' }}
+                <ng-container *ngIf="!t.latitude || !t.longitude"> &bull; No GPS pin</ng-container>
+              </div>
+            </div>
+            <button type="button" class="stop-open-btn" (click)="navigateToTask(t); $event.stopPropagation()" aria-label="Open work order">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-space"></div>
+    </div>
   </div>
-
 </ion-content>
 
 <app-tab-bar activeTab="map"></app-tab-bar>

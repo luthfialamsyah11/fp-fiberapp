@@ -9,6 +9,10 @@ import { GpsTelemetryPoint, OfflineQueueService } from './offline-queue.service'
 const isDebug = !environment.production;
 
 export interface FsmClientConfig {
+  company_name?: string;
+  support_email?: string;
+  support_phone?: string;
+  map_style?: string;
   gps_refresh_interval: number;
   geofence_check_meters: number;
   require_proof_photo: boolean;
@@ -29,6 +33,10 @@ export class ApiService {
   private demoInventory = DEMO_INVENTORY.map(item => ({ ...item }));
 
   private clientConfig: FsmClientConfig = {
+    company_name: 'FiberOps Global Carrier',
+    support_email: 'noc@bentengsiber.com',
+    support_phone: '+1-800-555-0199',
+    map_style: 'openstreetmap',
     gps_refresh_interval: 15,
     geofence_check_meters: 0,
     require_proof_photo: true,
@@ -108,6 +116,19 @@ export class ApiService {
       return { data: this.demoUser };
     }
     return firstValueFrom(this.http.put(`${this.baseUrl}/profile`, data));
+  }
+
+  async updatePassword(currentPassword: string, password: string, passwordConfirmation: string) {
+    if (await this.isDemoMode()) {
+      return { message: 'Password updated in Demo Mode.' };
+    }
+    return firstValueFrom(
+      this.http.put(`${this.baseUrl}/profile/password`, {
+        current_password: currentPassword,
+        password,
+        password_confirmation: passwordConfirmation,
+      })
+    );
   }
 
   // Tasks

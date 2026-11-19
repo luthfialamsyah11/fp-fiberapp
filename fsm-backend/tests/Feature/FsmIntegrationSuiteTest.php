@@ -1500,6 +1500,9 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertSee('focusTechOnMap(' . $tech->id . ')', false)
             ->assertSee('id="btn-map-sync"', false)
             ->assertSee('id="dash-task-search"', false)
+            ->assertSee('id="sidebar-collapse-btn"', false)
+            ->assertSee('id="sidebar-rail-tooltip"', false)
+            ->assertSee('fsm_admin_sidebar_collapsed', false)
             ->assertDontSee("createMarkerIcon('gold')", false);
 
         // Verify all server filter tabs return 200 OK including the new `sla` filter

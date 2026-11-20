@@ -28,6 +28,22 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      # 2.5 Setup PHP 8.2 & Run Automated Backend PHPUnit Quality Gate
+      - name: 🐘 Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, pdo_sqlite, sqlite3, fileinfo
+          coverage: none
+
+      - name: 🧪 Backend Quality Gate (PHPUnit Integration Suite)
+        working-directory: ./fsm-backend
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp -n .env.example .env || true
+          php artisan key:generate --force
+          php artisan test
+
       # 3. Install dependencies and build Ionic/Angular frontend
       - name: 🏗️ Install & Build Frontend
         run: |

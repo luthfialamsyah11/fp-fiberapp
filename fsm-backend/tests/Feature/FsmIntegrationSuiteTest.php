@@ -1932,4 +1932,75 @@ class FsmIntegrationSuiteTest extends TestCase
         $this->actingAs($admin)->delete("/tasks/{$task->id}")->assertRedirect();
         $this->assertFalse(\Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath));
     }
+
+    public function test_milestone1_csat_rating_apk_client_photo_parity_and_reports_csat(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => 'Tech CSAT', 'email' => 'csat@fsm.com', 'is_online' => true]);
+
+        $task = Task::create([
+            'source'           => 'client_portal',
+            'service_category' => 'outage_los',
+            'title'            => 'LOS Fiber Repair CSAT',
+            'customer_name'    => 'Pak Dedi',
+            'customer_phone'   => '081234567890',
+            'address'          => 'Jl. Merdeka 1',
+            'latitude'         => 0.0,
+            'longitude'        => 109.3425,
+            'client_photo'     => 'client_requests/sample_los.jpg',
+            'technician_id'    => $tech->id,
+            'status'           => 'assigned',
+            'priority'         => 'high',
+        ]);
+
+        // 1. APK /api/tasks/{id} exposes client_photo_url, source, service_category_label for field engineer
+        $this->actingAs($tech, 'sanctum')->getJson("/api/tasks/{$task->id}")
+            ->assertOk()
+            ->assertJsonPath('data.source', 'client_portal')
+            ->assertJsonPath('data.service_category_label', 'Total Outage / LOS Red Light')
+            ->assertJsonPath('data.client_photo_url', url('/storage/client_requests/sample_los.jpg'));
+
+        // 2. Rating is rejected before completion (422)
+        $this->postJson("/api/public/track/{$task->tracking_token}/rating", [
+            'rating'   => 5,
+            'feedback' => 'Early rating attempt',
+        ])->assertStatus(422);
+
+        // 3. Complete task -> submit 5-star CSAT rating -> duplicate submission blocked (409)
+        $task->update(['status' => 'completed', 'completed_at' => now()]);
+
+        $this->postJson("/api/public/track/{$task->tracking_token}/rating", [
+            'rating'   => 5,
+            'feedback' => 'Super fast fiber splice and tidy cable!',
+        ])->assertOk()
+            ->assertJsonPath('data.customer_rating', 5);
+
+        $this->postJson("/api/public/track/{$task->tracking_token}/rating", [
+            'rating' => 1,
+        ])->assertStatus(409);
+
+        // 4. Real CSAT propagates to APK /api/me, Admin /live-pulse, /reports, /tasks/{id}, and /track/{token}
+        $this->actingAs($tech, 'sanctum')->getJson('/api/me')
+            ->assertOk()
+            ->assertJsonPath('stats.avg_rating', 5)
+            ->assertJsonPath('stats.rated_count', 1);
+
+        $this->actingAs($admin)->getJson('/live-pulse')
+            ->assertOk()
+            ->assertJsonPath('latest_event.type', 'rating');
+
+        $this->actingAs($admin)->get('/reports')
+            ->assertOk()
+            ->assertSee('Fleet CSAT: 5.0 / 5.0');
+
+        $this->actingAs($admin)->get("/tasks/{$task->id}")
+            ->assertOk()
+            ->assertSee('Customer CSAT Service Rating')
+            ->assertSee('Super fast fiber splice and tidy cable!');
+
+        $this->get("/track/{$task->tracking_token}")
+            ->assertOk()
+            ->assertSee('Thank You for Rating Our Field Service!')
+            ->assertSee('Official BAST PDF');
+    }
 }

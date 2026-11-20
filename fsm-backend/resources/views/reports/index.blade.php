@@ -272,9 +272,18 @@
                 <span class="text-[10px] text-textSecondary">Benchmarking task completion efficiency, photographic proof, and attendance status</span>
             </div>
         </div>
-        <span class="text-xs font-semibold text-slate-500">
-            Total Fleet: {{ $technicianCompletions->count() }} Technicians
-        </span>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold tabular-nums">
+                <ion-icon name="star" class="text-amber-500"></ion-icon>
+                <span>Fleet CSAT: {{ $avgCsatRating !== null ? number_format($avgCsatRating, 1) . ' / 5.0' : 'No ratings yet' }}</span>
+                @if(($ratedTasksCount ?? 0) > 0)
+                    <span class="text-[10px] font-medium text-amber-600">({{ $ratedTasksCount }} reviews)</span>
+                @endif
+            </span>
+            <span class="text-xs font-semibold text-slate-500">
+                Total Fleet: {{ $technicianCompletions->count() }} Technicians
+            </span>
+        </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -287,6 +296,7 @@
                     <th class="p-4 text-center">Completed</th>
                     <th class="p-4 text-center">In Progress</th>
                     <th class="p-4 text-center">Proofs Submitted</th>
+                    <th class="p-4 text-center">Customer CSAT</th>
                     <th class="p-4">Success Rate</th>
                     <th class="p-4 text-center no-print">Action</th>
                 </tr>
@@ -320,6 +330,17 @@
                             {{ $tech['proofs_count'] }}
                         </span>
                     </td>
+                    <td class="p-4 text-center">
+                        @if(($tech['rated_count'] ?? 0) > 0 && $tech['avg_rating'] !== null)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-bold text-[11px] tabular-nums">
+                                <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
+                                {{ number_format($tech['avg_rating'], 1) }}
+                                <span class="text-[9px] font-normal text-amber-600">({{ $tech['rated_count'] }})</span>
+                            </span>
+                        @else
+                            <span class="text-[10px] text-slate-400">No ratings</span>
+                        @endif
+                    </td>
                     <td class="p-4">
                         <div class="flex items-center gap-2">
                             <div class="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
@@ -341,7 +362,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="p-8 text-center text-textSecondary">
+                    <td colspan="9" class="p-8 text-center text-textSecondary">
                         No technician data available.
                     </td>
                 </tr>

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TechnicianLocation;
 use App\Services\SettingService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CustomerTrackingController extends Controller
@@ -71,15 +73,21 @@ class CustomerTrackingController extends Controller
         return response()->json([
             'state' => $latestLocation ? 'tracking' : 'waiting',
             'task'  => [
-                'id'               => $task->id,
-                'title'            => $task->title,
-                'status'           => $task->status,
-                'status_label'     => $task->status_label,
-                'progress_percent' => $task->progress_percent,
-                'customer_name'    => $task->customer_name,
-                'address'          => $task->address,
-                'destination_lat'  => $task->latitude !== null ? (float) $task->latitude : null,
-                'destination_lng'  => $task->longitude !== null ? (float) $task->longitude : null,
+                'id'                => $task->id,
+                'title'             => $task->title,
+                'status'            => $task->status,
+                'status_label'      => $task->status_label,
+                'progress_percent'  => $task->progress_percent,
+                'customer_name'     => $task->customer_name,
+                'address'           => $task->address,
+                'destination_lat'   => $task->latitude !== null ? (float) $task->latitude : null,
+                'destination_lng'   => $task->longitude !== null ? (float) $task->longitude : null,
+                'customer_rating'   => $task->customer_rating,
+                'customer_feedback' => $task->customer_feedback,
+                'customer_rated_at' => $task->customer_rated_at?->toIso8601String(),
+                'bast_url'          => $task->status === 'completed'
+                    ? route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token])
+                    : null,
             ],
             'technician' => [
                 'name' => $techFirstName,
@@ -93,6 +101,57 @@ class CustomerTrackingController extends Controller
                 'recorded_at' => ($latestLocation->captured_at ?? $latestLocation->created_at)?->diffForHumans() ?? 'Just now',
             ] : null,
         ]);
+    }
+
+    /**
+     * Submit a one-time 1–5 star customer CSAT rating after work order completion.
+     */
+    public function submitRating(Request $request, string $token)
+    {
+        $validated = $request->validate([
+            'rating'   => 'required|integer|min:1|max:5',
+            'feedback' => 'nullable|string|max:1000',
+        ]);
+
+        $cleanFeedback = isset($validated['feedback']) ? trim(strip_tags((string) $validated['feedback'])) : null;
+        if ($cleanFeedback === '') {
+            $cleanFeedback = null;
+        }
+
+        $result = DB::transaction(function () use ($token, $validated, $cleanFeedback) {
+            $task = Task::where('tracking_token', $token)->lockForUpdate()->first();
+            if (!$task) {
+                return ['status' => 404, 'body' => ['message' => 'Tracking session not found.']];
+            }
+
+            if ($task->status !== 'completed') {
+                return ['status' => 422, 'body' => ['message' => 'Rating can only be submitted after the work order is completed.']];
+            }
+
+            if ($task->customer_rated_at !== null || $task->customer_rating !== null) {
+                return ['status' => 409, 'body' => ['message' => 'Thank you — feedback has already been submitted for this work order.']];
+            }
+
+            $task->update([
+                'customer_rating'   => (int) $validated['rating'],
+                'customer_feedback' => $cleanFeedback,
+                'customer_rated_at' => now(),
+            ]);
+
+            return [
+                'status' => 200,
+                'body'   => [
+                    'message' => 'Thank you for rating our field service!',
+                    'data'    => [
+                        'customer_rating'   => (int) $task->customer_rating,
+                        'customer_feedback' => $task->customer_feedback,
+                        'customer_rated_at' => $task->customer_rated_at?->toIso8601String(),
+                    ],
+                ],
+            ];
+        });
+
+        return response()->json($result['body'], $result['status']);
     }
 
     private function isTrackingExpired(Task $task): bool

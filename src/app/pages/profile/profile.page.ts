@@ -28,12 +28,22 @@ export class ProfilePage implements OnDestroy {
   completedTasks: any[] = [];
   showAllHistory = false;
 
-  stats = {
+  stats: {
+    completed_count: number;
+    active_count: number;
+    declined_count: number;
+    acceptance_rate: number;
+    proof_compliance_rate: number;
+    avg_rating: number | null;
+    rated_count: number;
+  } = {
     completed_count: 0,
     active_count: 0,
     declined_count: 0,
     acceptance_rate: 100,
     proof_compliance_rate: 100,
+    avg_rating: null,
+    rated_count: 0,
   };
 
   isOnline = true;
@@ -136,6 +146,10 @@ export class ProfilePage implements OnDestroy {
           declined_count: Number(res.stats.declined_count ?? 0),
           acceptance_rate: Number(res.stats.acceptance_rate ?? 100),
           proof_compliance_rate: Number(res.stats.proof_compliance_rate ?? 100),
+          avg_rating: res.stats.avg_rating !== null && res.stats.avg_rating !== undefined
+            ? Number(res.stats.avg_rating)
+            : null,
+          rated_count: Number(res.stats.rated_count ?? 0),
         };
       } else {
         this.stats.completed_count = this.completedTasks.length;

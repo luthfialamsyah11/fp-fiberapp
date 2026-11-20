@@ -37,7 +37,9 @@ class ReportController extends Controller
             COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected_tasks,
             COUNT(CASE WHEN priority = 'low' THEN 1 END) as low_priority_tasks,
             COUNT(CASE WHEN priority = 'medium' THEN 1 END) as medium_priority_tasks,
-            COUNT(CASE WHEN priority = 'high' THEN 1 END) as high_priority_tasks
+            COUNT(CASE WHEN priority = 'high' THEN 1 END) as high_priority_tasks,
+            AVG(CASE WHEN customer_rating IS NOT NULL THEN customer_rating END) as avg_csat_rating,
+            COUNT(CASE WHEN customer_rating IS NOT NULL THEN 1 END) as rated_tasks_count
         ")->first();
 
         $totalTasks = (int) ($metricsRow->total_tasks ?? 0);
@@ -45,6 +47,10 @@ class ReportController extends Controller
         $pendingTasks = (int) ($metricsRow->pending_tasks ?? 0);
         $ongoingTasks = (int) ($metricsRow->ongoing_tasks ?? 0);
         $urgentTasks = (int) ($metricsRow->urgent_tasks ?? 0);
+        $ratedTasksCount = (int) ($metricsRow->rated_tasks_count ?? 0);
+        $avgCsatRating = $ratedTasksCount > 0 && $metricsRow->avg_csat_rating !== null
+            ? round((float) $metricsRow->avg_csat_rating, 1)
+            : null;
 
         $completionRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
 
@@ -128,6 +134,9 @@ class ReportController extends Controller
                 $active = $tasks->whereIn('status', ['assigned', 'accepted', 'on-going'])->count();
                 $proofsCount = $tasks->sum(fn ($t) => $t->proofs->count());
                 $rate = $total > 0 ? round(($completed / $total) * 100, 1) : 0;
+                $ratedTasks = $tasks->filter(fn ($t) => $t->customer_rating !== null);
+                $ratedCount = $ratedTasks->count();
+                $avgRating = $ratedCount > 0 ? round((float) $ratedTasks->avg('customer_rating'), 1) : null;
 
                 return [
                     'id'              => $tech->id,
@@ -140,6 +149,8 @@ class ReportController extends Controller
                     'active'          => $active,
                     'proofs_count'    => $proofsCount,
                     'completion_rate' => $rate,
+                    'avg_rating'      => $avgRating,
+                    'rated_count'     => $ratedCount,
                 ];
             });
 
@@ -154,6 +165,8 @@ class ReportController extends Controller
             'completionRate',
             'proofComplianceRate',
             'avgResolutionHours',
+            'avgCsatRating',
+            'ratedTasksCount',
             'statusCounts',
             'priorityCounts',
             'trendLabels',

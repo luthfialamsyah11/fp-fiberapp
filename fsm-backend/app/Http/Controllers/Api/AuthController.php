@@ -136,7 +136,9 @@ class AuthController extends Controller
                 COUNT(CASE WHEN status IN ('assigned', 'accepted', 'on-going') THEN 1 END) as active_count,
                 COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted_count,
                 COUNT(CASE WHEN status = 'on-going' THEN 1 END) as ongoing_count,
-                COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected_count
+                COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected_count,
+                AVG(CASE WHEN customer_rating IS NOT NULL THEN customer_rating END) as avg_rating,
+                COUNT(CASE WHEN customer_rating IS NOT NULL THEN 1 END) as rated_count
             ")
             ->first();
 
@@ -144,6 +146,10 @@ class AuthController extends Controller
         $active = (int) ($counts->active_count ?? 0);
         $accepted = (int) ($counts->accepted_count ?? 0);
         $ongoing = (int) ($counts->ongoing_count ?? 0);
+        $ratedCount = (int) ($counts->rated_count ?? 0);
+        $avgRating = $ratedCount > 0 && $counts->avg_rating !== null
+            ? round((float) $counts->avg_rating, 1)
+            : null;
 
         $declinedHistory = TaskStatusHistory::where('actor_id', $user->id)
             ->where('from_status', 'assigned')
@@ -170,6 +176,8 @@ class AuthController extends Controller
             'declined_count'        => $declined,
             'acceptance_rate'       => $acceptanceRate,
             'proof_compliance_rate' => $proofComplianceRate,
+            'avg_rating'            => $avgRating,
+            'rated_count'           => $ratedCount,
         ];
     }
 

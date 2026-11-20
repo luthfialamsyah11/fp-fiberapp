@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public const SCHEMA_VERSION = 'v5.6-client-request-portal';
+    public const SCHEMA_VERSION = 'v5.7-csat-rating';
 
     public function register(): void
     {

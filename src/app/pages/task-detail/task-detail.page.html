@@ -26,9 +26,18 @@
             <ion-icon name="flag-outline"></ion-icon>
             {{ getPriorityLabel(task.priority) }}
           </span>
+          <span class="portal-origin-tag" *ngIf="task.source === 'client_portal'">
+            <ion-icon name="globe-outline"></ion-icon>
+            Client Portal
+          </span>
         </div>
         <h1 class="hero-title">{{ task.title }}</h1>
-        <span class="task-id-code">#TSK-{{ task.id }}</span>
+        <div class="hero-sub-meta">
+          <span class="task-id-code">#TSK-{{ task.id }}</span>
+          <span class="cat-label-chip" *ngIf="task.source === 'client_portal' && task.service_category_label">
+            &bull; {{ task.service_category_label }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -56,7 +65,7 @@
           <span>Call</span>
         </button>
 
-        <button class="btn-tool btn-tool-nav" *ngIf="task.latitude && task.longitude" (click)="openMaps()">
+        <button class="btn-tool btn-tool-nav" *ngIf="hasValidCoordinates(task)" (click)="openMaps()">
           <div class="icon-circle nav">
             <ion-icon name="navigate-outline"></ion-icon>
           </div>
@@ -431,6 +440,30 @@
           <p class="info-value">{{ task.description }}</p>
         </div>
 
+        <!-- Customer Attached Issue Photo (Client Portal Parity) -->
+        <div class="info-card client-photo-card" *ngIf="task.client_photo_url">
+          <div class="info-label">
+            <ion-icon name="image-outline"></ion-icon>
+            <span>Customer Attached Issue Photo</span>
+          </div>
+          <button type="button" class="client-photo-thumb-btn" (click)="clientPhotoLightboxOpen = true">
+            <img [src]="task.client_photo_url" alt="Customer issue photo" loading="lazy" />
+            <span class="client-photo-zoom-pill">
+              <ion-icon name="expand-outline"></ion-icon> Tap to Zoom
+            </span>
+          </button>
+        </div>
+
+        <!-- Customer CSAT Rating (When Rated) -->
+        <div class="info-card csat-review-card" *ngIf="task.customer_rating">
+          <div class="info-label">
+            <ion-icon name="star"></ion-icon>
+            <span>Customer CSAT Rating &bull; {{ task.customer_rating }}/5</span>
+          </div>
+          <p class="info-value" *ngIf="task.customer_feedback">{{ task.customer_feedback }}</p>
+          <p class="info-sub" *ngIf="!task.customer_feedback">Customer submitted {{ task.customer_rating }}-star service rating.</p>
+        </div>
+
         <!-- Customer & Schedule -->
         <div class="info-row">
           <div class="info-card half" *ngIf="task.customer_name">
@@ -530,6 +563,12 @@
   </div>
 
   <div class="footer-space"></div>
+
+  <!-- Full-Screen Lightbox for Customer Attached Issue Photo -->
+  <div class="client-photo-lightbox" *ngIf="clientPhotoLightboxOpen && task?.client_photo_url" (click)="clientPhotoLightboxOpen = false">
+    <img [src]="task.client_photo_url" alt="Customer issue full photo" (click)="$event.stopPropagation()" />
+    <button type="button" class="lightbox-close" (click)="clientPhotoLightboxOpen = false">Close Photo</button>
+  </div>
 </ion-content>
 
 <app-tab-bar activeTab="tasks"></app-tab-bar>

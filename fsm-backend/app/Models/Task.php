@@ -13,7 +13,8 @@ class Task extends Model
         'source', 'service_category', 'client_photo',
         'additional_notes', 'scheduled_at',
         'tracking_token', 'customer_signature', 'customer_signer_name', 'customer_signed_at',
-        'completed_at', 'bast_hash', 'bast_sealed_at'
+        'completed_at', 'bast_hash', 'bast_sealed_at',
+        'customer_rating', 'customer_feedback', 'customer_rated_at'
     ];
 
     protected $casts = [
@@ -21,6 +22,8 @@ class Task extends Model
         'customer_signed_at' => 'datetime',
         'completed_at'       => 'datetime',
         'bast_sealed_at'     => 'datetime',
+        'customer_rated_at'  => 'datetime',
+        'customer_rating'    => 'integer',
         'latitude'           => 'float',
         'longitude'          => 'float',
     ];

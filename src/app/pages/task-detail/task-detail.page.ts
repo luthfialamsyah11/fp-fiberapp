@@ -33,6 +33,11 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   isLoading = true;
   isActioning = false;
   taskId!: number;
+  clientPhotoLightboxOpen = false;
+
+  hasValidCoordinates(t: any): boolean {
+    return t != null && t.latitude !== null && t.latitude !== undefined && t.longitude !== null && t.longitude !== undefined;
+  }
 
   getBastUrl(): string {
     if (!this.task) return '#';

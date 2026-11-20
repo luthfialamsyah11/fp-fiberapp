@@ -188,6 +188,24 @@
             </div>
             @endif
 
+            @if($task->customer_rating !== null)
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <ion-icon name="star" class="text-amber-500 text-sm"></ion-icon>
+                        Customer CSAT Service Rating
+                    </h4>
+                    <p class="text-xs text-amber-800 mt-1">
+                        {{ $task->customer_feedback ?: 'Customer submitted rating without additional comments.' }}
+                    </p>
+                </div>
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-amber-200 text-amber-600 font-extrabold text-sm flex-shrink-0 tabular-nums">
+                    <span>{{ str_repeat('★', (int) $task->customer_rating) }}{{ str_repeat('☆', 5 - (int) $task->customer_rating) }}</span>
+                    <span class="text-xs text-amber-900">{{ $task->customer_rating }}/5</span>
+                </div>
+            </div>
+            @endif
+
             <!-- Customer & Location Specs -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                 <div>

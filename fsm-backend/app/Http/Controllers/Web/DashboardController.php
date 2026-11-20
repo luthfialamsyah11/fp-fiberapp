@@ -302,6 +302,24 @@ class DashboardController extends Controller
         // Identify the single most recent operational event for live toast notification
         $candidates = [];
 
+        $latestRated = Task::with('technician')->whereNotNull('customer_rated_at')->whereNotNull('customer_rating')->latest('customer_rated_at')->first();
+        if ($latestRated && $latestRated->customer_rated_at) {
+            $code = '#TSK-' . str_pad($latestRated->id, 4, '0', STR_PAD_LEFT);
+            $stars = str_repeat('★', (int) $latestRated->customer_rating);
+            $candidates[] = [
+                'ts'       => $latestRated->customer_rated_at->timestamp,
+                'priority' => 6,
+                'key'      => 'rated-' . $latestRated->id . '-' . $latestRated->customer_rated_at->timestamp,
+                'type'     => 'rating',
+                'title'    => "Customer Rated {$code} ({$latestRated->customer_rating}/5 {$stars})",
+                'subtitle' => $latestRated->customer_feedback
+                    ? \Illuminate\Support\Str::limit((string) $latestRated->customer_feedback, 60)
+                    : ('Technician: ' . ($latestRated->technician?->name ?? 'Field Engineer')),
+                'url'      => route('admin.tasks.show', $latestRated->id),
+                'time_ago' => $latestRated->customer_rated_at->diffForHumans(),
+            ];
+        }
+
         $latestClientReq = Task::clientPortal()->latest('id')->first();
         if ($latestClientReq && $latestClientReq->created_at) {
             $code = '#TSK-' . str_pad($latestClientReq->id, 4, '0', STR_PAD_LEFT);

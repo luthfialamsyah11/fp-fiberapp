@@ -11,7 +11,7 @@ define('LARAVEL_START', microtime(true));
 |--------------------------------------------------------------------------
 */
 $laravelCore = dirname(__DIR__);
-$deployCacheVersion = '2026-11-20-v6.3';
+$deployCacheVersion = '2026-11-20-v6.4';
 $stampFile = $laravelCore . '/storage/framework/deploy_cache.version';
 $cacheDir = $laravelCore . '/bootstrap/cache';
 $routeCacheFiles = glob($cacheDir . '/routes-*.php') ?: [];

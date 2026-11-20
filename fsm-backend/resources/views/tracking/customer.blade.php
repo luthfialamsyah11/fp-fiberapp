@@ -281,6 +281,102 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        /* Post-Completion Customer CSAT Rating Card */
+        .csat-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .csat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .csat-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fde68a;
+        }
+        .csat-stars {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .csat-star-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .csat-star-btn.active {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.16);
+            border-color: rgba(251, 191, 36, 0.5);
+            transform: scale(1.06);
+        }
+        .csat-input {
+            width: 100%;
+            background: rgba(7, 10, 16, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+            color: #f8fafc;
+            padding: 9px 11px;
+            font-size: 0.78rem;
+            outline: none;
+        }
+        .csat-input:focus {
+            border-color: #fbbf24;
+        }
+        .csat-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-csat-submit {
+            flex: 1;
+            min-height: 38px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #070a10;
+            font-weight: 700;
+            font-size: 0.78rem;
+            cursor: pointer;
+            padding: 0 14px;
+        }
+        .btn-csat-submit:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .btn-bast-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 38px;
+            padding: 0 12px;
+            border-radius: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -307,7 +403,7 @@
     <div id="map-viewport"></div>
 
     <!-- Bottom Sheet (Uber-Style Live Mission Card) -->
-    <div class="bottom-sheet">
+    <div class="bottom-sheet" style="max-height: 62vh; overflow-y: auto;">
         <div class="sheet-handle"></div>
 
         <div class="mission-status-headline">
@@ -332,7 +428,7 @@
                     <ion-icon name="construct"></ion-icon>
                 </div>
                 <div class="tech-text">
-                    <h4 id="tech-name-text">{{ $task->technician ? \Illuminate\Support\Str::before(trim($task->technician->name), ' ') : 'Assigned Specialist' }}</h4>
+                    <h4 id="tech-name-text">{{ $task->technician ? \Illuminate\Support\Str::before(trim($task->technician->name), ' ') : 'Awaiting NOC Dispatch' }}</h4>
                     <span><ion-icon name="shield-checkmark"></ion-icon> Certified Field Technician</span>
                 </div>
             </div>
@@ -340,6 +436,52 @@
             <div class="tech-actions">
                 <span style="font-size: 11px; color: #38bdf8; font-weight: 600; background: rgba(56, 189, 248, 0.12); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(56, 189, 248, 0.3);">
                     ID #TECH-{{ str_pad((string) ($task->technician_id ?? 0), 3, '0', STR_PAD_LEFT) }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Post-Completion CSAT Service Rating & Official BAST PDF -->
+        @php
+            $bastLink = route('admin.tasks.bast', ['task' => $task->id, 'token' => $task->tracking_token]);
+            $isCompletedInitial = $task->status === 'completed';
+            $hasRatingInitial = $task->customer_rating !== null;
+        @endphp
+        <div class="csat-box" id="csat-section" style="{{ $isCompletedInitial ? '' : 'display:none;' }}">
+            <div class="csat-header">
+                <span class="csat-title" id="csat-title-text">
+                    {{ $hasRatingInitial ? 'Thank You for Rating Our Field Service!' : 'Rate Your Fiber Technician Experience' }}
+                </span>
+                <a href="{{ $bastLink }}" target="_blank" rel="noopener noreferrer" class="btn-bast-pill" id="bast-download-link">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <span>Official BAST PDF</span>
+                </a>
+            </div>
+
+            <div id="csat-form-wrap" style="{{ $hasRatingInitial ? 'display:none;' : '' }}">
+                <div class="csat-stars" id="csat-star-row" role="radiogroup" aria-label="Service Rating">
+                    @for($s = 1; $s <= 5; $s++)
+                        <button type="button" class="csat-star-btn" data-star="{{ $s }}" onclick="selectCsatStar({{ $s }})" aria-label="{{ $s }} stars">
+                            <ion-icon name="star"></ion-icon>
+                        </button>
+                    @endfor
+                </div>
+                <input type="text" id="csat-feedback-input" class="csat-input" maxlength="500" style="margin-top:8px;" placeholder="Optional comment (e.g. Fast splicing, clean cable work)..." />
+                <div class="csat-actions" style="margin-top:8px;">
+                    <button type="button" id="csat-submit-btn" class="btn-csat-submit" onclick="submitCsatRating()" disabled>
+                        Submit Rating
+                    </button>
+                </div>
+                <div id="csat-error-msg" style="display:none; color:#fca5a5; font-size:0.72rem; margin-top:4px;"></div>
+            </div>
+
+            <div id="csat-done-wrap" style="{{ $hasRatingInitial ? '' : 'display:none;' }} font-size:0.78rem; color:#cbd5e1;">
+                <span id="csat-done-stars" style="color:#fbbf24; font-weight:700;">
+                    @if($hasRatingInitial)
+                        {{ str_repeat('★', (int) $task->customer_rating) }}{{ str_repeat('☆', 5 - (int) $task->customer_rating) }} ({{ $task->customer_rating }}/5)
+                    @endif
+                </span>
+                <span id="csat-done-comment" style="display:block; margin-top:4px; color:#94a3b8;">
+                    {{ $task->customer_feedback ?: 'Your feedback has been recorded for our NOC Quality Team.' }}
                 </span>
             </div>
         </div>
@@ -359,12 +501,60 @@
         const CUSTOMER_NAME = @json($task->customer_name);
         const IS_EXPIRED = {{ ($isExpired ?? false) ? 'true' : 'false' }};
         const HAS_INITIAL_TECH_LOC = {{ $latestLocation ? 'true' : 'false' }};
-        const HAS_DEST_COORDS = {{ ($task->latitude && $task->longitude) ? 'true' : 'false' }};
-        const destLat = {{ $task->latitude ? (float) $task->latitude : 'null' }};
-        const destLng = {{ $task->longitude ? (float) $task->longitude : 'null' }};
+        const HAS_DEST_COORDS = {{ ($task->latitude !== null && $task->longitude !== null) ? 'true' : 'false' }};
+        const destLat = {{ $task->latitude !== null ? (float) $task->latitude : 'null' }};
+        const destLng = {{ $task->longitude !== null ? (float) $task->longitude : 'null' }};
 
         let techLat = {{ $latestLocation ? (float) $latestLocation->latitude : 'null' }};
         let techLng = {{ $latestLocation ? (float) $latestLocation->longitude : 'null' }};
+        let selectedCsatRating = 0;
+
+        function selectCsatStar(star) {
+            selectedCsatRating = star;
+            document.querySelectorAll('#csat-star-row .csat-star-btn').forEach(btn => {
+                btn.classList.toggle('active', Number(btn.dataset.star) <= star);
+            });
+            const submitBtn = document.getElementById('csat-submit-btn');
+            if (submitBtn) submitBtn.disabled = star < 1;
+        }
+
+        async function submitCsatRating() {
+            if (selectedCsatRating < 1 || selectedCsatRating > 5) return;
+            const btn = document.getElementById('csat-submit-btn');
+            const errEl = document.getElementById('csat-error-msg');
+            const feedback = (document.getElementById('csat-feedback-input')?.value || '').trim();
+            if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+            if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+
+            try {
+                const res = await fetch(`/api/public/track/${TOKEN}/rating`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ rating: selectedCsatRating, feedback: feedback || null })
+                });
+                const payload = await res.json();
+                if (!res.ok) {
+                    if (errEl) {
+                        errEl.textContent = payload.message || 'Unable to submit rating.';
+                        errEl.style.display = 'block';
+                    }
+                    if (btn) { btn.disabled = false; btn.textContent = 'Submit Rating'; }
+                    return;
+                }
+                const r = payload.data?.customer_rating || selectedCsatRating;
+                document.getElementById('csat-title-text').textContent = 'Thank You for Rating Our Field Service!';
+                document.getElementById('csat-form-wrap').style.display = 'none';
+                document.getElementById('csat-done-stars').textContent = '★'.repeat(r) + '☆'.repeat(5 - r) + ` (${r}/5)`;
+                document.getElementById('csat-done-comment').textContent = payload.data?.customer_feedback || 'Your feedback has been recorded for our NOC Quality Team.';
+                document.getElementById('csat-done-wrap').style.display = 'block';
+            } catch (e) {
+                if (errEl) {
+                    errEl.textContent = 'Network error. Please try again.';
+                    errEl.style.display = 'block';
+                }
+                if (btn) { btn.disabled = false; btn.textContent = 'Submit Rating'; }
+            }
+        }
 
         function escapeHtml(text) {
             if (!text) return '';
@@ -464,6 +654,11 @@
                 const statusBadge = document.getElementById('badge-status-text');
                 if (statusBadge) statusBadge.textContent = data.task.status_label;
 
+                const techNameEl = document.getElementById('tech-name-text');
+                if (techNameEl && data.technician && data.technician.name) {
+                    techNameEl.textContent = data.technician.name;
+                }
+
                 const progressFill = document.getElementById('progress-bar-fill');
                 if (progressFill) progressFill.style.width = Math.max(15, data.task.progress_percent) + '%';
 
@@ -471,6 +666,12 @@
                 if (etaText) {
                     if (data.task.status === 'completed') {
                         etaText.innerHTML = '<ion-icon name="checkmark-circle" style="color: #10b981;"></ion-icon><span style="color: #10b981;">Work order completed</span>';
+                        const csatBox = document.getElementById('csat-section');
+                        if (csatBox) csatBox.style.display = 'flex';
+                        if (data.task.bast_url) {
+                            const bastLink = document.getElementById('bast-download-link');
+                            if (bastLink) bastLink.href = data.task.bast_url;
+                        }
                         if (pollingTimer) {
                             clearInterval(pollingTimer);
                             pollingTimer = null;
@@ -484,7 +685,7 @@
                     }
                 }
 
-                if (data.live_location && data.live_location.latitude && data.live_location.longitude) {
+                if (data.live_location && data.live_location.latitude !== null && data.live_location.longitude !== null) {
                     ensureTechMarker(data.live_location.latitude, data.live_location.longitude);
                 }
             } catch (err) {

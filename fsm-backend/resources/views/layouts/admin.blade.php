@@ -496,6 +496,7 @@
                 if (!toastContainer || !evt) return;
                 var iconMap = {
                     completed:      { icon: 'checkmark-done-circle', bg: 'bg-emerald-600', ring: 'border-emerald-500/40', label: 'Live Field Sync' },
+                    rating:         { icon: 'star',                  bg: 'bg-amber-500',   ring: 'border-amber-400/50',   label: 'Customer CSAT Rating' },
                     proof:          { icon: 'camera',                bg: 'bg-amber-500',   ring: 'border-amber-400/40',   label: 'Live Field Sync' },
                     inventory:      { icon: 'cube',                  bg: 'bg-violet-600',  ring: 'border-violet-500/40',  label: 'Live Field Sync' },
                     client_request: { icon: 'mail-unread',           bg: 'bg-sky-600',     ring: 'border-sky-400/40',     label: 'New Client Request' },

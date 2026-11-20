@@ -83,6 +83,113 @@
   ion-icon { font-size: 12px; }
 }
 
+.portal-origin-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #BAE6FD;
+  background: rgba(14, 165, 233, 0.22);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 3px 8px;
+  border-radius: 6px;
+  ion-icon { font-size: 12px; }
+}
+
+.hero-sub-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.cat-label-chip {
+  font-size: 11px;
+  font-weight: 600;
+  color: #93C5FD;
+}
+
+.client-photo-card {
+  border-color: #BAE6FD;
+  background: #F0F9FF;
+}
+
+.client-photo-thumb-btn {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  border: 1px solid #CBD5E1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0F172A;
+  cursor: pointer;
+  display: block;
+
+  img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.client-photo-zoom-pill {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.client-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(2, 6, 23, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  img {
+    max-width: 100%;
+    max-height: 82vh;
+    border-radius: 14px;
+    object-fit: contain;
+  }
+
+  .lightbox-close {
+    margin-top: 14px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}
+
+.csat-review-card {
+  border-color: #FDE68A;
+  background: #FFFBEB;
+
+  .info-label {
+    color: #B45309;
+    ion-icon { color: #F59E0B; }
+  }
+}
+
 .hero-title {
   font-size: 20px;
   font-weight: 800;

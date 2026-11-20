@@ -72,6 +72,11 @@
               <span class="stat-num">{{ stats.completed_count }}</span>
               <span class="stat-lbl">Completed</span>
             </div>
+            <div class="stat-divider"></div>
+            <div class="stat-box">
+              <span class="stat-num">{{ stats.avg_rating !== null ? (stats.avg_rating + '★') : '—' }}</span>
+              <span class="stat-lbl">{{ stats.rated_count > 0 ? stats.rated_count + ' CSAT' : 'CSAT' }}</span>
+            </div>
           </div>
         </section>
 

@@ -27,8 +27,9 @@ Route::get('/', function () {
 // Public Authentication (Strict brute-force protection: 5 attempts per minute)
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
-// Public Customer Live Tracking Polling API (Rate-limited)
+// Public Customer Live Tracking Polling API & Post-Completion CSAT Rating (Rate-limited)
 Route::get('/public/track/{token}', [CustomerTrackingController::class, 'apiStatus'])->middleware('throttle:60,1');
+Route::post('/public/track/{token}/rating', [CustomerTrackingController::class, 'submitRating'])->middleware('throttle:10,1');
 
 // Authenticated Routes
 Route::middleware(['auth:sanctum', 'active'])->group(function () {

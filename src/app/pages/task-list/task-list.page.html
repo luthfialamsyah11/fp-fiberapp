@@ -156,7 +156,7 @@
 
       <!-- 44px Thumb-Zone Quick Actions -->
       <div class="mission-actions-row">
-        <button type="button" class="btn-quick btn-gps" *ngIf="activeMission.latitude && activeMission.longitude" (click)="openNavigation(activeMission, $event)">
+        <button type="button" class="btn-quick btn-gps" *ngIf="activeMission.latitude !== null && activeMission.latitude !== undefined && activeMission.longitude !== null && activeMission.longitude !== undefined" (click)="openNavigation(activeMission, $event)">
           <ion-icon name="navigate-outline"></ion-icon>
           <span>Navigate</span>
         </button>
@@ -299,6 +299,12 @@
                 </div>
                 <span class="mini-pct">{{ task.progress_percent }}%</span>
               </div>
+              <span class="stat-pill" *ngIf="task.source === 'client_portal'" title="Client Portal Submission">
+                <ion-icon name="globe-outline"></ion-icon>Client
+              </span>
+              <span class="stat-pill" *ngIf="task.client_photo_url" title="Customer Photo Attached">
+                <ion-icon name="camera-outline"></ion-icon>Photo
+              </span>
               <span class="stat-pill" *ngIf="(task.proof_of_work_count || 0) > 0">
                 <ion-icon name="images-outline"></ion-icon>{{ task.proof_of_work_count }}
               </span>
@@ -331,7 +337,7 @@
               <button
                 type="button"
                 class="icon-mini nav"
-                *ngIf="task.latitude && task.longitude"
+                *ngIf="task.latitude !== null && task.latitude !== undefined && task.longitude !== null && task.longitude !== undefined"
                 (click)="openNavigation(task, $event)"
                 title="Navigate GPS"
                 aria-label="Navigate GPS"

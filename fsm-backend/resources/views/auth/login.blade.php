@@ -10,27 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        brandBg: '#06090e',
-                        brandSurface: '#0c1220',
-                        brandBorder: '#162238',
-                        brandCyan: '#22d3ee',
-                        brandBlue: '#2563eb',
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Compiled Production Tailwind CSS -->
+    <link rel="stylesheet" href="{{ asset('build/app.css') }}?v=20261120v2">
     
     <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>

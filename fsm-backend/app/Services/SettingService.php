@@ -31,6 +31,11 @@ class SettingService
             'webhook_url'              => '',
             'notify_emergency_tickets' => '1',
             'notify_task_completed'    => '1',
+            'whatsapp_gateway_url'     => '',
+            'whatsapp_gateway_token'   => '',
+            'notify_customer_whatsapp' => '0',
+            'notify_customer_email'    => '0',
+            'fcm_server_key'           => '',
             'telemetry_retention_days' => '30',
         ];
 

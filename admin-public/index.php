@@ -46,7 +46,7 @@ if (!$laravelCore) {
 | guarantees every new Admin/API route registers immediately (zero 404/500).
 |
 */
-$deployCacheVersion = '2026-11-20-v6.4';
+$deployCacheVersion = '2026-11-20-v6.5';
 $stampFile = $laravelCore . '/storage/framework/deploy_cache.version';
 $cacheDir = $laravelCore . '/bootstrap/cache';
 $routeCacheFiles = glob($cacheDir . '/routes-*.php') ?: [];

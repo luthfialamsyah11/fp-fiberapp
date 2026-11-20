@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public const SCHEMA_VERSION = 'v5.7-csat-rating';
+    public const SCHEMA_VERSION = 'v5.8-async-notifications-fcm';
 
     public function register(): void
     {

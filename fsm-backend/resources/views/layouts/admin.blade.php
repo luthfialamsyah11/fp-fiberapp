@@ -11,34 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#2563EB',
-                        fsmBg: '#F8FAFC',
-                        fsmSurface: '#FFFFFF',
-                        fsmSidebar: '#1E293B',
-                        fsmBorder: '#E2E8F0',
-                        textPrimary: '#0F172A',
-                        textSecondary: '#64748B',
-                        fsmSuccess: '#16A34A',
-                        fsmWarning: '#F59E0B',
-                        fsmDanger: '#DC2626',
-                    },
-                    borderRadius: {
-                        'xl': '12px',
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Compiled Production Tailwind CSS -->
+    <link rel="stylesheet" href="{{ asset('build/app.css') }}?v=20261120v2">
     
     <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>

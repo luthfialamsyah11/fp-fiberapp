@@ -43,6 +43,11 @@ class Kernel extends ConsoleKernel
                     ->delete();
             }
         })->daily()->name('fsm-telemetry-and-idempotency-prune');
+
+        // 3. Retry pending / failed async notifications (cPanel shared hosting compatible)
+        $schedule->call(function () {
+            app(\App\Services\NotificationService::class)->retryPending(25);
+        })->everyFiveMinutes()->name('fsm-retry-notifications');
     }
 
     /**

@@ -2003,4 +2003,63 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertSee('Thank You for Rating Our Field Service!')
             ->assertSee('Official BAST PDF');
     }
+
+    public function test_milestone2_device_tokens_async_notification_ledger_dispatch_service_and_compiled_css(): void
+    {
+        $admin = $this->createAdmin();
+        $tech = $this->createTechnician(['name' => 'Tech Push', 'email' => 'push@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+
+        // 1. Technician registers & updates FCM push token via /api/devices/token
+        $this->actingAs($tech, 'sanctum')
+            ->postJson('/api/devices/token', [
+                'token'       => 'fcm_token_abcdef1234567890_device_1',
+                'platform'    => 'android',
+                'device_name' => 'Pixel Field Phone',
+            ])
+            ->assertCreated()
+            ->assertJsonPath('data.platform', 'android');
+
+        $this->assertDatabaseHas('device_tokens', [
+            'user_id' => $tech->id,
+            'token'   => 'fcm_token_abcdef1234567890_device_1',
+        ]);
+
+        // 2. DispatchService assigns a pending client request -> logs queued FCM push in notification_logs
+        $task = Task::create([
+            'source'           => 'client_portal',
+            'service_category' => 'outage_los',
+            'title'            => 'Push Notification Dispatch Test',
+            'customer_name'    => 'Ibu Rina',
+            'customer_phone'   => '081234567899',
+            'customer_email'   => 'rina@example.com',
+            'address'          => 'Jl. Gatot Subroto 9',
+            'priority'         => 'high',
+            'status'           => 'pending',
+        ]);
+
+        $res = app(\App\Domain\Tasks\DispatchService::class)->autoAssign($task, $admin);
+        $this->assertTrue($res['ok']);
+        $this->assertEquals($tech->id, $task->fresh()->technician_id);
+
+        $this->assertDatabaseHas('notification_logs', [
+            'task_id'   => $task->id,
+            'channel'   => 'fcm',
+            'recipient' => 'fcm_token_abcdef1234567890_device_1',
+            'event'     => 'TASK_ASSIGNED',
+        ]);
+
+        // 3. Unregistering device token removes it cleanly
+        $this->actingAs($tech, 'sanctum')
+            ->deleteJson('/api/devices/token', ['token' => 'fcm_token_abcdef1234567890_device_1'])
+            ->assertOk();
+
+        $this->assertDatabaseMissing('device_tokens', ['token' => 'fcm_token_abcdef1234567890_device_1']);
+
+        // 4. Compiled production Tailwind CSS exists & Admin layout no longer loads cdn.tailwindcss.com
+        $this->assertFileExists(public_path('build/app.css'));
+        $this->actingAs($admin)->get('/dashboard')
+            ->assertOk()
+            ->assertSee('build/app.css')
+            ->assertDontSee('cdn.tailwindcss.com');
+    }
 }

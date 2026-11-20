@@ -6,6 +6,7 @@ import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { GpsHealthStatus, LocationService } from '../../services/location.service';
 import { NavigationService } from '../../services/navigation.service';
+import { OfflineQueueService } from '../../services/offline-queue.service';
 import { TaskSyncService } from '../../services/task-sync.service';
 import { formatPhoneForWhatsApp } from '../../utils/phone';
 
@@ -22,11 +23,14 @@ export class TaskListPage implements OnDestroy {
   private toastCtrl = inject(ToastController);
   private locationService = inject(LocationService);
   private navigationService = inject(NavigationService);
+  private offlineQueue = inject(OfflineQueueService);
   private taskSync = inject(TaskSyncService);
 
   user: any = null;
   isOnline = true;
   isDemoMode = false;
+  pendingOfflineMutations = 0;
+  isFlushingOffline = false;
   gpsStatus: GpsHealthStatus = 'offline';
   gpsStatusMessage = 'Offline';
   gpsAccuracy: number | null = null;
@@ -54,6 +58,11 @@ export class TaskListPage implements OnDestroy {
 
   constructor() {
     this.subs.add(
+      this.offlineQueue.pendingMutationsCount$.subscribe(count => {
+        this.pendingOfflineMutations = count;
+      })
+    );
+    this.subs.add(
       this.locationService.status$.subscribe(s => {
         this.gpsStatus = s;
         this.refreshGpsAccuracy();
@@ -80,6 +89,26 @@ export class TaskListPage implements OnDestroy {
         this.newTaskAlert = task;
       })
     );
+  }
+
+  async flushOfflineWorkOrders() {
+    if (this.isFlushingOffline) return;
+    this.isFlushingOffline = true;
+    try {
+      const res = await this.api.flushOfflineMutations();
+      if (res.synced > 0) {
+        const toast = await this.toastCtrl.create({
+          message: `Synced ${res.synced} offline field action(s) to NOC.`,
+          duration: 3000,
+          color: 'success',
+          position: 'top',
+        });
+        await toast.present();
+        this.taskSync.refreshTasks(false);
+      }
+    } finally {
+      this.isFlushingOffline = false;
+    }
   }
 
   async ionViewWillEnter() {

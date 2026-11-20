@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Domain\Tasks\DispatchService;
 use App\Domain\Tasks\TaskStateMachine;
 use App\Http\Controllers\Controller;
 use App\Models\ProgressUpdate;
@@ -14,8 +15,10 @@ use Illuminate\Validation\Rule;
 
 class ClientRequestController extends Controller
 {
-    public function __construct(private readonly TaskStateMachine $stateMachine)
-    {
+    public function __construct(
+        private readonly TaskStateMachine $stateMachine,
+        private readonly DispatchService $dispatchService
+    ) {
     }
 
     public function index(Request $request)
@@ -160,48 +163,11 @@ class ClientRequestController extends Controller
             ],
         ]);
 
-        $newTechId = (int) $validated['technician_id'];
         $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+        $outcome = $this->dispatchService->assignTechnician($task, (int) $validated['technician_id'], auth()->user());
 
-        $outcome = DB::transaction(function () use ($task, $newTechId) {
-            /** @var Task $locked */
-            $locked = Task::lockForUpdate()->findOrFail($task->id);
-
-            if ($locked->status === 'completed') {
-                return ['error' => 'Cannot assign a completed work order. Request rework from Task Details first.'];
-            }
-
-            $oldTechId = (int) ($locked->technician_id ?? 0);
-
-            // Prevent downgrading an already-accepted or in-progress work order when re-submitting the exact same technician
-            if ($oldTechId === $newTechId && in_array($locked->status, ['assigned', 'accepted', 'on-going'], true)) {
-                return ['unchanged' => true, 'tech_name' => $locked->technician?->name ?? 'technician'];
-            }
-
-            $locked->update(['technician_id' => $newTechId]);
-            $locked->refresh();
-            $techName = $locked->technician?->name ?? 'technician';
-
-            if ($locked->status !== 'assigned') {
-                $reason = $oldTechId && $oldTechId !== $newTechId
-                    ? "Client request reassigned to {$techName} by NOC dispatcher"
-                    : "Client request dispatched to {$techName} by NOC dispatcher";
-                $this->stateMachine->transition($locked, 'assigned', auth()->user(), $reason);
-            } elseif ($oldTechId !== $newTechId) {
-                ProgressUpdate::create([
-                    'task_id'          => $locked->id,
-                    'user_id'          => auth()->id(),
-                    'note'             => "NOC dispatcher reassigned client request to {$techName}.",
-                    'progress_percent' => (int) $locked->progress_percent,
-                ]);
-                $locked->touch();
-            }
-
-            return ['unchanged' => false, 'tech_name' => $techName];
-        });
-
-        if (!empty($outcome['error'])) {
-            return back()->with('error', $outcome['error']);
+        if (!($outcome['ok'] ?? false)) {
+            return back()->with('error', $outcome['error'] ?? 'Unable to assign technician.');
         }
 
         if (!empty($outcome['unchanged'])) {
@@ -216,90 +182,19 @@ class ClientRequestController extends Controller
      */
     public function autoAssign(Task $task)
     {
-        $candidates = User::where('role', 'technician')
-            ->where('is_active', true)
-            ->with('latestLocation')
-            ->withCount(['tasks as active_tasks_count' => function ($q) {
-                $q->whereIn('status', ['assigned', 'accepted', 'on-going']);
-            }])
-            ->get();
-
-        if ($candidates->isEmpty()) {
-            return back()->with('error', 'No active technicians are available in the system.');
-        }
-
-        // Strongly prefer effectively-online technicians; fall back to all active if none online
-        $onlinePool = $candidates->filter(fn (User $u) => $u->isEffectivelyOnline());
-        $pool = $onlinePool->isNotEmpty() ? $onlinePool : $candidates;
-
-        $bestTech = $pool->sortBy(function (User $tech) use ($task) {
-            $workloadPenalty = ((int) $tech->active_tasks_count) * 2000;
-            $loc = $tech->latestLocation;
-            if ($task->latitude !== null && $task->longitude !== null && $loc && $loc->latitude !== null && $loc->longitude !== null) {
-                $dist = SettingService::haversineMeters(
-                    (float) $task->latitude,
-                    (float) $task->longitude,
-                    (float) $loc->latitude,
-                    (float) $loc->longitude
-                );
-                return $dist + $workloadPenalty;
-            }
-            return 500000 + $workloadPenalty;
-        })->first();
-
-        if (!$bestTech) {
-            return back()->with('error', 'Unable to determine an available technician.');
-        }
-
         $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
-        $statusTag = $bestTech->isEffectivelyOnline() ? 'Online' : 'Standby';
+        $outcome = $this->dispatchService->autoAssign($task, auth()->user());
 
-        $outcome = DB::transaction(function () use ($task, $bestTech) {
-            /** @var Task $locked */
-            $locked = Task::lockForUpdate()->findOrFail($task->id);
-
-            if ($locked->status === 'completed') {
-                return ['error' => 'Cannot auto-assign a completed work order.'];
-            }
-
-            $oldTechId = (int) ($locked->technician_id ?? 0);
-            if ($oldTechId === (int) $bestTech->id && in_array($locked->status, ['assigned', 'accepted', 'on-going'], true)) {
-                return ['unchanged' => true];
-            }
-
-            $locked->update(['technician_id' => $bestTech->id]);
-            $locked->refresh();
-            $modeLabel = $bestTech->isEffectivelyOnline() ? 'Online Nearest GPS' : 'Lowest Workload Fallback';
-
-            if ($locked->status !== 'assigned') {
-                $this->stateMachine->transition(
-                    $locked,
-                    'assigned',
-                    auth()->user(),
-                    "Auto-assigned ({$modeLabel}) to {$bestTech->name}"
-                );
-            } elseif ($oldTechId !== (int) $bestTech->id) {
-                ProgressUpdate::create([
-                    'task_id'          => $locked->id,
-                    'user_id'          => auth()->id(),
-                    'note'             => "Auto-reassigned ({$modeLabel}) to {$bestTech->name}.",
-                    'progress_percent' => (int) $locked->progress_percent,
-                ]);
-                $locked->touch();
-            }
-
-            return ['unchanged' => false];
-        });
-
-        if (!empty($outcome['error'])) {
-            return back()->with('error', $outcome['error']);
+        if (!($outcome['ok'] ?? false)) {
+            return back()->with('error', $outcome['error'] ?? 'Unable to auto-assign technician.');
         }
 
+        $statusTag = $outcome['status_tag'] ?? 'Online';
         if (!empty($outcome['unchanged'])) {
-            return back()->with('success', "Client request {$code} is already assigned to {$bestTech->name} ({$statusTag}).");
+            return back()->with('success', "Client request {$code} is already assigned to {$outcome['tech_name']} ({$statusTag}).");
         }
 
-        return back()->with('success', "Auto-assigned {$code} to {$bestTech->name} ({$statusTag}) — live APK sync triggered.");
+        return back()->with('success', "Auto-assigned {$code} to {$outcome['tech_name']} ({$statusTag}) — live APK sync triggered.");
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DeviceTokenController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\LocationController;
@@ -38,6 +39,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::put('/profile/password', [AuthController::class, 'updatePassword'])->middleware('throttle:10,1');
+
+    // Push Notification Device Tokens (FCM / Capacitor)
+    Route::post('/devices/token', [DeviceTokenController::class, 'store'])->middleware('throttle:30,1');
+    Route::delete('/devices/token', [DeviceTokenController::class, 'destroy'])->middleware('throttle:30,1');
 
     // Technician - Tasks & Deterministic State Machine
     Route::get('/tasks', [TaskController::class, 'index']);

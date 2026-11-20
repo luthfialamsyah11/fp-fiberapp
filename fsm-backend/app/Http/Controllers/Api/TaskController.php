@@ -166,14 +166,15 @@ class TaskController extends Controller
         try {
             $updated = $this->stateMachine->transition($task, 'completed', auth()->user());
 
-            SettingService::dispatchWebhook('TASK_COMPLETED', [
+            app(\App\Services\NotificationService::class)->notifyTaskCompleted($updated);
+            app(\App\Services\NotificationService::class)->dispatchWebhookAsync('TASK_COMPLETED', [
                 'task_id'         => $updated->id,
                 'title'           => $updated->title,
                 'customer_name'   => $updated->customer_name,
-                'technician_name' => auth()->user()->name,
+                'technician_name' => $updated->technician?->name ?? 'Technician',
                 'status'          => 'completed',
                 'bast_hash'       => $updated->bast_hash,
-            ]);
+            ], $updated->id);
 
             return response()->json(['data' => $updated]);
         } catch (ValidationException $e) {

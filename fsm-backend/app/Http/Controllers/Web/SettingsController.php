@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\NotificationLog;
 use App\Models\TechnicianLocation;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 
 class SettingsController extends Controller
 {
@@ -17,8 +19,11 @@ class SettingsController extends Controller
 
         $totalGpsPoints = TechnicianLocation::count();
         $databaseSize = $this->formatOldestPingLabel();
+        $recentNotificationLogs = Schema::hasTable('notification_logs')
+            ? NotificationLog::latest('id')->take(10)->get()
+            : collect();
 
-        return view('settings.index', compact('settings', 'totalGpsPoints', 'databaseSize'));
+        return view('settings.index', compact('settings', 'totalGpsPoints', 'databaseSize', 'recentNotificationLogs'));
     }
 
     private function formatOldestPingLabel(): string
@@ -62,6 +67,20 @@ class SettingsController extends Controller
             ],
             'notify_emergency_tickets'   => 'nullable|in:0,1',
             'notify_task_completed'      => 'nullable|in:0,1',
+            'whatsapp_gateway_url'       => [
+                'nullable',
+                'url',
+                'max:500',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if (!empty($value) && !SettingService::isSafeExternalUrl((string) $value)) {
+                        $fail('The WhatsApp Gateway URL must be a public external HTTP/HTTPS endpoint.');
+                    }
+                },
+            ],
+            'whatsapp_gateway_token'     => 'nullable|string|max:500',
+            'notify_customer_whatsapp'   => 'nullable|in:0,1',
+            'notify_customer_email'      => 'nullable|in:0,1',
+            'fcm_server_key'             => 'nullable|string|max:500',
             'telemetry_retention_days'   => 'required|in:7,14,30,90,365',
         ], [
             'default_country_code.regex' => 'Default country dial code must contain 1 to 5 digits only (e.g., 62 or 1).',
@@ -72,9 +91,14 @@ class SettingsController extends Controller
         $validated['require_customer_signature'] = $request->has('require_customer_signature') ? '1' : '0';
         $validated['notify_emergency_tickets'] = $request->has('notify_emergency_tickets') ? '1' : '0';
         $validated['notify_task_completed'] = $request->has('notify_task_completed') ? '1' : '0';
+        $validated['notify_customer_whatsapp'] = $request->has('notify_customer_whatsapp') ? '1' : '0';
+        $validated['notify_customer_email'] = $request->has('notify_customer_email') ? '1' : '0';
         $validated['currency'] = $validated['currency'] ?? 'USD';
         $validated['default_country_code'] = $validated['default_country_code'] ?: '62';
         $validated['webhook_url'] = trim((string) ($validated['webhook_url'] ?? ''));
+        $validated['whatsapp_gateway_url'] = trim((string) ($validated['whatsapp_gateway_url'] ?? ''));
+        $validated['whatsapp_gateway_token'] = trim((string) ($validated['whatsapp_gateway_token'] ?? ''));
+        $validated['fcm_server_key'] = trim((string) ($validated['fcm_server_key'] ?? ''));
 
         $filePath = SettingService::getFilePath();
         File::ensureDirectoryExists(dirname($filePath));

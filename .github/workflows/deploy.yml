@@ -28,7 +28,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # 2.5 Setup PHP 8.2 & Run Automated Backend PHPUnit Quality Gate
+      # 2.5 Build Admin Tailwind CSS + Setup PHP 8.2 & Run Backend PHPUnit Quality Gate
+      - name: 🎨 Build Compiled Admin Tailwind CSS
+        run: |
+          npm --prefix fsm-backend ci
+          npm --prefix fsm-backend run build
+
       - name: 🐘 Setup PHP 8.2
         uses: shivammathur/setup-php@v2
         with:

@@ -140,7 +140,32 @@ export class ApiService {
     );
   }
 
-  // Tasks
+  // Push Notification Device Tokens (FCM)
+  async registerDeviceToken(token: string, platform = 'android', deviceName?: string) {
+    if (await this.isDemoMode()) return { message: 'Demo mode' };
+    return firstValueFrom(
+      this.http.post(`${this.baseUrl}/devices/token`, {
+        token,
+        platform,
+        device_name: deviceName || navigator.userAgent.slice(0, 100),
+      })
+    );
+  }
+
+  async unregisterDeviceToken(token: string) {
+    if (await this.isDemoMode()) return { message: 'Demo mode' };
+    return firstValueFrom(
+      this.http.delete(`${this.baseUrl}/devices/token`, { body: { token } })
+    );
+  }
+
+  private isOfflineNetworkError(err: any): boolean {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+    const status = err?.status;
+    return status === 0 || status === undefined;
+  }
+
+  // Tasks (with Offline Read Cache Fallback)
   async getTasks(status?: string) {
     if (await this.isDemoMode()) {
       const list = status
@@ -151,7 +176,23 @@ export class ApiService {
     const qs = new URLSearchParams();
     if (status) qs.set('status', status);
     qs.set('_ts', String(Date.now()));
-    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks?${qs.toString()}`, this.noCacheHeaders()));
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${this.baseUrl}/tasks?${qs.toString()}`, this.noCacheHeaders())
+      );
+      if (!status && Array.isArray(res?.data)) {
+        this.offlineQueue.cacheTasks(res.data);
+      }
+      return res;
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        const cached = await this.offlineQueue.getCachedTasks();
+        if (cached.length > 0) {
+          return { data: status ? cached.filter(t => t.status === status) : cached, _offline_cached: true };
+        }
+      }
+      throw err;
+    }
   }
 
   async getTaskSyncSignal(): Promise<{
@@ -182,7 +223,23 @@ export class ApiService {
       const found = this.demoTasks.find(t => t.id === Number(id)) || this.demoTasks[0];
       return { data: found };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${id}?_ts=${Date.now()}`, this.noCacheHeaders()));
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${this.baseUrl}/tasks/${id}?_ts=${Date.now()}`, this.noCacheHeaders())
+      );
+      if (res?.data) {
+        this.offlineQueue.cacheTaskDetail(id, res.data);
+      }
+      return res;
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        const cached = await this.offlineQueue.getCachedTaskDetail(id);
+        if (cached) {
+          return { data: cached, _offline_cached: true };
+        }
+      }
+      throw err;
+    }
   }
 
   private updateDemoTaskStatus(id: number, status: string, progress?: number) {
@@ -194,27 +251,63 @@ export class ApiService {
     return { data: task };
   }
 
-  async acceptTask(id: number) {
+  async acceptTask(id: number, idempotencyKey?: string) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'accepted', 10);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/accept`, {}, this.idempotentHeaders()));
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
+    try {
+      return await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/accept`, {}, this.idempotentHeaders(key)));
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        await this.offlineQueue.enqueueMutation(id, 'accept', {}, key);
+        return { _queued: true, message: 'Saved offline — will sync automatically when signal returns.' };
+      }
+      throw err;
+    }
   }
 
-  async rejectTask(id: number, reason?: string) {
+  async rejectTask(id: number, reason?: string, idempotencyKey?: string) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'rejected', 0);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/reject`, { reason }, this.idempotentHeaders()));
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
+    try {
+      return await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/reject`, { reason }, this.idempotentHeaders(key)));
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        await this.offlineQueue.enqueueMutation(id, 'reject', { reason }, key);
+        return { _queued: true, message: 'Decline saved offline — will sync automatically.' };
+      }
+      throw err;
+    }
   }
 
-  async startTask(id: number) {
+  async startTask(id: number, idempotencyKey?: string) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'on-going', 25);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/start`, {}, this.idempotentHeaders()));
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
+    try {
+      return await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/start`, {}, this.idempotentHeaders(key)));
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        await this.offlineQueue.enqueueMutation(id, 'start', {}, key);
+        return { _queued: true, message: 'Start work saved offline — will sync automatically.' };
+      }
+      throw err;
+    }
   }
 
-  async completeTask(id: number) {
+  async completeTask(id: number, idempotencyKey?: string) {
     if (await this.isDemoMode()) return this.updateDemoTaskStatus(id, 'completed', 100);
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/complete`, {}, this.idempotentHeaders()));
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
+    try {
+      return await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${id}/complete`, {}, this.idempotentHeaders(key)));
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        await this.offlineQueue.enqueueMutation(id, 'complete', {}, key);
+        return { _queued: true, message: 'Completion queued offline — will seal BAST once online.' };
+      }
+      throw err;
+    }
   }
 
-  async updateProgress(id: number, note: string, percent: number) {
+  async updateProgress(id: number, note: string, percent: number, idempotencyKey?: string) {
     if (await this.isDemoMode()) {
       const task = this.demoTasks.find(t => t.id === Number(id));
       if (task) {
@@ -230,13 +323,22 @@ export class ApiService {
       }
       return { data: task };
     }
-    return firstValueFrom(
-      this.http.post(
-        `${this.baseUrl}/tasks/${id}/progress`,
-        { note, progress_percent: percent },
-        this.idempotentHeaders()
-      )
-    );
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
+    try {
+      return await firstValueFrom(
+        this.http.post(
+          `${this.baseUrl}/tasks/${id}/progress`,
+          { note, progress_percent: percent },
+          this.idempotentHeaders(key)
+        )
+      );
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        await this.offlineQueue.enqueueMutation(id, 'progress', { note, progress_percent: percent }, key);
+        return { _queued: true, message: 'Progress saved offline — will sync automatically.' };
+      }
+      throw err;
+    }
   }
 
   async getHistory() {
@@ -275,8 +377,15 @@ export class ApiService {
     return firstValueFrom(this.http.post(`${this.baseUrl}/location/batch`, { points }));
   }
 
-  // Proof of Work
-  async uploadProof(taskId: number, file: File, description: string, slot?: 'before' | 'after' | 'additional') {
+  // Proof of Work (with Offline Compressed Queue Fallback)
+  async uploadProof(
+    taskId: number,
+    file: File,
+    description: string,
+    slot?: 'before' | 'after' | 'additional',
+    opticalPowerDbm?: number | null,
+    idempotencyKey?: string
+  ) {
     if (await this.isDemoMode()) {
       const task = this.demoTasks.find(t => t.id === Number(taskId));
       const proof = {
@@ -284,6 +393,7 @@ export class ApiService {
         description,
         slot: slot || 'additional',
         resolved_slot: slot || 'additional',
+        optical_power_dbm: opticalPowerDbm ?? null,
         image_url: URL.createObjectURL(file),
         created_at: new Date().toISOString(),
       };
@@ -293,13 +403,39 @@ export class ApiService {
       }
       return { data: proof };
     }
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
     const formData = new FormData();
     formData.append('image', file);
     formData.append('description', description);
     if (slot) {
       formData.append('slot', slot);
     }
-    return firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${taskId}/proof`, formData, this.idempotentHeaders()));
+    if (opticalPowerDbm !== null && opticalPowerDbm !== undefined && !Number.isNaN(Number(opticalPowerDbm))) {
+      formData.append('optical_power_dbm', String(opticalPowerDbm));
+    }
+    try {
+      return await firstValueFrom(
+        this.http.post(`${this.baseUrl}/tasks/${taskId}/proof`, formData, this.idempotentHeaders(key))
+      );
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        const dataUrl = await this.offlineQueue.compressImageToDataUrl(file);
+        await this.offlineQueue.enqueueMutation(
+          taskId,
+          'proof',
+          {
+            dataUrl,
+            fileName: file.name || 'offline_proof.jpg',
+            description,
+            slot: slot || 'additional',
+            optical_power_dbm: opticalPowerDbm ?? null,
+          },
+          key
+        );
+        return { _queued: true, message: 'Proof photo compressed & saved offline — will upload once signal returns.' };
+      }
+      throw err;
+    }
   }
 
   async getProof(taskId: number) {
@@ -310,12 +446,28 @@ export class ApiService {
     return firstValueFrom(this.http.get(`${this.baseUrl}/tasks/${taskId}/proof?_ts=${Date.now()}`, this.noCacheHeaders()));
   }
 
-  // Inventory & Materials (BOM)
+  // Inventory & Materials (BOM — with Offline Read Cache)
   async getInventory(): Promise<any> {
     if (await this.isDemoMode()) {
       return { data: this.demoInventory };
     }
-    return firstValueFrom(this.http.get(`${this.baseUrl}/inventory?_ts=${Date.now()}`, this.noCacheHeaders()));
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${this.baseUrl}/inventory?_ts=${Date.now()}`, this.noCacheHeaders())
+      );
+      if (Array.isArray(res?.data)) {
+        this.offlineQueue.cacheInventory(res.data);
+      }
+      return res;
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        const cached = await this.offlineQueue.getCachedInventory();
+        if (cached.length > 0) {
+          return { data: cached, _offline_cached: true };
+        }
+      }
+      throw err;
+    }
   }
 
   async getTaskMaterials(taskId: number): Promise<any> {
@@ -344,9 +496,18 @@ export class ApiService {
       }
       return { data: mat, current_stock: inv?.stock ?? 0 };
     }
-    return firstValueFrom(
-      this.http.post(`${this.baseUrl}/tasks/${taskId}/materials`, data, this.idempotentHeaders(idempotencyKey))
-    );
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
+    try {
+      return await firstValueFrom(
+        this.http.post(`${this.baseUrl}/tasks/${taskId}/materials`, data, this.idempotentHeaders(key))
+      );
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        await this.offlineQueue.enqueueMutation(taskId, 'material_add', data, key);
+        return { _queued: true, message: 'Material consumption saved offline — will deduct stock once online.' };
+      }
+      throw err;
+    }
   }
 
   async deleteTaskMaterial(taskId: number, materialId: number): Promise<any> {
@@ -365,8 +526,8 @@ export class ApiService {
     return firstValueFrom(this.http.delete(`${this.baseUrl}/tasks/${taskId}/materials/${materialId}`));
   }
 
-  // Customer Digital Signature
-  async saveTaskSignature(taskId: number, signature: string, signerName: string): Promise<any> {
+  // Customer Digital Signature (with Offline Queue Fallback)
+  async saveTaskSignature(taskId: number, signature: string, signerName: string, idempotencyKey?: string): Promise<any> {
     if (await this.isDemoMode()) {
       const task = this.demoTasks.find(t => t.id === Number(taskId));
       if (task) {
@@ -375,12 +536,86 @@ export class ApiService {
       }
       return { message: 'Signature saved in demo mode', data: task };
     }
-    return firstValueFrom(
-      this.http.post(
-        `${this.baseUrl}/tasks/${taskId}/signature`,
-        { signature, signer_name: signerName },
-        this.idempotentHeaders()
-      )
-    );
+    const key = idempotencyKey || this.offlineQueue.generateUuid();
+    try {
+      return await firstValueFrom(
+        this.http.post(
+          `${this.baseUrl}/tasks/${taskId}/signature`,
+          { signature, signer_name: signerName },
+          this.idempotentHeaders(key)
+        )
+      );
+    } catch (err) {
+      if (this.isOfflineNetworkError(err)) {
+        await this.offlineQueue.enqueueMutation(taskId, 'signature', { signature, signer_name: signerName }, key);
+        return { _queued: true, message: 'Customer signature saved offline — will sync automatically.' };
+      }
+      throw err;
+    }
+  }
+
+  /**
+   * Replay all queued offline work order mutations in strict FIFO causal order
+   * using their original UUIDv4 Idempotency-Key so retries never duplicate data.
+   */
+  async flushOfflineMutations(): Promise<{ synced: number; remaining: number }> {
+    if (await this.isDemoMode()) {
+      return { synced: 0, remaining: 0 };
+    }
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      const pending = await this.offlineQueue.getPendingMutations();
+      return { synced: 0, remaining: pending.length };
+    }
+
+    const queue = await this.offlineQueue.getPendingMutations();
+    let synced = 0;
+
+    for (const item of queue) {
+      try {
+        const headers = this.idempotentHeaders(item.idempotency_key);
+        if (item.type === 'accept') {
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/accept`, {}, headers));
+        } else if (item.type === 'reject') {
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/reject`, item.payload || {}, headers));
+        } else if (item.type === 'start') {
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/start`, {}, headers));
+        } else if (item.type === 'progress') {
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/progress`, item.payload || {}, headers));
+        } else if (item.type === 'material_add') {
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/materials`, item.payload || {}, headers));
+        } else if (item.type === 'signature') {
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/signature`, item.payload || {}, headers));
+        } else if (item.type === 'complete') {
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/complete`, {}, headers));
+        } else if (item.type === 'proof' && item.payload?.dataUrl) {
+          const file = this.offlineQueue.dataUrlToFile(item.payload.dataUrl, item.payload.fileName || 'offline_proof.jpg');
+          const fd = new FormData();
+          fd.append('image', file);
+          fd.append('description', item.payload.description || '');
+          if (item.payload.slot) fd.append('slot', item.payload.slot);
+          if (item.payload.optical_power_dbm !== null && item.payload.optical_power_dbm !== undefined) {
+            fd.append('optical_power_dbm', String(item.payload.optical_power_dbm));
+          }
+          await firstValueFrom(this.http.post(`${this.baseUrl}/tasks/${item.task_id}/proof`, fd, headers));
+        }
+
+        await this.offlineQueue.removeMutation(item.id);
+        synced += 1;
+      } catch (err: any) {
+        if (this.isOfflineNetworkError(err)) {
+          break; // Network dropped again; stop FIFO replay to preserve causal order
+        }
+        // If server rejected permanently (e.g. 422 / 409 / 404 after 3 attempts), drop stale item so queue never deadlocks
+        if (err?.status >= 400 && err?.status < 500) {
+          await this.offlineQueue.removeMutation(item.id);
+        } else {
+          await this.offlineQueue.markMutationAttempt(item.id, err?.message || 'Retry failed');
+          break;
+        }
+      }
+    }
+
+    const remaining = (await this.offlineQueue.getPendingMutations()).length;
+    return { synced, remaining };
   }
 }

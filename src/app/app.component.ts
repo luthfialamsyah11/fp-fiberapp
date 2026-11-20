@@ -8,6 +8,8 @@ import { AuthService } from './services/auth.service';
 import { ApiService } from './services/api.service';
 import { LocationService } from './services/location.service';
 import { TaskSyncService } from './services/task-sync.service';
+import { PushNotificationService } from './services/push-notification.service';
+import { OfflineQueueService } from './services/offline-queue.service';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +27,8 @@ export class AppComponent {
   private api = inject(ApiService);
   private locationService = inject(LocationService);
   private taskSync = inject(TaskSyncService);
+  private pushService = inject(PushNotificationService);
+  private offlineQueue = inject(OfflineQueueService);
 
   private lastTimeBackPress = 0;
   private timePeriodToExit = 2000;
@@ -79,6 +83,27 @@ export class AppComponent {
 
       // Start global 3-second instant task sync across all routes
       this.taskSync.start();
+
+      // Initialize native FCM push notifications (graceful no-op on web)
+      this.pushService.initForAuthenticatedUser();
+
+      // Initialize & auto-flush offline work order mutations when network returns or app resumes
+      await this.offlineQueue.init();
+      this.api.flushOfflineMutations().catch(() => {});
+      window.addEventListener('online', () => {
+        this.api.flushOfflineMutations().then(res => {
+          if (res.synced > 0) {
+            this.taskSync.refreshTasks(false);
+          }
+        }).catch(() => {});
+      });
+      App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) {
+          this.api.flushOfflineMutations().then(res => {
+            if (res.synced > 0) this.taskSync.refreshTasks(false);
+          }).catch(() => {});
+        }
+      });
 
       const meRes: any = await this.api.getMe().catch(() => null);
       const user = meRes?.data ?? meRes;

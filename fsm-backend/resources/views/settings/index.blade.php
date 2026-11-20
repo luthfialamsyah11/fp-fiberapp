@@ -257,7 +257,55 @@
                                 <input type="checkbox" name="notify_task_completed" value="1" class="rounded text-indigo-600" {{ $checked('notify_task_completed', '1') }}>
                                 <span>Notify NOC when Technicians Complete Work Orders</span>
                             </label>
+
+                            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
+                                <input type="checkbox" name="notify_customer_whatsapp" value="1" class="rounded text-emerald-600" {{ $checked('notify_customer_whatsapp', '0') }}>
+                                <span>Auto-Send Customer Live Tracking via WhatsApp Gateway</span>
+                            </label>
+
+                            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
+                                <input type="checkbox" name="notify_customer_email" value="1" class="rounded text-blue-600" {{ $checked('notify_customer_email', '0') }}>
+                                <span>Auto-Send Customer Receipt &amp; BAST via SMTP Email</span>
+                            </label>
                         </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">WhatsApp Gateway Endpoint URL</label>
+                                <input type="url" name="whatsapp_gateway_url" value="{{ $val('whatsapp_gateway_url') }}" placeholder="https://api.fonnte.com/send"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">WhatsApp Gateway Token</label>
+                                <input type="password" name="whatsapp_gateway_token" value="{{ $val('whatsapp_gateway_token') }}" placeholder="Bearer / API Token"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Firebase FCM Server Key (Native Push)</label>
+                                <input type="password" name="fcm_server_key" value="{{ $val('fcm_server_key') }}" placeholder="FCM Push Key (Optional)"
+                                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary">
+                            </div>
+                        </div>
+
+                        @if(isset($recentNotificationLogs) && $recentNotificationLogs->count() > 0)
+                        <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Recent Async Notification Delivery Log (Last {{ $recentNotificationLogs->count() }})</div>
+                            <div class="space-y-1.5 max-h-40 overflow-y-auto text-[11px]">
+                                @foreach($recentNotificationLogs as $nlog)
+                                    <div class="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-100">
+                                        <div class="truncate">
+                                            <span class="font-mono font-bold uppercase text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">{{ $nlog->channel }}</span>
+                                            <span class="font-semibold text-slate-800 ml-1">{{ $nlog->event }}</span>
+                                            <span class="text-slate-400 ml-1">{{ $nlog->recipient }}</span>
+                                        </div>
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold {{ $nlog->status === 'sent' ? 'bg-emerald-50 text-emerald-700' : ($nlog->status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700') }}">
+                                            {{ strtoupper($nlog->status) }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
 

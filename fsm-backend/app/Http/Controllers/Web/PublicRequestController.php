@@ -170,8 +170,10 @@ class PublicRequestController extends Controller
             throw $e;
         }
 
+        app(\App\Services\NotificationService::class)->notifyClientRequestReceived($task);
+
         if ($task->priority === 'high') {
-            SettingService::dispatchWebhook('TASK_EMERGENCY_CREATED', [
+            app(\App\Services\NotificationService::class)->dispatchWebhookAsync('TASK_EMERGENCY_CREATED', [
                 'task_id'          => $task->id,
                 'source'           => 'client_portal',
                 'service_category' => $catMeta['label'],
@@ -180,7 +182,7 @@ class PublicRequestController extends Controller
                 'priority'         => 'high',
                 'location'         => $task->location,
                 'technician'       => 'Unassigned (Client Request)',
-            ]);
+            ], $task->id);
         }
 
         return redirect()->route('public.request.receipt', ['token' => $task->tracking_token]);

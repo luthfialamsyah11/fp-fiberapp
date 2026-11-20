@@ -428,16 +428,21 @@ export class MapPage implements OnDestroy {
             iconAnchor: [13, 13],
           });
 
+          const safeCode = this.escapeHtml(node.code || '');
+          const safeName = this.escapeHtml(node.name || '');
+          const safeType = this.escapeHtml(node.node_type ? node.node_type.toUpperCase() : 'ODP');
+          const safeAddress = node.address ? this.escapeHtml(node.address) : '';
+
           const nodeMarker = L.marker([lat, lng], { icon: odpIcon }).addTo(this.fiberNodesLayer);
           nodeMarker.bindPopup(`
             <div style="font-family:Inter,system-ui,sans-serif;font-size:12px;min-width:160px;">
-              <b style="color:#0F172A;display:block;margin-bottom:2px;">[${node.code}] ${node.name}</b>
-              <div style="color:#64748B;font-size:11px;margin-bottom:4px;">${node.node_type ? node.node_type.toUpperCase() : 'ODP'} Node</div>
+              <b style="color:#0F172A;display:block;margin-bottom:2px;">[${safeCode}] ${safeName}</b>
+              <div style="color:#64748B;font-size:11px;margin-bottom:4px;">${safeType} Node</div>
               <div style="background:#F1F5F9;padding:4px 6px;border-radius:4px;font-size:11px;display:flex;justify-content:space-between;">
                 <span>Port Capacity:</span>
                 <b>${used}/${total} (${total - used} free)</b>
               </div>
-              ${node.address ? `<div style="font-size:10px;color:#94A3B8;margin-top:4px;">${node.address}</div>` : ''}
+              ${safeAddress ? `<div style="font-size:10px;color:#94A3B8;margin-top:4px;">${safeAddress}</div>` : ''}
             </div>
           `);
         }
@@ -546,8 +551,18 @@ export class MapPage implements OnDestroy {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
   }
 
+  private escapeHtml(text: any): string {
+    if (text === null || text === undefined) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   async doRefresh(event: any) {
-    await Promise.all([this.loadTasks(), this.refreshLocation(false), this.refreshOfflineCount()]);
+    await Promise.all([this.loadTasks(), this.loadFiberNodes(), this.refreshLocation(false), this.refreshOfflineCount()]);
     event.target.complete();
   }
 

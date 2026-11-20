@@ -45,7 +45,7 @@ class ProofController extends Controller
 
     public function index(Task $task)
     {
-        if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($task->technician_id !== auth()->id() && !auth()->user()->isPortalStaff()) {
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 

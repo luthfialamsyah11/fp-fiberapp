@@ -41,7 +41,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
 
   getBastUrl(): string {
     if (!this.task) return '#';
-    const base = this.api.getBaseUrl();
+    const base = this.api.getBaseUrl().replace(/\/api$/, '');
     return `${base}/tasks/${this.task.id}/bast?token=${this.task.tracking_token || ''}`;
   }
 

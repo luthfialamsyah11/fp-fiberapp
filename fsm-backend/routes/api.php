@@ -63,6 +63,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Technician - Proof of Work
     Route::get('/tasks/{task}/proof', [ProofController::class, 'index']);
+    Route::get('/tasks/{task}/proofs', [ProofController::class, 'index']);
     Route::post('/tasks/{task}/proof', [ProofController::class, 'store'])->middleware(['throttle:30,1', 'idempotent']);
 
     // Technician - Active Inventory Items Picker & Nearby Fiber GIS Nodes (OLT/ODC/ODP)

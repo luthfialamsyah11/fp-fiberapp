@@ -51,7 +51,7 @@ class TaskStateMachine
             $isAdminOverride = $actor->isPortalStaff() && !empty(trim((string) $reason));
 
             if (!$isNormalTransition && !$isAdminOverride) {
-                $msg = $actor->role === 'admin'
+                $msg = $actor->isPortalStaff()
                     ? "Cannot transition work order directly from '{$fromStatus}' to '{$toStatus}' without an explicit override reason."
                     : "Invalid status transition from '{$fromStatus}' to '{$toStatus}'.";
 
@@ -215,7 +215,7 @@ class TaskStateMachine
                 'progress_percent' => max(10, $task->progress_percent),
             ]);
         } elseif ($to === 'on-going') {
-            if ($from === 'completed' && $actor->role === 'admin') {
+            if ($from === 'completed' && $actor->isPortalStaff()) {
                 ProgressUpdate::create([
                     'task_id'          => $task->id,
                     'user_id'          => $actor->id,
@@ -248,7 +248,7 @@ class TaskStateMachine
                 'note'             => 'Assignment declined by technician' . ($reason ? ": {$reason}" : '.'),
                 'progress_percent' => 0,
             ]);
-        } elseif ($actor->role === 'admin') {
+        } elseif ($actor->isPortalStaff()) {
             ProgressUpdate::create([
                 'task_id'          => $task->id,
                 'user_id'          => $actor->id,

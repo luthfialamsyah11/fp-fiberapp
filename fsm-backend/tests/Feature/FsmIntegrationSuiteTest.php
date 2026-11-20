@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class FsmIntegrationSuiteTest extends TestCase
@@ -2322,5 +2323,78 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertSee('ZTEG98765432')
             ->assertSee('ODP-T4-01')
             ->assertSee('Optical Power Meter (OPM) Calibration &amp; Signal Quality Audit', false);
+    }
+
+    public function test_security_audit_portal_roles_api_access_and_reopen_state(): void
+    {
+        $tech1 = $this->createTechnician([
+            'name'  => 'Tech Alpha',
+            'email' => 'alpha_' . Str::random(5) . '@fsm.test',
+        ]);
+
+        $tech2 = $this->createTechnician([
+            'name'  => 'Tech Bravo',
+            'email' => 'bravo_' . Str::random(5) . '@fsm.test',
+        ]);
+
+        $dispatcher = User::create([
+            'name'      => 'NOC Dispatcher',
+            'email'     => 'noc_' . Str::random(5) . '@fsm.test',
+            'password'  => bcrypt('password123'),
+            'role'      => 'noc_dispatcher',
+            'is_active' => true,
+        ]);
+
+        $warehouseAdmin = User::create([
+            'name'      => 'Warehouse Officer',
+            'email'     => 'wh_' . Str::random(5) . '@fsm.test',
+            'password'  => bcrypt('password123'),
+            'role'      => 'warehouse_admin',
+            'is_active' => true,
+        ]);
+
+        $task = Task::create([
+            'title'          => 'Security Audit Work Order',
+            'customer_name'  => 'Audit Customer',
+            'technician_id'  => $tech1->id,
+            'status'         => 'on-going',
+            'priority'       => 'medium',
+            'tracking_token' => Str::random(32),
+        ]);
+
+        // Unauthorized technician should be blocked with 403
+        $this->actingAs($tech2, 'sanctum')->getJson("/api/tasks/{$task->id}")
+            ->assertStatus(403);
+        $this->actingAs($tech2, 'sanctum')->getJson("/api/tasks/{$task->id}/materials")
+            ->assertStatus(403);
+        $this->actingAs($tech2, 'sanctum')->getJson("/api/tasks/{$task->id}/proofs")
+            ->assertStatus(403);
+
+        // Assigned technician should have access
+        $this->actingAs($tech1, 'sanctum')->getJson("/api/tasks/{$task->id}")
+            ->assertStatus(200);
+
+        // NOC Dispatcher & Warehouse Admin should have authorized access across API endpoints
+        $this->actingAs($dispatcher, 'sanctum')->getJson("/api/tasks/{$task->id}")
+            ->assertStatus(200);
+        $this->actingAs($dispatcher, 'sanctum')->getJson("/api/tasks/{$task->id}/materials")
+            ->assertStatus(200);
+        $this->actingAs($dispatcher, 'sanctum')->getJson("/api/tasks/{$task->id}/proofs")
+            ->assertStatus(200);
+
+        $this->actingAs($warehouseAdmin, 'sanctum')->getJson("/api/tasks/{$task->id}/materials")
+            ->assertStatus(200);
+
+        // Test state machine reopen by NOC Dispatcher
+        $task->update(['status' => 'completed']);
+        $stateMachine = app(\App\Domain\Tasks\TaskStateMachine::class);
+        $stateMachine->transition($task, 'on-going', $dispatcher, 'ONT fiber attenuation high, re-splicing needed');
+
+        $this->assertEquals('on-going', $task->fresh()->status);
+        $this->assertDatabaseHas('progress_updates', [
+            'task_id' => $task->id,
+            'user_id' => $dispatcher->id,
+            'note'    => 'Dispatcher reopened work order for field rework: ONT fiber attenuation high, re-splicing needed',
+        ]);
     }
 }

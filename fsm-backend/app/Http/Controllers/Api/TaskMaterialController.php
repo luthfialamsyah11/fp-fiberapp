@@ -14,7 +14,8 @@ class TaskMaterialController extends Controller
 {
     public function index(Task $task)
     {
-        if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        $user = auth()->user();
+        if ($task->technician_id !== $user->id && !$user->isPortalStaff()) {
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
@@ -35,7 +36,7 @@ class TaskMaterialController extends Controller
     public function store(Request $request, Task $task)
     {
         $user = auth()->user();
-        if ($task->technician_id !== $user->id && $user->role !== 'admin') {
+        if ($task->technician_id !== $user->id && !$user->isPortalStaff()) {
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
@@ -46,7 +47,7 @@ class TaskMaterialController extends Controller
             ], 409);
         }
 
-        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && $user->role !== 'admin') {
+        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && !$user->isPortalStaff()) {
             return response()->json(['message' => 'Materials cannot be modified after a work order is completed or closed.'], 422);
         }
 
@@ -90,7 +91,7 @@ class TaskMaterialController extends Controller
     public function destroy(Task $task, TaskMaterial $material)
     {
         $user = auth()->user();
-        if ($task->technician_id !== $user->id && $user->role !== 'admin') {
+        if ($task->technician_id !== $user->id && !$user->isPortalStaff()) {
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
@@ -100,7 +101,7 @@ class TaskMaterialController extends Controller
             ], 409);
         }
 
-        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && $user->role !== 'admin') {
+        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && !$user->isPortalStaff()) {
             return response()->json(['message' => 'Materials cannot be removed after a work order is completed or closed.'], 422);
         }
 

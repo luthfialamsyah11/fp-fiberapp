@@ -83,7 +83,7 @@ class TaskController extends Controller
 
     public function show(Task $task)
     {
-        if ($task->technician_id !== auth()->id() && auth()->user()->role !== 'admin') {
+        if ($task->technician_id !== auth()->id() && !auth()->user()->isPortalStaff()) {
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
         $task->ensureTrackingToken();

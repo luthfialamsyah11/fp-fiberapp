@@ -17,12 +17,12 @@ class TaskSignatureController extends Controller
     {
         $user = auth()->user();
 
-        if ($task->technician_id !== $user->id && $user->role !== 'admin') {
+        if ($task->technician_id !== $user->id && !$user->isPortalStaff()) {
             return response()->json(['message' => 'Unauthorized access to this work order.'], 403);
         }
 
         // Prevent signature capture on pending/rejected/completed tasks (unless admin override)
-        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && $user->role !== 'admin') {
+        if (!in_array($task->status, ['assigned', 'accepted', 'on-going'], true) && !$user->isPortalStaff()) {
             return response()->json(['message' => 'Customer signature can only be captured on an active work order.'], 409);
         }
 

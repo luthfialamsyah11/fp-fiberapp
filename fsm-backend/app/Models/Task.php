@@ -8,8 +8,9 @@ use Illuminate\Support\Str;
 class Task extends Model
 {
     protected $fillable = [
-        'title', 'customer_name', 'customer_phone', 'description', 'address', 'location',
+        'title', 'customer_name', 'customer_phone', 'customer_email', 'description', 'address', 'location',
         'latitude', 'longitude', 'technician_id', 'status', 'priority',
+        'source', 'service_category', 'client_photo',
         'additional_notes', 'scheduled_at',
         'tracking_token', 'customer_signature', 'customer_signer_name', 'customer_signed_at',
         'completed_at', 'bast_hash', 'bast_sealed_at'
@@ -30,6 +31,8 @@ class Task extends Model
         'progress_percent',
         'tracking_url',
         'customer_signature_url',
+        'client_photo_url',
+        'service_category_label',
     ];
 
     protected static function booted()
@@ -66,6 +69,36 @@ class Task extends Model
         }
         $normalized = ltrim(preg_replace('#^/?storage/#', '', $sig), '/');
         return url('/storage/' . $normalized);
+    }
+
+    public function getClientPhotoUrlAttribute(): ?string
+    {
+        if (empty($this->client_photo)) {
+            return null;
+        }
+        $photo = (string) $this->client_photo;
+        if (Str::startsWith($photo, ['http://', 'https://'])) {
+            return $photo;
+        }
+        $normalized = ltrim(preg_replace('#^/?storage/#', '', $photo), '/');
+        return url('/storage/' . $normalized);
+    }
+
+    public function getServiceCategoryLabelAttribute(): string
+    {
+        return match ((string) $this->service_category) {
+            'new_install' => 'New Fiber Installation',
+            'outage_los'  => 'Total Outage / LOS Red Light',
+            'slow_speed'  => 'Slow Speed / High Optical Loss',
+            'relocation'  => 'Relocation / Maintenance',
+            'other'       => 'General Technical Support',
+            default       => $this->source === 'client_portal' ? 'Client Service Request' : 'NOC Work Order',
+        };
+    }
+
+    public function scopeClientPortal($query)
+    {
+        return $query->where('source', 'client_portal');
     }
 
     public function isSlaBreached(?int $slaHours = null): bool

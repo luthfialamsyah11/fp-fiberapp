@@ -113,6 +113,16 @@
             html.sidebar-collapsed #admin-sidebar .nav-icon {
                 margin-right: 0;
             }
+            html.sidebar-collapsed #admin-sidebar .sidebar-badge {
+                position: absolute;
+                top: 4px;
+                right: 12px;
+                margin-left: 0;
+                min-width: 16px;
+                height: 16px;
+                padding: 0 4px;
+                font-size: 9px;
+            }
             html.sidebar-collapsed #admin-sidebar .sidebar-user-row {
                 justify-content: center;
                 padding-left: 0;
@@ -174,6 +184,15 @@
             <a href="{{ route('admin.tasks.index') }}" data-tooltip="Task Management" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.tasks.*') ? 'active text-white' : '' }}">
                 <ion-icon name="list-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Task Management</span>
+            </a>
+
+            @php $pendingClientBadge = (int) ($pendingClientRequestsCount ?? 0); @endphp
+            <a href="{{ route('admin.client_requests.index') }}" data-tooltip="Client Requests" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm relative {{ request()->routeIs('admin.client_requests.*') ? 'active text-white' : '' }}">
+                <ion-icon name="mail-unread-outline" class="nav-icon text-lg mr-3 flex-shrink-0 {{ $pendingClientBadge > 0 ? 'text-sky-400' : '' }}"></ion-icon>
+                <span class="sidebar-label truncate">Client Requests</span>
+                <span id="sidebar-client-requests-badge" class="sidebar-badge ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-slate-950 shadow-sm {{ $pendingClientBadge > 0 ? '' : 'hidden' }}">
+                    {{ $pendingClientBadge > 99 ? '99+' : $pendingClientBadge }}
+                </span>
             </a>
 
             <a href="{{ route('admin.inventory.index') }}" data-tooltip="Inventory & Materials" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.inventory.*') ? 'active text-white' : '' }}">
@@ -476,10 +495,11 @@
             function showAdminLiveToast(evt) {
                 if (!toastContainer || !evt) return;
                 var iconMap = {
-                    completed: { icon: 'checkmark-done-circle', bg: 'bg-emerald-600', ring: 'border-emerald-500/40' },
-                    proof:     { icon: 'camera',                bg: 'bg-amber-500',   ring: 'border-amber-400/40' },
-                    inventory: { icon: 'cube',                  bg: 'bg-violet-600',  ring: 'border-violet-500/40' },
-                    progress:  { icon: 'pulse',                 bg: 'bg-blue-600',    ring: 'border-blue-500/40' }
+                    completed:      { icon: 'checkmark-done-circle', bg: 'bg-emerald-600', ring: 'border-emerald-500/40', label: 'Live Field Sync' },
+                    proof:          { icon: 'camera',                bg: 'bg-amber-500',   ring: 'border-amber-400/40',   label: 'Live Field Sync' },
+                    inventory:      { icon: 'cube',                  bg: 'bg-violet-600',  ring: 'border-violet-500/40',  label: 'Live Field Sync' },
+                    client_request: { icon: 'mail-unread',           bg: 'bg-sky-600',     ring: 'border-sky-400/40',     label: 'New Client Request' },
+                    progress:       { icon: 'pulse',                 bg: 'bg-blue-600',    ring: 'border-blue-500/40',    label: 'Live Field Sync' }
                 };
                 var style = iconMap[evt.type] || iconMap.progress;
 
@@ -491,7 +511,7 @@
                     + '</div>'
                     + '<div class="flex-1 min-w-0">'
                     + '<div class="flex items-center justify-between gap-2">'
-                    + '<span class="text-[9px] font-extrabold uppercase tracking-wider text-blue-300">Live Field Sync</span>'
+                    + '<span class="text-[9px] font-extrabold uppercase tracking-wider text-blue-300">' + escHtmlAdmin(style.label) + '</span>'
                     + '<span class="text-[10px] text-slate-400">Just now</span>'
                     + '</div>'
                     + '<p class="text-xs font-bold text-white truncate mt-0.5">' + escHtmlAdmin(evt.title) + '</p>'
@@ -611,6 +631,16 @@
                     if (!resp.ok) return;
                     var data = await resp.json();
                     if (!data || !data.version) return;
+
+                    // Live-sync Client Requests pending sidebar counter on every pulse
+                    if (data.counts && typeof data.counts.client_requests_pending === 'number') {
+                        var badgeEl = document.getElementById('sidebar-client-requests-badge');
+                        if (badgeEl) {
+                            var pendingReqCount = data.counts.client_requests_pending;
+                            badgeEl.textContent = pendingReqCount > 99 ? '99+' : String(pendingReqCount);
+                            badgeEl.classList.toggle('hidden', pendingReqCount <= 0);
+                        }
+                    }
 
                     if (lastGlobalVersion === null) {
                         lastGlobalVersion = data.version;

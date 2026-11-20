@@ -1489,7 +1489,7 @@
       </p>
 </div>
 <!-- Credentials Bento Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
 <!-- Card 1: Admin Dispatcher -->
 <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between hover:border-primary/40 transition-colors">
 <div>
@@ -1502,7 +1502,7 @@
 </div>
 <h3 class="text-headline-md font-headline-md text-on-surface font-semibold mb-2">Clientzone Central NOC Portal</h3>
 <p class="text-body-sm font-body-sm text-on-surface-variant mb-6">
-            Access fiber route maps, OLT optical power dashboards, real-time ticket escalation queues, and BAST approval workflows.
+            Access fiber route maps, OLT optical power dashboards, real-time client request inbox, and BAST approval workflows.
           </p>
 <div class="space-y-3 font-label-mono-xs text-label-mono-xs">
 <div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between gap-3">
@@ -1588,6 +1588,51 @@
 <div class="mt-6 pt-4 hairline-t">
 <a class="w-full py-2.5 bg-secondary text-surface-container-lowest font-body-sm font-medium rounded flex items-center justify-center gap-2 hover:bg-secondary-fixed transition-colors" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">
 <span>Launch Technician PWA (Demo)</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</a>
+</div>
+</div>
+<!-- Card 3: User / Client Direct Service Request -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-lg flex flex-col justify-between hover:border-amber-400/50 transition-colors">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-label-mono-xs text-label-mono-xs rounded">ROLE: USER / CLIENT</span>
+<span class="flex items-center gap-1.5 font-label-mono-xs text-label-mono-xs text-amber-400">
+<span class="w-2 h-2 rounded-full bg-amber-400 pulse-bead-green"></span>
+              NO LOGIN REQUIRED
+            </span>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface font-semibold mb-2">Direct Client Service Portal</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-6">
+            Submit an FTTH outage, new installation, or relocation request directly without registering. Streams live into the NOC queue with instant tracking.
+          </p>
+<div class="space-y-3 font-label-mono-xs text-label-mono-xs">
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between gap-3">
+<div class="min-w-0 flex-1">
+<span class="text-outline block">DIRECT PORTAL URL</span>
+<span class="text-on-surface font-semibold truncate block">https://admin.bentengsiber.com/request</span>
+</div>
+<button class="px-2.5 py-1 bg-surface-container-high hover:bg-surface-bright text-amber-400 rounded border border-outline-variant/40 shrink-0" onclick="copyToClipboard('https://admin.bentengsiber.com/request', this)" type="button">
+                Copy
+              </button>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between gap-3">
+<div class="min-w-0 flex-1">
+<span class="text-outline block">AUTHENTICATION MODE</span>
+<span class="text-on-surface font-semibold truncate block">Direct Public Form (Zero Auth)</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container-low border border-outline-variant/20 rounded flex items-center justify-between gap-3">
+<div class="min-w-0 flex-1">
+<span class="text-outline block">POST-SUBMIT TRACKING</span>
+<span class="text-on-surface font-semibold truncate block">Instant Live Radar &amp; #TSK Receipt</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 hairline-t">
+<a class="w-full py-2.5 bg-amber-500 text-slate-950 font-body-sm font-semibold rounded flex items-center justify-center gap-2 hover:bg-amber-400 transition-colors" href="https://admin.bentengsiber.com/request" target="_blank" rel="noopener noreferrer">
+<span>Submit Client Service Request</span>
 <span class="material-symbols-outlined text-[16px]">open_in_new</span>
 </a>
 </div>

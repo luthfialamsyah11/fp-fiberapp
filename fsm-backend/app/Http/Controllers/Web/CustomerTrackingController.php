@@ -66,7 +66,7 @@ class CustomerTrackingController extends Controller
         // Field-level privacy redaction: expose only technician first name, never private phone number
         $techFirstName = $task->technician
             ? Str::before(trim($task->technician->name), ' ')
-            : 'Assigned Specialist';
+            : 'Awaiting NOC Dispatch';
 
         return response()->json([
             'state' => $latestLocation ? 'tracking' : 'waiting',

@@ -185,6 +185,11 @@
                         </a>
                         <div class="flex flex-wrap items-center gap-1.5 text-[10px] text-textSecondary">
                             <span class="font-mono font-bold text-slate-600">#TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
+                            @if(($task->source ?? 'admin') === 'client_portal')
+                                <span class="px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 border border-sky-200 font-bold inline-flex items-center gap-0.5" title="Submitted via Public Client Portal">
+                                    <ion-icon name="globe-outline"></ion-icon> Client Portal
+                                </span>
+                            @endif
                             <span>&bull;</span>
                             <span>{{ $task->scheduled_at ? 'Due ' . $task->scheduled_at->format('d M H:i') : 'Created ' . $task->created_at->format('d M Y') }}</span>
                             @if($task->latitude && $task->longitude)

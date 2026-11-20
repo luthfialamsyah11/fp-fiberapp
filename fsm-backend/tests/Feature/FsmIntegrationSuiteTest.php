@@ -1656,4 +1656,186 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertJsonPath('materials_count', 1);
         $this->assertNotEmpty($liveStatFinal->json('bast_hash'));
     }
+
+    public function test_public_client_request_portal_admin_inbox_assignment_and_live_sync(): void
+    {
+        $admin = $this->createAdmin();
+
+        // Offline tech is CLOSER (-6.2002, 106.8452), Online tech is slightly farther (-6.2050, 106.8500)
+        // Auto-assign MUST prioritize the Online tech! Manual assign can freely pick either.
+        $offlineNearTech = $this->createTechnician([
+            'name'         => 'Offline Near Tech',
+            'email'        => 'offline-near@fsm.com',
+            'is_online'    => false,
+            'last_seen_at' => now()->subHours(2),
+        ]);
+        $onlineTech = $this->createTechnician([
+            'name'         => 'Online Active Tech',
+            'email'        => 'online-active@fsm.com',
+            'is_online'    => true,
+            'last_seen_at' => now(),
+        ]);
+
+        TechnicianLocation::create([
+            'technician_id' => $offlineNearTech->id,
+            'latitude'      => -6.2002,
+            'longitude'     => 106.8452,
+        ]);
+        TechnicianLocation::create([
+            'technician_id' => $onlineTech->id,
+            'latitude'      => -6.2050,
+            'longitude'     => 106.8500,
+        ]);
+
+        // 1. Public /request renders cleanly without any authentication
+        $this->get('/request')
+            ->assertStatus(200)
+            ->assertSee('Submit Fiber Service or Repair Request')
+            ->assertSee('No Login Required');
+
+        // 2. Honeypot anti-spam trap blocks bots
+        $this->post('/request', [
+            'website_url'      => 'https://spam.example.com',
+            'service_category' => 'outage_los',
+            'customer_name'    => 'Spam Bot',
+            'customer_phone'   => '0811111111',
+            'priority'         => 'high',
+            'title'            => 'Spam ticket',
+            'description'      => 'Spam',
+            'address'          => 'Spam St',
+        ])->assertRedirect()->assertSessionHasErrors('form');
+
+        $this->assertEquals(0, Task::count());
+
+        // 3. Valid public submission with 1x1 PNG issue photo creates unified Task (source=client_portal, status=pending)
+        $pngBytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        $photo = \Illuminate\Http\UploadedFile::fake()->createWithContent('los_modem.png', $pngBytes);
+
+        $submitRes = $this->post('/request', [
+            'service_category' => 'outage_los',
+            'customer_name'    => 'Ibu Sari Wijaya',
+            'customer_phone'   => '081234567890',
+            'customer_email'   => 'sari@example.com',
+            'priority'         => 'high',
+            'title'            => 'ONT blinking red LOS after heavy rain',
+            'description'      => 'No internet since 18:00, outdoor drop cable looks loose.',
+            'address'          => 'Jl. Kemang Raya No. 45, Jakarta Selatan',
+            'latitude'         => -6.2000,
+            'longitude'        => 106.8450,
+            'client_photo'     => $photo,
+        ]);
+
+        $task = Task::firstOrFail();
+        $this->assertEquals('client_portal', $task->source);
+        $this->assertEquals('outage_los', $task->service_category);
+        $this->assertEquals('pending', $task->status);
+        $this->assertEquals('sari@example.com', $task->customer_email);
+        $this->assertNotEmpty($task->tracking_token);
+        $this->assertNotEmpty($task->client_photo);
+
+        $submitRes->assertRedirect(route('public.request.receipt', $task->tracking_token));
+
+        // 4. Receipt & Live Customer Tracking work publicly without auth
+        $ticketCode = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+        $this->get("/request/receipt/{$task->tracking_token}")
+            ->assertStatus(200)
+            ->assertSee($ticketCode)
+            ->assertSee("/track/{$task->tracking_token}");
+
+        $this->getJson("/api/public/track/{$task->tracking_token}")
+            ->assertOk()
+            ->assertJsonPath('task.status', 'pending')
+            ->assertJsonPath('technician.name', 'Awaiting NOC Dispatch');
+
+        // 5. Admin /live-pulse immediately reflects the pending client request & emits client_request live event
+        $pulse = $this->actingAs($admin)->getJson('/live-pulse')->assertOk();
+        $this->assertEquals(1, $pulse->json('counts.client_requests_pending'));
+        $this->assertEquals('client_request', $pulse->json('latest_event.type'));
+
+        // 6. Admin /client-requests inbox renders the request, Eye modal trigger, and Client Portal badge on /tasks
+        $this->actingAs($admin)->get('/client-requests')
+            ->assertStatus(200)
+            ->assertSee('Ibu Sari Wijaya')
+            ->assertSee('openClientRequestModal')
+            ->assertSee('Online Active Tech');
+
+        $this->actingAs($admin)->get('/tasks')
+            ->assertStatus(200)
+            ->assertSee('Client Portal');
+
+        $this->actingAs($admin)->get("/tasks/{$task->id}")
+            ->assertStatus(200)
+            ->assertSee('Client Portal')
+            ->assertSee('Client Attached Issue Photo')
+            ->assertSee('sari@example.com');
+
+        // 7. Capture APK sync-signal before dispatch -> Auto-Assign Online picks Online Active Tech over closer Offline Near Tech
+        $apkBefore = $this->actingAs($onlineTech, 'sanctum')->getJson('/api/tasks/sync-signal')->assertOk();
+        $this->assertEquals(0, $apkBefore->json('assigned_count'));
+
+        $this->actingAs($admin)
+            ->post("/client-requests/{$task->id}/auto-assign")
+            ->assertRedirect();
+
+        $task->refresh();
+        $this->assertEquals('assigned', $task->status);
+        $this->assertEquals($onlineTech->id, $task->technician_id);
+
+        // APK sync-signal immediately detects the newly assigned client request!
+        $apkAfter = $this->actingAs($onlineTech, 'sanctum')->getJson('/api/tasks/sync-signal')->assertOk();
+        $this->assertEquals(1, $apkAfter->json('assigned_count'));
+        $this->assertNotEquals($apkBefore->json('version'), $apkAfter->json('version'));
+
+        // Pending client requests counter drops to 0 in /live-pulse
+        $pulseAfterDispatch = $this->actingAs($admin)->getJson('/live-pulse')->assertOk();
+        $this->assertEquals(0, $pulseAfterDispatch->json('counts.client_requests_pending'));
+
+        // 8. Admin can also freely assign ANY active technician (including offline) via manual assign
+        $task2 = Task::create([
+            'source'           => 'client_portal',
+            'service_category' => 'new_install',
+            'title'            => 'New FTTH 100Mbps Installation',
+            'customer_name'    => 'Pak Budi',
+            'customer_phone'   => '081999888777',
+            'address'          => 'Jl. Sudirman No. 8',
+            'priority'         => 'medium',
+            'status'           => 'pending',
+        ]);
+
+        $this->actingAs($admin)
+            ->post("/client-requests/{$task2->id}/assign", [
+                'technician_id' => $offlineNearTech->id,
+                'dispatch_note' => 'Assigning dedicated area specialist.',
+            ])
+            ->assertRedirect();
+
+        $task2->refresh();
+        $this->assertEquals('assigned', $task2->status);
+        $this->assertEquals($offlineNearTech->id, $task2->technician_id);
+
+        // 9. Admin can decline/reject a pending client request with reason
+        $task3 = Task::create([
+            'source'           => 'client_portal',
+            'service_category' => 'relocation',
+            'title'            => 'Duplicate relocation ticket',
+            'customer_name'    => 'Duplicate User',
+            'customer_phone'   => '081222333444',
+            'address'          => 'Jl. Thamrin No. 1',
+            'priority'         => 'low',
+            'status'           => 'pending',
+        ]);
+
+        $this->actingAs($admin)
+            ->post("/client-requests/{$task3->id}/reject", [
+                'reason' => 'Duplicate request already handled under #TSK-0001.',
+            ])
+            ->assertRedirect();
+
+        $this->assertEquals('rejected', $task3->fresh()->status);
+
+        // Clean up uploaded test file from public storage disk
+        if ($task->client_photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($task->client_photo);
+        }
+    }
 }

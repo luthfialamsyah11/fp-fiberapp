@@ -248,6 +248,7 @@ class DashboardController extends Controller
             COUNT(CASE WHEN status = 'on-going' THEN 1 END) as ongoing,
             COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected,
             COUNT(CASE WHEN priority = 'high' AND status NOT IN ('completed', 'rejected') THEN 1 END) as urgent_active,
+            COUNT(CASE WHEN source = 'client_portal' AND status = 'pending' THEN 1 END) as client_requests_pending,
             COALESCE(MAX(id), 0) as max_task_id,
             MAX(updated_at) as max_task_updated
         ")->first();
@@ -300,6 +301,20 @@ class DashboardController extends Controller
 
         // Identify the single most recent operational event for live toast notification
         $candidates = [];
+
+        $latestClientReq = Task::clientPortal()->latest('id')->first();
+        if ($latestClientReq && $latestClientReq->created_at) {
+            $code = '#TSK-' . str_pad($latestClientReq->id, 4, '0', STR_PAD_LEFT);
+            $candidates[] = [
+                'ts'       => $latestClientReq->created_at->timestamp + 1,
+                'key'      => 'client-req-' . $latestClientReq->id,
+                'type'     => 'client_request',
+                'title'    => "New Client Request {$code} from {$latestClientReq->customer_name}",
+                'subtitle' => $latestClientReq->service_category_label . ' — ' . \Illuminate\Support\Str::limit((string) $latestClientReq->title, 55),
+                'url'      => route('admin.client_requests.index'),
+                'time_ago' => $latestClientReq->created_at->diffForHumans(),
+            ];
+        }
 
         $latestProof = ProofOfWork::with('task')->latest('id')->first();
         if ($latestProof && $latestProof->created_at) {
@@ -381,8 +396,9 @@ class DashboardController extends Controller
                 'on_going'           => (int) ($taskStats->ongoing ?? 0),
                 'completed'          => (int) ($taskStats->completed ?? 0),
                 'rejected'           => (int) ($taskStats->rejected ?? 0),
-                'urgent_active'      => (int) ($taskStats->urgent_active ?? 0),
-                'total_proofs'       => (int) ($proofAgg->total_proofs ?? 0),
+                'urgent_active'           => (int) ($taskStats->urgent_active ?? 0),
+                'client_requests_pending' => (int) ($taskStats->client_requests_pending ?? 0),
+                'total_proofs'            => (int) ($proofAgg->total_proofs ?? 0),
                 'low_stock_items'    => (int) ($invAgg->low_stock ?? 0),
                 'online_technicians' => $onlineTechsCount,
                 'active_technicians' => $activeTechsCount,

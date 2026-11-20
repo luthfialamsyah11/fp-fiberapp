@@ -132,6 +132,16 @@
                     <h2 class="text-lg font-bold text-textPrimary leading-snug">{{ $task->title }}</h2>
                     <div class="flex flex-wrap items-center gap-2 mt-2">
                         <span class="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded uppercase">#TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
+                        @if(($task->source ?? 'admin') === 'client_portal')
+                            <span class="text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded inline-flex items-center gap-1">
+                                <ion-icon name="globe-outline"></ion-icon> Client Portal
+                            </span>
+                            @if($task->service_category)
+                                <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
+                                    {{ $task->service_category_label }}
+                                </span>
+                            @endif
+                        @endif
                         <span class="text-xs text-textSecondary flex items-center gap-1">
                             <ion-icon name="calendar-outline"></ion-icon> Created {{ $task->created_at->format('d M Y H:i') }}
                         </span>
@@ -161,6 +171,23 @@
                 <p class="text-xs text-textPrimary whitespace-pre-line leading-relaxed">{{ $task->description ?: 'No specific description provided.' }}</p>
             </div>
 
+            @if($task->client_photo_url)
+            <div class="bg-sky-50/50 border border-sky-200/80 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                    <h4 class="text-xs font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <ion-icon name="image-outline" class="text-sm"></ion-icon>
+                        Client Attached Issue Photo
+                    </h4>
+                    <a href="{{ $task->client_photo_url }}" target="_blank" rel="noopener" class="text-[11px] font-bold text-sky-700 hover:underline inline-flex items-center gap-1">
+                        Open Full Image <ion-icon name="open-outline"></ion-icon>
+                    </a>
+                </div>
+                <a href="{{ $task->client_photo_url }}" target="_blank" rel="noopener" class="block overflow-hidden rounded-lg border border-sky-200 bg-white">
+                    <img src="{{ $task->client_photo_url }}" alt="Client attached issue photo" class="w-full max-h-64 object-contain bg-slate-900/5">
+                </a>
+            </div>
+            @endif
+
             <!-- Customer & Location Specs -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                 <div>
@@ -174,6 +201,12 @@
                             <div class="text-xs text-textSecondary flex items-center gap-1.5">
                                 <ion-icon name="call-outline" class="text-slate-400"></ion-icon>
                                 <a href="tel:{{ $task->customer_phone }}" class="hover:text-primary transition-all">{{ $task->customer_phone }}</a>
+                            </div>
+                        @endif
+                        @if($task->customer_email)
+                            <div class="text-xs text-textSecondary flex items-center gap-1.5">
+                                <ion-icon name="mail-outline" class="text-slate-400"></ion-icon>
+                                <a href="mailto:{{ $task->customer_email }}" class="hover:text-primary transition-all">{{ $task->customer_email }}</a>
                             </div>
                         @endif
                     </div>

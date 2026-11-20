@@ -8,11 +8,22 @@ use App\Http\Controllers\Web\TechnicianController;
 use App\Http\Controllers\Web\CustomerTrackingController;
 use App\Http\Controllers\Web\BastController;
 use App\Http\Controllers\Web\MediaController;
+use App\Http\Controllers\Web\PublicRequestController;
+use App\Http\Controllers\Web\ClientRequestController;
 
 // Public Media Streaming Route (Fixes shared hosting symlink 404s & cross-origin canvas CORS)
 Route::get('/storage/{path}', [MediaController::class, 'show'])
     ->where('path', '.*')
     ->name('storage.serve');
+
+// Public Client Service Request Portal (Direct Access — No Login / Register Required)
+Route::get('/request', [PublicRequestController::class, 'create'])->name('public.request.create');
+Route::post('/request', [PublicRequestController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('public.request.store');
+Route::get('/request/receipt/{token}', [PublicRequestController::class, 'receipt'])
+    ->middleware('throttle:60,1')
+    ->name('public.request.receipt');
 
 // Public Customer Live Tracking Page (Uber-Style, Rate-Limited)
 Route::get('/track/{token}', [CustomerTrackingController::class, 'show'])
@@ -59,6 +70,12 @@ Route::middleware(['auth', 'active', 'role:admin'])->group(function () {
     Route::post('tasks/{task}/materials', [TaskController::class, 'addMaterial'])->name('admin.tasks.materials.store');
     Route::delete('tasks/{task}/materials/{material}', [TaskController::class, 'removeMaterial'])->name('admin.tasks.materials.destroy');
     Route::get('tasks/{task}/live-status', [TaskController::class, 'liveStatus'])->name('admin.tasks.live_status');
+
+    // Client Requests Inbox (Public Client Portal Submissions)
+    Route::get('/client-requests', [ClientRequestController::class, 'index'])->name('admin.client_requests.index');
+    Route::post('/client-requests/{task}/assign', [ClientRequestController::class, 'assign'])->name('admin.client_requests.assign');
+    Route::post('/client-requests/{task}/auto-assign', [ClientRequestController::class, 'autoAssign'])->name('admin.client_requests.auto_assign');
+    Route::post('/client-requests/{task}/reject', [ClientRequestController::class, 'reject'])->name('admin.client_requests.reject');
 
     // Inventory & Material Management
     Route::get('inventory/export', [\App\Http\Controllers\Web\InventoryController::class, 'export'])->name('admin.inventory.export');

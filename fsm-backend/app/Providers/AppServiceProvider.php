@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public const SCHEMA_VERSION = 'v5.5-gps-captured-at-sync';
+    public const SCHEMA_VERSION = 'v5.6-client-request-portal';
 
     public function register(): void
     {
@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
         // Self-healing automatic database migration & legacy note localization on production FTP deploy
         $this->ensureSchemaSynchronized();
 
-        // Share dynamic notifications to all admin layout views safely
+        // Share dynamic notifications & live client-request pending badge to all admin layout views safely
         View::composer('layouts.admin', function ($view) {
             try {
                 if (auth()->check() && Schema::hasTable('progress_updates')) {
@@ -47,8 +47,17 @@ class AppServiceProvider extends ServiceProvider
                         });
                     $view->with('notifications', $notifications);
                 }
+                if (auth()->check() && Schema::hasTable('tasks') && Schema::hasColumn('tasks', 'source')) {
+                    $pendingClientRequests = \App\Models\Task::where('source', 'client_portal')
+                        ->where('status', 'pending')
+                        ->count();
+                    $view->with('pendingClientRequestsCount', $pendingClientRequests);
+                } else {
+                    $view->with('pendingClientRequestsCount', 0);
+                }
             } catch (\Throwable $e) {
                 $view->with('notifications', collect());
+                $view->with('pendingClientRequestsCount', 0);
             }
         });
     }

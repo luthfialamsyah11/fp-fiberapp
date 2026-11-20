@@ -658,6 +658,7 @@ function showSimToast(title, message, icon = 'verified') {
       'nav.pricing': 'Acquire Asset',
       'nav.scanner': 'Scanner',
       'nav.architecture': 'Architecture',
+      'nav.faq': 'FAQ',
       'hero.title': 'The command platform for fiber field ops & cyber defense.',
       'hero.desc': 'Benteng Siber turns scattered field dispatches, technician GPS telemetry, BAST sign-offs, and security posture audits into one calm, high-precision operating layer.',
       'hero.cta1': 'Launch Interactive Simulator',
@@ -668,7 +669,8 @@ function showSimToast(title, message, icon = 'verified') {
       'sim.title': 'Interactive Product Simulator Hub',
       'demo.title': 'Live Sandbox & Demo Credentials',
       'pricing.title': 'Commercial Acquisition & Licensing Hub',
-      'scanner.title': 'Interactive Domain Security Posture Audit'
+      'scanner.title': 'Interactive Domain Security Posture Audit',
+      'faq.title': 'Carrier & Technical FAQ'
     }
   };
 

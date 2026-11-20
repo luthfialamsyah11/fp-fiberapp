@@ -28,6 +28,11 @@
     <FilesMatch "\.(png|ico|jpg|jpeg|svg|webp|woff2)$">
         Header set Cache-Control "public, max-age=2592000, immutable"
     </FilesMatch>
+
+    # Sitemaps & Robots: revalidate daily
+    <FilesMatch "\.(xml|txt)$">
+        Header set Cache-Control "public, max-age=86400, must-revalidate"
+    </FilesMatch>
 </IfModule>
 
 # ─── 2B. GZIP / DEFLATE PAYLOAD COMPRESSION (/audit--perf) ──────────────────

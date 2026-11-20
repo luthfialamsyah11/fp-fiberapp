@@ -27,6 +27,9 @@
         <button type="button" class="map-ctrl-btn" (click)="fitAllMarkers()" title="Fit Route & Pins" aria-label="Fit Route">
           <ion-icon name="scan-outline"></ion-icon>
         </button>
+        <button type="button" class="map-ctrl-btn" [class.active]="showFiberNodes" (click)="toggleFiberNodes()" title="Toggle ODP / ODC Nodes" aria-label="Toggle ODP Nodes">
+          <ion-icon name="git-network-outline"></ion-icon>
+        </button>
         <button type="button" class="map-ctrl-btn" [class.active]="isSatellite" (click)="toggleMapStyle()" title="Toggle Satellite / Street" aria-label="Toggle Map Style">
           <ion-icon name="layers-outline"></ion-icon>
         </button>

@@ -470,6 +470,26 @@ export class ApiService {
     }
   }
 
+  // Fiber GIS Assets (OLT / ODC / ODP Nodes for Field Routing)
+  async getNearbyFiberNodes(lat?: number | null, lng?: number | null): Promise<any[]> {
+    if (await this.isDemoMode()) {
+      return [];
+    }
+    try {
+      let params = '';
+      if (lat !== null && lat !== undefined && lng !== null && lng !== undefined) {
+        params = `?lat=${lat}&lng=${lng}`;
+      }
+      const res: any = await firstValueFrom(
+        this.http.get(`${this.baseUrl}/fiber-nodes/nearby${params}`, this.noCacheHeaders())
+      );
+      return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+    } catch (err) {
+      console.warn('[ApiService] Could not load nearby fiber nodes:', err);
+      return [];
+    }
+  }
+
   async getTaskMaterials(taskId: number): Promise<any> {
     if (await this.isDemoMode()) {
       const task = this.demoTasks.find(t => t.id === Number(taskId));

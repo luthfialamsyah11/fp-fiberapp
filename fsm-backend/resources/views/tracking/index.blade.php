@@ -168,6 +168,11 @@
                 </div>
 
                 <div class="flex items-center gap-2 flex-wrap">
+                    <label class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 cursor-pointer select-none">
+                        <input type="checkbox" id="toggle-odp-layer" checked class="w-3.5 h-3.5 rounded text-blue-600 border-slate-300">
+                        <ion-icon name="git-network-outline" class="text-cyan-600"></ion-icon>
+                        <span>ODPs ({{ isset($fiberNodes) ? $fiberNodes->count() : 0 }})</span>
+                    </label>
                     <span id="last-sync-time" class="text-[11px] font-mono text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
                         Sync: {{ now()->format('H:i:s') }}
                     </span>
@@ -289,6 +294,56 @@
         let destinationMarker = null;
         let destinationLine = null;
         let routeMarkersGroup = L.layerGroup().addTo(map);
+
+        // Fiber GIS Assets Layer (ODP / ODC / OLT)
+        const initialFiberNodes = @json($fiberNodes ?? []);
+        const fiberNodesLayer = L.layerGroup().addTo(map);
+
+        function renderFiberNodesLayer() {
+            fiberNodesLayer.clearLayers();
+            if (!initialFiberNodes || initialFiberNodes.length === 0) return;
+            initialFiberNodes.forEach(node => {
+                if (!node.latitude || !node.longitude) return;
+                const used = Number(node.used_ports || 0);
+                const total = Number(node.total_ports || 8);
+                const isFull = used >= total;
+                const badgeColor = isFull ? '#EF4444' : '#06B6D4';
+
+                const odpIcon = L.divIcon({
+                    className: 'leaflet-odp-pin',
+                    html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;width:24px;height:24px;background:#0F172A;border:2px solid ${badgeColor};border-radius:6px;box-shadow:0 2px 5px rgba(0,0,0,0.35);">
+                             <span style="font-size:8px;font-weight:800;color:#38BDF8;letter-spacing:-0.5px;">ODP</span>
+                             <span style="position:absolute;top:-5px;right:-7px;background:${badgeColor};color:#FFFFFF;font-size:7px;font-weight:700;padding:1px 2px;border-radius:3px;">${used}/${total}</span>
+                           </div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                const m = L.marker([node.latitude, node.longitude], { icon: odpIcon }).addTo(fiberNodesLayer);
+                m.bindPopup(`
+                    <div style="font-family:Inter,system-ui,sans-serif;font-size:12px;padding:4px;min-width:160px;">
+                        <b style="color:#0F172A;display:block;">[${escapeHtml(node.code)}] ${escapeHtml(node.name)}</b>
+                        <span style="color:#64748B;font-size:10px;">${escapeHtml(node.node_type ? node.node_type.toUpperCase() : 'ODP')} Node</span>
+                        <div style="background:#F1F5F9;padding:4px 6px;border-radius:4px;margin-top:4px;font-size:10px;">
+                            Port Usage: <b>${used}/${total} ports (${total - used} available)</b>
+                        </div>
+                        ${node.address ? `<div style="font-size:9px;color:#94A3B8;margin-top:4px;">${escapeHtml(node.address)}</div>` : ''}
+                    </div>
+                `);
+            });
+        }
+        renderFiberNodesLayer();
+
+        const toggleOdpEl = document.getElementById('toggle-odp-layer');
+        if (toggleOdpEl) {
+            toggleOdpEl.addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    map.addLayer(fiberNodesLayer);
+                } else {
+                    map.removeLayer(fiberNodesLayer);
+                }
+            });
+        }
 
         function buildPopupContent(tech) {
             let activeTaskHtml = '';

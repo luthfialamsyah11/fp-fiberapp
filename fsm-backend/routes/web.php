@@ -26,6 +26,10 @@ Route::get('/request/receipt/{token}', [PublicRequestController::class, 'receipt
     ->name('public.request.receipt');
 
 // Public Customer Live Tracking Page (Uber-Style, Rate-Limited)
+Route::get('/track', [CustomerTrackingController::class, 'lookupForm'])->name('tracking.lookup');
+Route::post('/track/lookup', [CustomerTrackingController::class, 'processLookup'])
+    ->middleware('throttle:20,1')
+    ->name('tracking.process_lookup');
 Route::get('/track/{token}', [CustomerTrackingController::class, 'show'])
     ->middleware('throttle:60,1')
     ->name('customer.tracking');
@@ -121,8 +125,13 @@ Route::middleware(['auth', 'active', 'role:admin,super_admin,noc_dispatcher,ware
         Route::delete('tasks/{task}/materials/{material}', [TaskController::class, 'removeMaterial'])->name('admin.tasks.materials.destroy');
     });
 
-    // Super Admin Only: Technicians User Management & Platform Settings
+    // Super Admin Only: Staff & Technicians User Management & Platform Settings
     Route::middleware('role:admin,super_admin')->group(function () {
+        Route::resource('staff', \App\Http\Controllers\Web\StaffController::class, [
+            'as' => 'admin'
+        ])->except(['show']);
+        Route::post('staff/{staff}/toggle-status', [\App\Http\Controllers\Web\StaffController::class, 'toggleStatus'])->name('admin.staff.toggle_status');
+
         Route::resource('technicians', TechnicianController::class, [
             'as' => 'admin'
         ])->except(['show']);

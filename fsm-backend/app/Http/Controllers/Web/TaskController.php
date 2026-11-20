@@ -111,19 +111,22 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'          => 'required|string|max:255',
-            'customer_name'  => 'required|string|max:255',
-            'customer_phone' => 'nullable|string|max:50',
-            'address'        => 'required|string',
-            'description'    => 'nullable|string',
-            'latitude'       => 'nullable|numeric|between:-90,90',
-            'longitude'      => 'nullable|numeric|between:-180,180',
-            'technician_id'  => [
+            'title'            => 'required|string|max:255',
+            'customer_name'    => 'required|string|max:255',
+            'customer_phone'   => 'nullable|string|max:50',
+            'address'          => 'required|string',
+            'description'      => 'nullable|string',
+            'customer_id'      => 'nullable|exists:customers,id',
+            'fiber_node_id'    => 'nullable|exists:fiber_nodes,id',
+            'service_category' => 'nullable|string|in:new_install,repair,maintenance,dismantle,relocation',
+            'latitude'         => 'nullable|numeric|between:-90,90',
+            'longitude'        => 'nullable|numeric|between:-180,180',
+            'technician_id'    => [
                 'nullable',
                 Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
             ],
-            'scheduled_at'   => 'nullable|date',
-            'priority'       => 'required|in:low,medium,high',
+            'scheduled_at'     => 'nullable|date',
+            'priority'         => 'required|in:low,medium,high',
         ]);
 
         // Auto-assign nearest available technician if enabled and technician_id omitted
@@ -227,11 +230,20 @@ class TaskController extends Controller
         $slaHours = (int) SettingService::get('sla_warning_hours', '2');
         $autoAssignEnabled = SettingService::get('auto_assign', '0') === '1';
 
+        $registeredCustomers = \App\Models\Customer::with('fiberNode')
+            ->orderBy('name')
+            ->get();
+
+        $fiberNodes = \App\Models\FiberNode::orderBy('code')
+            ->get();
+
         return compact(
             'task',
             'technicians',
             'technicianFleet',
             'recentCustomers',
+            'registeredCustomers',
+            'fiberNodes',
             'mapStyle',
             'geofenceRadius',
             'slaHours',
@@ -242,21 +254,24 @@ class TaskController extends Controller
     public function update(Request $request, Task $task)
     {
         $validated = $request->validate([
-            'title'           => 'required|string|max:255',
-            'customer_name'   => 'required|string|max:255',
-            'customer_phone'  => 'nullable|string|max:50',
-            'address'         => 'required|string',
-            'description'     => 'nullable|string',
-            'latitude'        => 'nullable|numeric|between:-90,90',
-            'longitude'       => 'nullable|numeric|between:-180,180',
-            'technician_id'   => [
+            'title'            => 'required|string|max:255',
+            'customer_name'    => 'required|string|max:255',
+            'customer_phone'   => 'nullable|string|max:50',
+            'address'          => 'required|string',
+            'description'      => 'nullable|string',
+            'customer_id'      => 'nullable|exists:customers,id',
+            'fiber_node_id'    => 'nullable|exists:fiber_nodes,id',
+            'service_category' => 'nullable|string|in:new_install,repair,maintenance,dismantle,relocation',
+            'latitude'         => 'nullable|numeric|between:-90,90',
+            'longitude'        => 'nullable|numeric|between:-180,180',
+            'technician_id'    => [
                 'nullable',
                 Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
             ],
-            'scheduled_at'    => 'nullable|date',
-            'priority'        => 'required|in:low,medium,high',
-            'status'          => 'required|in:pending,assigned,accepted,on-going,completed,rejected',
-            'override_reason' => 'nullable|string|max:500',
+            'scheduled_at'     => 'nullable|date',
+            'priority'         => 'required|in:low,medium,high',
+            'status'           => 'required|in:pending,assigned,accepted,on-going,completed,rejected',
+            'override_reason'  => 'nullable|string|max:500',
         ]);
 
         $validated['location'] = $validated['address'];

@@ -42,8 +42,9 @@ class TrackingController extends Controller
 
         $mapStyle = SettingService::get('map_style', 'openstreetmap');
         $pollInterval = (int) SettingService::get('gps_refresh_interval', '15');
+        $fiberNodes = \App\Models\FiberNode::whereNotNull('latitude')->whereNotNull('longitude')->get();
 
-        return view('tracking.index', compact('technicians', 'historyLogs', 'selectedTech', 'selectedRoute', 'mapStyle', 'pollInterval'));
+        return view('tracking.index', compact('technicians', 'historyLogs', 'selectedTech', 'selectedRoute', 'mapStyle', 'pollInterval', 'fiberNodes'));
     }
 
     /**

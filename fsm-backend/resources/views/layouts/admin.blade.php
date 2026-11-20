@@ -204,6 +204,11 @@
             @endif
 
             @if($isSuperAdmin)
+            <a href="{{ route('admin.staff.index') }}" data-tooltip="Portal Staff & Roles" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.staff.*') ? 'active text-white' : '' }}">
+                <ion-icon name="shield-checkmark-outline" class="nav-icon text-lg mr-3 flex-shrink-0 text-emerald-400"></ion-icon>
+                <span class="sidebar-label truncate">Portal Staff &amp; Roles</span>
+            </a>
+
             <a href="{{ route('admin.technicians.index') }}" data-tooltip="Technicians" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.technicians.*') ? 'active text-white' : '' }}">
                 <ion-icon name="people-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Technicians</span>

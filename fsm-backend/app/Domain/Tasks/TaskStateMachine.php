@@ -77,10 +77,35 @@ class TaskStateMachine
                 $updates['completed_at']   = now();
                 $updates['bast_hash']      = $lockedTask->computeBastHash();
                 $updates['bast_sealed_at'] = now();
+
+                // Auto-provision port on linked ODP fiber node for new installation tasks
+                if ($lockedTask->fiber_node_id && ($lockedTask->service_category === 'new_install' || str_contains(strtolower((string) $lockedTask->title), 'install'))) {
+                    $fiberNode = \App\Models\FiberNode::find($lockedTask->fiber_node_id);
+                    if ($fiberNode && $fiberNode->used_ports < $fiberNode->total_ports) {
+                        $fiberNode->increment('used_ports');
+                    }
+                    if ($lockedTask->customer_id) {
+                        $cust = \App\Models\Customer::find($lockedTask->customer_id);
+                        if ($cust && empty($cust->fiber_node_id)) {
+                            $cust->update([
+                                'fiber_node_id'   => $lockedTask->fiber_node_id,
+                                'status'          => 'active',
+                            ]);
+                        }
+                    }
+                }
             } elseif ($fromStatus === 'completed' && $toStatus !== 'completed') {
                 $updates['completed_at']   = null;
                 $updates['bast_hash']      = null;
                 $updates['bast_sealed_at'] = null;
+
+                // Roll back provisioned port on ODP fiber node
+                if ($lockedTask->fiber_node_id && ($lockedTask->service_category === 'new_install' || str_contains(strtolower((string) $lockedTask->title), 'install'))) {
+                    $fiberNode = \App\Models\FiberNode::find($lockedTask->fiber_node_id);
+                    if ($fiberNode && $fiberNode->used_ports > 0) {
+                        $fiberNode->decrement('used_ports');
+                    }
+                }
             }
 
             $lockedTask->update($updates);

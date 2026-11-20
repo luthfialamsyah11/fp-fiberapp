@@ -15,10 +15,10 @@ class BastController extends Controller
     {
         $token = $request->query('token');
         $isTokenValid = $token && $task->tracking_token && hash_equals($task->tracking_token, $token);
-        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+        $isPortalStaff = auth()->check() && auth()->user()->isPortalStaff();
         $isAssignedTech = auth()->check() && $task->technician_id === auth()->id();
 
-        if (!$isAdmin && !$isAssignedTech && !$isTokenValid) {
+        if (!$isPortalStaff && !$isAssignedTech && !$isTokenValid) {
             return redirect()->route('admin.login');
         }
 
@@ -46,10 +46,10 @@ class BastController extends Controller
     {
         $token = $request->query('token');
         $isTokenValid = $token && $task->tracking_token && hash_equals($task->tracking_token, $token);
-        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+        $isPortalStaff = auth()->check() && auth()->user()->isPortalStaff();
         $isAssignedTech = auth()->check() && $task->technician_id === auth()->id();
 
-        if (!$isAdmin && !$isAssignedTech && !$isTokenValid) {
+        if (!$isPortalStaff && !$isAssignedTech && !$isTokenValid) {
             return response()->json(['message' => 'Unauthorized verification request.'], 403);
         }
 

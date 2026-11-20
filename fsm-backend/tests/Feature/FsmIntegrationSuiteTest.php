@@ -2205,4 +2205,122 @@ class FsmIntegrationSuiteTest extends TestCase
         // Second sweep MUST NOT double-escalate!
         $this->assertEquals(0, $svc->runEscalationSweep());
     }
+
+    public function test_milestone4_staff_rbac_and_customer_odp_workflow(): void
+    {
+        $superAdmin = $this->createAdmin();
+        $superAdmin->update(['role' => 'super_admin']);
+
+        // 1. Staff Management UI: List, Create, Toggle Status & Delete
+        $this->actingAs($superAdmin)->get('/staff')
+            ->assertOk()
+            ->assertSee('Portal Staff Directory');
+
+        $staffData = [
+            'name'                  => 'Rina Dispatcher',
+            'email'                 => 'rina.disp@bentengsiber.com',
+            'role'                  => 'noc_dispatcher',
+            'phone'                 => '+6281987654321',
+            'password'              => 'securePass123',
+            'password_confirmation' => 'securePass123',
+            'is_active'             => 1,
+        ];
+
+        $this->actingAs($superAdmin)->post('/staff', $staffData)
+            ->assertRedirect(route('admin.staff.index'));
+
+        $rina = User::where('email', 'rina.disp@bentengsiber.com')->first();
+        $this->assertNotNull($rina);
+        $this->assertEquals('noc_dispatcher', $rina->role);
+        $this->assertTrue($rina->is_active);
+
+        // Toggle Status
+        $this->actingAs($superAdmin)->post("/staff/{$rina->id}/toggle-status")
+            ->assertRedirect();
+        $this->assertFalse($rina->fresh()->is_active);
+
+        // Safety: Cannot deactivate own session
+        $this->actingAs($superAdmin)->post("/staff/{$superAdmin->id}/toggle-status")
+            ->assertSessionHas('error');
+        $this->assertTrue($superAdmin->fresh()->is_active);
+
+        // 2. Customer CRM & Fiber Node Task Provisioning Integration
+        $fiberNode = \App\Models\FiberNode::create([
+            'code'        => 'ODP-T4-01',
+            'name'        => 'ODP Test Cluster 01',
+            'node_type'   => 'odp',
+            'latitude'    => -6.2088,
+            'longitude'   => 106.8456,
+            'address'     => 'Jl. Testing ODP',
+            'total_ports' => 8,
+            'used_ports'  => 3,
+            'status'      => 'active',
+        ]);
+
+        $customer = \App\Models\Customer::create([
+            'customer_code'     => 'CUST-T4-001',
+            'name'              => 'Budi Testing',
+            'phone'             => '+6281234567890',
+            'email'             => 'budi@test.com',
+            'address'           => 'Jl. Testing No. 42',
+            'latitude'          => -6.2090,
+            'longitude'         => 106.8459,
+            'service_plan'      => 'FTTH 100 Mbps',
+            'pppoe_username'    => 'budi_pppoe',
+            'ont_serial_number' => 'ZTEG98765432',
+            'fiber_node_id'     => $fiberNode->id,
+            'odp_port_number'   => 4,
+            'status'            => 'active',
+        ]);
+
+        $task = Task::create([
+            'title'            => 'FTTH New Installation - Budi',
+            'customer_name'    => $customer->name,
+            'customer_phone'   => $customer->phone,
+            'address'          => $customer->address,
+            'service_category' => 'new_install',
+            'customer_id'      => $customer->id,
+            'fiber_node_id'    => $fiberNode->id,
+            'status'           => 'on-going',
+            'priority'         => 'high',
+        ]);
+
+        // State Machine auto-increments ODP used ports upon task completion
+        $stateMachine = app(\App\Domain\Tasks\TaskStateMachine::class);
+        $stateMachine->transition($task, 'completed', $superAdmin, 'Installation successful', ['unassign' => false], true);
+
+        $this->assertEquals(4, $fiberNode->fresh()->used_ports);
+
+        // State Machine decrements ODP used ports upon task rework / status rollback
+        $stateMachine->transition($task, 'on-going', $superAdmin, 'Rework requested', [], true);
+        $this->assertEquals(3, $fiberNode->fresh()->used_ports);
+
+        // 3. Public Ticket Lookup & Verification (/track)
+        $this->get('/track')->assertOk()->assertSee('Track Your Work Order');
+
+        // Invalid lookup
+        $this->from('/track')->post('/track/lookup', [
+            'ticket_number' => (string) $task->id,
+            'phone_last4'   => '0000', // Wrong last 4 digits
+        ])->assertSessionHas('error');
+
+        // Valid lookup (matching ticket ID and phone last 4: 7890)
+        $resp = $this->from('/track')->post('/track/lookup', [
+            'ticket_number' => '#TSK-' . $task->id,
+            'phone_last4'   => '7890',
+        ]);
+        $resp->assertRedirect(route('customer.tracking', ['token' => $task->fresh()->tracking_token]));
+
+        // 4. Enhanced BAST Acceptance Printout
+        $task->update([
+            'status'       => 'completed',
+            'completed_at' => now(),
+        ]);
+        $this->actingAs($superAdmin)->get("/tasks/{$task->id}/bast")
+            ->assertOk()
+            ->assertSee('budi_pppoe')
+            ->assertSee('ZTEG98765432')
+            ->assertSee('ODP-T4-01')
+            ->assertSee('Optical Power Meter (OPM) Calibration &amp; Signal Quality Audit', false);
+    }
 }

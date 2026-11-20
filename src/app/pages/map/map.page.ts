@@ -36,6 +36,8 @@ export class MapPage implements OnDestroy {
   activeTask: any = null;
   assignedTasks: any[] = [];
   selectedTask: any = null;
+  fiberNodes: any[] = [];
+  showFiberNodes = true;
   isSatellite = false;
   private userToggledStyle = false;
 
@@ -45,6 +47,7 @@ export class MapPage implements OnDestroy {
   private techMarker: L.Marker | null = null;
   private accuracyCircle: L.Circle | null = null;
   private taskMarkersLayer: L.LayerGroup | null = null;
+  private fiberNodesLayer: L.LayerGroup | null = null;
   private routeLine: L.Polyline | null = null;
 
   private locationInterval: any = null;
@@ -63,6 +66,17 @@ export class MapPage implements OnDestroy {
     );
   }
 
+  private hasCoords(item: any): boolean {
+    return (
+      item?.latitude !== null &&
+      item?.latitude !== undefined &&
+      item?.latitude !== '' &&
+      item?.longitude !== null &&
+      item?.longitude !== undefined &&
+      item?.longitude !== ''
+    );
+  }
+
   get hasGpsError(): boolean {
     return (
       this.gpsStatus === 'no_permission' ||
@@ -73,12 +87,17 @@ export class MapPage implements OnDestroy {
   }
 
   get focusedTask(): any {
-    return this.selectedTask || this.activeTask || this.assignedTasks.find(t => t.latitude && t.longitude) || null;
+    return (
+      this.selectedTask ||
+      this.activeTask ||
+      this.assignedTasks.find(t => this.hasCoords(t)) ||
+      null
+    );
   }
 
   get distanceToFocusedLabel(): string | null {
     const target = this.focusedTask;
-    if (!target?.latitude || !target?.longitude || this.latitude === null || this.longitude === null) {
+    if (!this.hasCoords(target) || this.latitude === null || this.longitude === null) {
       return null;
     }
     const meters = this.haversineMeters(this.latitude, this.longitude, Number(target.latitude), Number(target.longitude));
@@ -90,7 +109,7 @@ export class MapPage implements OnDestroy {
 
   get etaMinutesToFocused(): number | null {
     const target = this.focusedTask;
-    if (!target?.latitude || !target?.longitude || this.latitude === null || this.longitude === null) {
+    if (!this.hasCoords(target) || this.latitude === null || this.longitude === null) {
       return null;
     }
     const meters = this.haversineMeters(this.latitude, this.longitude, Number(target.latitude), Number(target.longitude));
@@ -102,6 +121,7 @@ export class MapPage implements OnDestroy {
     this.syncFromLocationService();
     await Promise.all([
       this.loadTasks(),
+      this.loadFiberNodes(),
       this.refreshLocation(false),
       this.refreshOfflineCount(),
     ]);
@@ -162,6 +182,7 @@ export class MapPage implements OnDestroy {
 
     (this.isSatellite ? this.satelliteLayer : this.streetLayer).addTo(this.map);
     this.taskMarkersLayer = L.layerGroup().addTo(this.map);
+    this.fiberNodesLayer = L.layerGroup().addTo(this.map);
   }
 
   toggleMapStyle() {
@@ -175,6 +196,21 @@ export class MapPage implements OnDestroy {
       this.map.removeLayer(this.satelliteLayer);
       this.streetLayer.addTo(this.map);
     }
+  }
+
+  async loadFiberNodes() {
+    try {
+      this.fiberNodes = await this.api.getNearbyFiberNodes(this.latitude, this.longitude);
+      this.renderMapLayers(false);
+    } catch (e) {
+      console.warn('[MapPage] Fiber nodes load error:', e);
+    }
+  }
+
+  toggleFiberNodes() {
+    this.showFiberNodes = !this.showFiberNodes;
+    this.renderMapLayers(false);
+    this.showToast(this.showFiberNodes ? 'Fiber ODP layer enabled' : 'Fiber ODP layer hidden', 'success');
   }
 
   private startLocationPolling() {
@@ -367,7 +403,48 @@ export class MapPage implements OnDestroy {
       }
     }
 
-    // 3. Route Line from Technician to Focused Destination
+    // 3. Fiber GIS Nodes Layer (ODP / ODC / OLT)
+    if (this.fiberNodesLayer) {
+      this.fiberNodesLayer.clearLayers();
+      if (this.showFiberNodes && this.fiberNodes.length > 0) {
+        for (const node of this.fiberNodes) {
+          if (node.latitude === null || node.latitude === undefined || node.longitude === null || node.longitude === undefined) continue;
+          const lat = Number(node.latitude);
+          const lng = Number(node.longitude);
+          if (Math.abs(lat) < 0.0001 && Math.abs(lng) < 0.0001) continue;
+
+          const used = Number(node.used_ports || 0);
+          const total = Number(node.total_ports || 8);
+          const isFull = used >= total;
+          const badgeColor = isFull ? '#EF4444' : '#06B6D4';
+
+          const odpIcon = L.divIcon({
+            className: 'leaflet-odp-pin',
+            html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;width:26px;height:26px;background:#0F172A;border:2px solid ${badgeColor};border-radius:6px;box-shadow:0 3px 6px rgba(0,0,0,0.35);">
+                     <span style="font-size:9px;font-weight:800;color:#38BDF8;letter-spacing:-0.5px;">ODP</span>
+                     <span style="position:absolute;top:-6px;right:-8px;background:${badgeColor};color:#FFFFFF;font-size:8px;font-weight:700;padding:1px 3px;border-radius:4px;border:1px solid #0F172A;">${used}/${total}</span>
+                   </div>`,
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+          });
+
+          const nodeMarker = L.marker([lat, lng], { icon: odpIcon }).addTo(this.fiberNodesLayer);
+          nodeMarker.bindPopup(`
+            <div style="font-family:Inter,system-ui,sans-serif;font-size:12px;min-width:160px;">
+              <b style="color:#0F172A;display:block;margin-bottom:2px;">[${node.code}] ${node.name}</b>
+              <div style="color:#64748B;font-size:11px;margin-bottom:4px;">${node.node_type ? node.node_type.toUpperCase() : 'ODP'} Node</div>
+              <div style="background:#F1F5F9;padding:4px 6px;border-radius:4px;font-size:11px;display:flex;justify-content:space-between;">
+                <span>Port Capacity:</span>
+                <b>${used}/${total} (${total - used} free)</b>
+              </div>
+              ${node.address ? `<div style="font-size:10px;color:#94A3B8;margin-top:4px;">${node.address}</div>` : ''}
+            </div>
+          `);
+        }
+      }
+    }
+
+    // 4. Route Line from Technician to Focused Destination
     if (this.routeLine) {
       this.map.removeLayer(this.routeLine);
       this.routeLine = null;

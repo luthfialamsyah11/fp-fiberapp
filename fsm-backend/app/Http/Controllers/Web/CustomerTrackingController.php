@@ -13,6 +13,58 @@ use Illuminate\Support\Str;
 class CustomerTrackingController extends Controller
 {
     /**
+     * Show the public Ticket Self-Service Lookup Portal (/track).
+     */
+    public function lookupForm()
+    {
+        return view('tracking.lookup');
+    }
+
+    /**
+     * Process ticket lookup with phone verification & redirect to live tracking token.
+     */
+    public function processLookup(Request $request)
+    {
+        $validated = $request->validate([
+            'ticket_number' => 'required|string|max:64',
+            'phone_last4'   => 'required|string|min:4|max:20',
+        ]);
+
+        $rawTicket = trim($validated['ticket_number']);
+        $ticket = ltrim($rawTicket, '#');
+        $digits = preg_replace('/\D/', '', $validated['phone_last4']);
+        $last4 = substr($digits, -4);
+
+        if (strlen($last4) < 4) {
+            return back()->withInput()->with('error', 'Please enter at least 4 digits of the phone number used during registration.');
+        }
+
+        $task = Task::query()
+            ->where(function ($q) use ($ticket) {
+                $trimmed = strtoupper($ticket);
+                if (str_starts_with($trimmed, 'TSK-')) {
+                    $idPart = (int) substr($trimmed, 4);
+                    $q->where('id', $idPart);
+                } elseif (is_numeric($ticket)) {
+                    $q->where('id', (int) $ticket);
+                }
+                $q->orWhere('tracking_token', $ticket);
+            })
+            ->where(function ($q) use ($last4) {
+                $q->where('customer_phone', 'LIKE', '%' . $last4)
+                  ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(customer_phone, ' ', ''), '-', ''), '+', ''), '(', '') LIKE ?", ['%' . $last4]);
+            })
+            ->first();
+
+        if (!$task) {
+            return back()->withInput()->with('error', 'Ticket not found or phone number verification failed. Please verify your Ticket ID (e.g. #TSK-0012) and the last 4 digits of your phone.');
+        }
+
+        $token = $task->ensureTrackingToken();
+        return redirect()->route('customer.tracking', ['token' => $token]);
+    }
+
+    /**
      * Show the public Uber-style tracking web page for customer with strict privacy & expiry guards.
      */
     public function show(string $token)

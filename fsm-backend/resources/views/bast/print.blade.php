@@ -352,6 +352,29 @@
                     <span class="info-label">GPS Coordinates</span>
                     <span class="info-val">{{ ($task->latitude && $task->longitude) ? ($task->latitude . ', ' . $task->longitude) : 'Not Recorded' }}</span>
                 </div>
+                @if($task->customer || $task->fiberNode)
+                <div class="info-row">
+                    <span class="info-label">PPPoE Account</span>
+                    <span class="info-val"><code>{{ $task->customer?->pppoe_username ?? 'N/A' }}</code></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ONT Serial #</span>
+                    <span class="info-val"><code>{{ $task->customer?->ont_serial_number ?? 'N/A' }}</code></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Linked ODP Node</span>
+                    <span class="info-val">
+                        @if($task->fiberNode)
+                            <strong>{{ $task->fiberNode->code }}</strong> ({{ $task->fiberNode->name }})
+                            @if($task->customer?->odp_port_number)
+                                &bull; Port #{{ $task->customer->odp_port_number }}
+                            @endif
+                        @else
+                            {{ $task->customer?->fiberNode ? $task->customer->fiberNode->code : 'Direct Link / Not Specified' }}
+                        @endif
+                    </span>
+                </div>
+                @endif
             </div>
 
             <div class="info-card">
@@ -359,6 +382,10 @@
                 <div class="info-row">
                     <span class="info-label">Ticket ID</span>
                     <span class="info-val">#TSK-{{ str_pad($task->id, 4, '0', STR_PAD_LEFT) }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Service Type</span>
+                    <span class="info-val" style="font-weight: 600;">{{ $task->service_category_label ?? strtoupper((string) ($task->service_category ?? 'Standard Service')) }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Lead Technician</span>
@@ -408,16 +435,59 @@
             </tbody>
         </table>
 
+        <!-- Section OPM Optical Power Quality Audit -->
+        @php
+            $beforeProof = $task->proofOfWork->first(fn($p) => $p->resolved_slot === 'before')
+                ?? $task->proofOfWork->first();
+
+            $afterProof = $task->proofOfWork->first(fn($p) => $p->resolved_slot === 'after' && (!$beforeProof || $p->id !== $beforeProof->id))
+                ?? $task->proofOfWork->first(fn($p) => !$beforeProof || $p->id !== $beforeProof->id);
+
+            $opmBefore = $beforeProof?->optical_power_dbm;
+            $opmAfter = $afterProof?->optical_power_dbm;
+
+            $resolveOpmGrade = function(?float $val) {
+                if ($val === null) return ['N/A', '#64748b', 'Not Recorded'];
+                if ($val >= -24.0 && $val <= -15.0) return ['OPTIMAL (-15 to -24 dBm)', '#059669', 'PASS (Compliant)'];
+                if ($val > -27.0 && $val < -24.0) return ['ACCEPTABLE (-24 to -27 dBm)', '#d97706', 'PASS (Marginal)'];
+                return ['HIGH LOSS (Out of Spec)', '#dc2626', 'FAIL (Loss Detected)'];
+            };
+            $gradeBefore = $resolveOpmGrade($opmBefore);
+            $gradeAfter = $resolveOpmGrade($opmAfter);
+        @endphp
+
+        <div class="section-heading">Optical Power Meter (OPM) Calibration &amp; Signal Quality Audit</div>
+        <table class="material-table">
+            <thead>
+                <tr>
+                    <th>Measurement Checkpoint</th>
+                    <th>Measured Optical Power</th>
+                    <th>Standard Carrier Range</th>
+                    <th>Signal Quality Tier</th>
+                    <th>QA Verification</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Arrival / Fault Location (Slot 1)</strong></td>
+                    <td><code>{{ $opmBefore !== null ? number_format($opmBefore, 2) . ' dBm' : 'Not recorded' }}</code></td>
+                    <td>-15.00 dBm to -27.00 dBm</td>
+                    <td style="color: {{ $gradeBefore[1] }}; font-weight: 600;">{{ $gradeBefore[0] }}</td>
+                    <td style="color: {{ $gradeBefore[1] }}; font-weight: 700;">{{ $gradeBefore[2] }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Final Handover / ONU Rx (Slot 2)</strong></td>
+                    <td><code>{{ $opmAfter !== null ? number_format($opmAfter, 2) . ' dBm' : 'Not recorded' }}</code></td>
+                    <td>-15.00 dBm to -27.00 dBm</td>
+                    <td style="color: {{ $gradeAfter[1] }}; font-weight: 600;">{{ $gradeAfter[0] }}</td>
+                    <td style="color: {{ $gradeAfter[1] }}; font-weight: 700;">{{ $gradeAfter[2] }}</td>
+                </tr>
+            </tbody>
+        </table>
+
         <!-- Section Photos (Dual-Frame Before & After) -->
         <div class="section-heading">Field Photographic Proof Documentation</div>
         <div class="photo-evidence-grid">
-            @php
-                $beforeProof = $task->proofOfWork->first(fn($p) => $p->resolved_slot === 'before')
-                    ?? $task->proofOfWork->first();
-
-                $afterProof = $task->proofOfWork->first(fn($p) => $p->resolved_slot === 'after' && (!$beforeProof || $p->id !== $beforeProof->id))
-                    ?? $task->proofOfWork->first(fn($p) => !$beforeProof || $p->id !== $beforeProof->id);
-            @endphp
 
             <div class="photo-box">
                 @if($beforeProof)

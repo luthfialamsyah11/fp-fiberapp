@@ -171,6 +171,22 @@
                             placeholder="e.g. FTTH Loss of Signal (LOS Red) - Splice Restoration">
                     </div>
 
+                    <!-- Service Category -->
+                    <div>
+                        <label for="service-category-select" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                            ISP Service Category <span class="text-slate-400 font-normal">(FTTH / FTTB Classification)</span>
+                        </label>
+                        @php $currCat = old('service_category', $task->service_category ?? 'repair'); @endphp
+                        <select id="service-category-select" name="service_category"
+                            class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all bg-white">
+                            <option value="new_install" {{ $currCat === 'new_install' ? 'selected' : '' }}>New Subscriber Installation (FTTH Provisioning)</option>
+                            <option value="repair" {{ $currCat === 'repair' ? 'selected' : '' }}>Incident Repair / Fiber Splicing</option>
+                            <option value="maintenance" {{ $currCat === 'maintenance' ? 'selected' : '' }}>Preventative Maintenance &amp; Optical Audit</option>
+                            <option value="relocation" {{ $currCat === 'relocation' ? 'selected' : '' }}>Premise Relocation / Drop-Wire Re-route</option>
+                            <option value="dismantle" {{ $currCat === 'dismantle' ? 'selected' : '' }}>Service Dismantle &amp; Hardware Recovery</option>
+                        </select>
+                    </div>
+
                     <!-- Description -->
                     <div>
                         <label for="task-desc-input" class="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -274,13 +290,44 @@
                     </div>
                 </div>
 
+                @if(isset($registeredCustomers) && $registeredCustomers->count() > 0)
+                <!-- Registered Subscriber CRM Quick-Fill -->
+                <div class="mb-3 p-3 rounded-xl bg-blue-50/70 border border-blue-200">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="customer-crm-lookup" class="text-[11px] font-bold text-blue-900 flex items-center gap-1.5">
+                            <ion-icon name="business-outline" class="text-blue-700 text-sm"></ion-icon>
+                            Registered Subscriber CRM Database
+                        </label>
+                        <span class="text-[10px] text-blue-600 font-medium">Auto-fills info, coordinates &amp; linked ODP</span>
+                    </div>
+                    <select id="customer-crm-lookup" name="customer_id" onchange="applyRegisteredCustomer(this.value)"
+                        class="w-full rounded-lg border border-blue-200 px-3 py-2 text-xs text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-primary/25">
+                        <option value="">-- Choose registered customer (or leave blank for custom/new lead) --</option>
+                        @foreach($registeredCustomers as $rc)
+                            <option value="{{ $rc->id }}" 
+                                data-name="{{ $rc->name }}"
+                                data-phone="{{ $rc->phone }}"
+                                data-address="{{ $rc->address }}"
+                                data-lat="{{ $rc->latitude }}"
+                                data-lng="{{ $rc->longitude }}"
+                                data-fiber-node-id="{{ $rc->fiber_node_id }}"
+                                data-pppoe="{{ $rc->pppoe_username }}"
+                                data-ont="{{ $rc->ont_serial_number }}"
+                                {{ (string) old('customer_id', $task->customer_id) === (string) $rc->id ? 'selected' : '' }}>
+                                [{{ $rc->customer_code }}] {{ $rc->name }} • {{ $rc->service_plan ?: 'Standard' }} ({{ $rc->fiberNode ? 'ODP: '.$rc->fiberNode->code : 'No ODP' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+
                 @if(isset($recentCustomers) && $recentCustomers->count() > 0)
                 <!-- Existing Customer Quick-Lookup Autocomplete -->
                 <div class="mb-4 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
                     <div class="flex items-center justify-between mb-1.5">
                         <label for="customer-quick-lookup" class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
                             <ion-icon name="people-circle-outline" class="text-blue-600 text-sm"></ion-icon>
-                            Returning Subscriber Quick-Fill
+                            Returning Subscriber Quick-Fill (Past Tickets)
                         </label>
                         <span class="text-[10px] text-slate-400">Auto-fills name, phone, address &amp; map pin</span>
                     </div>
@@ -313,6 +360,25 @@
                         <input id="customer-phone-input" type="text" name="customer_phone" value="{{ old('customer_phone', $task->customer_phone) }}"
                             class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all"
                             placeholder="e.g. +62812XXXXXXXX or +1-555-0199">
+                    </div>
+
+                    <!-- Linked Fiber Node (ODP / ODC) -->
+                    <div class="md:col-span-2">
+                        <label for="fiber-node-select" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Linked Fiber Node (ODP / ODC Asset)
+                        </label>
+                        <select id="fiber-node-select" name="fiber_node_id" onchange="onFiberNodeChanged(this.value)"
+                            class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all bg-white">
+                            <option value="">-- No Linked Fiber Node / Direct Uplink --</option>
+                            @if(isset($fiberNodes))
+                                @foreach($fiberNodes as $fn)
+                                    <option value="{{ $fn->id }}" data-lat="{{ $fn->latitude }}" data-lng="{{ $fn->longitude }}" {{ (string) old('fiber_node_id', $task->fiber_node_id) === (string) $fn->id ? 'selected' : '' }}>
+                                        [{{ $fn->code }}] {{ $fn->name }} ({{ strtoupper($fn->node_type) }} • Ports: {{ $fn->used_ports }}/{{ $fn->total_ports }} used • Status: {{ $fn->status }})
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <span class="text-[10px] text-slate-400 mt-1 block">When new installation tasks are completed, 1 port on the selected ODP is automatically allocated.</span>
                     </div>
 
                     <div class="md:col-span-2">
@@ -740,6 +806,51 @@
         }
         if (cust.latitude !== null && cust.longitude !== null) {
             setTargetLocation(cust.latitude, cust.longitude, { fly: true, skipReverseGeocode: !!cust.address });
+        }
+    }
+
+    function applyRegisteredCustomer(customerId) {
+        if (!customerId) return;
+        const select = document.getElementById('customer-crm-lookup');
+        if (!select) return;
+        const opt = select.options[select.selectedIndex];
+        if (!opt) return;
+
+        const name = opt.getAttribute('data-name');
+        const phone = opt.getAttribute('data-phone');
+        const address = opt.getAttribute('data-address');
+        const lat = opt.getAttribute('data-lat');
+        const lng = opt.getAttribute('data-lng');
+        const fiberNodeId = opt.getAttribute('data-fiber-node-id');
+
+        if (name) document.getElementById('customer-name-input').value = name;
+        if (phone) document.getElementById('customer-phone-input').value = phone;
+        if (address) {
+            document.getElementById('address-input').value = address;
+            addressManuallyEdited = true;
+            const toggle = document.getElementById('toggle-auto-address');
+            if (toggle) toggle.checked = false;
+        }
+        if (fiberNodeId) {
+            const fnSelect = document.getElementById('fiber-node-select');
+            if (fnSelect) fnSelect.value = fiberNodeId;
+        }
+        if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+            setTargetLocation(parseFloat(lat), parseFloat(lng), { fly: true, skipReverseGeocode: !!address });
+        }
+    }
+
+    function onFiberNodeChanged(fiberNodeId) {
+        if (!fiberNodeId) return;
+        const select = document.getElementById('fiber-node-select');
+        const opt = select ? select.options[select.selectedIndex] : null;
+        if (!opt) return;
+        const lat = opt.getAttribute('data-lat');
+        const lng = opt.getAttribute('data-lng');
+        const latInput = document.getElementById('latitude-input');
+        const lngInput = document.getElementById('longitude-input');
+        if ((!latInput.value || !lngInput.value) && lat && lng) {
+            setTargetLocation(parseFloat(lat), parseFloat(lng), { fly: true, skipReverseGeocode: false });
         }
     }
 

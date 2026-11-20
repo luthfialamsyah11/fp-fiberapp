@@ -65,8 +65,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/tasks/{task}/proof', [ProofController::class, 'index']);
     Route::post('/tasks/{task}/proof', [ProofController::class, 'store'])->middleware(['throttle:30,1', 'idempotent']);
 
-    // Technician - Active Inventory Items Picker
+    // Technician - Active Inventory Items Picker & Nearby Fiber GIS Nodes (OLT/ODC/ODP)
     Route::get('/inventory', [InventoryController::class, 'index']);
+    Route::get('/fiber-nodes/nearby', [\App\Http\Controllers\Web\FiberNodeController::class, 'apiNearby']);
 
     // Technician & Admin - Task Materials (BOM) with Idempotency Guard
     Route::get('/tasks/{task}/materials', [TaskMaterialController::class, 'index']);

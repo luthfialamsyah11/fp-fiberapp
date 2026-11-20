@@ -7,9 +7,20 @@ use Illuminate\Http\Request;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, string $role)
+    public function handle(Request $request, Closure $next, string ...$roles)
     {
-        if (!$request->user() || $request->user()->role !== $role) {
+        $allowed = [];
+        foreach ($roles as $chunk) {
+            foreach (explode(',', $chunk) as $r) {
+                $r = trim($r);
+                if ($r !== '') {
+                    $allowed[] = $r;
+                }
+            }
+        }
+
+        $user = $request->user();
+        if (!$user || !$user->hasAnyRole($allowed)) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json(['message' => 'Access denied.'], 403);
             }

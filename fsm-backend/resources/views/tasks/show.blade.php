@@ -332,6 +332,11 @@
                                 <span class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-bold uppercase border {{ $labelBg }} shadow-sm">
                                     {{ $label }}
                                 </span>
+                                @if($proof->optical_power_dbm !== null)
+                                    <span class="absolute top-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono font-extrabold border shadow-sm {{ $proof->optical_status === 'high_loss' ? 'bg-red-600 text-white border-red-400' : 'bg-emerald-600 text-white border-emerald-400' }}">
+                                        OPM {{ number_format((float) $proof->optical_power_dbm, 1) }} dBm {{ $proof->optical_status === 'high_loss' ? 'HIGH LOSS' : 'GOOD' }}
+                                    </span>
+                                @endif
                                 <span class="absolute bottom-2.5 right-2.5 p-1.5 rounded-lg bg-slate-900/70 text-white opacity-0 group-hover:opacity-100 transition-opacity text-xs inline-flex items-center gap-1">
                                     <ion-icon name="scan-outline"></ion-icon> Zoom
                                 </span>

@@ -8,9 +8,22 @@ class ProofOfWork extends Model
 {
     protected $table = 'proof_of_work';
 
-    protected $fillable = ['task_id', 'image', 'slot', 'description'];
+    protected $fillable = ['task_id', 'image', 'slot', 'optical_power_dbm', 'description'];
 
-    protected $appends = ['image_url', 'resolved_slot'];
+    protected $casts = [
+        'optical_power_dbm' => 'float',
+    ];
+
+    protected $appends = ['image_url', 'resolved_slot', 'optical_status'];
+
+    public function getOpticalStatusAttribute(): ?string
+    {
+        if ($this->optical_power_dbm === null) {
+            return null;
+        }
+        $threshold = (float) \App\Services\SettingService::get('opm_max_attenuation_dbm', '-27.0');
+        return ((float) $this->optical_power_dbm) >= $threshold ? 'good' : 'high_loss';
+    }
 
     public function task()
     {

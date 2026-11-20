@@ -48,6 +48,11 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             app(\App\Services\NotificationService::class)->retryPending(25);
         })->everyFiveMinutes()->name('fsm-retry-notifications');
+
+        // 4. Automated SLA Breach Escalation Sweep
+        $schedule->call(function () {
+            app(\App\Services\SlaEscalationService::class)->runEscalationSweep();
+        })->everyFiveMinutes()->name('fsm-sla-escalation-sweep');
     }
 
     /**

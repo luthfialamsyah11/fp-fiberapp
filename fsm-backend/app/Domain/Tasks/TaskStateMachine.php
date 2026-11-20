@@ -48,7 +48,7 @@ class TaskStateMachine
 
             $allowedNext = self::TRANSITIONS[$fromStatus] ?? [];
             $isNormalTransition = in_array($toStatus, $allowedNext, true);
-            $isAdminOverride = $actor->role === 'admin' && !empty(trim((string) $reason));
+            $isAdminOverride = $actor->isPortalStaff() && !empty(trim((string) $reason));
 
             if (!$isNormalTransition && !$isAdminOverride) {
                 $msg = $actor->role === 'admin'
@@ -153,6 +153,26 @@ class TaskStateMachine
             throw ValidationException::withMessages([
                 'signature' => ['Customer digital acceptance signature (Sign-on-Glass) is required before completing the work order.']
             ]);
+        }
+
+        // Optional strict FTTH Optical Power Meter (OPM -dBm) quality gate
+        $requireOpm = SettingService::get('require_opm_reading', '0');
+        if ($requireOpm == '1') {
+            $maxAtten = (float) SettingService::get('opm_max_attenuation_dbm', '-27.0');
+            $latestOpm = \App\Models\ProofOfWork::where('task_id', $task->id)
+                ->whereNotNull('optical_power_dbm')
+                ->orderByDesc('id')
+                ->first();
+            if (!$latestOpm) {
+                throw ValidationException::withMessages([
+                    'optical_power_dbm' => ['An OPM optical power reading (dBm) must be recorded on Proof of Work before completing this FTTH work order.'],
+                ]);
+            }
+            if ((float) $latestOpm->optical_power_dbm < $maxAtten) {
+                throw ValidationException::withMessages([
+                    'optical_power_dbm' => ["Recorded optical power ({$latestOpm->optical_power_dbm} dBm) is below the required threshold ({$maxAtten} dBm)."],
+                ]);
+            }
         }
 
         if ($actor->role === 'technician') {

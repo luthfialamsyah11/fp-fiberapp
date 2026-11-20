@@ -54,6 +54,8 @@ class SettingsController extends Controller
             'sla_warning_hours'          => 'required|in:1,2,4,8,24',
             'require_proof_photo'        => 'nullable|in:0,1',
             'require_customer_signature' => 'nullable|in:0,1',
+            'require_opm_reading'        => 'nullable|in:0,1',
+            'opm_max_attenuation_dbm'    => 'nullable|numeric|between:-40,-10',
             'geofence_check_meters'      => 'required|in:0,50,100,250,500',
             'webhook_url'                => [
                 'nullable',
@@ -89,6 +91,8 @@ class SettingsController extends Controller
         $validated['auto_assign'] = $request->has('auto_assign') ? '1' : '0';
         $validated['require_proof_photo'] = $request->has('require_proof_photo') ? '1' : '0';
         $validated['require_customer_signature'] = $request->has('require_customer_signature') ? '1' : '0';
+        $validated['require_opm_reading'] = $request->has('require_opm_reading') ? '1' : '0';
+        $validated['opm_max_attenuation_dbm'] = (string) ($validated['opm_max_attenuation_dbm'] ?? '-27.0');
         $validated['notify_emergency_tickets'] = $request->has('notify_emergency_tickets') ? '1' : '0';
         $validated['notify_task_completed'] = $request->has('notify_task_completed') ? '1' : '0';
         $validated['notify_customer_whatsapp'] = $request->has('notify_customer_whatsapp') ? '1' : '0';
@@ -200,5 +204,20 @@ class SettingsController extends Controller
             'total_remaining'   => $totalAfter,
             'oldest_ping_label' => $oldestPingLabel,
         ]);
+    }
+
+    /**
+     * Trigger an immediate SLA breach escalation sweep manually from Admin Settings.
+     */
+    public function escalateSlaNow()
+    {
+        $escalated = app(\App\Services\SlaEscalationService::class)->runEscalationSweep();
+
+        return back()->with(
+            'success',
+            $escalated > 0
+                ? "SLA escalation sweep complete: {$escalated} overdue work order(s) escalated."
+                : 'SLA escalation sweep complete: all active work orders are within SLA thresholds.'
+        );
     }
 }

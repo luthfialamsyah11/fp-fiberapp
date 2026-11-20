@@ -216,6 +216,24 @@
                                     <span class="text-[11px] text-slate-500">Requires customer Sign-on-Glass digital signature before sealing BAST completion.</span>
                                 </div>
                             </label>
+
+                            <label class="flex items-start gap-3 p-3 rounded-xl bg-cyan-50/60 border border-cyan-200 cursor-pointer select-none hover:bg-cyan-50 transition-colors">
+                                <input type="checkbox" name="require_opm_reading" value="1"
+                                    class="w-4 h-4 mt-0.5 text-cyan-600 border-slate-300 rounded focus:ring-cyan-500 cursor-pointer"
+                                    {{ $checked('require_opm_reading', '0') }}>
+                                <div>
+                                    <span class="text-xs font-bold text-slate-800 block">Strict OPM Optical Power Gate</span>
+                                    <span class="text-[11px] text-slate-500">Require technician to record passing RX optical power (dBm) before completion.</span>
+                                </div>
+                            </label>
+
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                                <label for="opm_max_attenuation_dbm" class="block text-xs font-bold text-slate-800 mb-1">OPM Passing Threshold (dBm)</label>
+                                <input id="opm_max_attenuation_dbm" type="number" step="0.5" min="-40" max="-10" name="opm_max_attenuation_dbm"
+                                    value="{{ $val('opm_max_attenuation_dbm', '-27.0') }}"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono text-slate-800">
+                                <span class="text-[10px] text-slate-500 mt-1 block">Readings below this value (e.g. -29 dBm) trigger HIGH LOSS alert.</span>
+                            </div>
                         </div>
                     </div>
                 </div>

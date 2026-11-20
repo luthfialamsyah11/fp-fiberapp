@@ -32,12 +32,12 @@ class AuthController extends Controller
                 ])->onlyInput('email');
             }
 
-            if (Auth::user()->role !== 'admin') {
+            if (!Auth::user()->isPortalStaff()) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 return back()->withErrors([
-                    'email' => 'Only administrators are authorized to access this command portal.',
+                    'email' => 'Only authorized NOC/Admin portal staff can sign in here. Field technicians should use the Mobile App.',
                 ])->onlyInput('email');
             }
 

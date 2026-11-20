@@ -2062,4 +2062,147 @@ class FsmIntegrationSuiteTest extends TestCase
             ->assertSee('build/app.css')
             ->assertDontSee('cdn.tailwindcss.com');
     }
+
+    public function test_milestone3_isp_crm_fiber_nodes_opm_gate_granular_rbac_and_sla_escalation(): void
+    {
+        $admin = $this->createAdmin();
+        $warehouseAdmin = User::create([
+            'name'      => 'Warehouse Staff',
+            'email'     => 'warehouse@fsm.com',
+            'password'  => bcrypt('password123'),
+            'role'      => 'warehouse_admin',
+            'is_active' => true,
+        ]);
+        $dispatcher = User::create([
+            'name'      => 'NOC Dispatcher',
+            'email'     => 'dispatcher@fsm.com',
+            'password'  => bcrypt('password123'),
+            'role'      => 'noc_dispatcher',
+            'is_active' => true,
+        ]);
+        $tech = $this->createTechnician(['name' => 'FTTH Engineer', 'email' => 'ftth@fsm.com', 'is_online' => true]);
+
+        // 1. Granular Multi-Role RBAC isolation:
+        //    - warehouse_admin can access /inventory (200) & /dashboard (200), blocked from /settings (403) & /client-requests (403)
+        //    - noc_dispatcher can access /customers (200), /fiber-assets (200), /client-requests (200), blocked from /settings (403)
+        $this->actingAs($warehouseAdmin)->get('/inventory')->assertOk();
+        $this->actingAs($warehouseAdmin)->get('/dashboard')->assertOk();
+        $this->actingAs($warehouseAdmin)->get('/settings')->assertStatus(403);
+        $this->actingAs($warehouseAdmin)->get('/client-requests')->assertStatus(403);
+
+        $this->actingAs($dispatcher)->get('/customers')->assertOk();
+        $this->actingAs($dispatcher)->get('/fiber-assets')->assertOk();
+        $this->actingAs($dispatcher)->get('/client-requests')->assertOk();
+        $this->actingAs($dispatcher)->get('/settings')->assertStatus(403);
+
+        // 2. Fiber GIS Asset Registry (OLT -> ODP) + Nearby API for APK
+        $this->actingAs($dispatcher)->post('/fiber-assets', [
+            'code'        => 'ODP-KMG-01',
+            'name'        => 'ODP Kemang Pole 01',
+            'node_type'   => 'odp',
+            'latitude'    => -6.2615,
+            'longitude'   => 106.8106,
+            'total_ports' => 8,
+            'used_ports'  => 5,
+            'status'      => 'operational',
+        ])->assertRedirect();
+
+        $odp = \App\Models\FiberNode::where('code', 'ODP-KMG-01')->firstOrFail();
+        $this->assertEquals(3, $odp->available_ports);
+
+        $this->actingAs($tech, 'sanctum')
+            ->getJson('/api/fiber-nodes/nearby?lat=-6.2610&lng=106.8100')
+            ->assertOk()
+            ->assertJsonPath('data.0.code', 'ODP-KMG-01');
+
+        // 3. Subscriber CRM registration linked to ODP
+        $this->actingAs($dispatcher)->post('/customers', [
+            'name'              => 'PT Fiber Nusantara',
+            'phone'             => '081234560000',
+            'address'           => 'Jl. Kemang Selatan 12',
+            'service_plan'      => 'FTTH 200Mbps',
+            'pppoe_username'    => 'ptfn@fiberops',
+            'ont_serial_number' => 'ZTEGC991122',
+            'fiber_node_id'     => $odp->id,
+            'odp_port_number'   => 6,
+        ])->assertRedirect();
+
+        $cust = \App\Models\Customer::where('pppoe_username', 'ptfn@fiberops')->firstOrFail();
+        $this->assertEquals($odp->id, $cust->fiber_node_id);
+
+        // 4. OPM Optical Power (-dBm) recording & configurable strict completion gate
+        $task = Task::create([
+            'title'              => 'FTTH Attenuation Repair',
+            'customer_name'      => $cust->name,
+            'customer_id'        => $cust->id,
+            'fiber_node_id'      => $odp->id,
+            'address'            => $cust->address,
+            'technician_id'      => $tech->id,
+            'status'             => 'on-going',
+            'priority'           => 'high',
+            'customer_signature' => 'data:image/png;base64,iVBORw0KGgo=',
+        ]);
+
+        // Enable strict OPM gate (-27.0 dBm threshold)
+        $settingsFile = \App\Services\SettingService::getFilePath();
+        $origSettings = file_exists($settingsFile) ? file_get_contents($settingsFile) : null;
+        $merged = array_merge(\App\Services\SettingService::all(), [
+            'require_opm_reading'     => '1',
+            'opm_max_attenuation_dbm' => '-27.0',
+        ]);
+        file_put_contents($settingsFile, json_encode($merged));
+
+        try {
+            $pngBytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+            // Upload bad optical reading (-31.5 dBm) -> completion MUST be rejected (422)
+            $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/proof", [
+                'image'             => \Illuminate\Http\UploadedFile::fake()->createWithContent('bad_opm.png', $pngBytes),
+                'slot'              => 'before',
+                'optical_power_dbm' => -31.5,
+                'description'       => 'High attenuation before splice',
+            ])->assertCreated()->assertJsonPath('data.optical_status', 'high_loss');
+
+            $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/complete")
+                ->assertStatus(422);
+
+            // Upload good optical reading (-18.4 dBm) -> completion succeeds!
+            $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/proof", [
+                'image'             => \Illuminate\Http\UploadedFile::fake()->createWithContent('good_opm.png', $pngBytes),
+                'slot'              => 'after',
+                'optical_power_dbm' => -18.4,
+                'description'       => 'Clean fusion splice',
+            ])->assertCreated()->assertJsonPath('data.optical_status', 'good');
+
+            $this->actingAs($tech, 'sanctum')->postJson("/api/tasks/{$task->id}/complete")->assertOk();
+            $this->assertEquals('completed', $task->fresh()->status);
+
+            $this->actingAs($admin)->get("/tasks/{$task->id}")
+                ->assertOk()
+                ->assertSee('OPM -18.4 dBm GOOD');
+        } finally {
+            if ($origSettings !== null) {
+                file_put_contents($settingsFile, $origSettings);
+            } elseif (file_exists($settingsFile)) {
+                @unlink($settingsFile);
+            }
+        }
+
+        // 5. Automated SLA Escalation Engine fires exactly once per overdue ticket
+        $overdueTask = Task::create([
+            'title'         => 'Unassigned Urgent Outage',
+            'customer_name' => 'VIP Client',
+            'address'       => 'Jl. Sudirman',
+            'priority'      => 'high',
+            'status'        => 'pending',
+        ]);
+        \Illuminate\Support\Facades\DB::table('tasks')
+            ->where('id', $overdueTask->id)
+            ->update(['created_at' => now()->subMinutes(30)]);
+
+        $svc = app(\App\Services\SlaEscalationService::class);
+        $this->assertEquals(1, $svc->runEscalationSweep());
+        $this->assertNotNull($overdueTask->fresh()->sla_escalated_at);
+        // Second sweep MUST NOT double-escalate!
+        $this->assertEquals(0, $svc->runEscalationSweep());
+    }
 }

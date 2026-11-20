@@ -64,6 +64,12 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
     additional: null,
   };
 
+  slotOpticalDbm: { [key: string]: number | null } = {
+    before: null,
+    after: null,
+    additional: null,
+  };
+
   slotPreviews: { [key: string]: string | null } = {
     before: null,
     after: null,
@@ -372,12 +378,15 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const desc = this.slotDescriptions[slot] || (slot === 'before' ? 'Before Photo' : 'After Photo');
+    const opmRaw = this.slotOpticalDbm[slot];
+    const opmVal = opmRaw !== null && opmRaw !== undefined && String(opmRaw).trim() !== '' ? Number(opmRaw) : null;
     this.isUploadingSlot[slot] = true;
     try {
-      await this.api.uploadProof(this.taskId, file, desc, slot);
+      await this.api.uploadProof(this.taskId, file, desc, slot, opmVal);
       await this.showToast(`Proof photo (${slot === 'before' ? 'Before' : (slot === 'after' ? 'After' : 'Additional')}) uploaded successfully!`, 'success');
       this.slotFiles[slot] = null;
       this.slotPreviews[slot] = null;
+      this.slotOpticalDbm[slot] = null;
       await this.loadTask();
     } catch (e: any) {
       this.showToast(e?.error?.message || 'Failed to upload proof photo', 'danger');

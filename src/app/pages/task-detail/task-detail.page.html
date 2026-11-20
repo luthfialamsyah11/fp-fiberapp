@@ -175,7 +175,17 @@
             </div>
           </div>
 
-          <div class="slot-actions" *ngIf="slotPreviews['before']">
+          <div class="slot-actions" *ngIf="slotPreviews['before']" style="flex-direction: column; gap: 8px;">
+            <input
+              type="number"
+              step="0.1"
+              min="-50"
+              max="10"
+              [(ngModel)]="slotOpticalDbm['before']"
+              placeholder="Optional OPM RX Power (dBm, e.g. -29.5)"
+              class="bom-input"
+              style="width: 100%;"
+            />
             <button class="btn-slot-upload" (click)="uploadSlotProof('before')" [disabled]="isUploadingSlot['before']">
               <ion-icon name="cloud-upload-outline"></ion-icon>
               <span>{{ isUploadingSlot['before'] ? 'Uploading...' : 'Upload Photo Before' }}</span>
@@ -207,7 +217,17 @@
             </div>
           </div>
 
-          <div class="slot-actions" *ngIf="slotPreviews['after']">
+          <div class="slot-actions" *ngIf="slotPreviews['after']" style="flex-direction: column; gap: 8px;">
+            <input
+              type="number"
+              step="0.1"
+              min="-50"
+              max="10"
+              [(ngModel)]="slotOpticalDbm['after']"
+              placeholder="Optional OPM RX Power (dBm, e.g. -18.2)"
+              class="bom-input"
+              style="width: 100%;"
+            />
             <button class="btn-slot-upload btn-emerald" (click)="uploadSlotProof('after')" [disabled]="isUploadingSlot['after']">
               <ion-icon name="cloud-upload-outline"></ion-icon>
               <span>{{ isUploadingSlot['after'] ? 'Uploading...' : 'Upload Photo After' }}</span>

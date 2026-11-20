@@ -21,18 +21,20 @@ class ProofController extends Controller
         }
 
         $request->validate([
-            'image'       => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'description' => 'nullable|string|max:1000',
-            'slot'        => 'nullable|string|in:before,after,additional',
+            'image'             => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'description'       => 'nullable|string|max:1000',
+            'slot'              => 'nullable|string|in:before,after,additional',
+            'optical_power_dbm' => 'nullable|numeric|between:-50,10',
         ]);
 
         $path = $request->file('image')->store('proof', 'public');
 
         $proof = ProofOfWork::create([
-            'task_id'     => $task->id,
-            'image'       => $path,
-            'slot'        => $request->input('slot'),
-            'description' => $request->description ? strip_tags(trim($request->description)) : null,
+            'task_id'           => $task->id,
+            'image'             => $path,
+            'slot'              => $request->input('slot'),
+            'optical_power_dbm' => $request->filled('optical_power_dbm') ? round((float) $request->input('optical_power_dbm'), 2) : null,
+            'description'       => $request->description ? strip_tags(trim($request->description)) : null,
         ]);
 
         // Bump parent task updated_at so both Admin & APK sync signals detect the new proof immediately

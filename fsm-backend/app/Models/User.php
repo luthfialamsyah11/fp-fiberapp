@@ -15,6 +15,52 @@ class User extends Authenticatable
      */
     public const ONLINE_WINDOW_SECONDS = 120;
 
+    /**
+     * Granular RBAC portal staff roles authorized to access the web NOC/Admin Command Center.
+     * Legacy 'admin' is treated identically to 'super_admin' for 100% backward compatibility.
+     */
+    public const PORTAL_ROLES = [
+        'admin',
+        'super_admin',
+        'noc_dispatcher',
+        'warehouse_admin',
+        'field_supervisor',
+    ];
+
+    public function isSuperAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin'], true);
+    }
+
+    public function isPortalStaff(): bool
+    {
+        return in_array($this->role, self::PORTAL_ROLES, true);
+    }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        if (in_array($this->role, $roles, true)) {
+            return true;
+        }
+        // Treat legacy 'admin' and 'super_admin' as equivalent
+        if ($this->isSuperAdmin() && (in_array('admin', $roles, true) || in_array('super_admin', $roles, true))) {
+            return true;
+        }
+        return false;
+    }
+
+    public function roleLabel(): string
+    {
+        return match ((string) $this->role) {
+            'admin', 'super_admin' => 'Super Admin',
+            'noc_dispatcher'       => 'NOC Dispatcher',
+            'warehouse_admin'      => 'Warehouse Admin',
+            'field_supervisor'     => 'Field Supervisor',
+            'technician'           => 'Field Technician',
+            default                => ucfirst((string) $this->role),
+        };
+    }
+
     protected $fillable = [
         'name', 'email', 'password', 'role', 'phone', 'is_active', 'is_online', 'last_seen_at'
     ];

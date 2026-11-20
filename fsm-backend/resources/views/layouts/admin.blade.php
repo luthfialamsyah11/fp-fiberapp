@@ -155,12 +155,21 @@
                 <span class="sidebar-label truncate">Dashboard</span>
             </a>
             
+            @php
+                $navUser = auth()->user();
+                $canDispatch = $navUser && $navUser->hasAnyRole(['admin', 'super_admin', 'noc_dispatcher']);
+                $canSupervise = $navUser && $navUser->hasAnyRole(['admin', 'super_admin', 'noc_dispatcher', 'field_supervisor']);
+                $canInventory = $navUser && $navUser->hasAnyRole(['admin', 'super_admin', 'warehouse_admin', 'noc_dispatcher']);
+                $isSuperAdmin = $navUser && $navUser->isSuperAdmin();
+                $pendingClientBadge = (int) ($pendingClientRequestsCount ?? 0);
+            @endphp
+
             <a href="{{ route('admin.tasks.index') }}" data-tooltip="Task Management" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.tasks.*') ? 'active text-white' : '' }}">
                 <ion-icon name="list-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Task Management</span>
             </a>
 
-            @php $pendingClientBadge = (int) ($pendingClientRequestsCount ?? 0); @endphp
+            @if($canDispatch)
             <a href="{{ route('admin.client_requests.index') }}" data-tooltip="Client Requests" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm relative {{ request()->routeIs('admin.client_requests.*') ? 'active text-white' : '' }}">
                 <ion-icon name="mail-unread-outline" class="nav-icon text-lg mr-3 flex-shrink-0 {{ $pendingClientBadge > 0 ? 'text-sky-400' : '' }}"></ion-icon>
                 <span class="sidebar-label truncate">Client Requests</span>
@@ -169,21 +178,39 @@
                 </span>
             </a>
 
+            <a href="{{ route('admin.customers.index') }}" data-tooltip="Subscribers CRM" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.customers.*') ? 'active text-white' : '' }}">
+                <ion-icon name="business-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
+                <span class="sidebar-label truncate">Subscribers CRM</span>
+            </a>
+
+            <a href="{{ route('admin.fiber_assets.index') }}" data-tooltip="Fiber Assets (ODP)" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.fiber_assets.*') ? 'active text-white' : '' }}">
+                <ion-icon name="git-network-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
+                <span class="sidebar-label truncate">Fiber Assets (ODP)</span>
+            </a>
+            @endif
+
+            @if($canInventory)
             <a href="{{ route('admin.inventory.index') }}" data-tooltip="Inventory & Materials" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.inventory.*') ? 'active text-white' : '' }}">
                 <ion-icon name="cube-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Inventory &amp; Materials</span>
             </a>
+            @endif
 
+            @if($canDispatch)
             <a href="{{ route('admin.assignments') }}" data-tooltip="Assignment Monitoring" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.assignments') ? 'active text-white' : '' }}">
                 <ion-icon name="calendar-clear-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Assignment Monitoring</span>
             </a>
-            
+            @endif
+
+            @if($isSuperAdmin)
             <a href="{{ route('admin.technicians.index') }}" data-tooltip="Technicians" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.technicians.*') ? 'active text-white' : '' }}">
                 <ion-icon name="people-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Technicians</span>
             </a>
+            @endif
 
+            @if($canSupervise)
             <a href="{{ route('admin.tracking') }}" data-tooltip="Live Tracking" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.tracking') ? 'active text-white' : '' }}">
                 <ion-icon name="locate-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Live Tracking</span>
@@ -203,11 +230,14 @@
                 <ion-icon name="bar-chart-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Reports</span>
             </a>
+            @endif
 
+            @if($isSuperAdmin)
             <a href="{{ route('admin.settings') }}" data-tooltip="Settings" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.settings') ? 'active text-white' : '' }}">
                 <ion-icon name="settings-outline" class="nav-icon text-lg mr-3 flex-shrink-0"></ion-icon>
                 <span class="sidebar-label truncate">Settings</span>
             </a>
+            @endif
 
             <a href="{{ route('admin.guide') }}" data-tooltip="Admin Operations Guide" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.guide') ? 'active text-white' : '' }}">
                 <ion-icon name="book-outline" class="nav-icon text-lg mr-3 flex-shrink-0 text-amber-400"></ion-icon>
@@ -217,13 +247,13 @@
         
         <!-- User Info / Logout Footer -->
         <div class="p-3 border-t border-slate-700/50 bg-slate-900/40">
-            <div data-tooltip="{{ auth()->user()->name ?? 'Admin' }} (Administrator)" class="sidebar-user-row flex items-center gap-3 px-2 py-1.5 mb-2">
+            <div data-tooltip="{{ auth()->user()->name ?? 'Admin' }} ({{ auth()->user()?->roleLabel() ?? 'Administrator' }})" class="sidebar-user-row flex items-center gap-3 px-2 py-1.5 mb-2">
                 <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                     {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
                 </div>
                 <div class="sidebar-label overflow-hidden">
                     <p class="text-xs font-semibold text-white truncate">{{ auth()->user()->name ?? 'Admin' }}</p>
-                    <p class="text-[10px] text-slate-400 truncate">Administrator</p>
+                    <p class="text-[10px] text-slate-400 truncate">{{ auth()->user()?->roleLabel() ?? 'Administrator' }}</p>
                 </div>
             </div>
             <button type="button" data-tooltip="Log Out" onclick="document.getElementById('admin-logout-modal').classList.remove('hidden')" class="sidebar-logout-btn flex items-center px-3 py-2 w-full text-left rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs font-medium cursor-pointer">

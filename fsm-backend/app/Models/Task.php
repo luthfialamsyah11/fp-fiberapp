@@ -9,12 +9,12 @@ class Task extends Model
 {
     protected $fillable = [
         'title', 'customer_name', 'customer_phone', 'customer_email', 'description', 'address', 'location',
-        'latitude', 'longitude', 'technician_id', 'status', 'priority',
+        'latitude', 'longitude', 'technician_id', 'customer_id', 'fiber_node_id', 'status', 'priority',
         'source', 'service_category', 'client_photo',
         'additional_notes', 'scheduled_at',
         'tracking_token', 'customer_signature', 'customer_signer_name', 'customer_signed_at',
         'completed_at', 'bast_hash', 'bast_sealed_at',
-        'customer_rating', 'customer_feedback', 'customer_rated_at'
+        'customer_rating', 'customer_feedback', 'customer_rated_at', 'sla_escalated_at'
     ];
 
     protected $casts = [
@@ -23,6 +23,7 @@ class Task extends Model
         'completed_at'       => 'datetime',
         'bast_sealed_at'     => 'datetime',
         'customer_rated_at'  => 'datetime',
+        'sla_escalated_at'   => 'datetime',
         'customer_rating'    => 'integer',
         'latitude'           => 'float',
         'longitude'          => 'float',
@@ -144,6 +145,16 @@ class Task extends Model
     public function technician()
     {
         return $this->belongsTo(User::class, 'technician_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function fiberNode()
+    {
+        return $this->belongsTo(FiberNode::class, 'fiber_node_id');
     }
 
     public function progressUpdates()

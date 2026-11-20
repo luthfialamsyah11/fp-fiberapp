@@ -27,6 +27,8 @@ class SettingService
             'sla_warning_hours'        => '2',
             'require_proof_photo'      => '1',
             'require_customer_signature'=> '1',
+            'require_opm_reading'      => '0',
+            'opm_max_attenuation_dbm'  => '-27.0',
             'geofence_check_meters'    => '0',
             'webhook_url'              => '',
             'notify_emergency_tickets' => '1',

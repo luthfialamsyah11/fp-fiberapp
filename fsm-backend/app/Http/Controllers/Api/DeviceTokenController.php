@@ -16,11 +16,15 @@ class DeviceTokenController extends Controller
             'device_name' => 'nullable|string|max:120',
         ]);
 
+        $cleanToken = trim($validated['token']);
+        $tokenHash = hash('sha256', $cleanToken);
+
         $record = DeviceToken::updateOrCreate(
-            ['token' => trim($validated['token'])],
+            ['token_hash' => $tokenHash],
             [
                 'user_id'      => $request->user()->id,
                 'platform'     => $validated['platform'] ?? 'android',
+                'token'        => $cleanToken,
                 'device_name'  => isset($validated['device_name']) ? trim(strip_tags($validated['device_name'])) : null,
                 'last_used_at' => now(),
             ]
@@ -39,7 +43,7 @@ class DeviceTokenController extends Controller
         ]);
 
         DeviceToken::where('user_id', $request->user()->id)
-            ->where('token', trim($validated['token']))
+            ->where('token_hash', hash('sha256', trim($validated['token'])))
             ->delete();
 
         return response()->json(['message' => 'Device token unregistered.']);

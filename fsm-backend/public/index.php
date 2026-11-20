@@ -11,7 +11,7 @@ define('LARAVEL_START', microtime(true));
 |--------------------------------------------------------------------------
 */
 $laravelCore = dirname(__DIR__);
-$deployCacheVersion = '2026-11-20-v6.6';
+$deployCacheVersion = '2026-11-20-v6.7';
 $stampFile = $laravelCore . '/storage/framework/deploy_cache.version';
 $cacheDir = $laravelCore . '/bootstrap/cache';
 $routeCacheFiles = glob($cacheDir . '/routes-*.php') ?: [];
@@ -34,7 +34,7 @@ if ($versionStale || $routesStale) {
     foreach ($routeCacheFiles as $rf) {
         @unlink($rf);
     }
-    foreach (['config.php', 'events.php'] as $cf) {
+    foreach (['config.php', 'events.php', 'packages.php', 'services.php'] as $cf) {
         if (file_exists($cacheDir . '/' . $cf)) {
             @unlink($cacheDir . '/' . $cf);
         }

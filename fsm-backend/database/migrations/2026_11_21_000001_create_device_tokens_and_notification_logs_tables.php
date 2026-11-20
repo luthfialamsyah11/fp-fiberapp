@@ -13,7 +13,8 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
                 $table->string('platform', 20)->default('android');
-                $table->string('token', 512)->unique();
+                $table->string('token_hash', 64)->unique();
+                $table->string('token', 512);
                 $table->string('device_name', 120)->nullable();
                 $table->timestamp('last_used_at')->nullable();
                 $table->timestamps();

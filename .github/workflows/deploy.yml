@@ -48,6 +48,8 @@ jobs:
           cp -n .env.example .env || true
           php artisan key:generate --force
           php artisan test
+          # Remove CI dev-package bootstrap caches & temp .env before FTP deploy so production vendor/ never loads dev providers
+          rm -f bootstrap/cache/*.php .env
 
       # 3. Install dependencies and build Ionic/Angular frontend
       - name: 🏗️ Install & Build Frontend
@@ -188,6 +190,7 @@ jobs:
           exclude: |
             **/node_modules/**
             **/vendor/**
+            **/bootstrap/cache/**
             **/tests/**
             **/.git*
             **/.env*
@@ -213,6 +216,7 @@ jobs:
           exclude: |
             **/node_modules/**
             **/vendor/**
+            **/bootstrap/cache/**
             **/tests/**
             **/.git*
             **/.env*

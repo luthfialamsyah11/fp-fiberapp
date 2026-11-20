@@ -9,6 +9,7 @@ class DeviceToken extends Model
     protected $fillable = [
         'user_id',
         'platform',
+        'token_hash',
         'token',
         'device_name',
         'last_used_at',

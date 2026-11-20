@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public const SCHEMA_VERSION = 'v5.9-isp-crm-odp-rbac-sla';
+    public const SCHEMA_VERSION = 'v5.9b-mysql-safe-tokens';
 
     public function register(): void
     {

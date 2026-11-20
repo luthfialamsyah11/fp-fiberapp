@@ -88,8 +88,8 @@ class ClientRequestController extends Controller
                 'phone'              => $tech->phone ?? '',
                 'is_online'          => $tech->isEffectivelyOnline(),
                 'active_tasks_count' => (int) ($tech->active_tasks_count ?? 0),
-                'latitude'           => ($loc && $loc->latitude) ? (float) $loc->latitude : null,
-                'longitude'          => ($loc && $loc->longitude) ? (float) $loc->longitude : null,
+                'latitude'           => ($loc && $loc->latitude !== null) ? (float) $loc->latitude : null,
+                'longitude'          => ($loc && $loc->longitude !== null) ? (float) $loc->longitude : null,
                 'last_ping'          => $capturedAt ? $capturedAt->diffForHumans() : 'No GPS signal',
             ];
         })->sortByDesc(function ($t) {
@@ -112,8 +112,8 @@ class ClientRequestController extends Controller
                     'customer_phone'         => $task->customer_phone ?? '',
                     'customer_email'         => $task->customer_email ?? '',
                     'address'                => $task->resolved_location,
-                    'latitude'               => $task->latitude ? (float) $task->latitude : null,
-                    'longitude'              => $task->longitude ? (float) $task->longitude : null,
+                    'latitude'               => $task->latitude !== null ? (float) $task->latitude : null,
+                    'longitude'              => $task->longitude !== null ? (float) $task->longitude : null,
                     'description'            => $task->description ?? '',
                     'priority'               => $task->priority,
                     'status'                 => $task->status,
@@ -153,10 +153,6 @@ class ClientRequestController extends Controller
      */
     public function assign(Request $request, Task $task)
     {
-        if ($task->status === 'completed') {
-            return back()->with('error', 'Cannot assign a completed work order. Request rework from Task Details first.');
-        }
-
         $validated = $request->validate([
             'technician_id' => [
                 'required',
@@ -165,33 +161,54 @@ class ClientRequestController extends Controller
         ]);
 
         $newTechId = (int) $validated['technician_id'];
-        $oldTechId = (int) ($task->technician_id ?? 0);
+        $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
 
-        DB::transaction(function () use ($task, $newTechId, $oldTechId) {
-            $task->update(['technician_id' => $newTechId]);
-            $task->refresh();
-            $techName = $task->technician?->name ?? 'technician';
+        $outcome = DB::transaction(function () use ($task, $newTechId) {
+            /** @var Task $locked */
+            $locked = Task::lockForUpdate()->findOrFail($task->id);
 
-            if ($task->status !== 'assigned') {
+            if ($locked->status === 'completed') {
+                return ['error' => 'Cannot assign a completed work order. Request rework from Task Details first.'];
+            }
+
+            $oldTechId = (int) ($locked->technician_id ?? 0);
+
+            // Prevent downgrading an already-accepted or in-progress work order when re-submitting the exact same technician
+            if ($oldTechId === $newTechId && in_array($locked->status, ['assigned', 'accepted', 'on-going'], true)) {
+                return ['unchanged' => true, 'tech_name' => $locked->technician?->name ?? 'technician'];
+            }
+
+            $locked->update(['technician_id' => $newTechId]);
+            $locked->refresh();
+            $techName = $locked->technician?->name ?? 'technician';
+
+            if ($locked->status !== 'assigned') {
                 $reason = $oldTechId && $oldTechId !== $newTechId
                     ? "Client request reassigned to {$techName} by NOC dispatcher"
                     : "Client request dispatched to {$techName} by NOC dispatcher";
-                $this->stateMachine->transition($task, 'assigned', auth()->user(), $reason);
+                $this->stateMachine->transition($locked, 'assigned', auth()->user(), $reason);
             } elseif ($oldTechId !== $newTechId) {
                 ProgressUpdate::create([
-                    'task_id'          => $task->id,
+                    'task_id'          => $locked->id,
                     'user_id'          => auth()->id(),
                     'note'             => "NOC dispatcher reassigned client request to {$techName}.",
-                    'progress_percent' => (int) $task->progress_percent,
+                    'progress_percent' => (int) $locked->progress_percent,
                 ]);
-                $task->touch();
+                $locked->touch();
             }
+
+            return ['unchanged' => false, 'tech_name' => $techName];
         });
 
-        $fresh = $task->fresh('technician');
-        $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+        if (!empty($outcome['error'])) {
+            return back()->with('error', $outcome['error']);
+        }
 
-        return back()->with('success', "Client request {$code} dispatched to " . ($fresh->technician?->name ?? 'technician') . ' (APK live sync triggered).');
+        if (!empty($outcome['unchanged'])) {
+            return back()->with('success', "Client request {$code} is already assigned to {$outcome['tech_name']}.");
+        }
+
+        return back()->with('success', "Client request {$code} dispatched to {$outcome['tech_name']} (APK live sync triggered).");
     }
 
     /**
@@ -199,10 +216,6 @@ class ClientRequestController extends Controller
      */
     public function autoAssign(Task $task)
     {
-        if ($task->status === 'completed') {
-            return back()->with('error', 'Cannot auto-assign a completed work order.');
-        }
-
         $candidates = User::where('role', 'technician')
             ->where('is_active', true)
             ->with('latestLocation')
@@ -222,7 +235,7 @@ class ClientRequestController extends Controller
         $bestTech = $pool->sortBy(function (User $tech) use ($task) {
             $workloadPenalty = ((int) $tech->active_tasks_count) * 2000;
             $loc = $tech->latestLocation;
-            if ($task->latitude && $task->longitude && $loc && $loc->latitude && $loc->longitude) {
+            if ($task->latitude !== null && $task->longitude !== null && $loc && $loc->latitude !== null && $loc->longitude !== null) {
                 $dist = SettingService::haversineMeters(
                     (float) $task->latitude,
                     (float) $task->longitude,
@@ -238,24 +251,53 @@ class ClientRequestController extends Controller
             return back()->with('error', 'Unable to determine an available technician.');
         }
 
-        DB::transaction(function () use ($task, $bestTech) {
-            $task->update(['technician_id' => $bestTech->id]);
-            $task->refresh();
+        $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+        $statusTag = $bestTech->isEffectivelyOnline() ? 'Online' : 'Standby';
+
+        $outcome = DB::transaction(function () use ($task, $bestTech) {
+            /** @var Task $locked */
+            $locked = Task::lockForUpdate()->findOrFail($task->id);
+
+            if ($locked->status === 'completed') {
+                return ['error' => 'Cannot auto-assign a completed work order.'];
+            }
+
+            $oldTechId = (int) ($locked->technician_id ?? 0);
+            if ($oldTechId === (int) $bestTech->id && in_array($locked->status, ['assigned', 'accepted', 'on-going'], true)) {
+                return ['unchanged' => true];
+            }
+
+            $locked->update(['technician_id' => $bestTech->id]);
+            $locked->refresh();
             $modeLabel = $bestTech->isEffectivelyOnline() ? 'Online Nearest GPS' : 'Lowest Workload Fallback';
-            if ($task->status !== 'assigned') {
+
+            if ($locked->status !== 'assigned') {
                 $this->stateMachine->transition(
-                    $task,
+                    $locked,
                     'assigned',
                     auth()->user(),
                     "Auto-assigned ({$modeLabel}) to {$bestTech->name}"
                 );
-            } else {
-                $task->touch();
+            } elseif ($oldTechId !== (int) $bestTech->id) {
+                ProgressUpdate::create([
+                    'task_id'          => $locked->id,
+                    'user_id'          => auth()->id(),
+                    'note'             => "Auto-reassigned ({$modeLabel}) to {$bestTech->name}.",
+                    'progress_percent' => (int) $locked->progress_percent,
+                ]);
+                $locked->touch();
             }
+
+            return ['unchanged' => false];
         });
 
-        $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
-        $statusTag = $bestTech->isEffectivelyOnline() ? 'Online' : 'Standby';
+        if (!empty($outcome['error'])) {
+            return back()->with('error', $outcome['error']);
+        }
+
+        if (!empty($outcome['unchanged'])) {
+            return back()->with('success', "Client request {$code} is already assigned to {$bestTech->name} ({$statusTag}).");
+        }
 
         return back()->with('success', "Auto-assigned {$code} to {$bestTech->name} ({$statusTag}) — live APK sync triggered.");
     }
@@ -265,22 +307,42 @@ class ClientRequestController extends Controller
      */
     public function reject(Request $request, Task $task)
     {
-        if ($task->status === 'completed') {
-            return back()->with('error', 'Cannot reject an already completed work order.');
-        }
-
         $validated = $request->validate([
             'reason' => 'required|string|max:500',
         ]);
 
-        $this->stateMachine->transition(
-            $task,
-            'rejected',
-            auth()->user(),
-            'Client request declined by NOC: ' . strip_tags(trim($validated['reason']))
-        );
+        $cleanReason = strip_tags(trim($validated['reason']));
+        if ($cleanReason === '') {
+            return back()->with('error', 'Please provide a clear decline reason.');
+        }
 
         $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+
+        $outcome = DB::transaction(function () use ($task, $cleanReason) {
+            /** @var Task $locked */
+            $locked = Task::lockForUpdate()->findOrFail($task->id);
+
+            if ($locked->status === 'completed') {
+                return ['error' => 'Cannot reject an already completed work order.'];
+            }
+
+            if ($locked->status === 'rejected') {
+                return ['already_rejected' => true];
+            }
+
+            $this->stateMachine->transition(
+                $locked,
+                'rejected',
+                auth()->user(),
+                'Client request declined by NOC: ' . $cleanReason
+            );
+
+            return ['already_rejected' => false];
+        });
+
+        if (!empty($outcome['error'])) {
+            return back()->with('error', $outcome['error']);
+        }
 
         return back()->with('success', "Client request {$code} marked as rejected.");
     }

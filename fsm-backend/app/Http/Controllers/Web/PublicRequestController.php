@@ -9,7 +9,10 @@ use App\Models\TaskStatusHistory;
 use App\Models\User;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class PublicRequestController extends Controller
 {
@@ -64,11 +67,33 @@ class PublicRequestController extends Controller
             'title'            => 'nullable|string|max:255',
             'priority'         => 'required|in:low,medium,high',
             'address'          => 'required|string|max:1000',
-            'latitude'         => 'nullable|numeric|between:-90,90',
-            'longitude'        => 'nullable|numeric|between:-180,180',
+            'latitude'         => 'nullable|numeric|between:-90,90|required_with:longitude',
+            'longitude'        => 'nullable|numeric|between:-180,180|required_with:latitude',
             'description'      => 'required|string|max:2000',
             'client_photo'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
+
+        $cleanName = trim(strip_tags((string) $validated['customer_name']));
+        $cleanPhone = trim(strip_tags((string) $validated['customer_phone']));
+        $cleanAddress = trim(strip_tags((string) $validated['address']));
+        $cleanDescription = trim(strip_tags((string) $validated['description']));
+
+        $sanitizeErrors = [];
+        if ($cleanName === '') {
+            $sanitizeErrors['customer_name'] = ['Please enter a valid full name or company name.'];
+        }
+        if ($cleanPhone === '') {
+            $sanitizeErrors['customer_phone'] = ['Please enter a valid phone or WhatsApp number.'];
+        }
+        if ($cleanAddress === '') {
+            $sanitizeErrors['address'] = ['Please enter a valid service address.'];
+        }
+        if ($cleanDescription === '') {
+            $sanitizeErrors['description'] = ['Please describe the issue or installation notes.'];
+        }
+        if (!empty($sanitizeErrors)) {
+            throw ValidationException::withMessages($sanitizeErrors);
+        }
 
         $catMeta = self::SERVICE_CATEGORIES[$validated['service_category']] ?? self::SERVICE_CATEGORIES['other'];
         $cleanTitle = trim(strip_tags((string) ($validated['title'] ?? '')));
@@ -81,48 +106,68 @@ class PublicRequestController extends Controller
             $photoPath = $request->file('client_photo')->store('client_requests', 'public');
         }
 
-        $cleanAddress = strip_tags(trim($validated['address']));
-        $task = Task::create([
-            'title'            => $cleanTitle,
-            'customer_name'    => strip_tags(trim($validated['customer_name'])),
-            'customer_phone'   => strip_tags(trim($validated['customer_phone'])),
-            'customer_email'   => !empty($validated['customer_email']) ? trim($validated['customer_email']) : null,
-            'service_category' => $validated['service_category'],
-            'source'           => 'client_portal',
-            'priority'         => $validated['priority'],
-            'address'          => $cleanAddress,
-            'location'         => $cleanAddress,
-            'latitude'         => $validated['latitude'] ?? null,
-            'longitude'        => $validated['longitude'] ?? null,
-            'description'      => strip_tags(trim($validated['description'])),
-            'client_photo'     => $photoPath,
-            'status'           => 'pending',
-            'tracking_token'   => Str::random(32),
-        ]);
+        try {
+            $task = DB::transaction(function () use (
+                $validated,
+                $catMeta,
+                $cleanTitle,
+                $cleanName,
+                $cleanPhone,
+                $cleanAddress,
+                $cleanDescription,
+                $photoPath,
+                $request
+            ) {
+                $task = Task::create([
+                    'title'            => $cleanTitle,
+                    'customer_name'    => $cleanName,
+                    'customer_phone'   => $cleanPhone,
+                    'customer_email'   => !empty($validated['customer_email']) ? trim($validated['customer_email']) : null,
+                    'service_category' => $validated['service_category'],
+                    'source'           => 'client_portal',
+                    'priority'         => $validated['priority'],
+                    'address'          => $cleanAddress,
+                    'location'         => $cleanAddress,
+                    'latitude'         => array_key_exists('latitude', $validated) && $validated['latitude'] !== null && $validated['latitude'] !== '' ? (float) $validated['latitude'] : null,
+                    'longitude'        => array_key_exists('longitude', $validated) && $validated['longitude'] !== null && $validated['longitude'] !== '' ? (float) $validated['longitude'] : null,
+                    'description'      => $cleanDescription,
+                    'client_photo'     => $photoPath,
+                    'status'           => 'pending',
+                    'tracking_token'   => Str::random(32),
+                ]);
 
-        TaskStatusHistory::create([
-            'task_id'     => $task->id,
-            'actor_id'    => null,
-            'actor_role'  => 'client',
-            'from_status' => null,
-            'to_status'   => 'pending',
-            'reason'      => '[Client Portal] Service request submitted by ' . $task->customer_name . ' (' . $catMeta['label'] . ').',
-            'meta'        => [
-                'source'           => 'client_portal',
-                'service_category' => $task->service_category,
-                'has_photo'        => !empty($photoPath),
-            ],
-            'ip_address'  => $request->ip(),
-        ]);
+                TaskStatusHistory::create([
+                    'task_id'     => $task->id,
+                    'actor_id'    => null,
+                    'actor_role'  => 'client',
+                    'from_status' => null,
+                    'to_status'   => 'pending',
+                    'reason'      => '[Client Portal] Service request submitted by ' . $task->customer_name . ' (' . $catMeta['label'] . ').',
+                    'meta'        => [
+                        'source'           => 'client_portal',
+                        'service_category' => $task->service_category,
+                        'has_photo'        => !empty($photoPath),
+                    ],
+                    'ip_address'  => $request->ip(),
+                ]);
 
-        $systemUserId = User::where('role', 'admin')->orderBy('id')->value('id');
-        if ($systemUserId) {
-            ProgressUpdate::create([
-                'task_id'          => $task->id,
-                'user_id'          => $systemUserId,
-                'note'             => '[Client Portal] Service request submitted by ' . $task->customer_name . ' (' . $catMeta['label'] . '). Awaiting NOC dispatcher assignment.',
-                'progress_percent' => 0,
-            ]);
+                $systemUserId = User::where('role', 'admin')->orderBy('id')->value('id');
+                if ($systemUserId) {
+                    ProgressUpdate::create([
+                        'task_id'          => $task->id,
+                        'user_id'          => $systemUserId,
+                        'note'             => '[Client Portal] Service request submitted by ' . $task->customer_name . ' (' . $catMeta['label'] . '). Awaiting NOC dispatcher assignment.',
+                        'progress_percent' => 0,
+                    ]);
+                }
+
+                return $task;
+            });
+        } catch (\Throwable $e) {
+            if ($photoPath) {
+                Storage::disk('public')->delete($photoPath);
+            }
+            throw $e;
         }
 
         if ($task->priority === 'high') {

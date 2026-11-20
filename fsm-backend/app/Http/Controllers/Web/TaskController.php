@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -343,6 +344,8 @@ class TaskController extends Controller
 
     public function destroy(Task $task)
     {
+        $clientPhotoToDelete = $task->client_photo;
+
         DB::transaction(function () use ($task) {
             // Restore consumed warehouse inventory stock before deleting work order
             $materials = $task->materials()->get();
@@ -355,15 +358,15 @@ class TaskController extends Controller
             $task->delete();
         });
 
+        if (!empty($clientPhotoToDelete)) {
+            Storage::disk('public')->delete($clientPhotoToDelete);
+        }
+
         return redirect()->route('admin.tasks.index')->with('success', 'Work order deleted and any allocated materials restored to warehouse.');
     }
 
     public function assign(Request $request, Task $task)
     {
-        if ($task->status === 'completed') {
-            return back()->with('error', 'Cannot assign or reassign a completed work order. Request rework first.');
-        }
-
         if ($request->filled('technician_id')) {
             $request->validate([
                 'technician_id' => [
@@ -371,29 +374,54 @@ class TaskController extends Controller
                     Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
                 ],
             ]);
-            $oldTechId = (int) ($task->technician_id ?? 0);
             $newTechId = (int) $request->technician_id;
 
-            DB::transaction(function () use ($task, $oldTechId, $newTechId) {
-                $task->update(['technician_id' => $newTechId]);
-                $task->refresh();
+            $outcome = DB::transaction(function () use ($task, $newTechId) {
+                /** @var Task $locked */
+                $locked = Task::lockForUpdate()->findOrFail($task->id);
+                if ($locked->status === 'completed') {
+                    return ['error' => 'Cannot assign or reassign a completed work order. Request rework first.'];
+                }
 
-                if ($task->status !== 'assigned') {
+                $oldTechId = (int) ($locked->technician_id ?? 0);
+                if ($oldTechId === $newTechId && in_array($locked->status, ['assigned', 'accepted', 'on-going'], true)) {
+                    return ['unchanged' => true, 'tech_name' => $locked->technician?->name ?? 'technician'];
+                }
+
+                $locked->update(['technician_id' => $newTechId]);
+                $locked->refresh();
+                $techName = $locked->technician?->name ?? 'technician';
+
+                if ($locked->status !== 'assigned') {
                     $reason = $oldTechId && $oldTechId !== $newTechId
-                        ? 'Reassigned to ' . ($task->technician?->name ?? 'technician') . ' by dispatcher'
-                        : 'Work order assigned to ' . ($task->technician?->name ?? 'technician');
-                    $this->stateMachine->transition($task, 'assigned', auth()->user(), $reason);
+                        ? "Reassigned to {$techName} by dispatcher"
+                        : "Work order assigned to {$techName}";
+                    $this->stateMachine->transition($locked, 'assigned', auth()->user(), $reason);
                 } elseif ($oldTechId !== $newTechId) {
                     ProgressUpdate::create([
-                        'task_id'          => $task->id,
+                        'task_id'          => $locked->id,
                         'user_id'          => auth()->id(),
-                        'note'             => 'Dispatcher reassigned work order to ' . ($task->technician?->name ?? 'technician') . '.',
-                        'progress_percent' => (int) $task->progress_percent,
+                        'note'             => "Dispatcher reassigned work order to {$techName}.",
+                        'progress_percent' => (int) $locked->progress_percent,
                     ]);
+                    $locked->touch();
                 }
+
+                return ['unchanged' => false, 'tech_name' => $techName];
             });
 
-            return back()->with('success', 'Work order dispatched to ' . ($task->fresh()->technician?->name ?? 'technician') . '.');
+            if (!empty($outcome['error'])) {
+                return back()->with('error', $outcome['error']);
+            }
+            if (!empty($outcome['unchanged'])) {
+                return back()->with('success', 'Work order is already assigned to ' . $outcome['tech_name'] . '.');
+            }
+
+            return back()->with('success', 'Work order dispatched to ' . $outcome['tech_name'] . '.');
+        }
+
+        if ($task->status === 'completed') {
+            return back()->with('error', 'Cannot assign or reassign a completed work order. Request rework first.');
         }
 
         if ($task->technician_id && in_array($task->status, ['pending', 'rejected'], true)) {

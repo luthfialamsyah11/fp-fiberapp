@@ -49,7 +49,7 @@ class CustomerTrackingController extends Controller
 
         $distanceKm = null;
         $etaMinutes = null;
-        if ($latestLocation && $task->latitude && $task->longitude) {
+        if ($latestLocation && $latestLocation->latitude !== null && $latestLocation->longitude !== null && $task->latitude !== null && $task->longitude !== null) {
             $meters = SettingService::haversineMeters(
                 (float) $latestLocation->latitude,
                 (float) $latestLocation->longitude,
@@ -78,8 +78,8 @@ class CustomerTrackingController extends Controller
                 'progress_percent' => $task->progress_percent,
                 'customer_name'    => $task->customer_name,
                 'address'          => $task->address,
-                'destination_lat'  => $task->latitude ? (float) $task->latitude : null,
-                'destination_lng'  => $task->longitude ? (float) $task->longitude : null,
+                'destination_lat'  => $task->latitude !== null ? (float) $task->latitude : null,
+                'destination_lng'  => $task->longitude !== null ? (float) $task->longitude : null,
             ],
             'technician' => [
                 'name' => $techFirstName,

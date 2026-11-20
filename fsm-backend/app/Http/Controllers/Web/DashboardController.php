@@ -306,7 +306,8 @@ class DashboardController extends Controller
         if ($latestClientReq && $latestClientReq->created_at) {
             $code = '#TSK-' . str_pad($latestClientReq->id, 4, '0', STR_PAD_LEFT);
             $candidates[] = [
-                'ts'       => $latestClientReq->created_at->timestamp + 1,
+                'ts'       => $latestClientReq->created_at->timestamp,
+                'priority' => 4,
                 'key'      => 'client-req-' . $latestClientReq->id,
                 'type'     => 'client_request',
                 'title'    => "New Client Request {$code} from {$latestClientReq->customer_name}",
@@ -322,6 +323,7 @@ class DashboardController extends Controller
             $slotLabel = strtoupper((string) ($latestProof->slot ?: 'PROOF'));
             $candidates[] = [
                 'ts'       => $latestProof->created_at->timestamp,
+                'priority' => 3,
                 'key'      => 'proof-' . $latestProof->id,
                 'type'     => 'proof',
                 'title'    => "New Proof of Work ({$slotLabel}) uploaded on {$code}",
@@ -337,6 +339,7 @@ class DashboardController extends Controller
             $techName = $latestCompleted->technician?->name ?? 'Technician';
             $candidates[] = [
                 'ts'       => $latestCompleted->completed_at->timestamp,
+                'priority' => 5,
                 'key'      => 'completed-' . $latestCompleted->id . '-' . $latestCompleted->completed_at->timestamp,
                 'type'     => 'completed',
                 'title'    => "Work Order {$code} Completed by {$techName}",
@@ -353,6 +356,7 @@ class DashboardController extends Controller
             $unit = $latestMat->inventoryItem?->unit ?? 'unit';
             $candidates[] = [
                 'ts'       => $latestMat->created_at->timestamp,
+                'priority' => 2,
                 'key'      => 'mat-' . $latestMat->id,
                 'type'     => 'inventory',
                 'title'    => "BOM Material Deducted on {$code}",
@@ -368,6 +372,7 @@ class DashboardController extends Controller
             $actor = $latestProg->user?->name ?? 'Technician';
             $candidates[] = [
                 'ts'       => $latestProg->created_at->timestamp,
+                'priority' => 1,
                 'key'      => 'prog-' . $latestProg->id,
                 'type'     => 'progress',
                 'title'    => "{$actor} updated {$code} ({$latestProg->progress_percent}%)",
@@ -377,8 +382,11 @@ class DashboardController extends Controller
             ];
         }
 
-        usort($candidates, fn ($a, $b) => $b['ts'] <=> $a['ts']);
+        usort($candidates, fn ($a, $b) => ($b['ts'] <=> $a['ts']) ?: ($b['priority'] <=> $a['priority']));
         $latestEvent = $candidates[0] ?? null;
+        if ($latestEvent !== null) {
+            unset($latestEvent['priority']);
+        }
 
         return response()->json([
             'version'      => $globalVersion,

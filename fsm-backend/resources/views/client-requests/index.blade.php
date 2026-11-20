@@ -181,7 +181,7 @@
                                     {{ $req->resolved_location }}
                                 </div>
                                 <div class="flex items-center gap-1.5 mt-1">
-                                    @if($req->latitude && $req->longitude)
+                                    @if($req->latitude !== null && $req->longitude !== null)
                                         <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold">GPS Pinned</span>
                                     @endif
                                     @if($req->client_photo_url)
@@ -424,14 +424,33 @@
 @push('scripts')
 <script>
     function copyPublicFormUrl(url, btn) {
-        navigator.clipboard.writeText(url).then(function() {
+        function markCopied() {
             var span = btn.querySelector('span');
             if (span) {
                 var orig = span.textContent;
                 span.textContent = 'Copied!';
                 setTimeout(function() { span.textContent = orig; }, 2000);
             }
-        });
+        }
+        function fallback() {
+            try {
+                var ta = document.createElement('textarea');
+                ta.value = url;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                markCopied();
+            } catch (e) {}
+        }
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(url).then(markCopied).catch(fallback);
+        } else {
+            fallback();
+        }
     }
 
     function haversineKm(lat1, lon1, lat2, lon2) {
@@ -444,8 +463,14 @@
         return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
+    function hasValidCoords(lat, lng) {
+        return lat !== null && lat !== undefined && lat !== ''
+            && lng !== null && lng !== undefined && lng !== ''
+            && Number.isFinite(Number(lat)) && Number.isFinite(Number(lng));
+    }
+
     function escModal(s) {
-        if (!s) return '';
+        if (s === null || s === undefined) return '';
         var d = document.createElement('div');
         d.textContent = String(s);
         return d.innerHTML;
@@ -480,7 +505,12 @@
     function openClientRequestModal(btn) {
         var raw = btn.getAttribute('data-request');
         if (!raw) return;
-        var req = JSON.parse(raw);
+        var req;
+        try {
+            req = JSON.parse(raw);
+        } catch (e) {
+            return;
+        }
 
         var rootEl = document.getElementById('client-requests-root');
         var fleet = [];
@@ -494,7 +524,8 @@
         document.getElementById('crm-title').textContent = req.title;
         document.getElementById('crm-customer').textContent = req.customer_name;
         document.getElementById('crm-phone').textContent = req.customer_phone || '-';
-        document.getElementById('crm-phone-link').href = req.customer_phone ? ('tel:' + req.customer_phone) : '#';
+        var dialablePhone = String(req.customer_phone || '').replace(/[^0-9+]/g, '');
+        document.getElementById('crm-phone-link').href = dialablePhone ? ('tel:' + dialablePhone) : '#';
         document.getElementById('crm-email').textContent = req.customer_email ? ('• ' + req.customer_email) : '';
         document.getElementById('crm-submitted').textContent = 'Submitted: ' + req.created_at_full + ' (' + req.created_at_human + ')';
         document.getElementById('crm-address').textContent = req.address || '-';
@@ -503,8 +534,9 @@
         document.getElementById('crm-full-detail-link').href = req.detail_url || '#';
 
         var gmaps = document.getElementById('crm-gmaps-link');
-        if (req.latitude && req.longitude) {
-            gmaps.href = 'https://www.google.com/maps?q=' + req.latitude + ',' + req.longitude;
+        var reqHasCoords = hasValidCoords(req.latitude, req.longitude);
+        if (reqHasCoords) {
+            gmaps.href = 'https://www.google.com/maps?q=' + encodeURIComponent(req.latitude + ',' + req.longitude);
             gmaps.classList.remove('hidden');
         } else {
             gmaps.classList.add('hidden');
@@ -530,8 +562,8 @@
         // Enrich technicians with distance to client pin & split Online vs Free Choice
         var enriched = fleet.map(function(t) {
             var distKm = null;
-            if (req.latitude && req.longitude && t.latitude !== null && t.longitude !== null) {
-                distKm = haversineKm(req.latitude, req.longitude, t.latitude, t.longitude);
+            if (reqHasCoords && hasValidCoords(t.latitude, t.longitude)) {
+                distKm = haversineKm(Number(req.latitude), Number(req.longitude), Number(t.latitude), Number(t.longitude));
             }
             return Object.assign({}, t, { distKm: distKm });
         });
@@ -550,13 +582,13 @@
                 ? ('<span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-mono text-[10px] font-bold">' + t.distKm.toFixed(1) + ' km</span>')
                 : '<span class="text-[10px] text-slate-400">No GPS</span>';
             var statusDot = t.is_online ? 'bg-emerald-500' : 'bg-slate-300';
-            return '<button type="button" data-tech-id="' + t.id + '" onclick="selectModalTech(' + t.id + ')" '
+            return '<button type="button" data-tech-id="' + Number(t.id) + '" onclick="selectModalTech(' + Number(t.id) + ')" '
                 + 'class="crm-tech-option text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-400 transition-all flex items-center justify-between gap-2 cursor-pointer">'
                 + '<div class="flex items-center gap-2 min-w-0">'
                 + '<span class="w-2.5 h-2.5 rounded-full ' + statusDot + ' flex-shrink-0"></span>'
                 + '<div class="min-w-0">'
                 + '<div class="text-xs font-bold text-slate-900 truncate">' + escModal(t.name) + '</div>'
-                + '<div class="text-[10px] text-slate-500">' + t.active_tasks_count + ' active • ' + escModal(t.last_ping) + '</div>'
+                + '<div class="text-[10px] text-slate-500">' + Number(t.active_tasks_count) + ' active • ' + escModal(t.last_ping) + '</div>'
                 + '</div></div>'
                 + distBadge + '</button>';
         }
@@ -575,6 +607,22 @@
         selectModalTech(req.technician_id || '');
         document.getElementById('client-request-modal').classList.remove('hidden');
     }
+
+    // Delegated double-submit lock for all POST dispatch/auto-assign/reject forms (survives hot-refresh)
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (!form || String(form.method || '').toUpperCase() !== 'POST') return;
+        if (!form.closest('#client-requests-root') && !form.closest('#client-request-modal')) return;
+        if (form.dataset.submitting === '1') {
+            e.preventDefault();
+            return;
+        }
+        form.dataset.submitting = '1';
+        form.querySelectorAll('button[type="submit"]').forEach(function(b) {
+            b.disabled = true;
+            b.classList.add('opacity-60', 'cursor-wait');
+        });
+    });
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeClientRequestModal();

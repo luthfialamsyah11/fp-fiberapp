@@ -1838,4 +1838,98 @@ class FsmIntegrationSuiteTest extends TestCase
             \Illuminate\Support\Facades\Storage::disk('public')->delete($task->client_photo);
         }
     }
+
+    public function test_client_request_audit_edge_cases_equator_same_tech_html_and_live_pulse_tiebreaker(): void
+    {
+        $admin = $this->createAdmin();
+        $techA = $this->createTechnician(['name' => 'Tech Alpha', 'email' => 'alpha-edge@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+        $techB = $this->createTechnician(['name' => 'Tech Beta', 'email' => 'beta-edge@fsm.com', 'is_online' => true, 'last_seen_at' => now()]);
+
+        // 1. HTML-only inputs and half-coordinates are rejected cleanly (BUG-4)
+        $this->post('/request', [
+            'service_category' => 'outage_los',
+            'customer_name'    => '<b></b>',
+            'customer_phone'   => '<i></i>',
+            'priority'         => 'high',
+            'address'          => '<div> </div>',
+            'description'      => '<script></script>',
+            'latitude'         => 0.0,
+        ])->assertRedirect()->assertSessionHasErrors(['longitude']);
+
+        $this->post('/request', [
+            'service_category' => 'outage_los',
+            'customer_name'    => '<b></b>',
+            'customer_phone'   => '0812345678',
+            'priority'         => 'high',
+            'address'          => 'Jl. Khatulistiwa',
+            'description'      => 'LOS red',
+        ])->assertRedirect()->assertSessionHasErrors(['customer_name']);
+
+        // 2. Equator latitude 0.0 (Pontianak, Indonesia) is preserved cleanly & never treated as falsey null (BUG-3)
+        $pngBytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        $photo = \Illuminate\Http\UploadedFile::fake()->createWithContent('equator_photo.png', $pngBytes);
+
+        $this->post('/request', [
+            'service_category' => 'outage_los',
+            'customer_name'    => 'Klien Pontianak',
+            'customer_phone'   => '081299990000',
+            'priority'         => 'high',
+            'title'            => 'Equator Fiber Cut',
+            'description'      => 'Red LOS at Equator Monument',
+            'address'          => 'Jl. Khatulistiwa, Pontianak',
+            'latitude'         => 0.0,
+            'longitude'        => 109.3425,
+            'client_photo'     => $photo,
+        ])->assertRedirect();
+
+        $task = Task::firstOrFail();
+        $this->assertSame(0.0, (float) $task->latitude);
+        $this->assertSame(109.3425, (float) $task->longitude);
+        $this->assertTrue(\Illuminate\Support\Facades\Storage::disk('public')->exists($task->client_photo));
+
+        $trackJson = $this->getJson("/api/public/track/{$task->tracking_token}")->assertOk();
+        $this->assertSame(0, (int) $trackJson->json('task.destination_lat'));
+        $this->assertNotNull($trackJson->json('task.destination_lat'));
+
+        // 3. Re-submitting SAME technician on an on-going task does NOT downgrade status back to assigned (BUG-1)
+        $task->update(['technician_id' => $techA->id, 'status' => 'on-going']);
+
+        $this->actingAs($admin)
+            ->post("/client-requests/{$task->id}/assign", ['technician_id' => $techA->id])
+            ->assertRedirect();
+        $this->assertEquals('on-going', $task->fresh()->status);
+
+        $this->actingAs($admin)
+            ->post("/tasks/{$task->id}/assign", ['technician_id' => $techA->id])
+            ->assertRedirect();
+        $this->assertEquals('on-going', $task->fresh()->status);
+
+        // 4. Auto-assign changing technician on an already-assigned task logs ProgressUpdate audit note (BUG-1)
+        $task->update(['status' => 'assigned', 'technician_id' => $techA->id]);
+        TechnicianLocation::create(['technician_id' => $techA->id, 'latitude' => -6.2000, 'longitude' => 106.8450]);
+        TechnicianLocation::create(['technician_id' => $techB->id, 'latitude' => 0.0001, 'longitude' => 109.3426]);
+
+        $progCountBefore = \App\Models\ProgressUpdate::where('task_id', $task->id)->count();
+        $this->actingAs($admin)->post("/client-requests/{$task->id}/auto-assign")->assertRedirect();
+        $this->assertEquals($techB->id, $task->fresh()->technician_id);
+        $this->assertGreaterThan($progCountBefore, \App\Models\ProgressUpdate::where('task_id', $task->id)->count());
+
+        // 5. /live-pulse event 1 second AFTER client request is NOT hijacked by client_request ts+1 (BUG-2)
+        $task->update(['status' => 'on-going']);
+        $this->travel(1)->seconds();
+        $proofFile = \Illuminate\Http\UploadedFile::fake()->createWithContent('proof_1s.png', $pngBytes);
+        $this->actingAs($techB, 'sanctum')->postJson("/api/tasks/{$task->id}/proof", [
+            'image'       => $proofFile,
+            'slot'        => 'after',
+            'description' => 'Spliced at +1s',
+        ])->assertCreated();
+
+        $pulse = $this->actingAs($admin)->getJson('/live-pulse')->assertOk();
+        $this->assertEquals('proof', $pulse->json('latest_event.type'));
+
+        // 6. Deleting task cleans up uploaded client_photo from public storage disk (BUG-4)
+        $photoPath = $task->client_photo;
+        $this->actingAs($admin)->delete("/tasks/{$task->id}")->assertRedirect();
+        $this->assertFalse(\Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath));
+    }
 }

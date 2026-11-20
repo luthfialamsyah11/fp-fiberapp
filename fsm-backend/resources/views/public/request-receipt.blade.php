@@ -119,9 +119,36 @@
     document.addEventListener('DOMContentLoaded', function() {
         var copyBtn = document.getElementById('btn-copy-link');
         var urlInput = document.getElementById('live-track-url');
+
+        function copyTextSafe(text) {
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                return navigator.clipboard.writeText(text).catch(function() {
+                    return fallbackCopy(text);
+                });
+            }
+            return fallbackCopy(text);
+        }
+
+        function fallbackCopy(text) {
+            return new Promise(function(resolve) {
+                try {
+                    var ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.setAttribute('readonly', '');
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                } catch (e) {}
+                resolve();
+            });
+        }
+
         copyBtn?.addEventListener('click', function() {
             urlInput.select();
-            navigator.clipboard.writeText(urlInput.value).then(function() {
+            copyTextSafe(urlInput.value).then(function() {
                 copyBtn.innerHTML = '<ion-icon name="checkmark-outline" class="text-sm"></ion-icon><span>Copied!</span>';
                 setTimeout(function() {
                     copyBtn.innerHTML = '<ion-icon name="copy-outline" class="text-sm"></ion-icon><span>Copy</span>';
@@ -129,15 +156,22 @@
             });
         });
 
-        // Live-poll public status every 5 seconds so receipt updates automatically when NOC assigns technician
+        // Live-poll public status every 5 seconds until terminal state (completed/rejected/expired)
         var pollUrl = @json($pollApiUrl);
         var statusEl = document.getElementById('receipt-status-label');
         var techEl = document.getElementById('receipt-tech-label');
+        var isPolling = false;
+        var pollTimer = null;
 
-        setInterval(async function() {
-            if (document.hidden) return;
+        async function pollReceiptStatus() {
+            if (document.hidden || isPolling) return;
+            isPolling = true;
             try {
                 var resp = await fetch(pollUrl + '?_ts=' + Date.now(), { headers: { 'Accept': 'application/json' } });
+                if (resp.status === 404 || resp.status === 410) {
+                    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+                    return;
+                }
                 if (!resp.ok) return;
                 var data = await resp.json();
                 if (data.task && statusEl) {
@@ -146,8 +180,19 @@
                 if (data.technician && techEl) {
                     techEl.textContent = 'Technician: ' + (data.technician.name || 'Awaiting NOC Dispatch');
                 }
-            } catch (e) {}
-        }, 5000);
+                if (data.task && (data.task.status === 'completed' || data.task.status === 'rejected')) {
+                    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+                }
+            } catch (e) {
+            } finally {
+                isPolling = false;
+            }
+        }
+
+        pollTimer = setInterval(pollReceiptStatus, 5000);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && pollTimer) pollReceiptStatus();
+        });
     });
 </script>
 </body>

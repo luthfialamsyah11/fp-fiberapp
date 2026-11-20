@@ -237,6 +237,7 @@
                                 <button type="button" id="btn-clear-photo" class="text-[11px] font-bold text-red-600 hover:underline cursor-pointer">Remove</button>
                             </div>
                         </div>
+                        <p id="photo-client-error" class="hidden mt-1.5 text-[11px] font-semibold text-red-600"></p>
                     </div>
                 </div>
             </div>
@@ -321,7 +322,11 @@
         var catInput = document.getElementById('service_category_input');
         var prioInput = document.getElementById('priority_input');
         var titleInput = document.getElementById('request_title');
-        var titleManuallyEdited = false;
+        var defaultCategoryTitles = Array.from(document.querySelectorAll('.cat-card'))
+            .map(function(c) { return (c.dataset.title || '').trim(); });
+        var titleManuallyEdited = Boolean(
+            titleInput && titleInput.value.trim() !== '' && !defaultCategoryTitles.includes(titleInput.value.trim())
+        );
 
         titleInput?.addEventListener('input', function() { titleManuallyEdited = true; });
 
@@ -351,32 +356,60 @@
             });
         });
 
-        // 2. Photo Preview
+        // 2. Photo Preview + Client-Side 5MB / Image MIME Validation
         var photoInput = document.getElementById('client_photo');
         var previewWrap = document.getElementById('photo-preview-wrap');
         var previewImg = document.getElementById('photo-preview-img');
         var clearBtn = document.getElementById('btn-clear-photo');
+        var photoErrEl = document.getElementById('photo-client-error');
+        var MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+        var ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+        function clearPhotoSelection(errorMessage) {
+            if (photoInput) photoInput.value = '';
+            if (previewImg) previewImg.src = '';
+            previewWrap?.classList.add('hidden');
+            if (photoErrEl) {
+                if (errorMessage) {
+                    photoErrEl.textContent = errorMessage;
+                    photoErrEl.classList.remove('hidden');
+                } else {
+                    photoErrEl.textContent = '';
+                    photoErrEl.classList.add('hidden');
+                }
+            }
+        }
 
         photoInput?.addEventListener('change', function() {
             var file = photoInput.files && photoInput.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewWrap.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewWrap.classList.add('hidden');
+            if (!file) {
+                clearPhotoSelection('');
+                return;
             }
+            if (file.type && !ALLOWED_PHOTO_TYPES.includes(file.type.toLowerCase())) {
+                clearPhotoSelection('Unsupported file type. Please attach a JPEG, PNG, or WebP photo.');
+                return;
+            }
+            if (file.size > MAX_PHOTO_BYTES) {
+                clearPhotoSelection('Photo is too large (' + (file.size / (1024 * 1024)).toFixed(1) + ' MB). Maximum allowed size is 5 MB.');
+                return;
+            }
+            if (photoErrEl) {
+                photoErrEl.textContent = '';
+                photoErrEl.classList.add('hidden');
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewWrap.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
         });
         clearBtn?.addEventListener('click', function() {
-            photoInput.value = '';
-            previewImg.src = '';
-            previewWrap.classList.add('hidden');
+            clearPhotoSelection('');
         });
 
-        // 3. Interactive Leaflet Map Picker + GPS + Nominatim Search
+        // 3. Interactive Leaflet Map Picker + GPS + Nominatim Search (Equator 0.0 Safe)
         var mapStyle = @json($jsMapStyle);
         var latInput = document.getElementById('lat-input');
         var lngInput = document.getElementById('lng-input');
@@ -384,9 +417,12 @@
         var searchInput = document.getElementById('map-search-input');
         var searchStatus = document.getElementById('map-search-status');
 
-        var startLat = parseFloat(latInput.value) || -6.2088;
-        var startLng = parseFloat(lngInput.value) || 106.8456;
-        var map = L.map('client-map').setView([startLat, startLng], 12);
+        var parsedLat = latInput.value !== '' ? parseFloat(latInput.value) : NaN;
+        var parsedLng = lngInput.value !== '' ? parseFloat(lngInput.value) : NaN;
+        var hasSavedPin = Number.isFinite(parsedLat) && Number.isFinite(parsedLng);
+        var startLat = hasSavedPin ? parsedLat : -6.2088;
+        var startLng = hasSavedPin ? parsedLng : 106.8456;
+        var map = L.map('client-map').setView([startLat, startLng], hasSavedPin ? 15 : 12);
 
         var tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         var tileAttr = '&copy; OpenStreetMap contributors';
@@ -423,8 +459,8 @@
             }
         }
 
-        if (latInput.value && lngInput.value) {
-            setPin(parseFloat(latInput.value), parseFloat(lngInput.value), false);
+        if (hasSavedPin) {
+            setPin(parsedLat, parsedLng, false);
         }
 
         map.on('click', function(e) {
@@ -486,10 +522,42 @@
             }
         });
 
-        // Prevent double-submit
+        // Prevent double-submit & handle BFCache restore cleanly
         var form = document.getElementById('public-request-form');
         var submitBtn = document.getElementById('btn-submit-request');
-        form?.addEventListener('submit', function() {
+        var defaultSubmitHtml = submitBtn ? submitBtn.innerHTML : '';
+        var isSubmitting = false;
+
+        function resetSubmitState() {
+            isSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = defaultSubmitHtml;
+            }
+        }
+
+        window.addEventListener('pageshow', function(ev) {
+            if (ev.persisted || isSubmitting) {
+                resetSubmitState();
+            }
+        });
+
+        form?.addEventListener('submit', function(e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                return;
+            }
+            var requiredIds = ['customer_name', 'customer_phone', 'description', 'address-input'];
+            for (var i = 0; i < requiredIds.length; i++) {
+                var field = document.getElementById(requiredIds[i]);
+                if (field && !field.value.trim()) {
+                    field.value = '';
+                    field.focus();
+                    e.preventDefault();
+                    return;
+                }
+            }
+            isSubmitting = true;
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<ion-icon name="sync-outline" class="animate-spin text-base"></ion-icon><span>Submitting Request...</span>';

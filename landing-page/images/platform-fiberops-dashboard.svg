@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" role="img" aria-label="Benteng Siber FiberOps NOC Dispatcher and Cryptographic BAST Dashboard">
+  <defs>
+    <filter id="sh2" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f3559" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="760" rx="12" fill="#f6f7f9"/>
+  <rect width="1200" height="44" rx="12" fill="#ffffff"/>
+  <rect y="32" width="1200" height="12" fill="#ffffff"/>
+  <line x1="0" y1="44" x2="1200" y2="44" stroke="#e2e8f0" stroke-width="1"/>
+  <circle cx="24" cy="22" r="5.5" fill="#e2e8f0"/>
+  <circle cx="42" cy="22" r="5.5" fill="#e2e8f0"/>
+  <circle cx="60" cy="22" r="5.5" fill="#e2e8f0"/>
+  <rect x="340" y="10" width="520" height="24" rx="6" fill="#f6f7f9" stroke="#e2e8f0"/>
+  <text x="600" y="26" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="11.5" font-weight="600" fill="#475569">admin.bentengsiber.com/dashboard</text>
+
+  <!-- Sidebar -->
+  <rect x="0" y="44" width="214" height="716" fill="#0f3559"/>
+  <text x="26" y="88" font-family="Inter, Segoe UI, sans-serif" font-size="14" font-weight="800" fill="#ffffff">FiberOps NOC</text>
+  <text x="26" y="104" font-family="Inter, Segoe UI, sans-serif" font-size="9.5" font-weight="600" fill="#f4a94f" letter-spacing="0.8">FIELD GOVERNANCE</text>
+  <rect x="14" y="128" width="186" height="38" rx="7" fill="#1a4a7a"/>
+  <rect x="14" y="135" width="3.5" height="24" rx="2" fill="#e8913a"/>
+  <text x="34" y="151" font-family="Inter, Segoe UI, sans-serif" font-size="12.5" font-weight="700" fill="#ffffff">Live Fleet Dispatch</text>
+  <text x="34" y="192" font-family="Inter, Segoe UI, sans-serif" font-size="12" fill="#cbd5e1">Client Request Inbox</text>
+  <text x="34" y="228" font-family="Inter, Segoe UI, sans-serif" font-size="12" fill="#cbd5e1">GIS OLT / ODC / ODP</text>
+  <text x="34" y="264" font-family="Inter, Segoe UI, sans-serif" font-size="12" fill="#cbd5e1">Proof-of-Work Audit</text>
+  <text x="34" y="300" font-family="Inter, Segoe UI, sans-serif" font-size="12" fill="#cbd5e1">SHA-256 BAST Archive</text>
+  <text x="34" y="336" font-family="Inter, Segoe UI, sans-serif" font-size="12" fill="#cbd5e1">Atomic BOM Inventory</text>
+
+  <!-- Header -->
+  <text x="246" y="84" font-family="Inter, Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#e8913a" letter-spacing="1.2">ZERO-TRUST FIELD SERVICE MANAGEMENT</text>
+  <text x="246" y="112" font-family="Inter, Segoe UI, sans-serif" font-size="22" font-weight="800" fill="#0f3559">NOC Dispatch &amp; Live Tracking Command</text>
+
+  <!-- Map Card -->
+  <rect x="246" y="138" width="590" height="370" rx="10" fill="#ffffff" stroke="#e2e8f0" filter="url(#sh2)"/>
+  <text x="270" y="168" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#0f3559">Real-Time Technician GPS &amp; ODP Fiber Topology</text>
+  <rect x="270" y="184" width="542" height="302" rx="8" fill="#eef4fa" stroke="#dbe6f2"/>
+  <!-- Clean schematic map roads/fiber lines -->
+  <path d="M270 250 L812 250 M270 340 L812 340 M270 420 L812 420 M380 184 L380 486 M520 184 L520 486 M670 184 L670 486" stroke="#ffffff" stroke-width="5"/>
+  <path d="M318 424 Q420 350 520 340 T728 242" fill="none" stroke="#0f3559" stroke-width="3.5" stroke-dasharray="7 5"/>
+  <circle cx="318" cy="424" r="11" fill="#0f3559" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="520" cy="340" r="13" fill="#e8913a" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="728" cy="242" r="11" fill="#059669" stroke="#ffffff" stroke-width="3"/>
+  <rect x="466" y="294" width="142" height="30" rx="6" fill="#0f3559"/>
+  <text x="537" y="313" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Tech Unit • En Route</text>
+  <rect x="646" y="200" width="142" height="28" rx="6" fill="#ffffff" stroke="#059669"/>
+  <text x="717" y="218" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="10.5" font-weight="700" fill="#059669">ODP Target • Geofenced</text>
+
+  <!-- Right Panel: BAST & Workflow Verification -->
+  <rect x="856" y="138" width="312" height="370" rx="10" fill="#ffffff" stroke="#e2e8f0" filter="url(#sh2)"/>
+  <text x="880" y="168" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="700" fill="#0f3559">Cryptographic BAST Seal</text>
+  <rect x="880" y="186" width="264" height="76" rx="8" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="898" y="212" font-family="Inter, Segoe UI, sans-serif" font-size="11" font-weight="800" fill="#059669">SHA-256 INTEGRITY VERIFIED</text>
+  <text x="898" y="233" font-family="Consolas, monospace" font-size="10.5" fill="#065f46">7f4a9c2e...e81d04b9</text>
+  <text x="898" y="250" font-family="Inter, Segoe UI, sans-serif" font-size="10.5" fill="#047857">Before/After Proof + E-Sign Bound</text>
+
+  <text x="880" y="294" font-family="Inter, Segoe UI, sans-serif" font-size="11.5" font-weight="700" fill="#64748b">MANDATORY WORKFLOW GATES</text>
+  <rect x="880" y="308" width="264" height="44" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="896" y="335" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="600" fill="#0f3559">1. RBAC &amp; Anti-IDOR Guard</text>
+  <rect x="880" y="362" width="264" height="44" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="896" y="389" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="600" fill="#0f3559">2. Photo Proof Enforcement (422)</text>
+  <rect x="880" y="416" width="264" height="44" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="896" y="443" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="600" fill="#0f3559">3. Atomic BOM Row Locking</text>
+
+  <!-- Bottom Strip -->
+  <rect x="246" y="528" width="922" height="202" rx="10" fill="#ffffff" stroke="#e2e8f0" filter="url(#sh2)"/>
+  <text x="270" y="560" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="13" font-weight="800" fill="#0f3559">Connected Roles &amp; Portals (Laravel 10 + Ionic 8 / Angular 20 PWA)</text>
+  <rect x="270" y="582" width="276" height="122" rx="8" fill="#f6f7f9" stroke="#e2e8f0"/>
+  <text x="288" y="610" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11" font-weight="700" fill="#e8913a">SUPER ADMIN</text>
+  <text x="288" y="635" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#0f3559">Central NOC Console</text>
+  <text x="288" y="658" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" fill="#475569">Auto-dispatch, OLT/ODP GIS,</text>
+  <text x="288" y="676" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" fill="#475569">BOM ledger, SLA &amp; CSV reports.</text>
+
+  <rect x="568" y="582" width="276" height="122" rx="8" fill="#f6f7f9" stroke="#e2e8f0"/>
+  <text x="586" y="610" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11" font-weight="700" fill="#059669">FIELD TECHNICIAN</text>
+  <text x="586" y="635" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#0f3559">Offline-First PWA &amp; APK</text>
+  <text x="586" y="658" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" fill="#475569">3-slot photo + optical dBm,</text>
+  <text x="586" y="676" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" fill="#475569">3s sync signal &amp; e-signature.</text>
+
+  <rect x="866" y="582" width="278" height="122" rx="8" fill="#f6f7f9" stroke="#e2e8f0"/>
+  <text x="884" y="610" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f3559">SUBSCRIBER / CLIENT</text>
+  <text x="884" y="635" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#0f3559">Service Request &amp; /track</text>
+  <text x="884" y="658" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" fill="#475569">Submit reports, live arrival</text>
+  <text x="884" y="676" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" fill="#475569">radar &amp; post-work CSAT rating.</text>
+</svg>

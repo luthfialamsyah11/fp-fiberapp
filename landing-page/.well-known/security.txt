@@ -1,0 +1,6 @@
+Contact: mailto:security@bentengsiber.com
+Contact: https://admin.bentengsiber.com/request
+Expires: 2027-11-20T00:00:00.000Z
+Preferred-Languages: en, id
+Canonical: https://bentengsiber.com/.well-known/security.txt
+Policy: https://bentengsiber.com/privacy-policy.html

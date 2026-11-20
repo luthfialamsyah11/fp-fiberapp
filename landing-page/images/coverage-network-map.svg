@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 480" width="1120" height="480" role="img" aria-label="Benteng Siber Cloud-Ready Network Architecture with Primary Operations Hub in Jakarta, Indonesia">
+  <defs>
+    <pattern id="dotGrid" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="2.2" fill="#cbd5e1"/>
+    </pattern>
+    <clipPath id="worldClip">
+      <path d="M90,95 C140,70 250,65 305,95 C325,120 300,165 268,195 C245,218 232,248 215,252 C192,250 175,218 145,196 C115,175 78,132 90,95 Z"/>
+      <path d="M250,275 C288,268 332,295 345,335 C355,368 320,425 292,452 C272,456 266,408 258,370 C248,332 232,296 250,275 Z"/>
+      <path d="M498,92 C545,76 615,82 636,115 C644,142 612,168 575,172 C538,175 496,158 488,132 C484,114 486,98 498,92 Z"/>
+      <path d="M495,195 C548,184 612,196 632,244 C644,282 618,358 584,386 C558,392 536,348 522,306 C506,266 476,228 495,195 Z"/>
+      <path d="M645,86 C735,70 865,78 932,126 C955,158 924,218 872,248 C832,268 784,266 742,248 C695,228 652,192 642,148 C638,122 635,96 645,86 Z"/>
+      <path d="M778,274 C818,268 874,276 912,294 C918,308 886,320 842,318 C802,316 768,296 778,274 Z"/>
+      <path d="M846,342 C898,330 966,344 980,388 C986,418 946,442 902,438 C862,434 832,396 846,342 Z"/>
+      <path d="M1016,412 C1030,404 1044,418 1034,438 C1022,446 1008,430 1016,412 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1120" height="480" fill="#f8fafc"/>
+  <rect width="1120" height="480" fill="url(#dotGrid)" clip-path="url(#worldClip)"/>
+
+  <!-- Cloud & Regional Sync Arcs -->
+  <g fill="none" stroke="#0f3559" stroke-opacity="0.24" stroke-width="1.6" stroke-dasharray="4 5">
+    <path d="M826,298 Q680,155 524,132"/>
+    <path d="M826,298 Q875,355 942,402"/>
+    <path d="M826,298 Q875,210 906,174"/>
+    <path d="M524,132 Q385,78 248,146"/>
+    <path d="M826,298 Q818,284 808,278"/>
+  </g>
+
+  <!-- Primary Operations Hub: Jakarta, Indonesia -->
+  <circle cx="826" cy="298" r="22" fill="#e8913a" fill-opacity="0.16"/>
+  <circle cx="826" cy="298" r="12" fill="#e8913a" fill-opacity="0.28"/>
+  <circle cx="826" cy="298" r="7.5" fill="#e8913a" stroke="#ffffff" stroke-width="2.5"/>
+  <rect x="728" y="318" width="196" height="26" rx="13" fill="#0f3559"/>
+  <text x="826" y="335" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Indonesia • Primary Ops Hub</text>
+
+  <!-- Cloud Edge Compatibility Nodes -->
+  <circle cx="806" cy="274" r="5.5" fill="#0f3559" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="906" cy="174" r="5.5" fill="#0f3559" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="946" cy="404" r="5.5" fill="#0f3559" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="524" cy="132" r="5.5" fill="#0f3559" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="248" cy="146" r="5.5" fill="#0f3559" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- Honest Legend -->
+  <g transform="translate(28, 422)">
+    <rect width="456" height="38" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="22" cy="19" r="5.5" fill="#e8913a"/>
+    <text x="36" y="23" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" font-weight="700" fill="#0f3559">Primary Hub (Jakarta, ID)</text>
+    <circle cx="222" cy="19" r="5.5" fill="#0f3559"/>
+    <text x="236" y="23" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#475569">Cloud-Ready Edge &amp; API Reach</text>
+  </g>
+</svg>

@@ -1,53 +1,48 @@
 # ==============================================================================
-# BENTENG SIBER ECOSYSTEM — ENTERPRISE SECURITY & CACHE POLICIES
+# BENTENG SIBER — ENTERPRISE SECURITY & CACHE POLICIES
 # ==============================================================================
 
 <IfModule mod_headers.c>
-    # ─── 1. OWASP RECOMMENDED SECURITY HEADERS ────────────────────────────────
+    # 1. OWASP RECOMMENDED SECURITY HEADERS
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-XSS-Protection "1; mode=block"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     Header set Permissions-Policy "geolocation=(self), camera=(self), microphone=()"
-    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
-    # ─── 2. CACHE-CONTROL & IMMEDIATE REVALIDATION ────────────────────────────
-    # HTML documents: must never be stale
+    # 2. CACHE-CONTROL & REVALIDATION
     <FilesMatch "\.(html|htm)$">
         Header set Cache-Control "no-cache, no-store, must-revalidate"
         Header set Pragma "no-cache"
         Header set Expires "0"
     </FilesMatch>
 
-    # CSS & JS assets: revalidate on update
     <FilesMatch "\.(css|js)$">
         Header set Cache-Control "public, max-age=86400, must-revalidate"
     </FilesMatch>
 
-    # Static Icons & Images: cache for 30 days
     <FilesMatch "\.(png|ico|jpg|jpeg|svg|webp|woff2)$">
         Header set Cache-Control "public, max-age=2592000, immutable"
     </FilesMatch>
 
-    # Sitemaps & Robots: revalidate daily
     <FilesMatch "\.(xml|txt)$">
         Header set Cache-Control "public, max-age=86400, must-revalidate"
     </FilesMatch>
 </IfModule>
 
-# ─── 2B. GZIP / DEFLATE PAYLOAD COMPRESSION (/audit--perf) ──────────────────
+# 3. GZIP / DEFLATE COMPRESSION
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json image/svg+xml
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
 </IfModule>
 
-# ─── 3. DEFENSIVE ACCESS CONTROLS (BLOCK SENSITIVE DIRECTORIES & FILES) ───────
+# 4. DEFENSIVE ACCESS CONTROLS
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Deny access to dotfiles & dotdirectories (.env, .git, etc.)
+    # Deny access to dotfiles & dotdirectories (.env, .git, etc.) except .well-known
     RewriteRule (^|/)\.(?!well-known) - [F,L]
 
-    # Block direct HTTP access to laravel-core codebase from the root domain
+    # Block direct HTTP access to laravel-core codebase from root domain
     RewriteRule ^laravel-core/ - [F,L]
 
     # Block log, sql, pem, and config files

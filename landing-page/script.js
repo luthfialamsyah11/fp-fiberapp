@@ -1,954 +1,813 @@
-function showSimToast(title, message, icon = 'verified') {
-      let existing = document.getElementById('sim-active-toast');
-      if (existing) existing.remove();
-      
-      const toast = document.createElement('div');
-      toast.id = 'sim-active-toast';
-      toast.className = 'sim-floating-toast';
-      toast.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-primary/20 border border-primary/40 text-primary flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-[18px]">${icon}</span>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-xs font-bold text-primary font-mono tracking-tight">${title}</span>
-          <span class="text-[11px] text-slate-300 font-mono">${message}</span>
-        </div>
-        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white ml-2 text-xs font-mono" aria-label="Close">✕</button>
-      `;
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        if (toast.parentElement) {
-          toast.style.opacity = '0';
-          toast.style.transition = 'opacity 0.3s ease';
-          setTimeout(() => toast.remove(), 300);
-        }
-      }, 4200);
-    }
-    window.showSimToast = showSimToast;
+/* ==========================================================================
+   BENTENG SIBER — MODULAR LANDING PAGE CONTROLLER (100% BILINGUAL EN / ID)
+   Validated in CI via: node -c landing-page/script.js
+   ========================================================================== */
 
-    function switchSimTab(tabIndex) {
-      for (let i = 1; i <= 4; i++) {
-        const btn = document.getElementById(`sim-tab-${i}`);
-        const panel = document.getElementById(`sim-panel-${i}`);
-        if (!btn || !panel) continue;
-        if (i === tabIndex) {
-          btn.classList.add('active');
-          panel.classList.remove('hidden');
-          panel.classList.add('block');
-        } else {
-          btn.classList.remove('active');
-          panel.classList.remove('block');
-          panel.classList.add('hidden');
-        }
-      }
-      if (tabIndex === 1) {
-        initSignaturePad();
-      } else if (tabIndex === 2) {
-        requestAnimationFrame(() => updateRadarProgress(radarProgress));
-      }
-    }
+(function () {
+  'use strict';
 
-    function goToStep(step) {
-      const c1 = document.getElementById('step-content-1');
-      const c2 = document.getElementById('step-content-2');
-      const c3 = document.getElementById('step-content-3');
-      if (c1) c1.classList.add('hidden');
-      if (c2) c2.classList.add('hidden');
-      if (c3) c3.classList.add('hidden');
-      
-      const bead1 = document.getElementById('step-bead-1');
-      const bead2 = document.getElementById('step-bead-2');
-      const bead3 = document.getElementById('step-bead-3');
-      const bar1 = document.getElementById('step-bar-1');
-      const bar2 = document.getElementById('step-bar-2');
-      const logText = document.getElementById('stepper-log-text');
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      if (step === 1 && c1 && bead1 && bead2 && bead3) {
-        c1.classList.remove('hidden');
-        bead1.className = 'w-7 h-7 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)]';
-        bead2.className = 'w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30';
-        bead3.className = 'w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30';
-        if (bar1) bar1.className = 'h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors';
-        if (bar2) bar2.className = 'h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors';
-        if (logText) logText.innerText = '> Step 1: Work order acknowledged. Geofence valid.';
-      } else if (step === 2 && c2 && bead1 && bead2 && bead3) {
-        c2.classList.remove('hidden');
-        bead1.className = 'w-7 h-7 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(78,222,163,0.5)]';
-        bead2.className = 'w-7 h-7 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)]';
-        bead3.className = 'w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-center border border-outline-variant/30';
-        if (bar1) bar1.className = 'h-0.5 flex-1 bg-secondary mx-1.5 transition-colors';
-        if (bar2) bar2.className = 'h-0.5 flex-1 bg-outline-variant/30 mx-1.5 transition-colors';
-        if (logText) logText.innerText = '> Step 2: Web Bluetooth OPM connected. Signal -18.42 dBm captured.';
-      } else if (step === 3 && c3 && bead1 && bead2 && bead3) {
-        c3.classList.remove('hidden');
-        bead1.className = 'w-7 h-7 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(78,222,163,0.5)]';
-        bead2.className = 'w-7 h-7 rounded-full bg-secondary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(78,222,163,0.5)]';
-        bead3.className = 'w-7 h-7 rounded-full bg-primary text-surface-container-lowest font-label-mono-xs text-label-mono-xs flex items-center justify-center font-bold shadow-[0_0_12px_rgba(34,211,238,0.5)]';
-        if (bar1) bar1.className = 'h-0.5 flex-1 bg-secondary mx-1.5 transition-colors';
-        if (bar2) bar2.className = 'h-0.5 flex-1 bg-secondary mx-1.5 transition-colors';
-        if (logText) logText.innerText = '> Step 3: Prompting customer signature for digital BAST endorsement...';
-        initSignaturePad();
-      }
-    }
-
-    function simulatePhotoCapture() {
-      const box = document.getElementById('photo-box');
-      const cap = document.getElementById('photo-captured');
-      const log = document.getElementById('stepper-log-text');
-      if (box) box.classList.add('hidden');
-      if (cap) cap.classList.remove('hidden');
-      if (log) log.innerText = '> Photo taken: EXIF coordinates match (-6.2088, 106.8456). Integrity PASS.';
-      showSimToast('PHOTO EVIDENCE CAPTURED', 'EXIF Geotag: -6.2088° S, 106.8456° E (1.2 MB Encrypted)', 'photo_camera');
-    }
-
-    function setOpmWavelength(wl) {
-      const valEl = document.getElementById('opm-val');
-      const wlLabel = document.getElementById('opm-wl-label');
-      const btns = ['1310', '1490', '1550'];
-      btns.forEach(k => {
-        const b = document.getElementById(`opm-btn-${k}`);
-        if (b) {
-          if (k === wl) {
-            b.className = 'px-2.5 py-1 bg-primary/20 border border-primary text-primary font-mono text-xs rounded font-bold';
-          } else {
-            b.className = 'px-2.5 py-1 bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-on-surface-variant font-mono text-xs rounded';
-          }
-        }
-      });
-      const presets = {
-        '1310': { val: '-17.92', label: '1310nm UPSTREAM' },
-        '1490': { val: '-18.42', label: '1490nm DWDM DOWNSTREAM' },
-        '1550': { val: '-19.15', label: '1550nm CATV / OVERLAY' }
+  /* ------------------------------------------------------------------------
+     1. STICKY HEADER ELEVATION & DESKTOP DROPDOWNS
+  ------------------------------------------------------------------------ */
+  function initHeader() {
+    const header = document.getElementById('site-header');
+    if (header) {
+      const syncScroll = () => {
+        header.classList.toggle('is-scrolled', window.scrollY > 12);
       };
-      const p = presets[wl] || presets['1490'];
-      if (valEl) valEl.innerText = `${p.val} dBm`;
-      if (wlLabel) wlLabel.innerText = p.label;
-      const log = document.getElementById('stepper-log-text');
-      if (log) log.innerText = `> Optical Meter calibrated to ${wl}nm. Attenuation ${p.val} dBm. Standard: PASS.`;
-    }
-    window.setOpmWavelength = setOpmWavelength;
-
-    let canvas, ctx, isDrawing = false, hasSignature = false;
-    function initSignaturePad() {
-      canvas = document.getElementById('signature-canvas');
-      if (!canvas) return;
-      ctx = canvas.getContext('2d');
-      ctx.strokeStyle = '#22d3ee';
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = 'round';
-
-      if (canvas.dataset.bound === '1') return;
-      canvas.dataset.bound = '1';
-
-      function getCanvasPos(clientX, clientY) {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / (rect.width || 1);
-        const scaleY = canvas.height / (rect.height || 1);
-        return {
-          x: (clientX - rect.left) * scaleX,
-          y: (clientY - rect.top) * scaleY
-        };
-      }
-
-      canvas.addEventListener('mousedown', (e) => {
-        isDrawing = true;
-        hasSignature = true;
-        ctx.beginPath();
-        const pos = getCanvasPos(e.clientX, e.clientY);
-        ctx.moveTo(pos.x, pos.y);
-      });
-      canvas.addEventListener('mousemove', (e) => {
-        if (!isDrawing) return;
-        const pos = getCanvasPos(e.clientX, e.clientY);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-      });
-      window.addEventListener('mouseup', () => { isDrawing = false; });
-
-      canvas.addEventListener('touchstart', (e) => {
-        isDrawing = true;
-        hasSignature = true;
-        ctx.beginPath();
-        const touch = e.touches[0];
-        const pos = getCanvasPos(touch.clientX, touch.clientY);
-        ctx.moveTo(pos.x, pos.y);
-        e.preventDefault();
-      }, { passive: false });
-      canvas.addEventListener('touchmove', (e) => {
-        if (!isDrawing) return;
-        const touch = e.touches[0];
-        const pos = getCanvasPos(touch.clientX, touch.clientY);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        e.preventDefault();
-      }, { passive: false });
-      canvas.addEventListener('touchend', () => { isDrawing = false; });
+      syncScroll();
+      window.addEventListener('scroll', syncScroll, { passive: true });
     }
 
-    function clearSignature() {
-      if (!ctx || !canvas) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      hasSignature = false;
-    }
-
-    function autoSignature() {
-      if (!ctx || !canvas) initSignaturePad();
-      if (!ctx || !canvas) return;
-      clearSignature();
-      hasSignature = true;
-      ctx.beginPath();
-      ctx.moveTo(40, 60);
-      ctx.bezierCurveTo(70, 20, 90, 80, 120, 40);
-      ctx.bezierCurveTo(150, 70, 180, 30, 220, 55);
-      ctx.moveTo(90, 65);
-      ctx.lineTo(240, 65);
-      ctx.stroke();
-      const log = document.getElementById('stepper-log-text');
-      if (log) log.innerText = '> Auto-signature vector captured. Ready to commit.';
-    }
-
-    function completeHandover() {
-      if (!hasSignature) {
-        autoSignature();
-      }
-      const nowIso = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
-      const tsEl = document.getElementById('bast-timestamp');
-      if (tsEl) tsEl.innerText = `TIMESTAMP: ${nowIso}`;
-      showSimToast('BAST CRYPTOGRAPHICALLY ENDORSED', 'SHA256: 4F8A902C118B • Synced to Dispatch Ledger', 'verified');
-      const log = document.getElementById('stepper-log-text');
-      if (log) log.innerText = '> Handover complete. Status changed to RESOLVED. Notification dispatched.';
-    }
-
-    let radarProgress = 20;
-    let radarAutoInterval = null;
-    let radarIsAuto = true;
-
-    function updateRadarProgress(val) {
-      radarProgress = Number(val);
-      const van = document.getElementById('radar-van');
-      const etaText = document.getElementById('radar-eta');
-      const speedText = document.getElementById('radar-speed');
-      const percentText = document.getElementById('radar-percent-text');
-      const slider = document.getElementById('radar-progress-slider');
-      const log = document.getElementById('radar-event-log');
-
-      if (slider) slider.value = radarProgress;
-      if (percentText) percentText.innerText = `${radarProgress}%`;
-
-      const trackRow = document.getElementById('radar-corridor') || (van ? van.parentElement : null);
-      const targetPin = document.getElementById('radar-target-pin');
-      let maxOffset = 140;
-      if (trackRow && van) {
-        const rowWidth = trackRow.getBoundingClientRect().width;
-        const vanWidth = van.getBoundingClientRect().width || 135;
-        const targetWidth = targetPin ? (targetPin.getBoundingClientRect().width || 135) : 135;
-        if (rowWidth > 0) {
-          // Ensure van marker never collides with Customer ONT Target pin (leaving 56px padding + 16px safety gap)
-          maxOffset = Math.max(0, Math.floor(rowWidth - vanWidth - targetWidth - 64));
-        }
-      }
-      const currentOffset = Math.round((radarProgress / 100) * maxOffset);
-      if (van) van.style.transform = `translateX(${currentOffset}px)`;
-
-      if (radarProgress >= 100) {
-        if (etaText) etaText.innerText = 'Arrived at customer premises!';
-        if (speedText) speedText.innerText = '0 km/h';
-        if (log) log.innerText = '> Van #04 has reached target ONT. Geofence lock initiated.';
-      } else {
-        const remainingDistance = ((100 - radarProgress) * 0.03).toFixed(1);
-        const remainingMinutes = Math.max(1, Math.round((100 - radarProgress) * 0.1));
-        const randomSpeed = Math.round(34 + Math.random() * 8);
-        if (etaText) etaText.innerText = `${remainingMinutes} Minutes (${remainingDistance} km away)`;
-        if (speedText) speedText.innerText = `${randomSpeed} km/h`;
-        if (log) log.innerText = `> Van in transit. Waypoint ${Math.min(6, Math.floor(radarProgress / 18) + 1)} verified via GPS.`;
-      }
-    }
-
-    function toggleRadarSimulation() {
-      const btn = document.getElementById('radar-auto-btn');
-      radarIsAuto = !radarIsAuto;
-      if (radarIsAuto) {
-        if (btn) btn.innerText = 'Auto Move: ON';
-        startRadarTimer();
-      } else {
-        if (btn) btn.innerText = 'Auto Move: OFF';
-        if (radarAutoInterval) clearInterval(radarAutoInterval);
-      }
-    }
-
-    function startRadarTimer() {
-      if (radarAutoInterval) clearInterval(radarAutoInterval);
-      if (!document.getElementById('sim-panel-2')) return;
-      radarAutoInterval = setInterval(() => {
-        const panel2 = document.getElementById('sim-panel-2');
-        if (document.hidden || !panel2 || panel2.classList.contains('hidden')) return;
-        if (radarProgress < 100) {
-          updateRadarProgress(radarProgress + 5);
-        } else {
-          updateRadarProgress(10);
-        }
-      }, 3500);
-    }
-
-    function simulateVehicleArrival() {
-      updateRadarProgress(100);
-      showSimToast('VEHICLE ARRIVED AT ONT', 'Geofence proximity confirmed: 4 meters to subscriber terminal.', 'local_shipping');
-    }
-
-    function resendWhatsAppPing() {
-      const log = document.getElementById('radar-event-log');
-      const status = document.getElementById('radar-socket-status');
-      if (log) log.innerText = '> WhatsApp template triggered: "Technician Budi is en route to your location (ETA: 8 mins)..."';
-      if (status) status.innerText = 'Webhook Triggered • Click-to-Chat (wa.me) Ready';
-      showSimToast('WHATSAPP DISPATCH PING SENT', 'Subscriber received live GPS tracking URL via Cloud API.', 'sms');
-    }
-
-    function verifyBastHash() {
-      const statusEl = document.getElementById('bast-hash-badge');
-      if (!statusEl) return;
-      statusEl.innerHTML = '<span class="text-primary font-mono animate-pulse">Computing SHA-256 Digest...</span>';
-      setTimeout(() => {
-        statusEl.innerHTML = '<span class="text-emerald-700 font-mono font-bold">✓ SHA-256 MATCH VERIFIED (100% Tamper-Evident)</span>';
-        showSimToast('CRYPTOGRAPHIC SEAL VERIFIED', 'Digest 4F8A902C matches immutable ledger entry.', 'verified_user');
-      }, 450);
-    }
-    window.verifyBastHash = verifyBastHash;
-
-    function printDemoBast() {
-      window.print();
-    }
-
-    const stockCounts = { patchcord: 24, connector: 50, ont: 6 };
-    const stockMax = { patchcord: 30, connector: 60, ont: 10 };
-
-    function updateStockBars() {
-      ['patchcord', 'connector', 'ont'].forEach(k => {
-        const bar = document.getElementById(`stock-bar-${k}`);
-        if (bar) {
-          const pct = Math.max(0, Math.min(100, Math.round((stockCounts[k] / stockMax[k]) * 100)));
-          bar.style.width = `${pct}%`;
-          if (pct <= 20) {
-            bar.className = 'h-1.5 rounded-full transition-all duration-300 bg-red-500';
-          } else if (pct <= 45) {
-            bar.className = 'h-1.5 rounded-full transition-all duration-300 bg-amber-400';
-          } else {
-            bar.className = 'h-1.5 rounded-full transition-all duration-300 bg-secondary';
-          }
-        }
+    const dropdownItems = document.querySelectorAll('[data-dropdown]');
+    function closeAllDropdowns(exceptItem) {
+      dropdownItems.forEach((item) => {
+        if (item === exceptItem) return;
+        item.classList.remove('is-open');
+        const trigger = item.querySelector('.nav-trigger');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
       });
     }
 
-    function resetBomStock() {
-      stockCounts.patchcord = 24;
-      stockCounts.connector = 50;
-      stockCounts.ont = 6;
-      ['patchcord', 'connector', 'ont'].forEach(k => {
-        const el = document.getElementById('stock-' + k);
-        if (el) el.innerText = stockCounts[k];
+    dropdownItems.forEach((item) => {
+      const trigger = item.querySelector('.nav-trigger');
+      if (!trigger) return;
+
+      trigger.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const willOpen = !item.classList.contains('is-open');
+        closeAllDropdowns(item);
+        item.classList.toggle('is-open', willOpen);
+        trigger.setAttribute('aria-expanded', String(willOpen));
       });
-      updateStockBars();
-      const logBox = document.getElementById('bom-log');
-      if (logBox) logBox.innerHTML = '<div>[RESET] Warehouse Van Stock restored to initial baseline.</div>';
-      showSimToast('WAREHOUSE STOCK RESET', 'Field Van 04 inventory restored to initial baseline.', 'restart_alt');
-    }
 
-    function deductStock(itemKey, itemName) {
-      if (stockCounts[itemKey] > 0) {
-        stockCounts[itemKey]--;
-        const badge = document.getElementById(`stock-${itemKey}`);
-        if (badge) badge.innerText = stockCounts[itemKey];
-        updateStockBars();
-        
-        const now = new Date();
-        const timeStr = now.toTimeString().split(' ')[0];
-        const logBox = document.getElementById('bom-log');
-        if (logBox) {
-          const entry = document.createElement('div');
-          entry.className = 'text-secondary font-mono';
-          entry.innerHTML = `[${timeStr}] DEDUCT: ${itemName} (-1) &bull; Remainder: ${stockCounts[itemKey]} &bull; WO-88219`;
-          logBox.prepend(entry);
-        }
-      } else {
-        showSimToast('STOCK DEPLETED', `No remaining ${itemName} available in Mobile Van 04!`, 'warning');
-      }
-    }
-
-    function simulateConcurrentDispatches() {
-      const btn = document.getElementById('btn-concurrent-acid');
-      if (btn) btn.disabled = true;
-      const logBox = document.getElementById('bom-log');
-      if (logBox) {
-        const header = document.createElement('div');
-        header.className = 'text-primary font-mono font-bold';
-        header.innerText = `[ACID LOCK] Simulating 5 concurrent field transactions with DB::transaction()...`;
-        logBox.prepend(header);
-      }
-      
-      let count = 0;
-      const timer = setInterval(() => {
-        if (stockCounts.patchcord > 0) {
-          deductStock('patchcord', 'Fiber Patchcord SC-UPC 3m');
-        }
-        count++;
-        if (count >= 5) {
-          clearInterval(timer);
-          if (btn) btn.disabled = false;
-          showSimToast('ACID MUTEX COMMITTED', '5 concurrent transactions executed sequentially without race conditions.', 'database');
-        }
-      }, 180);
-    }
-    window.simulateConcurrentDispatches = simulateConcurrentDispatches;
-
-
-    function copyToClipboard(text, btnElement) {
-      if (!btnElement) return;
-      if (!btnElement.dataset.origLabel) {
-        btnElement.dataset.origLabel = btnElement.innerText;
-      }
-      const applyCopiedUI = () => {
-        if (btnElement._copyTimer) clearTimeout(btnElement._copyTimer);
-        btnElement.innerText = 'Copied!';
-        btnElement.classList.add('bg-primary', 'text-surface-container-lowest');
-        btnElement._copyTimer = setTimeout(() => {
-          btnElement.innerText = btnElement.dataset.origLabel || 'Copy';
-          btnElement.classList.remove('bg-primary', 'text-surface-container-lowest');
-          btnElement._copyTimer = null;
-        }, 1800);
-      };
-
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-        navigator.clipboard.writeText(text).then(applyCopiedUI).catch(() => {
-          fallbackCopy(text, applyCopiedUI);
-        });
-      } else {
-        fallbackCopy(text, applyCopiedUI);
-      }
-    }
-
-    function fallbackCopy(text, onDone) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); } catch (_) {}
-      ta.remove();
-      if (typeof onDone === 'function') onDone();
-    }
-
-    let activeScanInterval = null;
-    let activeScanTimeout = null;
-
-    function sanitizeHostname(rawInput) {
-      const cleaned = String(rawInput || '')
-        .trim()
-        .replace(/^https?:\/\//i, '')
-        .split('/')[0]
-        .split('?')[0]
-        .split('#')[0]
-        .replace(/[^a-zA-Z0-9.-]/g, '')
-        .toLowerCase();
-      return cleaned && cleaned.includes('.') ? cleaned : 'bentengsiber.com';
-    }
-
-    function runDomainScan(e) {
-      if (e) e.preventDefault();
-      const inputEl = document.getElementById('target-domain-input');
-      const domain = sanitizeHostname(inputEl ? inputEl.value : 'bentengsiber.com');
-      if (inputEl) inputEl.value = domain;
-
-      const progressBox = document.getElementById('scan-progress-box');
-      const progressBar = document.getElementById('scan-progress-bar');
-      const stageText = document.getElementById('scan-stage-text');
-      const percentText = document.getElementById('scan-percent');
-      const reportCard = document.getElementById('audit-report-card');
-      const submitBtn = document.getElementById('audit-submit-btn');
-
-      if (activeScanInterval) clearInterval(activeScanInterval);
-      if (activeScanTimeout) clearTimeout(activeScanTimeout);
-
-      if (progressBox) progressBox.classList.remove('hidden');
-      if (progressBar) progressBar.style.width = '0%';
-      if (percentText) percentText.innerText = '0%';
-      if (reportCard) reportCard.classList.add('opacity-40');
-      if (submitBtn) submitBtn.disabled = true;
-
-      let progress = 0;
-      const stages = [
-        `Resolving DNSSEC & authoritative NS for ${domain}...`,
-        `Handshaking TLS 1.3 cipher negotiation on ${domain}...`,
-        `Querying https://${domain}/.well-known/security.txt (RFC 9116)...`,
-        `Inspecting CSP, HSTS, and X-Content headers for ${domain}...`,
-        `Compiling vulnerability index & generating score for ${domain}...`
-      ];
-
-      activeScanInterval = setInterval(() => {
-        progress += 20;
-        if (progressBar) progressBar.style.width = `${progress}%`;
-        if (percentText) percentText.innerText = `${progress}%`;
-        if (stageText) stageText.innerText = stages[Math.min(Math.floor(progress / 20) - 1, stages.length - 1)];
-
-        if (progress >= 100) {
-          clearInterval(activeScanInterval);
-          activeScanInterval = null;
-          activeScanTimeout = setTimeout(() => {
-            if (progressBox) progressBox.classList.add('hidden');
-            if (reportCard) reportCard.classList.remove('opacity-40');
-            if (submitBtn) submitBtn.disabled = false;
-
-            const domainLabel = document.getElementById('audit-domain-label');
-            const scoreVal = document.getElementById('audit-score-val');
-            const gradeBadge = document.getElementById('audit-grade-badge');
-            const nodeMeta = document.getElementById('audit-node-meta');
-
-            const isBenteng = domain === 'bentengsiber.com' || domain.endsWith('.bentengsiber.com');
-            const hashSeed = Array.from(domain).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-            const score = isBenteng ? 98 : (91 + (hashSeed % 7));
-            const grade = score >= 95 ? 'GRADE A+' : 'GRADE A';
-
-            if (domainLabel) domainLabel.textContent = domain;
-            if (scoreVal) scoreVal.textContent = String(score);
-            if (gradeBadge) gradeBadge.textContent = grade;
-            if (nodeMeta) {
-              nodeMeta.textContent = `Scanned ${domain} via Edge Node JKT-02 • TLS 1.3 Strict-Transport-Security Valid`;
-            }
-            showSimToast('PERIMETER AUDIT COMPLETE', `${domain} scored ${score}/100 (${grade}) via passive RFC 9116 probe.`, 'security_update_good');
-          }, 350);
-        }
-      }, 280);
-    }
-
-    function triggerFastAudit() {
-      const scannerEl = document.getElementById('scanner-spotlight');
-      if (scannerEl) {
-        scannerEl.scrollIntoView({ behavior: 'smooth' });
-        runDomainScan();
-      }
-    }
-
-    function clearHeroLog() {
-      const log = document.getElementById('hero-log-stream');
-      if (log) {
-        log.innerHTML = '<div class="text-outline">[CLEARED] Stream listening for inbound WebSockets...</div>';
-      }
-    }
-
-    window.switchSimTab = switchSimTab;
-    window.goToStep = goToStep;
-    window.simulatePhotoCapture = simulatePhotoCapture;
-    window.initSignaturePad = initSignaturePad;
-    window.clearSignature = clearSignature;
-    window.autoSignature = autoSignature;
-    window.completeHandover = completeHandover;
-    window.updateRadarProgress = updateRadarProgress;
-    window.toggleRadarSimulation = toggleRadarSimulation;
-    window.simulateVehicleArrival = simulateVehicleArrival;
-    window.resendWhatsAppPing = resendWhatsAppPing;
-    window.printDemoBast = printDemoBast;
-    window.resetBomStock = resetBomStock;
-    window.deductStock = deductStock;
-    window.copyToClipboard = copyToClipboard;
-    window.runDomainScan = runDomainScan;
-    window.triggerFastAudit = triggerFastAudit;
-
-    window.addEventListener('DOMContentLoaded', () => {
-      initSignaturePad();
-      startRadarTimer();
+      item.querySelectorAll('.dropdown-link').forEach((link) => {
+        link.addEventListener('click', () => closeAllDropdowns(null));
+      });
     });
 
-(function() {
+    document.addEventListener('click', () => closeAllDropdowns(null));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllDropdowns(null);
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     2. MOBILE SLIDE-OVER DRAWER
+  ------------------------------------------------------------------------ */
   function initMobileDrawer() {
-    const mobileBtn = document.getElementById('mobile-menu-btn');
-    const mobileCloseBtn = document.getElementById('mobile-sidebar-close');
-    const mobileDrawer = document.getElementById('mobile-sidebar-drawer');
-    const mobileBackdrop = document.getElementById('mobile-menu-backdrop');
-    const mobileIcon = document.getElementById('mobile-menu-icon');
+    const openBtn = document.getElementById('mobile-menu-open');
+    const closeBtn = document.getElementById('mobile-menu-close');
+    const drawer = document.getElementById('mobile-drawer');
+    const backdrop = document.getElementById('drawer-backdrop');
+    if (!openBtn || !drawer || !backdrop) return;
 
-    if (!mobileBtn || !mobileDrawer) return;
-
-    function openMobileDrawer() {
-      mobileDrawer.classList.remove('hidden', 'drawer-closed', 'translate-x-full');
-      mobileDrawer.classList.add('drawer-open', 'translate-x-0');
-      if (mobileBackdrop) {
-        mobileBackdrop.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          mobileBackdrop.classList.remove('opacity-0');
-          mobileBackdrop.classList.add('opacity-100');
-        });
-      }
-      mobileBtn.setAttribute('aria-expanded', 'true');
-      if (mobileIcon) mobileIcon.textContent = 'close';
-      document.body.style.overflow = 'hidden';
+    function setOpen(open) {
+      drawer.classList.toggle('is-open', open);
+      backdrop.classList.toggle('is-open', open);
+      drawer.setAttribute('aria-hidden', String(!open));
+      openBtn.setAttribute('aria-expanded', String(open));
+      document.body.style.overflow = open ? 'hidden' : '';
+      if (open && closeBtn) closeBtn.focus();
     }
 
-    function closeMobileDrawer() {
-      mobileDrawer.classList.remove('drawer-open', 'translate-x-0');
-      mobileDrawer.classList.add('drawer-closed', 'translate-x-full');
-      if (mobileBackdrop) {
-        mobileBackdrop.classList.remove('opacity-100');
-        mobileBackdrop.classList.add('opacity-0');
-        setTimeout(() => {
-          if (!mobileDrawer.classList.contains('drawer-open')) {
-            mobileBackdrop.classList.add('hidden');
-          }
-        }, 300);
-      }
-      mobileBtn.setAttribute('aria-expanded', 'false');
-      if (mobileIcon) mobileIcon.textContent = 'menu';
-      document.body.style.overflow = '';
-    }
+    openBtn.addEventListener('click', () => setOpen(true));
+    if (closeBtn) closeBtn.addEventListener('click', () => setOpen(false));
+    backdrop.addEventListener('click', () => setOpen(false));
 
-    mobileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = mobileDrawer.classList.contains('drawer-open');
-      if (isOpen) {
-        closeMobileDrawer();
-      } else {
-        openMobileDrawer();
-      }
+    drawer.querySelectorAll('a, button[data-open-modal]').forEach((el) => {
+      el.addEventListener('click', () => setOpen(false));
     });
 
-    if (mobileCloseBtn) {
-      mobileCloseBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeMobileDrawer();
-      });
-    }
-
-    if (mobileBackdrop) {
-      mobileBackdrop.addEventListener('click', closeMobileDrawer);
-    }
-
-    mobileDrawer.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        closeMobileDrawer();
-      });
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && mobileDrawer.classList.contains('drawer-open')) {
-        closeMobileDrawer();
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && drawer.classList.contains('is-open')) {
+        setOpen(false);
+        openBtn.focus();
       }
     });
 
     window.addEventListener('resize', () => {
-      if (window.innerWidth >= 1024 && mobileDrawer.classList.contains('drawer-open')) {
-        closeMobileDrawer();
+      if (window.innerWidth >= 1120 && drawer.classList.contains('is-open')) {
+        setOpen(false);
       }
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMobileDrawer);
-  } else {
-    initMobileDrawer();
-  }
-})();
+  /* ------------------------------------------------------------------------
+     3. DISMISSIBLE ANNOUNCEMENT BAR
+  ------------------------------------------------------------------------ */
+  function initAnnouncementBar() {
+    const bar = document.getElementById('announcement-bar');
+    const closeBtn = document.getElementById('announcement-close');
+    if (!bar || !closeBtn) return;
 
-// =========================================================================
-// BILINGUAL ENGINE (EN / ID), SCROLLSPY & LIVE HERO TELEMETRY
-// =========================================================================
-(function() {
-  const translations = {
-    en: {
-      'nav.portals': 'Portals',
-      'nav.simulator': 'Live Simulator',
-      'nav.sandbox': 'Live Sandbox',
-      'nav.pricing': 'Acquire Asset',
-      'nav.scanner': 'Scanner',
-      'nav.architecture': 'Architecture',
-      'nav.faq': 'FAQ',
-      'hero.title': 'The command platform for fiber field ops & cyber defense.',
-      'hero.desc': 'Benteng Siber turns scattered field dispatches, technician GPS telemetry, BAST sign-offs, and security posture audits into one calm, high-precision operating layer.',
-      'hero.cta1': 'Launch Interactive Simulator',
-      'hero.cta2': 'Acquire Full IP ($5,850)',
-      'hero.cta3': 'Run Security Audit',
-      'portals.title': 'Ecosystem Gateway Portals',
-      'carousel.title': 'Ecosystem Screens & Real-Time Workflows',
-      'sim.title': 'Interactive Product Simulator Hub',
-      'demo.title': 'Live Sandbox & Demo Credentials',
-      'pricing.title': 'Commercial Acquisition & Licensing Hub',
-      'scanner.title': 'Interactive Domain Security Posture Audit',
-      'faq.title': 'Carrier & Technical FAQ'
+    try {
+      if (window.sessionStorage.getItem('bs_announcement_closed') === '1') {
+        bar.classList.add('is-hidden');
+        return;
+      }
+    } catch (_) {
+      // Ignore storage restrictions
+    }
+
+    closeBtn.addEventListener('click', () => {
+      bar.classList.add('is-hidden');
+      try {
+        window.sessionStorage.setItem('bs_announcement_closed', '1');
+      } catch (_) {
+        // Ignore
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     4. HERO ROTATING THREAT HEADLINE (REDUCED-MOTION AWARE)
+  ------------------------------------------------------------------------ */
+  let rotatingPhrases = [
+    'Unverified Field Operations',
+    'API & IDOR Authorization Flaws',
+    'Tampered BAST & Stock Leaks',
+    'External Security Exposure'
+  ];
+
+  function initHeroRotator() {
+    const target = document.getElementById('hero-rotating-text');
+    if (!target || prefersReducedMotion) return;
+
+    let phraseIdx = 0;
+    let charIdx = rotatingPhrases[0].length;
+    let deleting = false;
+
+    function tick() {
+      const current = rotatingPhrases[phraseIdx % rotatingPhrases.length];
+      if (!deleting) {
+        if (charIdx < current.length) {
+          charIdx += 1;
+          target.textContent = current.slice(0, charIdx);
+          window.setTimeout(tick, 42);
+        } else {
+          deleting = true;
+          window.setTimeout(tick, 2400);
+        }
+      } else {
+        if (charIdx > 0) {
+          charIdx -= 1;
+          target.textContent = current.slice(0, charIdx);
+          window.setTimeout(tick, 22);
+        } else {
+          deleting = false;
+          phraseIdx = (phraseIdx + 1) % rotatingPhrases.length;
+          window.setTimeout(tick, 260);
+        }
+      }
+    }
+
+    window.setTimeout(() => {
+      deleting = true;
+      tick();
+    }, 2600);
+  }
+
+  /* ------------------------------------------------------------------------
+     5. PLATFORM SPOTLIGHT TABS
+  ------------------------------------------------------------------------ */
+  function initSpotlightTabs() {
+    const tabs = document.querySelectorAll('[data-tab-target]');
+    if (!tabs.length) return;
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const targetId = tab.getAttribute('data-tab-target');
+        tabs.forEach((btn) => {
+          const active = btn === tab;
+          btn.classList.toggle('is-active', active);
+          btn.setAttribute('aria-selected', String(active));
+          const panel = document.getElementById(btn.getAttribute('data-tab-target'));
+          if (panel) panel.hidden = !active;
+        });
+        const activePanel = document.getElementById(targetId);
+        if (activePanel) activePanel.hidden = false;
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     6. ACCESSIBLE MODALS, ARTICLE BRIEF READER & CLIPBOARD COPY
+  ------------------------------------------------------------------------ */
+  const articleBriefs = {
+    rfc9116: {
+      tag: 'COMPLIANCE GUIDE • RFC 9116',
+      title: 'Hardening Edge Domains with HTTP Security Headers & RFC 9116',
+      paragraphs: [
+        'External security posture begins at the HTTP response boundary. Enforcing Strict-Transport-Security (HSTS) with includeSubDomains prevents downgrade attacks, while X-Frame-Options, nosniff, and strict Referrer-Policy defend web portals from framing and content-sniffing exploits.',
+        'Publishing a valid /.well-known/security.txt file compliant with RFC 9116 gives security researchers a verified disclosure channel—including encrypted contact endpoints and policy references—before issues are leaked.',
+        'Benteng Siber enforces these OWASP headers directly at the server edge and ships a modular 6-engine passive security posture architecture covering HTTP headers, TLS 1.3, SPF/DMARC/CAA, crt.sh logs, and AI remediation snippets.'
+      ]
+    },
+    zerotrust: {
+      tag: 'ARCHITECTURE • ZERO-TRUST ISP',
+      title: 'Zero-Trust Perimeter Design for Modern ISP Field Operations',
+      paragraphs: [
+        'Distributed ISP operations require strict separation between Super Admin NOC controls and mobile Field Technician terminals. A compromised field token must never enumerate another technician or modify unrelated subscriber tasks.',
+        'Benteng Siber FiberOps enforces anti-IDOR ownership checks across every task and proof endpoint, Laravel Sanctum token authentication with 5/min login throttling, and idempotency keys preventing duplicate mutations on unstable mobile networks.',
+        'Combined with rate-limited public tracking links that expire 24 hours after work completion, operators gain end-to-end operational visibility without expanding their attack surface.'
+      ]
+    },
+    bast: {
+      tag: 'FIELD GOVERNANCE • CRYPTOGRAPHIC BAST',
+      title: 'Eliminating Handover Disputes with SHA-256 Cryptographic BAST Seals',
+      paragraphs: [
+        'Paper-based Berita Acara Serah Terima (BAST) forms often suffer from missing signatures, unverified site visits, unlogged optical attenuation, and inaccurate warehouse stock deductions.',
+        'FiberOps enforces workflow integrity at the API layer: tasks require guided 3-slot Before/After/Additional photographic proof (with optical dBm readings) before completion (HTTP 422 gate), while material consumption deducts inventory inside row-locked transactions.',
+        'Once signed on glass by the subscriber, the handover payload is sealed with an immutable SHA-256 hash verifiable at /tasks/{id}/bast/verify—making any post-completion tampering immediately detectable.'
+      ]
     }
   };
 
-  let currentLang = 'en';
-  const langLabel = document.getElementById('lang-label');
-  const langLabelSidebar = document.getElementById('lang-label-sidebar');
+  function initModals() {
+    let activeModal = null;
+    let lastTrigger = null;
 
-  function applyLanguage() {
-    currentLang = 'en';
-    localStorage.setItem('benteng_lang', 'en');
-    if (langLabel) langLabel.textContent = 'EN • GLOBAL';
-    if (langLabelSidebar) langLabelSidebar.textContent = 'EN • GLOBAL';
-    const dict = translations.en;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if (dict[key]) el.textContent = dict[key];
-    });
-  }
+    function openModal(modalId, triggerEl) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      if (activeModal) closeModal(activeModal);
+      activeModal = modal;
+      lastTrigger = triggerEl || document.activeElement;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      const closeBtn = modal.querySelector('[data-close-modal]');
+      if (closeBtn) closeBtn.focus();
+    }
 
-  applyLanguage();
-
-  [document.getElementById('lang-toggle-btn'), document.getElementById('lang-toggle-btn-sidebar')].forEach(btn => {
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      applyLanguage();
-      if (typeof window.showSimToast === 'function') {
-        window.showSimToast('GLOBAL ENGLISH EDITION', 'Interface locked to International English (EN-GLOBAL) for enterprise evaluation.', 'translate');
+    function closeModal(modal) {
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      activeModal = null;
+      if (lastTrigger && typeof lastTrigger.focus === 'function') {
+        lastTrigger.focus();
       }
+    }
+
+    document.querySelectorAll('[data-open-modal]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openModal(btn.getAttribute('data-open-modal'), btn);
+      });
     });
-  });
 
-  // Scrollspy for top desktop navbar
-  const navLinks = document.querySelectorAll('header nav a[href^="#"]');
-  const sectionIds = Array.from(navLinks).map(a => a.getAttribute('href').slice(1));
-  const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
-
-  if (sections.length && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const activeHref = '#' + entry.target.id;
-          navLinks.forEach(link => {
-            if (link.getAttribute('href') === activeHref) {
-              link.className = 'text-primary font-medium border-b border-primary pb-0.5 transition-colors duration-150';
-            } else {
-              link.className = 'text-on-surface-variant hover:text-on-surface font-body-sm transition-colors duration-150';
-            }
+    document.querySelectorAll('[data-open-article]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-open-article');
+        const data = articleBriefs[key];
+        if (!data) return;
+        const tagEl = document.getElementById('article-modal-tag');
+        const titleEl = document.getElementById('article-modal-title');
+        const bodyEl = document.getElementById('article-modal-content');
+        if (tagEl) tagEl.textContent = data.tag;
+        if (titleEl) titleEl.textContent = data.title;
+        if (bodyEl) {
+          bodyEl.innerHTML = '';
+          data.paragraphs.forEach((text) => {
+            const p = document.createElement('p');
+            p.textContent = text;
+            bodyEl.appendChild(p);
           });
         }
+        openModal('article-modal', btn);
       });
-    }, { rootMargin: '-25% 0px -60% 0px', threshold: 0.05 });
-
-    sections.forEach(sec => observer.observe(sec));
-  }
-})();
-
-// Hero Telemetry Controls (1H / 24H / 7D / Refresh)
-window.setHeroTimeframe = function(tf) {
-  const buttons = {
-    '1h': document.getElementById('hero-tf-1h'),
-    '24h': document.getElementById('hero-tf-24h'),
-    '7d': document.getElementById('hero-tf-7d')
-  };
-  Object.entries(buttons).forEach(([k, btn]) => {
-    if (!btn) return;
-    btn.className = k === tf
-      ? 'px-2 py-0.5 bg-surface-container-high text-primary rounded font-medium'
-      : 'px-2 py-0.5 text-on-surface-variant hover:text-white';
-  });
-
-  const odnEl = document.getElementById('hero-odn-val');
-  const deltaEl = document.getElementById('hero-odn-delta');
-  const presets = {
-    '1h': { val: '-17.84', delta: 'Δ 0.02 dBm / hr' },
-    '24h': { val: '-18.12', delta: 'Δ 0.08 dBm / 24h' },
-    '7d': { val: '-18.45', delta: 'Δ 0.14 dBm / 7d' }
-  };
-  const p = presets[tf] || presets['1h'];
-  if (odnEl) odnEl.innerHTML = `${p.val} <span class="text-label-mono-xs text-outline font-normal">dBm</span>`;
-  if (deltaEl) deltaEl.textContent = p.delta;
-};
-
-window.refreshHeroTelemetry = function() {
-  const odnEl = document.getElementById('hero-odn-val');
-  const logEl = document.getElementById('hero-log-stream');
-  const jitter = (-17.75 - Math.random() * 0.35).toFixed(2);
-  if (odnEl) odnEl.innerHTML = `${jitter} <span class="text-label-mono-xs text-outline font-normal">dBm</span>`;
-  if (logEl) {
-    const now = new Date().toTimeString().split(' ')[0];
-    const row = document.createElement('div');
-    row.className = 'text-primary font-label-mono-xs';
-    row.textContent = `[${now}] TELEMETRY_SYNC // ODN_AVG ${jitter} dBm • OK`;
-    logEl.prepend(row);
-    while (logEl.children.length > 8) logEl.removeChild(logEl.lastElementChild);
-  }
-};
-
-// =========================================================================
-// SCROLL REVEAL, INTERACTIVE CARD LIFT & PANEL TRANSITIONS
-// =========================================================================
-(function() {
-  function initMotionPolish() {
-    // 1. Add subtle Hero ambient glow wrapper
-    const heroSection = document.getElementById('hero') || document.querySelector('main > section:first-of-type');
-    if (heroSection) heroSection.classList.add('hero-ambient-glow');
-
-    // 2. Add tactile hover lift to portal, sandbox, pricing, and architecture cards
-    document.querySelectorAll('#portals .grid > div, #demo .grid > div, #acquisition .grid > div, #architecture .grid > div').forEach((card, idx) => {
-      card.classList.add('card-interactive', 'reveal-on-scroll');
-      card.style.transitionDelay = `${(idx % 4) * 75}ms`;
     });
 
-    // 3. Tag major sections for smooth scroll reveal (footer excluded to prevent layout collisions)
-    document.querySelectorAll('#portals, #ecosystem-carousel, #simulator, #demo, #acquisition, #scanner-spotlight, #architecture').forEach(sec => {
-      sec.classList.add('reveal-on-scroll');
+    document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) closeModal(overlay);
+      });
+      overlay.querySelectorAll('[data-close-modal]').forEach((btn) => {
+        btn.addEventListener('click', () => closeModal(overlay));
+      });
     });
 
-    const targets = document.querySelectorAll('.reveal-on-scroll');
-    if ('IntersectionObserver' in window && targets.length) {
-      const revealObserver = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && activeModal) {
+        closeModal(activeModal);
+      }
+    });
+
+    document.querySelectorAll('[data-copy]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const val = btn.getAttribute('data-copy') || '';
+        const original = btn.textContent;
+        const markCopied = () => {
+          btn.textContent = 'Copied';
+          window.setTimeout(() => {
+            btn.textContent = original;
+          }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(val).then(markCopied).catch(markCopied);
+        } else {
+          markCopied();
+        }
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     7. REAL ACTIONABLE INQUIRY HANDLER (MAILTO COMPOSER + LIVE /REQUEST LINK)
+  ------------------------------------------------------------------------ */
+  function initForms() {
+    const incidentForm = document.getElementById('incident-form');
+    const incidentFeedback = document.getElementById('incident-feedback');
+    if (incidentForm && incidentFeedback) {
+      incidentForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!incidentForm.checkValidity()) {
+          incidentForm.reportValidity();
+          return;
+        }
+        const name = (document.getElementById('inc-name') || {}).value || '';
+        const email = (document.getElementById('inc-email') || {}).value || '';
+        const org = (document.getElementById('inc-org') || {}).value || '-';
+        const type = (document.getElementById('inc-type') || {}).value || 'Inquiry';
+        const details = (document.getElementById('inc-details') || {}).value || '';
+
+        const subject = encodeURIComponent('[Benteng Siber] ' + type + ' — ' + name);
+        const body = encodeURIComponent(
+          'Name: ' + name + '\n' +
+          'Email: ' + email + '\n' +
+          'Organization: ' + org + '\n' +
+          'Category: ' + type + '\n\n' +
+          'Details:\n' + details
+        );
+        const mailtoUrl = 'mailto:security@bentengsiber.com?subject=' + subject + '&body=' + body;
+
+        incidentFeedback.hidden = false;
+        incidentFeedback.innerHTML =
+          'Your pre-filled message is ready. <a href="' +
+          mailtoUrl +
+          '" style="text-decoration:underline;font-weight:700;color:#065f46;">Open Email Client</a> or submit directly via <a href="https://admin.bentengsiber.com/request" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:700;color:#065f46;">admin.bentengsiber.com/request</a>.';
+        window.location.href = mailtoUrl;
+      });
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     8. COMPLETE 100% BILINGUAL ENGINE (GLOBAL ENGLISH DEFAULT <-> INDONESIAN)
+  ------------------------------------------------------------------------ */
+  const i18nDict = {
+    en: {
+      'a11y.skip': 'Skip to main content',
+      'brand.tagline': 'Cyber Defense & FiberOps',
+      'nav.solutions': 'Solutions',
+      'nav.portals': 'Live Portals',
+      'nav.platform': 'Platform',
+      'nav.resources': 'Resources',
+      'nav.faq': 'FAQ',
+      'nav.incident': 'Submit Report',
+      'nav.cta': 'Open Console',
+      'dd.sol1Title': 'Zero-Trust FiberOps NOC',
+      'dd.sol1Desc': 'Super Admin dispatch, GIS OLT/ODP, BOM ledger & SLA control.',
+      'dd.sol2Title': 'Technician Mobile PWA & APK',
+      'dd.sol2Desc': 'Offline-first sync, 3-slot optical dBm photo proof & e-signature.',
+      'dd.sol3Title': 'Cyber Posture & RFC 9116',
+      'dd.sol3Desc': 'Anti-IDOR APIs, SHA-256 BAST seals & passive audit architecture.',
+      'dd.p1Title': 'Super Admin NOC Console',
+      'dd.p2Title': 'Technician Mobile PWA',
+      'dd.p3Title': 'Client Service Request',
+      'dd.p4Title': 'Subscriber Ticket Radar',
+      'drawer.navLabel': 'Navigation',
+      'drawer.defense': 'Zero-Trust Defense',
+      'drawer.portalsLabel': 'Live Production Portals',
+      'announcement.text': 'FiberOps Production Portals Active: Super Admin NOC Console, Offline-First Technician PWA, Client Request & Live Ticket Radar.',
+      'announcement.cta': 'Try Live PWA Demo →',
+      'hero.eyebrow': 'BENTENG SIBER | ZERO-TRUST FIBEROPS & CYBER DEFENSE',
+      'hero.titlePrefix': 'We protect ISP networks and enterprises against',
+      'hero.subtitle': 'Carrier-grade Zero-Trust Field Service Management and cyber defense architecture—uniting Super Admin NOC dispatch, offline-first Technician PWA/Android workflows, SHA-256 sealed BAST certificates, and live subscriber tracking.',
+      'hero.ctaPrimary': 'Open Admin Console →',
+      'hero.ctaSecondary': 'Launch Technician PWA Demo',
+      'hero.cardTitle': 'Zero-Trust Field Integrity',
+      'hero.cardSub': 'SHA-256 BAST • Anti-IDOR • Atomic BOM',
+      'hero.cardBadge': 'VERIFIED',
+      'trust.t1': 'Anti-IDOR & Sanctum Auth',
+      'trust.t2': 'SHA-256 Sealed BAST',
+      'trust.t3': 'Offline-First PWA & Android',
+      'trust.t4': 'RFC 9116 Security Standard',
+      'intro.eyebrow': 'THE CYBER & TELECOM OPERATIONS LANDSCAPE',
+      'intro.titleStart': 'Operational blind spots',
+      'intro.titleAccent': 'compound rapidly',
+      'intro.titleEnd': 'without verifiable security governance.',
+      'intro.p1': 'Internet Service Providers and network enterprises face simultaneous risks across external web perimeters and distributed field work. Unverified technician sign-offs, unlogged fiber attenuation, inconsistent inventory deductions, and weak API authorization open costly operational and security gaps.',
+      'intro.p2': 'Benteng Siber unifies a hardened Super Admin NOC Command Center, an offline-first Field Technician PWA/Android app, and transparent subscriber service tracking—backed by cryptographic proof and strict API security controls.',
+      'intro.m1': 'Lightweight mobile sync signal for new dispatches',
+      'intro.m2': 'Guided Before, After & Additional optical dBm proofs',
+      'intro.m3': 'Cryptographic integrity seal on every digital BAST',
+      'intro.cta': 'Evaluate Live Sandbox →',
+      'solutions.eyebrow': 'CORE PLATFORM CAPABILITIES',
+      'solutions.title': 'Four tightly integrated modules covering NOC command, field execution, and security',
+      'solutions.subtitle': 'Engineered cleanly around two core roles—Super Admin and Field Technician—plus a dedicated service submission and live tracking experience for subscribers.',
+      'sol1.title': 'Super Admin NOC & Auto-Dispatch',
+      'sol1.desc': 'Manage work orders, auto-dispatch nearest technicians, GIS OLT/ODC/ODP fiber assets, subscriber CRM, SLA escalation, webhook tests, and CSV reporting.',
+      'sol2.title': 'Offline-First Technician PWA & APK',
+      'sol2.desc': 'Ionic 8 + Angular 20 + Capacitor Android app with 3-slot Before/After photo capture, optical power (dBm) input, batch GPS sync, FCM push alerts, and e-signatures.',
+      'sol3.title': 'SHA-256 BAST & Atomic BOM',
+      'sol3.desc': 'Mandatory HTTP 422 proof gates, row-locked warehouse stock deductions, rework tracking, and tamper-evident SHA-256 digital BAST verification endpoints.',
+      'sol4.title': 'Client Requests, /track & CSAT',
+      'sol4.desc': 'Subscribers submit outage or installation reports at /request, watch live technician ETA at /track with 24-hour expiring privacy tokens, and rate completed service.',
+      'common.openPortal': 'Open Console',
+      'common.tryDemo': 'Try PWA Demo',
+      'common.inspectPlatform': 'Inspect Platform',
+      'common.openTracker': 'Open Live Radar',
+      'common.readBrief': 'Read Brief',
+      'platform.eyebrow': 'FLAGSHIP PLATFORM ARCHITECTURE',
+      'platform.title': 'NOC Command, Field Execution & Security Posture—Unified',
+      'platform.desc': 'Replace manual paper handovers and fragmented spreadsheets with deterministic work-order state machines, real-time GPS dispatch, and hardened security posture verification.',
+      'platform.b1': 'Super Admin & Technician Roles: Clean role separation between central NOC operations and mobile field execution, plus dedicated client report submission.',
+      'platform.b2': '3-Slot Photo Proof & Optical dBm: Technicians document Before, After, and Additional photos with optical power readings before tasks can close.',
+      'platform.b3': 'SHA-256 Sealed BAST & Atomic BOM: Cryptographic hash sealing binds signatures, photos, and row-locked inventory consumption into verifiable certificates.',
+      'platform.b4': 'Offline Queue, 3s Sync & FCM Push: Resilient local queueing with idempotency keys prevents double-submissions and syncs seamlessly on reconnection.',
+      'platform.b5': 'Live Subscriber Radar & CSAT Rating: Rate-limited /track tokens expire 24 hours after completion, redact private numbers, and collect customer satisfaction ratings.',
+      'platform.b6': 'Passive Security Posture Engine: Built-in 6-module RFC 9116, TLS 1.3, HTTP headers, SPF/DMARC, crt.sh recon, and AI remediation architecture ready for cloud edge.',
+      'platform.cta': 'Open Admin Console →',
+      'platform.sandboxLink': 'View Sandbox Credentials →',
+      'platform.sandboxBtn': 'View Sandbox Credentials',
+      'platform.tab1': 'FiberOps NOC Command (Live)',
+      'platform.tab2': 'Security Posture Engine (Preview)',
+      'defense.eyebrow': 'ZERO-TRUST DEFENSE & ENGINEERING RIGOR',
+      'defense.title': 'Security Governance Built for Production Networks',
+      'defense.intro': 'Every API endpoint and field workflow in Benteng Siber is audited for real-world resilience—preventing unauthorized task access, duplicate transactions, and silent data tampering.',
+      'defense.p1Title': 'Anti-IDOR & Sanctum Protection',
+      'defense.p1Desc': 'Field technicians can only read or update their own assigned tasks (HTTP 403 enforced), backed by 5/min login throttling and strict whitelist validation.',
+      'defense.p2Title': 'Idempotent State Machines & Atomic BOM',
+      'defense.p2Desc': 'Idempotency keys block duplicate mobile retries on flaky cellular links, while pessimistic row-level locks protect warehouse material balances.',
+      'defense.p3Title': 'Cryptographic BAST & RFC 9116 Standard',
+      'defense.p3Desc': 'Every completed job seals photos, materials, and customer signatures with SHA-256 verification alongside published OWASP headers and /.well-known/security.txt.',
+      'defense.cta': 'Submit Service or Security Inquiry →',
+      'eco.eyebrow': 'INDONESIA OPERATIONS HUB • CLOUD-READY REACH',
+      'eco.title': 'Connected Live Production Portals',
+      'eco.subtitle': 'Headquartered in Indonesia with cloud-ready API architecture—launch any live production portal directly below or open our evaluation credentials.',
+      'portal1.title': 'Super Admin Command Console',
+      'portal1.desc': 'Central NOC dashboard for auto-dispatch, live fleet GPS, GIS fiber nodes (OLT/ODC/ODP), CRM, BOM inventory, SLA escalation, and BAST review.',
+      'portal1.cta': 'Open Admin Console',
+      'portal2.title': 'Field Technician Mobile PWA',
+      'portal2.desc': 'Offline-first mobile workspace with instant ?demo=1 mode, 3-slot optical dBm photo proof, BOM material picker, and on-glass e-signatures.',
+      'portal2.cta': 'Launch PWA',
+      'portal2.specs': 'Android Specs',
+      'portal3.title': 'Client Service Report Portal',
+      'portal3.desc': 'Submit FTTH installations, fiber outage reports, or relocation requests directly into the Super Admin queue with instant tracking receipts.',
+      'portal3.cta': 'Submit Service Report',
+      'portal4.title': 'Subscriber Live Ticket Radar',
+      'portal4.desc': 'Real-time technician ETA lookup using ticket ID and last 4 phone digits, with 24-hour expiring tokens, privacy redaction, and CSAT rating.',
+      'portal4.cta': 'Track Active Ticket',
+      'sandbox.title': 'Evaluating Benteng Siber for your ISP or operations team?',
+      'sandbox.desc': 'Copy pre-seeded demo credentials for both Super Admin and Field Technician accounts in one click.',
+      'sandbox.cta': 'View Sandbox Credentials →',
+      'res.eyebrow': 'SECURITY INSIGHTS & ARCHITECTURE',
+      'res.title': 'Technical briefings from Benteng Siber',
+      'res.cta': 'View RFC 9116 Policy →',
+      'res1.badge': 'COMPLIANCE GUIDE',
+      'res1.title': 'Hardening Edge Domains with HTTP Security Headers & RFC 9116',
+      'res1.desc': 'A practical blueprint for deploying HSTS preload, X-Frame-Options, nosniff, and standardized /.well-known/security.txt vulnerability disclosure policies.',
+      'res2.badge': 'ARCHITECTURE',
+      'res2.title': 'Zero-Trust Perimeter Design for Modern ISP Field Operations',
+      'res2.desc': 'How strict Super Admin vs. Technician role scoping, Sanctum tokens, brute-force throttling, and anti-IDOR ownership guards prevent lateral API abuse.',
+      'res3.badge': 'FIELD GOVERNANCE',
+      'res3.title': 'Eliminating Handover Disputes with SHA-256 Cryptographic BAST Seals',
+      'res3.desc': 'Why binding 3-slot optical dBm photo proofs, row-locked atomic BOM deductions, and immutable SHA-256 hashing stops billing leakage and rework friction.',
+      'faq.eyebrow': 'FREQUENTLY ASKED QUESTIONS',
+      'faq.title': 'Security, Roles & Operations FAQ',
+      'faq.subtitle': 'Direct technical answers covering active roles, offline field execution, SHA-256 BAST integrity, subscriber tracking privacy, and RFC 9116 security standards.',
+      'faq.q1': 'What user roles are supported in Benteng Siber FiberOps?',
+      'faq.a1': 'Benteng Siber FiberOps operates around two core authenticated roles—Super Admin (NOC command, auto-dispatch, GIS fiber assets, CRM, BOM inventory, SLA escalation, and CSV reporting) and Field Technician (offline-first mobile PWA and Android client)—alongside a dedicated Client/Subscriber flow for submitting service reports (/request) and live tracking (/track).',
+      'faq.q2': 'How does FiberOps guarantee work order authenticity and prevent field tampering?',
+      'faq.a2': 'The Laravel 10 API enforces anti-IDOR ownership checks, idempotency keys on all state mutations, server-side HTTP 422 proof gates requiring photographic evidence before completion, atomic row-locked BOM inventory deduction, and SHA-256 cryptographic hashing on every digital BAST acceptance certificate.',
+      'faq.q3': 'Can the Field Technician Mobile App operate in zero-signal basements or remote fiber nodes?',
+      'faq.a3': 'Yes. Built with Ionic 8, Angular 20, and Capacitor 8 for Android and PWA, the technician app operates offline-first with local storage caching, offline action queueing, batch GPS flushing, and 3-second lightweight sync signals when connectivity resumes.',
+      'faq.q4': 'What field documentation is captured on each fiber work order?',
+      'faq.a4': 'Technicians capture guided 3-slot photographic proofs (Before, After, and Additional), log optical power readings (dBm) per slot, record BOM materials directly against warehouse stock, collect on-glass customer e-signatures, and receive instant FCM push notifications for new assignments.',
+      'faq.q5': 'How do subscribers submit service reports or track technician arrival securely?',
+      'faq.a5': 'Subscribers can submit installation or outage reports at admin.bentengsiber.com/request and monitor live arrival at admin.bentengsiber.com/track using ticket ID and phone verification. Tracking links apply rate limiting, redact private technician phone numbers, expire automatically 24 hours after completion, and include post-completion CSAT rating.',
+      'faq.q6': 'How does Benteng Siber address external web security and RFC 9116 compliance?',
+      'faq.a6': 'Benteng Siber enforces OWASP HTTP security headers (HSTS preload, X-Frame-Options, nosniff, Referrer-Policy), publishes a verified RFC 9116 /.well-known/security.txt disclosure policy, and includes a modular 6-engine passive security posture scanner architecture (HTTP headers, TLS 1.3, SPF/DMARC/CAA, crt.sh CT logs, banner fingerprinting, and AI remediation snippets).',
+      'cta.title': 'Ready to streamline ISP field operations with Zero-Trust security?',
+      'cta.subtitle': 'Launch the live Super Admin Console or Field Technician PWA immediately, or submit a direct service request through our portal.',
+      'cta.primary': 'Open Admin Console →',
+      'cta.secondary': 'Submit Client Service Request',
+      'strip.title': 'Need immediate dispatch or security assistance?',
+      'strip.desc': 'Submit an outage/installation ticket directly into the live NOC queue or track an active work order.',
+      'strip.btn1': 'Submit Service Report →',
+      'strip.btn2': 'Track Ticket (/track)',
+      'footer.desc': 'Zero-Trust FiberOps Field Service Management and enterprise cyber defense architecture—connecting Super Admin NOC teams, Field Technicians, and subscribers with cryptographic accountability.',
+      'footer.status': 'All Production Portals Operational',
+      'footer.col1': 'Core Capabilities',
+      'footer.l1': 'Super Admin NOC Dispatch',
+      'footer.l2': '3-Slot Optical dBm Photo Proof',
+      'footer.l3': 'SHA-256 Cryptographic BAST',
+      'footer.l4': 'Anti-IDOR & Atomic BOM',
+      'footer.l5': 'Passive Security Posture Engine',
+      'footer.col2': 'Live Portals',
+      'footer.android': 'Android Native Edition',
+      'footer.col3': 'Governance & Legal',
+      'footer.about': 'About Benteng Siber',
+      'footer.privacy': 'Privacy Policy & Data Governance',
+      'footer.privacyShort': 'Privacy Policy',
+      'footer.top': 'Back to Top ↑',
+      'modal.incTag': 'SERVICE & SECURITY DESK',
+      'modal.incTitle': 'Submit a Report or Security Inquiry',
+      'modal.liveBoxTitle': 'Need fiber installation, outage dispatch, or ticket support?',
+      'modal.liveBoxDesc': 'Submit directly to the live NOC queue and receive an instant tracking number:',
+      'modal.liveBoxBtn': 'Open Live Client Report Portal (/request) →',
+      'modal.fName': 'Full Name *',
+      'modal.fEmail': 'Business Email *',
+      'modal.fOrg': 'Organization / ISP',
+      'modal.fType': 'Inquiry Category *',
+      'modal.fDetails': 'Summary & Objectives *',
+      'modal.fSubmit': 'Compose Pre-Filled Email to Security Desk →',
+      'modal.sbTag': 'EVALUATION ENVIRONMENT',
+      'modal.sbTitle': 'Live Sandbox Demo Credentials'
+    },
+    id: {
+      'a11y.skip': 'Lewati ke konten utama',
+      'brand.tagline': 'Pertahanan Siber & FiberOps',
+      'nav.solutions': 'Solusi',
+      'nav.portals': 'Portal Aktif',
+      'nav.platform': 'Platform',
+      'nav.resources': 'Wawasan',
+      'nav.faq': 'FAQ',
+      'nav.incident': 'Kirim Laporan',
+      'nav.cta': 'Buka Konsol',
+      'dd.sol1Title': 'FiberOps NOC Zero-Trust',
+      'dd.sol1Desc': 'Dispatch Super Admin, GIS OLT/ODP, stok BOM & kontrol SLA.',
+      'dd.sol2Title': 'Aplikasi Teknisi PWA & APK',
+      'dd.sol2Desc': 'Sinkronisasi offline-first, foto 3-slot + dBm optik & e-sign.',
+      'dd.sol3Title': 'Postur Siber & RFC 9116',
+      'dd.sol3Desc': 'API Anti-IDOR, segel BAST SHA-256 & arsitektur audit pasif.',
+      'dd.p1Title': 'Konsol NOC Super Admin',
+      'dd.p2Title': 'PWA Mobile Teknisi',
+      'dd.p3Title': 'Portal Laporan Klien',
+      'dd.p4Title': 'Radar Pelacakan Tiket',
+      'drawer.navLabel': 'Navigasi',
+      'drawer.defense': 'Pertahanan Zero-Trust',
+      'drawer.portalsLabel': 'Portal Produksi Aktif',
+      'announcement.text': 'Portal Produksi FiberOps Aktif: Konsol NOC Super Admin, PWA Teknisi Offline-First, Laporan Klien & Radar Pelacakan Langsung.',
+      'announcement.cta': 'Coba Demo PWA →',
+      'hero.eyebrow': 'BENTENG SIBER | FIBEROPS ZERO-TRUST & PERTAHANAN SIBER',
+      'hero.titlePrefix': 'Kami melindungi jaringan ISP dan enterprise dari',
+      'hero.subtitle': 'Manajemen Layanan Lapangan Zero-Trust kelas operator dan arsitektur pertahanan siber—menyatukan dispatch NOC Super Admin, alur kerja Teknisi PWA/Android offline-first, sertifikat BAST bersegel SHA-256, dan pelacakan pelanggan langsung.',
+      'hero.ctaPrimary': 'Buka Konsol Admin →',
+      'hero.ctaSecondary': 'Buka Demo PWA Teknisi',
+      'hero.cardTitle': 'Integritas Lapangan Zero-Trust',
+      'hero.cardSub': 'BAST SHA-256 • Anti-IDOR • BOM Atomik',
+      'hero.cardBadge': 'TERVERIFIKASI',
+      'trust.t1': 'Anti-IDOR & Auth Sanctum',
+      'trust.t2': 'BAST Bersegel SHA-256',
+      'trust.t3': 'PWA & Android Offline-First',
+      'trust.t4': 'Standar Keamanan RFC 9116',
+      'intro.eyebrow': 'LANSKAP OPERASI SIBER & TELEKOMUNIKASI',
+      'intro.titleStart': 'Celah operasional dan keamanan',
+      'intro.titleAccent': 'menumpuk cepat',
+      'intro.titleEnd': 'tanpa tata kelola yang terverifikasi.',
+      'intro.p1': 'ISP dan perusahaan jaringan menghadapi risiko bersamaan pada perimeter web dan pekerjaan lapangan yang tersebar. Serah terima tanpa verifikasi, redaman optik tak tercatat, pemotongan stok gudang tak akurat, dan otorisasi API yang lemah memicu kerugian besar.',
+      'intro.p2': 'Benteng Siber menyatukan Pusat Komando NOC Super Admin yang terproteksi, aplikasi Teknisi Lapangan PWA/Android offline-first, dan pelacakan layanan pelanggan transparan—didukung bukti kriptografis dan kontrol keamanan API ketat.',
+      'intro.m1': 'Sinyal sinkronisasi mobile ringan untuk tiket baru',
+      'intro.m2': 'Bukti foto 3-slot Before, After & Additional + dBm optik',
+      'intro.m3': 'Segel integritas kriptografis pada setiap BAST digital',
+      'intro.cta': 'Evaluasi Live Sandbox →',
+      'solutions.eyebrow': 'KAPABILITAS INTI PLATFORM',
+      'solutions.title': 'Empat modul terpadu mencakup komando NOC, eksekusi lapangan, dan keamanan',
+      'solutions.subtitle': 'Dirancang bersih di sekitar dua peran utama—Super Admin dan Teknisi Lapangan—ditambah portal pengiriman laporan serta pelacakan langsung bagi pelanggan.',
+      'sol1.title': 'NOC Super Admin & Auto-Dispatch',
+      'sol1.desc': 'Kelola work order, auto-dispatch teknisi terdekat, aset fiber GIS OLT/ODC/ODP, CRM pelanggan, eskalasi SLA, uji webhook, dan ekspor laporan CSV.',
+      'sol2.title': 'PWA & APK Teknisi Offline-First',
+      'sol2.desc': 'Aplikasi Ionic 8 + Angular 20 + Capacitor Android dengan foto 3-slot Before/After, input daya optik (dBm), batch GPS sync, notifikasi FCM, dan tanda tangan digital.',
+      'sol3.title': 'BAST SHA-256 & BOM Atomik',
+      'sol3.desc': 'Gerbang bukti foto wajib HTTP 422, penguncian baris stok gudang atomik, alur rework, serta verifikasi sertifikat BAST digital anti-manipulasi SHA-256.',
+      'sol4.title': 'Laporan Klien, /track & CSAT',
+      'sol4.desc': 'Pelanggan mengirim laporan gangguan atau instalasi di /request, memantau ETA teknisi di /track dengan token privasi 24 jam, dan memberi rating kepuasan CSAT.',
+      'common.openPortal': 'Buka Konsol',
+      'common.tryDemo': 'Coba Demo PWA',
+      'common.inspectPlatform': 'Lihat Platform',
+      'common.openTracker': 'Buka Radar Langsung',
+      'common.readBrief': 'Baca Ringkasan',
+      'platform.eyebrow': 'ARSITEKTUR PLATFORM UNGGULAN',
+      'platform.title': 'Komando NOC, Eksekusi Lapangan & Postur Keamanan—Terpadu',
+      'platform.desc': 'Gantikan berita acara kertas dan spreadsheet terpisah dengan state machine work order yang deterministik, dispatch GPS real-time, dan verifikasi postur keamanan.',
+      'platform.b1': 'Peran Super Admin & Teknisi: Pemisahan peran bersih antara komando NOC pusat dan eksekusi lapangan mobile, plus alur pengiriman laporan klien.',
+      'platform.b2': 'Bukti Foto 3-Slot & Daya Optik dBm: Teknisi mendokumentasikan foto Before, After, dan Additional beserta nilai redaman optik sebelum tugas dapat ditutup.',
+      'platform.b3': 'BAST Bersegel SHA-256 & BOM Atomik: Hash kriptografis mengikat tanda tangan, foto, dan pemakaian material terkunci baris menjadi sertifikat yang dapat diverifikasi.',
+      'platform.b4': 'Antrean Offline, Sinkron 3 Detik & Push FCM: Antrean lokal dengan idempotency key mencegah duplikasi transaksi dan otomatis sinkron saat sinyal pulih.',
+      'platform.b5': 'Radar Pelanggan & Rating CSAT: Token /track berbatas laju otomatis kedaluwarsa 24 jam setelah selesai, menyensor nomor pribadi, dan menampung rating CSAT.',
+      'platform.b6': 'Mesin Audit Postur Pasif: Arsitektur 6 modul RFC 9116, TLS 1.3, header HTTP, SPF/DMARC, recon crt.sh, dan remediasi AI siap untuk edge cloud.',
+      'platform.cta': 'Buka Konsol Admin →',
+      'platform.sandboxLink': 'Lihat Kredensial Sandbox →',
+      'platform.sandboxBtn': 'Lihat Kredensial Sandbox',
+      'platform.tab1': 'Komando NOC FiberOps (Aktif)',
+      'platform.tab2': 'Mesin Postur Keamanan (Pratinjau)',
+      'defense.eyebrow': 'PERTAHANAN ZERO-TRUST & REKAYASA KETAT',
+      'defense.title': 'Tata Kelola Keamanan untuk Jaringan Produksi',
+      'defense.intro': 'Setiap endpoint API dan alur lapangan di Benteng Siber diaudit untuk ketahanan nyata—mencegah akses tugas tanpa izin, transaksi ganda, dan manipulasi data diam-diam.',
+      'defense.p1Title': 'Proteksi Anti-IDOR & Sanctum',
+      'defense.p1Desc': 'Teknisi lapangan hanya dapat mengakses atau memproses tugas miliknya sendiri (HTTP 403), dilengkapi pembatasan login 5/menit dan validasi whitelist ketat.',
+      'defense.p2Title': 'State Machine Idempoten & BOM Atomik',
+      'defense.p2Desc': 'Idempotency key memblokir pengiriman ulang ganda saat jaringan seluler tidak stabil, sementara row-level locking menjaga akurasi saldo gudang.',
+      'defense.p3Title': 'BAST Kriptografis & Standar RFC 9116',
+      'defense.p3Desc': 'Setiap tugas selesai menyegel foto, material, dan tanda tangan pelanggan dengan verifikasi SHA-256 bersama header OWASP dan /.well-known/security.txt.',
+      'defense.cta': 'Kirim Permintaan Layanan atau Keamanan →',
+      'eco.eyebrow': 'PUSAT OPERASI INDONESIA • ARSITEKTUR SIAP CLOUD',
+      'eco.title': 'Portal Produksi Aktif Terintegrasi',
+      'eco.subtitle': 'Berpusat di Indonesia dengan arsitektur API siap cloud—buka langsung seluruh portal produksi aktif di bawah ini atau lihat kredensial evaluasi.',
+      'portal1.title': 'Konsol Komando Super Admin',
+      'portal1.desc': 'Dashboard NOC pusat untuk auto-dispatch, GPS armada langsung, aset GIS fiber (OLT/ODC/ODP), CRM, inventaris BOM, eskalasi SLA, dan tinjauan BAST.',
+      'portal1.cta': 'Buka Konsol Admin',
+      'portal2.title': 'PWA Mobile Teknisi Lapangan',
+      'portal2.desc': 'Ruang kerja mobile offline-first dengan mode instan ?demo=1, foto bukti 3-slot + dBm optik, pemilih material BOM, dan tanda tangan digital di layar.',
+      'portal2.cta': 'Buka PWA',
+      'portal2.specs': 'Info Android',
+      'portal3.title': 'Portal Laporan Layanan Klien',
+      'portal3.desc': 'Kirim permintaan instalasi FTTH, laporan gangguan fiber, atau relokasi langsung ke antrean Super Admin lengkap dengan tanda terima pelacakan.',
+      'portal3.cta': 'Kirim Laporan Layanan',
+      'portal4.title': 'Radar Pelacakan Tiket Pelanggan',
+      'portal4.desc': 'Cek ETA kedatangan teknisi dengan ID tiket dan 4 digit akhir telepon, dilengkapi token kedaluwarsa 24 jam, sensor privasi, dan rating CSAT.',
+      'portal4.cta': 'Lacak Tiket Aktif',
+      'sandbox.title': 'Sedang mengevaluasi Benteng Siber untuk tim ISP atau operasi Anda?',
+      'sandbox.desc': 'Salin kredensial demo siap pakai untuk akun Super Admin dan Teknisi Lapangan hanya dengan satu klik.',
+      'sandbox.cta': 'Lihat Kredensial Sandbox →',
+      'res.eyebrow': 'WAWASAN KEAMANAN & ARSITEKTUR',
+      'res.title': 'Ringkasan teknis dari Benteng Siber',
+      'res.cta': 'Lihat Kebijakan RFC 9116 →',
+      'res1.badge': 'PANDUAN KEPATUHAN',
+      'res1.title': 'Memperkuat Domain Edge dengan HTTP Security Headers & RFC 9116',
+      'res1.desc': 'Panduan praktis menerapkan HSTS preload, X-Frame-Options, nosniff, dan kebijakan pengungkapan kerentanan standar /.well-known/security.txt.',
+      'res2.badge': 'ARSITEKTUR',
+      'res2.title': 'Desain Perimeter Zero-Trust untuk Operasional Lapangan ISP Modern',
+      'res2.desc': 'Bagaimana pemisahan peran Super Admin vs Teknisi, token Sanctum, pembatasan brute-force, dan penjaga anti-IDOR mencegah penyalahgunaan API.',
+      'res3.badge': 'TATA KELOLA LAPANGAN',
+      'res3.title': 'Menghilangkan Sengketa Serah Terima dengan Segel BAST SHA-256',
+      'res3.desc': 'Mengapa menyatukan bukti foto 3-slot + dBm optik, pemotongan BOM atomik terkunci baris, dan hash SHA-256 mencegah kebocoran stok dan rework.',
+      'faq.eyebrow': 'PERTANYAAN UMUM',
+      'faq.title': 'FAQ Keamanan, Peran & Operasional',
+      'faq.subtitle': 'Jawaban teknis langsung mengenai peran aktif, eksekusi lapangan offline, integritas BAST SHA-256, privasi pelacakan pelanggan, dan standar RFC 9116.',
+      'faq.q1': 'Peran pengguna apa saja yang didukung di Benteng Siber FiberOps?',
+      'faq.a1': 'Benteng Siber FiberOps beroperasi dengan dua peran terautentikasi utama—Super Admin (komando NOC, auto-dispatch, aset GIS fiber, CRM, stok BOM, eskalasi SLA, dan laporan CSV) serta Teknisi Lapangan (PWA mobile offline-first dan klien Android)—ditambah alur khusus Klien/Pelanggan untuk mengirim laporan (/request) dan melacak tiket (/track).',
+      'faq.q2': 'Bagaimana FiberOps menjamin keaslian work order dan mencegah manipulasi lapangan?',
+      'faq.a2': 'API Laravel 10 menerapkan pemeriksaan kepemilikan anti-IDOR, idempotency key pada seluruh mutasi state, gerbang bukti foto wajib HTTP 422 sebelum tugas selesai, pengurangan stok BOM terkunci baris secara atomik, dan hash kriptografis SHA-256 pada setiap sertifikat BAST digital.',
+      'faq.q3': 'Apakah aplikasi Mobile Teknisi bisa berjalan di basement tanpa sinyal atau lokasi fiber terpencil?',
+      'faq.a3': 'Ya. Dibangun dengan Ionic 8, Angular 20, dan Capacitor 8 untuk Android dan PWA, aplikasi teknisi berjalan offline-first dengan cache lokal, antrean aksi offline, pengiriman batch GPS, dan sinyal sinkronisasi ringan 3 detik saat koneksi pulih.',
+      'faq.q4': 'Dokumentasi lapangan apa saja yang dicatat pada setiap work order fiber?',
+      'faq.a4': 'Teknisi mengambil foto bukti terpandu 3-slot (Before, After, dan Additional), mencatat nilai daya optik (dBm) per slot, memilih material BOM langsung dari stok gudang, mengambil tanda tangan digital pelanggan di layar, dan menerima notifikasi push FCM instan untuk tugas baru.',
+      'faq.q5': 'Bagaimana pelanggan mengirim laporan layanan atau melacak kedatangan teknisi secara aman?',
+      'faq.a5': 'Pelanggan dapat mengirim laporan instalasi atau gangguan di admin.bentengsiber.com/request dan memantau kedatangan langsung di admin.bentengsiber.com/track menggunakan nomor tiket dan verifikasi 4 digit telepon. Tautan pelacakan menerapkan rate limit, menyensor nomor pribadi teknisi, otomatis kedaluwarsa 24 jam setelah selesai, dan menyediakan rating CSAT.',
+      'faq.q6': 'Bagaimana Benteng Siber menangani keamanan web eksternal dan kepatuhan RFC 9116?',
+      'faq.a6': 'Benteng Siber menerapkan header keamanan HTTP OWASP (HSTS preload, X-Frame-Options, nosniff, Referrer-Policy), mempublikasikan kebijakan RFC 9116 /.well-known/security.txt yang aktif, serta memiliki arsitektur pemindai postur keamanan pasif 6 modul (header HTTP, TLS 1.3, SPF/DMARC/CAA, log CT crt.sh, fingerprinting server, dan cuplikan remediasi AI).',
+      'cta.title': 'Siap menata operasional lapangan ISP dengan keamanan Zero-Trust?',
+      'cta.subtitle': 'Buka Konsol Super Admin atau PWA Teknisi Lapangan sekarang juga, atau kirim permintaan layanan langsung melalui portal kami.',
+      'cta.primary': 'Buka Konsol Admin →',
+      'cta.secondary': 'Kirim Laporan Layanan Klien',
+      'strip.title': 'Butuh dispatch cepat atau bantuan keamanan?',
+      'strip.desc': 'Kirim tiket gangguan/instalasi langsung ke antrean NOC aktif atau lacak progres work order berjalan.',
+      'strip.btn1': 'Kirim Laporan Layanan →',
+      'strip.btn2': 'Lacak Tiket (/track)',
+      'footer.desc': 'Manajemen Layanan Lapangan FiberOps Zero-Trust dan arsitektur pertahanan siber enterprise—menghubungkan tim NOC Super Admin, Teknisi Lapangan, dan pelanggan dengan akuntabilitas kriptografis.',
+      'footer.status': 'Seluruh Portal Produksi Aktif',
+      'footer.col1': 'Kapabilitas Inti',
+      'footer.l1': 'Dispatch NOC Super Admin',
+      'footer.l2': 'Bukti Foto 3-Slot & dBm Optik',
+      'footer.l3': 'BAST Kriptografis SHA-256',
+      'footer.l4': 'Anti-IDOR & BOM Atomik',
+      'footer.l5': 'Mesin Postur Keamanan Pasif',
+      'footer.col2': 'Portal Aktif',
+      'footer.android': 'Edisi Android Native',
+      'footer.col3': 'Tata Kelola & Legal',
+      'footer.about': 'Tentang Benteng Siber',
+      'footer.privacy': 'Kebijakan Privasi & Tata Kelola Data',
+      'footer.privacyShort': 'Kebijakan Privasi',
+      'footer.top': 'Kembali ke Atas ↑',
+      'modal.incTag': 'LAYANAN & MEJA KEAMANAN',
+      'modal.incTitle': 'Kirim Laporan atau Pertanyaan Keamanan',
+      'modal.liveBoxTitle': 'Butuh instalasi fiber, penanganan gangguan, atau dukungan tiket?',
+      'modal.liveBoxDesc': 'Kirim langsung ke antrean NOC aktif dan dapatkan nomor pelacakan instan:',
+      'modal.liveBoxBtn': 'Buka Portal Laporan Klien Aktif (/request) →',
+      'modal.fName': 'Nama Lengkap *',
+      'modal.fEmail': 'Email Bisnis *',
+      'modal.fOrg': 'Organisasi / ISP',
+      'modal.fType': 'Kategori Permintaan *',
+      'modal.fDetails': 'Ringkasan & Kebutuhan *',
+      'modal.fSubmit': 'Buat Email Terformat ke Tim Keamanan →',
+      'modal.sbTag': 'LINGKUNGAN EVALUASI',
+      'modal.sbTitle': 'Kredensial Demo Live Sandbox'
+    }
+  };
+
+  function initLanguageSwitcher() {
+    const toggleBtn = document.getElementById('lang-toggle');
+    const toggleLabel = document.getElementById('lang-toggle-label');
+    if (!toggleBtn) return;
+
+    function detectInitialLang() {
+      const params = new URLSearchParams(window.location.search);
+      const qLang = params.get('lang');
+      if (qLang === 'id' || qLang === 'en') return qLang;
+      try {
+        const stored = window.localStorage.getItem('bs_lang');
+        if (stored === 'id' || stored === 'en') return stored;
+      } catch (_) {
+        // Ignore
+      }
+      return 'en';
+    }
+
+    let currentLang = detectInitialLang();
+
+    function applyLang(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      if (toggleLabel) toggleLabel.textContent = lang.toUpperCase();
+      const dict = i18nDict[lang] || i18nDict.en;
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+      rotatingPhrases =
+        lang === 'id'
+          ? [
+              'Operasi Lapangan Tanpa Verifikasi',
+              'Celah Otorisasi API & IDOR',
+              'Manipulasi BAST & Kebocoran Stok',
+              'Eksposur Keamanan Eksternal'
+            ]
+          : [
+              'Unverified Field Operations',
+              'API & IDOR Authorization Flaws',
+              'Tampered BAST & Stock Leaks',
+              'External Security Exposure'
+            ];
+      const rotatingEl = document.getElementById('hero-rotating-text');
+      if (rotatingEl) rotatingEl.textContent = rotatingPhrases[0];
+      try {
+        window.localStorage.setItem('bs_lang', lang);
+      } catch (_) {
+        // Ignore
+      }
+    }
+
+    applyLang(currentLang);
+
+    toggleBtn.addEventListener('click', () => {
+      applyLang(currentLang === 'en' ? 'id' : 'en');
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     9. SAFE PROGRESSIVE SCROLL REVEAL (NEVER TRAPS ELEMENTS HIDDEN)
+  ------------------------------------------------------------------------ */
+  function initScrollReveal() {
+    const els = document.querySelectorAll('.reveal');
+    if (!els.length) return;
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+      els.forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
+
+    document.documentElement.classList.add('js-reveal-ready');
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
             obs.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.02, rootMargin: '120px 0px 0px 0px' });
+      },
+      { threshold: 0.01, rootMargin: '180px 0px 180px 0px' }
+    );
 
-      targets.forEach(el => revealObserver.observe(el));
-    } else {
-      targets.forEach(el => el.classList.add('is-visible'));
-    }
+    els.forEach((el) => observer.observe(el));
+  }
 
-    // 4. Wrap switchSimTab & goToStep with smooth panel-animate-in entrance
-    const origSwitch = window.switchSimTab;
-    if (typeof origSwitch === 'function') {
-      window.switchSimTab = function(tabIndex) {
-        origSwitch(tabIndex);
-        const panel = document.getElementById(`sim-panel-${tabIndex}`);
-        if (panel) {
-          panel.classList.remove('panel-animate-in');
-          void panel.offsetWidth;
-          panel.classList.add('panel-animate-in');
-        }
-      };
-    }
-
-    const origStep = window.goToStep;
-    if (typeof origStep === 'function') {
-      window.goToStep = function(step) {
-        origStep(step);
-        const stepEl = document.getElementById(`step-content-${step}`);
-        if (stepEl) {
-          stepEl.classList.remove('panel-animate-in');
-          void stepEl.offsetWidth;
-          stepEl.classList.add('panel-animate-in');
-        }
-      };
-    }
+  /* ------------------------------------------------------------------------
+     BOOTSTRAP
+  ------------------------------------------------------------------------ */
+  function init() {
+    initHeader();
+    initMobileDrawer();
+    initAnnouncementBar();
+    initLanguageSwitcher();
+    initHeroRotator();
+    initSpotlightTabs();
+    initModals();
+    initForms();
+    initScrollReveal();
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMotionPolish);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    initMotionPolish();
-  }
-})();
-
-
-// =========================================================================
-// SMOOTH ECOSYSTEM CAROUSEL, SPOTLIGHT TRACKING & COUNT-UP METRICS
-// =========================================================================
-(function() {
-  function initCarouselAndMotion() {
-    // 1. Mouse-Tracking Radial Spotlight (60 FPS rAF throttled, zero-reflow cached bounds)
-    document.querySelectorAll('.card-interactive').forEach(card => {
-      let rafPending = false;
-      let cachedRect = null;
-      card.addEventListener('mouseenter', () => {
-        cachedRect = card.getBoundingClientRect();
-      }, { passive: true });
-      card.addEventListener('mouseleave', () => {
-        cachedRect = null;
-      }, { passive: true });
-      card.addEventListener('mousemove', (e) => {
-        if (rafPending) return;
-        const clientX = e.clientX;
-        const clientY = e.clientY;
-        rafPending = true;
-        requestAnimationFrame(() => {
-          const rect = cachedRect || card.getBoundingClientRect();
-          card.style.setProperty('--mouse-x', `${clientX - rect.left}px`);
-          card.style.setProperty('--mouse-y', `${clientY - rect.top}px`);
-          rafPending = false;
-        });
-      }, { passive: true });
-    });
-
-    // 1B. Secondary Page Ambient Mouse Glow (#mouse-glow in playstore.html & privacy-policy.html)
-    const mouseGlow = document.getElementById('mouse-glow');
-    if (mouseGlow) {
-      let glowRaf = false;
-      window.addEventListener('mousemove', (e) => {
-        if (glowRaf) return;
-        const x = e.clientX;
-        const y = e.clientY;
-        glowRaf = true;
-        requestAnimationFrame(() => {
-          document.documentElement.style.setProperty('--mouse-x', `${x}px`);
-          document.documentElement.style.setProperty('--mouse-y', `${y}px`);
-          glowRaf = false;
-        });
-      }, { passive: true });
-    }
-
-    // 2. Smooth Count-Up for Telemetry Numbers (#architecture KPIs & #acquisition pricing)
-    const countTargets = document.querySelectorAll('#architecture .text-headline-lg, #acquisition .text-display-lg');
-    if ('IntersectionObserver' in window && countTargets.length) {
-      const countObs = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          const el = entry.target;
-          const raw = el.textContent.trim();
-          const match = raw.match(/^([^0-9.-]*)([0-9,.]+)(.*)$/);
-          if (match) {
-            const prefix = match[1];
-            const targetNum = parseFloat(match[2].replace(/,/g, ''));
-            const suffix = match[3];
-            const decimals = (match[2].split('.')[1] || '').length;
-            const hasComma = match[2].includes(',');
-            if (targetNum > 0) {
-              const duration = 700;
-              const start = performance.now();
-              function tick(now) {
-                const p = Math.min(1, (now - start) / duration);
-                const eased = 1 - Math.pow(1 - p, 3);
-                let val = (targetNum * eased).toFixed(decimals);
-                if (hasComma) val = Number(val).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-                el.textContent = prefix + val + suffix;
-                if (p < 1) requestAnimationFrame(tick);
-                else el.textContent = raw;
-              }
-              requestAnimationFrame(tick);
-            }
-          }
-          obs.unobserve(el);
-        });
-      }, { threshold: 0.4 });
-      countTargets.forEach(el => countObs.observe(el));
-    }
-
-    // 3. Continuous Infinite Marquee Stream & Offscreen GPU Animation Governor
-    const viewport = document.getElementById('carousel-viewport');
-    const marqueeStatus = document.getElementById('marquee-badge-status');
-
-    if (viewport && marqueeStatus) {
-      viewport.addEventListener('mouseenter', () => {
-        marqueeStatus.textContent = 'STREAM PAUSED • INSPECTING MODULE';
-      }, { passive: true });
-      viewport.addEventListener('mouseleave', () => {
-        marqueeStatus.textContent = 'CONTINUOUS STREAM • HOVER TO PAUSE';
-      }, { passive: true });
-    }
-
-    if ('IntersectionObserver' in window) {
-      const animSections = document.querySelectorAll('#hero, #ecosystem-carousel, #simulator');
-      const gpuObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          entry.target.classList.toggle('is-offscreen', !entry.isIntersecting);
-        });
-      }, { rootMargin: '100px 0px 100px 0px', threshold: 0.01 });
-      animSections.forEach(sec => gpuObserver.observe(sec));
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCarouselAndMotion);
-  } else {
-    initCarouselAndMotion();
+    init();
   }
 })();

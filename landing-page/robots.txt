@@ -1,17 +1,18 @@
 # ==============================================================================
-# BENTENG SIBER ECOSYSTEM — SEARCH ENGINE CRAWLER DIRECTIVES
+# BENTENG SIBER — SEARCH ENGINE CRAWLER DIRECTIVES
 # ==============================================================================
 User-agent: *
 Allow: /
-Allow: /app.css
+Allow: /styles.css
 Allow: /script.js
-Allow: /style.css
+Allow: /images/
+Allow: /.well-known/security.txt
 Allow: /playstore.html
 Allow: /privacy-policy.html
 Allow: /favicon.png
 Allow: /og-image.png
 
-# Disallow administrative and private endpoints from public crawler indexing
+# Disallow administrative and internal endpoints from public crawler indexing
 Disallow: /laravel-core/
 Disallow: /scratch/
 Disallow: /admin-public/

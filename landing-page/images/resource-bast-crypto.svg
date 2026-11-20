@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450" role="img" aria-label="Cryptographic SHA-256 Sealed BAST Field Acceptance Illustration">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg3)"/>
+  <!-- Document Frame -->
+  <rect x="140" y="54" width="380" height="342" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="140" y="54" width="380" height="12" rx="6" fill="#0f3559"/>
+  <text x="172" y="102" font-family="Inter, Segoe UI, sans-serif" font-size="12" font-weight="800" fill="#e8913a" letter-spacing="1.2">CRYPTOGRAPHIC WORK CERTIFICATE</text>
+  <text x="172" y="132" font-family="Inter, Segoe UI, sans-serif" font-size="21" font-weight="800" fill="#0f3559">Digital BAST Acceptance</text>
+  <rect x="172" y="156" width="316" height="48" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="188" y="176" font-family="Inter, Segoe UI, sans-serif" font-size="10.5" font-weight="700" fill="#64748b">IMMUTABLE SHA-256 INTEGRITY SEAL</text>
+  <text x="188" y="195" font-family="Consolas, monospace" font-size="12" font-weight="700" fill="#0f3559">sha256:9a4e7c10...3b81f4d2</text>
+  <!-- Checklist items -->
+  <circle cx="182" cy="236" r="6" fill="#059669"/>
+  <text x="198" y="241" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#1e293b">Before &amp; After Photographic Proof</text>
+  <circle cx="182" cy="268" r="6" fill="#059669"/>
+  <text x="198" y="273" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#1e293b">Atomic BOM Material Consumption</text>
+  <circle cx="182" cy="300" r="6" fill="#059669"/>
+  <text x="198" y="305" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#1e293b">Customer On-Glass E-Signature</text>
+  <!-- Signature curve -->
+  <path d="M180 356 C205 328, 224 368, 250 344 C272 325, 294 358, 336 342" fill="none" stroke="#0f3559" stroke-width="2.8" stroke-linecap="round"/>
+  <line x1="172" y1="368" x2="352" y2="368" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- Verified Seal Badge Overlay -->
+  <g transform="translate(474, 154)">
+    <rect width="194" height="194" rx="18" fill="#0f3559"/>
+    <circle cx="97" cy="84" r="44" fill="#059669"/>
+    <path d="M77 84 L91 98 L119 68" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="97" y="156" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="13" font-weight="800" fill="#ffffff">TAMPER-PROOF</text>
+    <text x="97" y="174" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="10.5" font-weight="600" fill="#f4a94f">HASH_EQUALS GUARD</text>
+  </g>
+</svg>

@@ -1,4 +1,6 @@
-Contact: mailto:security@bentengsiber.com
+Contact: mailto:leoallogne@gmail.com
+Contact: mailto:allogneleo@gmail.com
+Contact: tel:+6281223554539
 Contact: https://admin.bentengsiber.com/request
 Expires: 2027-11-20T00:00:00.000Z
 Preferred-Languages: en, id

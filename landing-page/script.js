@@ -346,13 +346,13 @@
           'Category: ' + type + '\n\n' +
           'Details:\n' + details
         );
-        const mailtoUrl = 'mailto:security@bentengsiber.com?subject=' + subject + '&body=' + body;
+        const mailtoUrl = 'mailto:leoallogne@gmail.com?cc=allogneleo@gmail.com&subject=' + subject + '&body=' + body;
 
         incidentFeedback.hidden = false;
         incidentFeedback.innerHTML =
           'Your pre-filled message is ready. <a href="' +
           mailtoUrl +
-          '" style="text-decoration:underline;font-weight:700;color:#065f46;">Open Email Client</a> or submit directly via <a href="https://admin.bentengsiber.com/request" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:700;color:#065f46;">admin.bentengsiber.com/request</a>.';
+          '" style="text-decoration:underline;font-weight:700;color:#065f46;">Open Email Client</a>, chat via <a href="https://wa.me/6281223554539" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:700;color:#065f46;">WhatsApp (+62 812-2355-4539)</a>, or submit at <a href="https://admin.bentengsiber.com/request" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:700;color:#065f46;">/request</a>.';
         window.location.href = mailtoUrl;
       });
     }
@@ -370,6 +370,7 @@
       'nav.platform': 'Platform',
       'nav.resources': 'Resources',
       'nav.faq': 'FAQ',
+      'nav.contact': 'Contact',
       'nav.incident': 'Submit Report',
       'nav.cta': 'Open Console',
       'dd.sol1Title': 'Zero-Trust FiberOps NOC',
@@ -530,7 +531,21 @@
       'modal.fDetails': 'Summary & Objectives *',
       'modal.fSubmit': 'Compose Pre-Filled Email to Security Desk →',
       'modal.sbTag': 'EVALUATION ENVIRONMENT',
-      'modal.sbTitle': 'Live Sandbox Demo Credentials'
+      'modal.sbTitle': 'Live Sandbox Demo Credentials',
+      'contact.eyebrow': 'CONTACT & CUSTOMER SERVICE',
+      'contact.title': 'Get in Touch With Benteng Siber',
+      'contact.subtitle': 'Reach our team directly via phone, WhatsApp, email, or official Instagram Customer Service for deployments, technical support, and enterprise inquiries.',
+      'contact.phoneLabel': 'PHONE & WHATSAPP',
+      'contact.phoneDesc': 'Direct line for rapid deployment inquiries, technical escalation, and customer assistance.',
+      'contact.callNow': 'Call Now',
+      'contact.email1Label': 'PRIMARY EMAIL',
+      'contact.email1Desc': 'Commercial proposals, FiberOps onboarding, and security architecture consultation.',
+      'contact.email2Label': 'SUPPORT EMAIL',
+      'contact.email2Desc': 'Technical support, portal evaluation requests, and security disclosure reports.',
+      'contact.sendEmail': 'Send Email →',
+      'contact.igLabel': 'INSTAGRAM CS SERVICE',
+      'contact.igDesc': 'Official Instagram Customer Service channel for quick questions and updates.',
+      'contact.openIg': 'Message on Instagram →'
     },
     id: {
       'a11y.skip': 'Lewati ke konten utama',
@@ -540,6 +555,7 @@
       'nav.platform': 'Platform',
       'nav.resources': 'Wawasan',
       'nav.faq': 'FAQ',
+      'nav.contact': 'Kontak',
       'nav.incident': 'Kirim Laporan',
       'nav.cta': 'Buka Konsol',
       'dd.sol1Title': 'FiberOps NOC Zero-Trust',
@@ -700,7 +716,21 @@
       'modal.fDetails': 'Ringkasan & Kebutuhan *',
       'modal.fSubmit': 'Buat Email Terformat ke Tim Keamanan →',
       'modal.sbTag': 'LINGKUNGAN EVALUASI',
-      'modal.sbTitle': 'Kredensial Demo Live Sandbox'
+      'modal.sbTitle': 'Kredensial Demo Live Sandbox',
+      'contact.eyebrow': 'KONTAK & LAYANAN PELANGGAN',
+      'contact.title': 'Hubungi Tim Benteng Siber',
+      'contact.subtitle': 'Hubungi kami langsung melalui telepon, WhatsApp, email, atau Instagram Customer Service resmi untuk implementasi, dukungan teknis, dan kerja sama.',
+      'contact.phoneLabel': 'TELEPON & WHATSAPP',
+      'contact.phoneDesc': 'Jalur langsung untuk pertanyaan implementasi, eskalasi teknis, dan bantuan pelanggan.',
+      'contact.callNow': 'Telepon',
+      'contact.email1Label': 'EMAIL UTAMA',
+      'contact.email1Desc': 'Proposal komersial, onboarding FiberOps, dan konsultasi arsitektur keamanan.',
+      'contact.email2Label': 'EMAIL DUKUNGAN',
+      'contact.email2Desc': 'Dukungan teknis, permintaan evaluasi portal, dan pelaporan keamanan.',
+      'contact.sendEmail': 'Kirim Email →',
+      'contact.igLabel': 'INSTAGRAM CS SERVICE',
+      'contact.igDesc': 'Kanal resmi Instagram Customer Service untuk pertanyaan cepat dan pembaruan.',
+      'contact.openIg': 'Chat di Instagram →'
     }
   };
 

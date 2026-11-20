@@ -25,7 +25,7 @@ class FsmRichDataSeeder extends Seeder
         TechnicianLocation::truncate();
         Task::truncate();
         User::where('role', 'technician')->delete();
-        User::where('email', 'admin@fsm.com')->delete();
+        User::whereIn('email', ['admin@fsm.com', 'supervisor@fsm.com'])->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // Create Admin
@@ -35,6 +35,16 @@ class FsmRichDataSeeder extends Seeder
             'password'  => Hash::make('password123'),
             'role'      => 'admin',
             'phone'     => '081122334455',
+            'is_active' => true,
+        ]);
+
+        // Create Field Supervisor
+        User::create([
+            'name'      => 'Field Supervisor',
+            'email'     => 'supervisor@fsm.com',
+            'password'  => Hash::make('password123'),
+            'role'      => 'field_supervisor',
+            'phone'     => '081122334466',
             'is_active' => true,
         ]);
 

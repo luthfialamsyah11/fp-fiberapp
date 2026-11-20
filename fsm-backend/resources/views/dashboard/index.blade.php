@@ -109,7 +109,11 @@
                                 <ion-icon name="chevron-forward" class="text-[10px]"></ion-icon>
                             </a>
                         @endif
-                        @if($stats['pending'] > 0)
+                        @php
+                            $dashCanDispatch = auth()->user()?->hasAnyRole(['admin', 'super_admin', 'noc_dispatcher']);
+                            $dashCanInventory = auth()->user()?->hasAnyRole(['admin', 'super_admin', 'warehouse_admin', 'noc_dispatcher']);
+                        @endphp
+                        @if($stats['pending'] > 0 && $dashCanDispatch)
                             <a href="{{ route('admin.assignments') }}"
                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-200 text-[11px] font-semibold transition-colors">
                                 <ion-icon name="flash" class="text-amber-400 text-sm"></ion-icon>
@@ -117,7 +121,7 @@
                                 <ion-icon name="chevron-forward" class="text-[10px]"></ion-icon>
                             </a>
                         @endif
-                        @if($stats['low_stock_items'] > 0)
+                        @if($stats['low_stock_items'] > 0 && $dashCanInventory)
                             <a href="{{ route('admin.inventory.index') }}"
                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-semibold transition-colors">
                                 <ion-icon name="cube-outline" class="text-amber-400 text-sm"></ion-icon>
@@ -131,19 +135,21 @@
 
             <!-- Primary Action Hub (44px Ergonomic Touch Targets) -->
             <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
-                <a href="{{ route('admin.tasks.create') }}"
-                   class="min-h-[40px] px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white rounded-xl transition-all flex items-center gap-1.5 shadow-sm shadow-blue-950/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
-                    <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
-                    <span>New Work Order</span>
-                </a>
-                <a href="{{ route('admin.assignments') }}"
-                   class="min-h-[40px] px-3.5 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-700 text-slate-100 rounded-xl transition-all flex items-center gap-1.5">
-                    <ion-icon name="navigate-circle-outline" class="text-base text-amber-400"></ion-icon>
-                    <span>Dispatch Queue</span>
-                    @if($stats['pending'] > 0)
-                        <span class="ml-0.5 px-1.5 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[10px] font-extrabold tabular-nums">{{ $stats['pending'] }}</span>
-                    @endif
-                </a>
+                @if(auth()->user()?->hasAnyRole(['admin', 'super_admin', 'noc_dispatcher']))
+                    <a href="{{ route('admin.tasks.create') }}"
+                       class="min-h-[40px] px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white rounded-xl transition-all flex items-center gap-1.5 shadow-sm shadow-blue-950/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                        <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
+                        <span>New Work Order</span>
+                    </a>
+                    <a href="{{ route('admin.assignments') }}"
+                       class="min-h-[40px] px-3.5 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-700 text-slate-100 rounded-xl transition-all flex items-center gap-1.5">
+                        <ion-icon name="navigate-circle-outline" class="text-base text-amber-400"></ion-icon>
+                        <span>Dispatch Queue</span>
+                        @if($stats['pending'] > 0)
+                            <span class="ml-0.5 px-1.5 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[10px] font-extrabold tabular-nums">{{ $stats['pending'] }}</span>
+                        @endif
+                    </a>
+                @endif
                 <a href="{{ route('admin.tracking') }}"
                    class="min-h-[40px] px-3.5 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:scale-[0.98] border border-slate-700 text-slate-100 rounded-xl transition-all flex items-center gap-1.5">
                     <ion-icon name="locate-outline" class="text-base text-sky-400"></ion-icon>

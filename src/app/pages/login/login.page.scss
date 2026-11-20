@@ -1,6 +1,11 @@
+/* ==========================================================================
+   FIBEROPS TECHNICIAN LOGIN — BRIGHT CORPORATE LIGHT THEME
+   Aligned with Benteng Siber Corporate Navy (#0F3559) + Warm Amber (#E8913A)
+   ========================================================================== */
+
 .login-content {
-  --background: #090D16;
-  --color: #F8FAFC;
+  --background: #F6F7F9;
+  --color: #0F3559;
 }
 
 .login-container {
@@ -14,17 +19,12 @@
   position: relative;
   box-sizing: border-box;
 
-  // Background ambient glow (clean B2B, no overdone neon)
   &::before {
     content: '';
     position: absolute;
-    top: -50px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 320px;
-    height: 240px;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, transparent 70%);
-    border-radius: 50%;
+    inset: 0;
+    background-image: radial-gradient(rgba(15, 53, 89, 0.065) 1px, transparent 1px);
+    background-size: 24px 24px;
     pointer-events: none;
     z-index: 0;
   }
@@ -44,19 +44,21 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
-    background: rgba(30, 41, 59, 0.6);
-    border: 1px solid rgba(51, 65, 85, 0.6);
-    border-radius: 8px;
-    color: #94A3B8;
+    padding: 7px 12px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    color: #0F3559;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
+    box-shadow: 0 1px 2px rgba(15, 53, 89, 0.05);
     transition: all 0.15s ease;
 
     &:hover, &:active {
-      background: #1E293B;
-      color: #F8FAFC;
+      background: #EEF4FA;
+      border-color: #0F3559;
+      color: #0F3559;
     }
 
     ion-icon {
@@ -68,20 +70,19 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 10px;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 5px 11px;
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
     border-radius: 9999px;
     font-size: 11px;
-    font-weight: 600;
-    color: #34D399;
+    font-weight: 700;
+    color: #047857;
 
     .status-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
       background: #10B981;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
       animation: pulse 2s infinite ease-in-out;
     }
   }
@@ -89,13 +90,13 @@
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 0.45; transform: scale(0.9); }
 }
 
 // ─── Header ─────────────────────────────────────────────────────────────────────
 .login-header {
   text-align: center;
-  margin: 12px 0 24px;
+  margin: 10px 0 22px;
   position: relative;
   z-index: 2;
 
@@ -108,30 +109,30 @@
   }
 
   .logo-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-    border-radius: 18px;
+    width: 58px;
+    height: 58px;
+    background: linear-gradient(135deg, #0F3559 0%, #011835 100%);
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+    border: 1.5px solid rgba(15, 53, 89, 0.16);
+    box-shadow: 0 10px 24px rgba(15, 53, 89, 0.18);
     position: relative;
     z-index: 2;
 
     ion-icon {
-      font-size: 30px;
-      color: #FFFFFF;
+      font-size: 28px;
+      color: #E8913A;
     }
   }
 
   .logo-ring {
     position: absolute;
-    width: 76px;
-    height: 76px;
-    border-radius: 24px;
-    border: 1px dashed rgba(59, 130, 246, 0.4);
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    border: 1px dashed rgba(232, 145, 58, 0.45);
     z-index: 1;
   }
 
@@ -139,39 +140,39 @@
     display: inline-block;
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #60A5FA;
-    background: rgba(37, 99, 235, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    padding: 3px 10px;
+    color: #D07E2E;
+    background: #FFF5EA;
+    border: 1px solid rgba(232, 145, 58, 0.35);
+    padding: 3px 11px;
     border-radius: 9999px;
     margin-bottom: 8px;
   }
 
   h1 {
-    color: #FFFFFF;
+    color: #0F3559;
     font-size: 24px;
     font-weight: 800;
     margin: 0 0 4px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
 
   .subtitle {
-    color: #94A3B8;
+    color: #475569;
     font-size: 13px;
-    font-weight: 400;
+    font-weight: 500;
     margin: 0;
   }
 }
 
 // ─── Login Card ─────────────────────────────────────────────────────────────────
 .login-card {
-  background: #0F172A;
-  border: 1px solid #1E293B;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
   border-radius: 20px;
   padding: 24px 20px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 14px 36px rgba(15, 53, 89, 0.08);
   position: relative;
   z-index: 2;
 
@@ -181,25 +182,25 @@
     h2 {
       font-size: 17px;
       font-weight: 700;
-      color: #F8FAFC;
+      color: #0F3559;
       margin: 0 0 4px;
     }
 
     .card-desc {
       font-size: 12px;
-      color: #94A3B8;
+      color: #64748B;
       margin: 0;
-      line-height: 1.4;
+      line-height: 1.45;
     }
   }
 }
 
 // ─── Demo Selector Pills ────────────────────────────────────────────────────────
 .demo-selector {
-  background: #090D16;
-  border: 1px solid #1E293B;
+  background: #F6F7F9;
+  border: 1px solid #E2E8F0;
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 11px 12px;
   margin-bottom: 18px;
 
   .demo-label {
@@ -207,12 +208,13 @@
     align-items: center;
     gap: 6px;
     font-size: 11px;
-    font-weight: 600;
-    color: #60A5FA;
+    font-weight: 700;
+    color: #0F3559;
     margin-bottom: 8px;
 
     ion-icon {
-      font-size: 13px;
+      font-size: 14px;
+      color: #E8913A;
     }
   }
 
@@ -222,10 +224,10 @@
     gap: 6px;
 
     .demo-chip {
-      background: #1E293B;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 6px 4px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 9px;
+      padding: 7px 4px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -235,12 +237,12 @@
       .chip-name {
         font-size: 11px;
         font-weight: 700;
-        color: #F8FAFC;
+        color: #0F3559;
       }
 
       .chip-role {
         font-size: 9px;
-        color: #94A3B8;
+        color: #64748B;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -248,21 +250,21 @@
       }
 
       &:hover {
-        background: #2563EB;
-        border-color: #3B82F6;
-
-        .chip-role {
-          color: rgba(255, 255, 255, 0.8);
-        }
+        background: #EEF4FA;
+        border-color: #0F3559;
       }
 
       &.active {
-        background: #2563EB;
-        border-color: #60A5FA;
-        box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+        background: #0F3559;
+        border-color: #0F3559;
+        box-shadow: 0 4px 12px rgba(15, 53, 89, 0.2);
+
+        .chip-name {
+          color: #FFFFFF;
+        }
 
         .chip-role {
-          color: rgba(255, 255, 255, 0.9);
+          color: rgba(255, 255, 255, 0.82);
         }
       }
 
@@ -280,10 +282,10 @@
   label {
     display: block;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #94A3B8;
+    letter-spacing: 0.05em;
+    color: #0F3559;
     margin-bottom: 6px;
   }
 }
@@ -291,17 +293,17 @@
 .input-wrap {
   display: flex;
   align-items: center;
-  background: #090D16;
+  background: #FFFFFF;
   border-radius: 12px;
   padding: 0 12px;
   min-height: 48px;
-  border: 1.5px solid #1E293B;
+  border: 1.5px solid #CBD5E1;
   transition: all 0.2s ease;
 
   &.focused {
-    border-color: #2563EB;
-    background: #090D16;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: #E8913A;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(232, 145, 58, 0.16);
   }
 
   .input-icon {
@@ -313,7 +315,7 @@
   }
 
   &.focused .input-icon {
-    color: #3B82F6;
+    color: #E8913A;
   }
 
   input {
@@ -321,18 +323,17 @@
     border: none;
     background: transparent;
     padding: 13px 0;
-    font-size: 16px; // 16px prevents iOS Safari auto-zoom on focus
-    color: #F8FAFC;
+    font-size: 16px; // Prevents iOS Safari auto-zoom on focus
+    color: #0F172A;
     outline: none;
     font-family: 'Inter', sans-serif;
 
     &::placeholder {
-      color: #475569;
+      color: #94A3B8;
       font-size: 14px;
     }
   }
 
-  // Minimum 44x44px Touch Target for Mobile Ergonomics
   .toggle-btn {
     width: 44px;
     height: 44px;
@@ -349,7 +350,7 @@
     -webkit-tap-highlight-color: transparent;
 
     &:hover, &:active {
-      color: #94A3B8;
+      color: #0F3559;
     }
 
     ion-icon {
@@ -370,14 +371,15 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: #CBD5E1;
+    font-weight: 500;
+    color: #334155;
     cursor: pointer;
     user-select: none;
 
     input[type="checkbox"] {
       width: 16px;
       height: 16px;
-      accent-color: #2563EB;
+      accent-color: #0F3559;
       cursor: pointer;
     }
   }
@@ -387,10 +389,11 @@
     align-items: center;
     gap: 4px;
     font-size: 11px;
-    color: #64748B;
+    font-weight: 600;
+    color: #047857;
 
     ion-icon {
-      font-size: 13px;
+      font-size: 14px;
     }
   }
 }
@@ -398,24 +401,25 @@
 // ─── Submit Button ──────────────────────────────────────────────────────────────
 .btn-login {
   width: 100%;
+  min-height: 48px;
   padding: 14px;
-  background: #2563EB;
+  background: #E8913A;
   color: #FFFFFF;
   border: none;
   border-radius: 12px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 6px 16px rgba(232, 145, 58, 0.3);
   transition: all 0.15s ease;
   font-family: 'Inter', sans-serif;
 
   &:hover {
-    background: #1D4ED8;
+    background: #D07E2E;
   }
 
   &:active {
@@ -448,19 +452,20 @@
   text-align: center;
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid #1E293B;
+  border-top: 1px solid #E2E8F0;
 
   p {
-    font-size: 11px;
+    font-size: 12px;
     color: #64748B;
     margin: 0;
 
     a {
-      color: #60A5FA;
+      color: #0F3559;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 700;
 
       &:hover {
+        color: #E8913A;
         text-decoration: underline;
       }
     }
@@ -475,26 +480,28 @@
   z-index: 2;
 
   .app-version {
-    color: #64748B;
+    color: #475569;
     font-size: 11px;
+    font-weight: 600;
     margin: 0 0 2px;
   }
 
   .copyright {
     font-size: 10px;
-    color: #475569;
+    color: #64748B;
     margin: 0;
   }
 }
 
 .demo-direct-btn {
   width: 100%;
+  min-height: 46px;
   margin-top: 10px;
   padding: 12px 16px;
-  border-radius: 14px;
-  border: 1px dashed rgba(0, 242, 254, 0.45);
-  background: rgba(0, 242, 254, 0.08);
-  color: #00f2fe;
+  border-radius: 12px;
+  border: 1.5px solid #0F3559;
+  background: #FFFFFF;
+  color: #0F3559;
   font-size: 0.84rem;
   font-weight: 700;
   display: flex;
@@ -506,5 +513,6 @@
 }
 
 .demo-direct-btn:hover {
-  background: rgba(0, 242, 254, 0.16);
+  background: #0F3559;
+  color: #FFFFFF;
 }

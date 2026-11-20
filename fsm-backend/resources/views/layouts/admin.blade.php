@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Compiled Production Tailwind CSS -->
-    <link rel="stylesheet" href="{{ asset('build/app.css') }}?v=20261120v2">
+    <link rel="stylesheet" href="{{ asset('build/app.css') }}?v=20261120v3">
     
     <!-- Ionicons -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
@@ -332,7 +332,7 @@
                 <div class="flex items-center gap-2">
                     <div class="text-right hidden sm:block">
                         <span class="text-xs font-medium text-textPrimary block">{{ auth()->user()->name ?? 'Admin FSM' }}</span>
-                        <span class="text-[10px] text-textSecondary block">Super Admin</span>
+                        <span class="text-[10px] text-textSecondary block">{{ auth()->user()?->roleLabel() ?? 'Administrator' }}</span>
                     </div>
                 </div>
             </div>

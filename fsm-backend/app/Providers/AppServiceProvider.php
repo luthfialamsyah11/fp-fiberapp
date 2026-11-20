@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public const SCHEMA_VERSION = 'v5.9b-mysql-safe-tokens';
+    public const SCHEMA_VERSION = 'v6.0-bright-auth-supervisor';
 
     public function register(): void
     {

@@ -10,15 +10,29 @@
         <h2 class="text-base sm:text-lg font-bold text-textPrimary tracking-tight">Operations Work Orders</h2>
         <p class="text-xs text-textSecondary">Create, filter, quick-dispatch, and monitor SLA compliance across all field tickets.</p>
     </div>
+    @php
+        $canManageDispatch = auth()->user()?->hasAnyRole(['admin', 'super_admin', 'noc_dispatcher']);
+    @endphp
     <div class="flex items-center gap-2">
-        <a href="{{ route('admin.assignments') }}" class="bg-white border border-slate-200 hover:border-slate-300 text-slate-700 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all inline-flex items-center gap-1.5 shadow-sm">
-            <ion-icon name="git-network-outline" class="text-sm text-blue-600"></ion-icon>
-            Assignment Board
-        </a>
-        <a href="{{ route('admin.tasks.create') }}" class="bg-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-blue-500/15 transition-all inline-flex items-center gap-1.5">
-            <ion-icon name="add-circle-outline" class="text-base pointer-events-none"></ion-icon>
-            Create New Task
-        </a>
+        @if($canManageDispatch)
+            <a href="{{ route('admin.assignments') }}" class="bg-white border border-slate-200 hover:border-slate-300 text-slate-700 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all inline-flex items-center gap-1.5 shadow-sm">
+                <ion-icon name="git-network-outline" class="text-sm text-blue-600"></ion-icon>
+                Assignment Board
+            </a>
+            <a href="{{ route('admin.tasks.create') }}" class="bg-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-blue-500/15 transition-all inline-flex items-center gap-1.5">
+                <ion-icon name="add-circle-outline" class="text-base pointer-events-none"></ion-icon>
+                Create New Task
+            </a>
+        @else
+            <a href="{{ route('admin.tracking') }}" class="bg-white border border-slate-200 hover:border-slate-300 text-slate-700 px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all inline-flex items-center gap-1.5 shadow-sm">
+                <ion-icon name="locate-outline" class="text-sm text-blue-600"></ion-icon>
+                Live Tracking
+            </a>
+            <a href="{{ route('admin.proofs') }}" class="bg-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-blue-500/15 transition-all inline-flex items-center gap-1.5">
+                <ion-icon name="images-outline" class="text-base pointer-events-none"></ion-icon>
+                Proof of Work
+            </a>
+        @endif
     </div>
 </div>
 

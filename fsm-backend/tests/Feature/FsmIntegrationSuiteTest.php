@@ -2397,4 +2397,56 @@ class FsmIntegrationSuiteTest extends TestCase
             'note'    => 'Dispatcher reopened work order for field rework: ONT fiber attenuation high, re-splicing needed',
         ]);
     }
+
+    public function test_field_supervisor_can_authenticate_and_access_all_supervisor_pages(): void
+    {
+        // Migration ensures supervisor@fsm.com exists with role field_supervisor
+        $supervisor = User::where('email', 'supervisor@fsm.com')->first();
+        $this->assertNotNull($supervisor, 'Expected supervisor@fsm.com to be provisioned by migration.');
+        $this->assertEquals('field_supervisor', $supervisor->role);
+        $this->assertTrue($supervisor->is_active);
+        $this->assertTrue($supervisor->isPortalStaff());
+
+        // Bright login page loads cleanly
+        $this->get('/login')
+            ->assertStatus(200)
+            ->assertSee('Admin &amp; Supervisor Sign In', false)
+            ->assertSee('supervisor@fsm.com', false);
+
+        // Authenticate via POST /login
+        $loginRes = $this->post('/login', [
+            'email'    => 'supervisor@fsm.com',
+            'password' => 'password123',
+        ]);
+        $loginRes->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($supervisor);
+
+        $tech = $this->createTechnician(['email' => 'sup-tech@fsm.com']);
+        $task = Task::create([
+            'title'          => 'Supervisor Monitored Fiber Repair',
+            'customer_name'  => 'Enterprise Client',
+            'address'        => 'Jl. Sudirman Kav 10',
+            'technician_id'  => $tech->id,
+            'status'         => 'on-going',
+            'priority'       => 'high',
+            'tracking_token' => Str::random(32),
+        ]);
+
+        // All Supervisor-accessible pages must return HTTP 200 with accurate role label
+        $this->actingAs($supervisor)->get('/dashboard')
+            ->assertStatus(200)
+            ->assertSee('Field Supervisor', false);
+        $this->actingAs($supervisor)->get('/tasks')->assertStatus(200);
+        $this->actingAs($supervisor)->get("/tasks/{$task->id}")->assertStatus(200);
+        $this->actingAs($supervisor)->get('/tracking')->assertStatus(200);
+        $this->actingAs($supervisor)->get('/proofs')->assertStatus(200);
+        $this->actingAs($supervisor)->get('/history')->assertStatus(200);
+        $this->actingAs($supervisor)->get('/reports')->assertStatus(200);
+        $this->actingAs($supervisor)->get('/guide')->assertStatus(200);
+        $this->actingAs($supervisor)->getJson('/live-pulse')->assertStatus(200);
+
+        // Super-Admin-only pages remain strictly protected (403)
+        $this->actingAs($supervisor)->get('/settings')->assertStatus(403);
+        $this->actingAs($supervisor)->get('/staff')->assertStatus(403);
+    }
 }

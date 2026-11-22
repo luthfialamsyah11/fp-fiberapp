@@ -45,8 +45,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="images/hero-cyber-ops.webp" fetchpriority="high">
 
-  <!-- Unified Bright Corporate Stylesheet -->
-  <link rel="stylesheet" href="styles.css?v=1.3">
+  <!-- Unified Bright Corporate Stylesheet & Leaflet Global Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="styles.css?v=1.4">
 
   <!-- Structured Data (JSON-LD Schema.org: Organization, WebSite, SoftwareApplication, BreadcrumbList, FAQPage) -->
   <script type="application/ld+json">
@@ -114,23 +115,30 @@
         ],
         "offers": {
           "@type": "AggregateOffer",
-          "priceCurrency": "IDR",
-          "lowPrice": "1500000",
-          "highPrice": "4500000",
+          "priceCurrency": "USD",
+          "lowPrice": "249",
+          "highPrice": "4950",
           "offerCount": "3",
           "offers": [
             {
               "@type": "Offer",
               "name": "Starter ISP Plan (14-Day Free Trial)",
-              "price": "1500000",
-              "priceCurrency": "IDR",
+              "price": "249",
+              "priceCurrency": "USD",
               "url": "https://admin.bentengsiber.com/register-isp"
             },
             {
               "@type": "Offer",
               "name": "Growth Regional ISP Plan (14-Day Free Trial)",
-              "price": "4500000",
-              "priceCurrency": "IDR",
+              "price": "990",
+              "priceCurrency": "USD",
+              "url": "https://admin.bentengsiber.com/register-isp"
+            },
+            {
+              "@type": "Offer",
+              "name": "Enterprise Carrier Plan (Dedicated SLA)",
+              "price": "4950",
+              "priceCurrency": "USD",
               "url": "https://admin.bentengsiber.com/register-isp"
             }
           ]
@@ -835,16 +843,41 @@
           </p>
         </div>
 
-        <!-- Clean Dotted Coverage Map (Honest Primary Hub: Indonesia) -->
-        <div class="coverage-map-frame reveal">
-          <img
-            src="images/coverage-network-map.svg"
-            alt="Dotted architecture map highlighting Benteng Siber Primary Operations Hub in Jakarta, Indonesia and cloud-ready API reach"
-            width="1120"
-            height="480"
-            loading="eager"
-            decoding="async"
-          >
+        <!-- Live Interactive Global Network Map (Leaflet + Real CartoDB Positron + Animated Geodesic Arcs) -->
+        <div class="coverage-map-frame coverage-map-interactive reveal" aria-label="Interactive global map highlighting Benteng Siber Primary Operations Hub in Jakarta, Indonesia and global cloud-ready API edge reach">
+          <div class="map-hud-top">
+            <div class="map-hud-badge">
+              <span class="map-live-dot" aria-hidden="true"></span>
+              <span data-i18n="map.hudTitle">LIVE GLOBAL BACKBONE &amp; CLOUD EDGE MAP</span>
+            </div>
+            <div class="map-region-controls" role="group" aria-label="Map region quick focus">
+              <button class="map-region-btn is-active" type="button" data-map-focus="global" data-i18n="map.btnGlobal">Global</button>
+              <button class="map-region-btn" type="button" data-map-focus="jakarta" data-i18n="map.btnJakarta">Jakarta Hub</button>
+              <button class="map-region-btn" type="button" data-map-focus="apac" data-i18n="map.btnApac">APAC</button>
+              <button class="map-region-btn" type="button" data-map-focus="euus" data-i18n="map.btnEuUs">EU &amp; Americas</button>
+            </div>
+          </div>
+
+          <div id="global-network-map" class="global-network-map" role="region" aria-label="Interactive world map of Benteng Siber network hubs and routes">
+            <noscript>
+              <img src="images/coverage-network-map.svg" alt="Benteng Siber global network reach map centered in Jakarta, Indonesia" width="1120" height="480">
+            </noscript>
+          </div>
+
+          <div class="map-hud-legend" aria-label="Map legend">
+            <span class="map-legend-item">
+              <span class="map-legend-dot map-legend-dot--hub" aria-hidden="true"></span>
+              <span data-i18n="map.legendHub">Primary Ops Hub (Jakarta, ID)</span>
+            </span>
+            <span class="map-legend-item">
+              <span class="map-legend-dot map-legend-dot--edge" aria-hidden="true"></span>
+              <span data-i18n="map.legendEdge">Global Cloud &amp; API Edge Nodes</span>
+            </span>
+            <span class="map-legend-item">
+              <span class="map-legend-line" aria-hidden="true"></span>
+              <span data-i18n="map.legendRoute">Encrypted TLS 1.3 &amp; Webhook Sync Routes</span>
+            </span>
+          </div>
         </div>
 
         <!-- 4 Live Production Portals (ALL HTTP 200 VERIFIED) -->
@@ -946,15 +979,15 @@
                 <span class="pricing-pill" data-i18n="pricing.trialBadge">14-Day Free Trial</span>
               </div>
               <div class="pricing-price">
-                <span class="pricing-amount tabular-nums" data-i18n="pricing.t1Price">Rp 1,5 Jt</span>
+                <span class="pricing-amount tabular-nums" data-i18n="pricing.t1Price">$249</span>
                 <span class="pricing-period" data-i18n="pricing.perMonth">/ month</span>
               </div>
               <p class="pricing-desc" data-i18n="pricing.t1Desc">
-                Built for growing RT/RW Net and local FTTH operators moving off WhatsApp spreadsheets.
+                Built for growing local ISPs &amp; FTTH operators transitioning off manual WhatsApp and spreadsheet dispatch.
               </p>
             </div>
             <ul class="pricing-features">
-              <li data-i18n="pricing.t1f1">Up to 5 Field Technicians &amp; 50 ODP/ODC GIS Nodes</li>
+              <li data-i18n="pricing.t1f1">Up to 10 Field Technicians &amp; 100 ODP/ODC GIS Nodes</li>
               <li data-i18n="pricing.t1f2">5-Role Granular RBAC &amp; Isolated Multi-Tenant Cloud</li>
               <li data-i18n="pricing.t1f3">Offline-First Technician PWA &amp; Android APK</li>
               <li data-i18n="pricing.t1f4">On-Site Dynamic QRIS &amp; SHA-256 Public BAST (/bast/verify)</li>
@@ -976,7 +1009,7 @@
                 <span class="pricing-pill pricing-pill--accent" data-i18n="pricing.trialBadge">14-Day Free Trial</span>
               </div>
               <div class="pricing-price">
-                <span class="pricing-amount tabular-nums" data-i18n="pricing.t2Price">Rp 4,5 Jt</span>
+                <span class="pricing-amount tabular-nums" data-i18n="pricing.t2Price">$990</span>
                 <span class="pricing-period" data-i18n="pricing.perMonth">/ month</span>
               </div>
               <p class="pricing-desc" data-i18n="pricing.t2Desc">
@@ -984,7 +1017,7 @@
               </p>
             </div>
             <ul class="pricing-features">
-              <li data-i18n="pricing.t2f1">Up to 20 Field Technicians &amp; 250 ODP/ODC GIS Nodes</li>
+              <li data-i18n="pricing.t2f1">Up to 40 Field Technicians &amp; 500 ODP/ODC GIS Nodes</li>
               <li data-i18n="pricing.t2f2">MikroTik RouterOS v7 REST Auto-Provisioning &amp; 3s QRIS Unblock</li>
               <li data-i18n="pricing.t2f3">Live OLT / GenieACS TR-069 Optical Power (-dBm) Gate</li>
               <li data-i18n="pricing.t2f4">Async ShouldQueue Hardware Workers &amp; Signed Webhooks</li>
@@ -1005,18 +1038,18 @@
                 <span class="pricing-pill pricing-pill--navy" data-i18n="pricing.verifiedBadge">Verified Onboarding</span>
               </div>
               <div class="pricing-price">
-                <span class="pricing-amount" data-i18n="pricing.t3Price">Custom</span>
-                <span class="pricing-period" data-i18n="pricing.customPeriod">SLA &amp; Volume</span>
+                <span class="pricing-amount tabular-nums" data-i18n="pricing.t3Price">$4,950</span>
+                <span class="pricing-period" data-i18n="pricing.perMonth">/ month</span>
               </div>
               <p class="pricing-desc" data-i18n="pricing.t3Desc">
-                For national NAPs, multi-city ISPs, and carrier deployments requiring custom quotas and compliance.
+                For national NAPs, multi-city ISPs, and carrier deployments requiring unlimited scale and dedicated SLA.
               </p>
             </div>
             <ul class="pricing-features">
               <li data-i18n="pricing.t3f1">Unlimited Field Technicians, ODP/ODC &amp; Multi-Region NOC</li>
               <li data-i18n="pricing.t3f2">Custom Branded Domain, White-Label BAST &amp; APK Signing</li>
               <li data-i18n="pricing.t3f3">Dedicated Multi-Router MikroTik &amp; OLT/ACS Cluster Drivers</li>
-              <li data-i18n="pricing.t3f4">Immutable SHA-256 Platform Audit Trail &amp; Priority SLA</li>
+              <li data-i18n="pricing.t3f4">Immutable SHA-256 Platform Audit Trail &amp; 99.99% Priority SLA</li>
               <li data-i18n="pricing.t3f5">Direct Provisioning via Verified Enterprise Sales Activation</li>
             </ul>
             <div class="pricing-actions">
@@ -1569,6 +1602,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=1.3" defer></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+  <script src="script.js?v=1.4" defer></script>
 </body>
 </html>

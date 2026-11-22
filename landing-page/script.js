@@ -474,6 +474,14 @@
       'sandbox.title': 'Evaluating Benteng Siber for your ISP or operations team?',
       'sandbox.desc': 'Copy pre-seeded demo credentials for both Super Admin and Field Technician accounts in one click.',
       'sandbox.cta': 'View Sandbox Credentials →',
+      'map.hudTitle': 'LIVE GLOBAL BACKBONE & CLOUD EDGE MAP',
+      'map.btnGlobal': 'Global',
+      'map.btnJakarta': 'Jakarta Hub',
+      'map.btnApac': 'APAC',
+      'map.btnEuUs': 'EU & Americas',
+      'map.legendHub': 'Primary Ops Hub (Jakarta, ID)',
+      'map.legendEdge': 'Global Cloud & API Edge Nodes',
+      'map.legendRoute': 'Encrypted TLS 1.3 & Webhook Sync Routes',
       'pricing.eyebrow': 'MULTI-TENANT ISP SAAS PLANS',
       'pricing.title': 'Predictable Carrier Pricing, Instant 14-Day Cloud Trial',
       'pricing.subtitle': 'Provision an isolated Zero-Trust FiberOps tenant in under 60 seconds on Starter or Growth, or request dedicated Enterprise Carrier onboarding verified by our architects.',
@@ -483,30 +491,30 @@
       'pricing.perMonth': '/ month',
       'pricing.customPeriod': 'SLA & Volume',
       'pricing.t1Name': 'Starter ISP',
-      'pricing.t1Price': 'Rp 1,5 Jt',
-      'pricing.t1Desc': 'Built for growing RT/RW Net and local FTTH operators moving off WhatsApp spreadsheets.',
-      'pricing.t1f1': 'Up to 5 Field Technicians & 50 ODP/ODC GIS Nodes',
+      'pricing.t1Price': '$249',
+      'pricing.t1Desc': 'Built for growing local ISPs & FTTH operators transitioning off manual WhatsApp and spreadsheet dispatch.',
+      'pricing.t1f1': 'Up to 10 Field Technicians & 100 ODP/ODC GIS Nodes',
       'pricing.t1f2': '5-Role Granular RBAC & Isolated Multi-Tenant Cloud',
       'pricing.t1f3': 'Offline-First Technician PWA & Android APK',
       'pricing.t1f4': 'On-Site Dynamic QRIS & SHA-256 Public BAST (/bast/verify)',
       'pricing.t1f5': 'AES-256-CBC Encrypted Tenant Credentials',
       'pricing.t1Cta': 'Start Starter Trial →',
       'pricing.t2Name': 'Growth Regional',
-      'pricing.t2Price': 'Rp 4,5 Jt',
+      'pricing.t2Price': '$990',
       'pricing.t2Desc': 'Full hardware network orchestration, automated MikroTik restoration, and OLT optical telemetry gates.',
-      'pricing.t2f1': 'Up to 20 Field Technicians & 250 ODP/ODC GIS Nodes',
+      'pricing.t2f1': 'Up to 40 Field Technicians & 500 ODP/ODC GIS Nodes',
       'pricing.t2f2': 'MikroTik RouterOS v7 REST Auto-Provisioning & 3s QRIS Unblock',
       'pricing.t2f3': 'Live OLT / GenieACS TR-069 Optical Power (-dBm) Gate',
       'pricing.t2f4': 'Async ShouldQueue Hardware Workers & Signed Webhooks',
       'pricing.t2f5': 'GPS Auto-Dispatch, Atomic BOM Ledger & Live /track Radar',
       'pricing.t2Cta': 'Start Growth 14-Day Trial →',
       'pricing.t3Name': 'Enterprise Carrier',
-      'pricing.t3Price': 'Custom',
-      'pricing.t3Desc': 'For national NAPs, multi-city ISPs, and carrier deployments requiring custom quotas and compliance.',
+      'pricing.t3Price': '$4,950',
+      'pricing.t3Desc': 'For national NAPs, multi-city ISPs, and carrier deployments requiring unlimited scale and dedicated SLA.',
       'pricing.t3f1': 'Unlimited Field Technicians, ODP/ODC & Multi-Region NOC',
       'pricing.t3f2': 'Custom Branded Domain, White-Label BAST & APK Signing',
       'pricing.t3f3': 'Dedicated Multi-Router MikroTik & OLT/ACS Cluster Drivers',
-      'pricing.t3f4': 'Immutable SHA-256 Platform Audit Trail & Priority SLA',
+      'pricing.t3f4': 'Immutable SHA-256 Platform Audit Trail & 99.99% Priority SLA',
       'pricing.t3f5': 'Direct Provisioning via Verified Enterprise Sales Activation',
       'pricing.t3Cta': 'Request Enterprise Activation →',
       'pricing.footnote': 'Instant 14-day trials activate automatically for Starter & Growth with zero credit card required. Enterprise Carrier tiers undergo direct verification to guarantee dedicated infrastructure capacity.',
@@ -702,6 +710,14 @@
       'sandbox.title': 'Sedang mengevaluasi Benteng Siber untuk tim ISP atau operasi Anda?',
       'sandbox.desc': 'Salin kredensial demo siap pakai untuk akun Super Admin dan Teknisi Lapangan hanya dengan satu klik.',
       'sandbox.cta': 'Lihat Kredensial Sandbox →',
+      'map.hudTitle': 'PETA BACKBONE GLOBAL & CLOUD EDGE LANGSUNG',
+      'map.btnGlobal': 'Global',
+      'map.btnJakarta': 'Hub Jakarta',
+      'map.btnApac': 'APAC',
+      'map.btnEuUs': 'Eropa & Amerika',
+      'map.legendHub': 'Pusat Operasi Utama (Jakarta, ID)',
+      'map.legendEdge': 'Node Cloud & API Edge Global',
+      'map.legendRoute': 'Rute Sinkron TLS 1.3 & Webhook Terenkripsi',
       'pricing.eyebrow': 'PAKET SAAS ISP MULTI-TENANT',
       'pricing.title': 'Harga Carrier Transparan, Trial Cloud Instan 14 Hari',
       'pricing.subtitle': 'Aktifkan tenant Zero-Trust FiberOps terisolasi di bawah 60 detik pada paket Starter atau Growth, atau ajukan onboarding Enterprise Carrier terverifikasi oleh arsitek kami.',
@@ -711,30 +727,30 @@
       'pricing.perMonth': '/ bulan',
       'pricing.customPeriod': 'SLA & Skala Khusus',
       'pricing.t1Name': 'Starter ISP',
-      'pricing.t1Price': 'Rp 1,5 Jt',
-      'pricing.t1Desc': 'Cocok untuk RT/RW Net berkembang dan operator FTTH lokal yang beralih dari laporan WhatsApp & spreadsheet.',
-      'pricing.t1f1': 'Hingga 5 Teknisi Lapangan & 50 Node GIS ODP/ODC',
+      'pricing.t1Price': '$249',
+      'pricing.t1Desc': 'Cocok untuk ISP lokal & operator FTTH berkembang yang beralih dari laporan WhatsApp & spreadsheet manual.',
+      'pricing.t1f1': 'Hingga 10 Teknisi Lapangan & 100 Node GIS ODP/ODC',
       'pricing.t1f2': '5 Peran RBAC Granular & Cloud Multi-Tenant Terisolasi',
       'pricing.t1f3': 'PWA Teknisi Offline-First & APK Android Native',
       'pricing.t1f4': 'QRIS Dinamis On-Site & BAST Publik SHA-256 (/bast/verify)',
       'pricing.t1f5': 'Enkripsi Kredensial Tenant AES-256-CBC At-Rest',
       'pricing.t1Cta': 'Mulai Trial Starter →',
       'pricing.t2Name': 'Growth Regional',
-      'pricing.t2Price': 'Rp 4,5 Jt',
+      'pricing.t2Price': '$990',
       'pricing.t2Desc': 'Orkestrasi perangkat jaringan penuh, pemulihan MikroTik otomatis, dan gerbang telemetri optik OLT.',
-      'pricing.t2f1': 'Hingga 20 Teknisi Lapangan & 250 Node GIS ODP/ODC',
+      'pricing.t2f1': 'Hingga 40 Teknisi Lapangan & 500 Node GIS ODP/ODC',
       'pricing.t2f2': 'Auto-Provisioning MikroTik RouterOS v7 REST & Buka Isolir 3 Detik',
       'pricing.t2f3': 'Gerbang Daya Optik (-dBm) OLT / GenieACS TR-069 Langsung',
       'pricing.t2f4': 'Worker Hardware Asinkron ShouldQueue & Webhook Bertanda Tangan',
       'pricing.t2f5': 'Auto-Dispatch GPS, Ledger BOM Atomik & Radar /track Langsung',
       'pricing.t2Cta': 'Mulai Trial Growth 14 Hari →',
       'pricing.t3Name': 'Enterprise Carrier',
-      'pricing.t3Price': 'Kustom',
-      'pricing.t3Desc': 'Untuk NAP nasional, ISP multi-kota, dan operator besar yang membutuhkan kuota khusus dan SLA kepatuhan.',
+      'pricing.t3Price': '$4,950',
+      'pricing.t3Desc': 'Untuk NAP nasional, ISP multi-kota, dan operator besar yang membutuhkan skala tanpa batas dan SLA terdedikasi.',
       'pricing.t3f1': 'Teknisi Lapangan, ODP/ODC & NOC Multi-Wilayah Tanpa Batas',
       'pricing.t3f2': 'Custom Domain, BAST White-Label & Penandatanganan APK Khusus',
       'pricing.t3f3': 'Driver Cluster Multi-Router MikroTik & OLT/ACS Terdedikasi',
-      'pricing.t3f4': 'Jejak Audit Platform SHA-256 Kekal & Prioritas SLA',
+      'pricing.t3f4': 'Jejak Audit Platform SHA-256 Kekal & Prioritas SLA 99.99%',
       'pricing.t3f5': 'Aktivasi Langsung via Verifikasi Sales Enterprise Resmi',
       'pricing.t3Cta': 'Ajukan Aktivasi Enterprise →',
       'pricing.footnote': 'Trial instan 14 hari aktif otomatis untuk Starter & Growth tanpa kartu kredit. Paket Enterprise Carrier melalui verifikasi langsung untuk menjamin kapasitas infrastruktur terdedikasi.',
@@ -911,6 +927,263 @@
   }
 
   /* ------------------------------------------------------------------------
+     10. INTERACTIVE REAL GLOBAL NETWORK MAP (LEAFLET + GEODESIC DASHED ARCS)
+  ------------------------------------------------------------------------ */
+  function initGlobalNetworkMap() {
+    const container = document.getElementById('global-network-map');
+    if (!container) return;
+
+    if (typeof window.L === 'undefined') {
+      container.innerHTML =
+        '<img src="images/coverage-network-map.svg" alt="Benteng Siber global network reach map" style="width:100%;height:100%;object-fit:cover;">';
+      return;
+    }
+
+    const L = window.L;
+    const isMobile = window.innerWidth < 768;
+
+    const map = L.map(container, {
+      center: [16, 42],
+      zoom: isMobile ? 1.35 : 2.15,
+      minZoom: 1.25,
+      maxZoom: 6,
+      zoomSnap: 0.25,
+      scrollWheelZoom: false,
+      worldCopyJump: false,
+      maxBounds: [
+        [-62, -165],
+        [76, 178]
+      ],
+      maxBoundsViscosity: 0.85,
+      attributionControl: true
+    });
+
+    // Real Geographic World Map Tiles (CartoDB Positron — Crisp Bright Corporate Theme)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }).addTo(map);
+
+    // Subtle city/country reference labels layer at light opacity for geographic precision
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 19,
+      opacity: 0.52,
+      pane: 'shadowPane'
+    }).addTo(map);
+
+    const nodes = {
+      jakarta: {
+        coords: [-6.2088, 106.8456],
+        name: 'Jakarta, Indonesia',
+        role: 'Primary NOC & Core API Hub',
+        meta: 'admin.bentengsiber.com • AES-256 • LIVE',
+        primary: true
+      },
+      singapore: {
+        coords: [1.3521, 103.8198],
+        name: 'Singapore',
+        role: 'SEA Edge & MikroTik Webhook Relay',
+        meta: 'TLS 1.3 • ~14 ms to Jakarta'
+      },
+      tokyo: {
+        coords: [35.6762, 139.6503],
+        name: 'Tokyo, Japan',
+        role: 'Northeast Asia Cloud Edge',
+        meta: 'TLS 1.3 • ~68 ms to Jakarta'
+      },
+      sydney: {
+        coords: [-33.8688, 151.2093],
+        name: 'Sydney, Australia',
+        role: 'Oceania Cloud Edge',
+        meta: 'TLS 1.3 • ~86 ms to Jakarta'
+      },
+      mumbai: {
+        coords: [19.076, 72.8777],
+        name: 'Mumbai, India',
+        role: 'South Asia Carrier Relay',
+        meta: 'TLS 1.3 • ~74 ms to Jakarta'
+      },
+      dubai: {
+        coords: [25.2048, 55.2708],
+        name: 'Dubai, UAE',
+        role: 'MENA Operations Gateway',
+        meta: 'TLS 1.3 • ~112 ms to Jakarta'
+      },
+      frankfurt: {
+        coords: [50.1109, 8.6821],
+        name: 'Frankfurt, Germany',
+        role: 'EU Zero-Trust Cloud Edge',
+        meta: 'TLS 1.3 • ~164 ms to Jakarta'
+      },
+      london: {
+        coords: [51.5074, -0.1278],
+        name: 'London, United Kingdom',
+        role: 'UK & Atlantic Backbone Relay',
+        meta: 'TLS 1.3 • ~172 ms to Jakarta'
+      },
+      ashburn: {
+        coords: [39.0438, -77.4874],
+        name: 'Virginia (US-East)',
+        role: 'North America East Edge',
+        meta: 'TLS 1.3 • Trans-Atlantic Route'
+      },
+      sanjose: {
+        coords: [37.3382, -121.8863],
+        name: 'Silicon Valley (US-West)',
+        role: 'North America West Cloud Edge',
+        meta: 'TLS 1.3 • Global CDN Sync'
+      },
+      saopaulo: {
+        coords: [-23.5505, -46.6333],
+        name: 'São Paulo, Brazil',
+        role: 'LATAM Cloud-Ready Relay',
+        meta: 'TLS 1.3 • Americas Backbone'
+      }
+    };
+
+    // Smooth Quadratic Bezier Geodesic Arc Generator
+    function buildCurvedArc(from, to, bend) {
+      const lat1 = from[0];
+      const lng1 = from[1];
+      const lat2 = to[0];
+      const lng2 = to[1];
+      const midLat = (lat1 + lat2) / 2;
+      const midLng = (lng1 + lng2) / 2;
+      const dLat = lat2 - lat1;
+      const dLng = lng2 - lng1;
+      const dist = Math.sqrt(dLat * dLat + dLng * dLng) || 1;
+      const normLat = -dLng / dist;
+      const normLng = dLat / dist;
+      const offset = dist * bend;
+      const ctrlLat = Math.max(-72, Math.min(78, midLat + normLat * offset));
+      const ctrlLng = midLng + normLng * offset;
+
+      const pts = [];
+      const steps = 44;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const u = 1 - t;
+        const lat = u * u * lat1 + 2 * u * t * ctrlLat + t * t * lat2;
+        const lng = u * u * lng1 + 2 * u * t * ctrlLng + t * t * lng2;
+        pts.push([lat, lng]);
+      }
+      return pts;
+    }
+
+    const routes = [
+      // Primary Amber Backbone from Jakarta Hub
+      { from: 'jakarta', to: 'singapore', bend: -0.22, primary: true },
+      { from: 'jakarta', to: 'tokyo', bend: -0.18, primary: true },
+      { from: 'jakarta', to: 'sydney', bend: 0.2, primary: true },
+      { from: 'jakarta', to: 'mumbai', bend: -0.2, primary: true },
+      { from: 'jakarta', to: 'dubai', bend: -0.22, primary: true },
+      { from: 'jakarta', to: 'frankfurt', bend: -0.19, primary: true },
+      // Secondary Navy Global Mesh Relays
+      { from: 'singapore', to: 'tokyo', bend: 0.16, primary: false },
+      { from: 'mumbai', to: 'dubai', bend: -0.22, primary: false },
+      { from: 'dubai', to: 'frankfurt', bend: -0.18, primary: false },
+      { from: 'frankfurt', to: 'london', bend: -0.24, primary: false },
+      { from: 'london', to: 'ashburn', bend: -0.2, primary: false },
+      { from: 'ashburn', to: 'sanjose', bend: -0.18, primary: false },
+      { from: 'ashburn', to: 'saopaulo', bend: 0.2, primary: false },
+      { from: 'frankfurt', to: 'saopaulo', bend: 0.16, primary: false }
+    ];
+
+    routes.forEach((route) => {
+      const a = nodes[route.from];
+      const b = nodes[route.to];
+      if (!a || !b) return;
+      const arc = buildCurvedArc(a.coords, b.coords, route.bend);
+
+      // Soft translucent under-glow track
+      L.polyline(arc, {
+        color: route.primary ? '#e8913a' : '#0f3559',
+        weight: route.primary ? 4.2 : 2.6,
+        opacity: route.primary ? 0.16 : 0.1,
+        interactive: false
+      }).addTo(map);
+
+      // Crisp animated dashed fiber signal line
+      L.polyline(arc, {
+        color: route.primary ? '#e8913a' : '#0f3559',
+        weight: route.primary ? 2.2 : 1.55,
+        opacity: route.primary ? 0.92 : 0.56,
+        lineCap: 'round',
+        interactive: false,
+        className: route.primary ? 'map-arc-primary' : 'map-arc-secondary'
+      }).addTo(map);
+    });
+
+    // Plot Glowing Radar Hub & Edge Markers
+    Object.keys(nodes).forEach((key) => {
+      const n = nodes[key];
+      const iconHtml = n.primary
+        ? '<div class="bs-map-node bs-map-node--hub">' +
+          '<span class="bs-map-node__pulse"></span>' +
+          '<span class="bs-map-node__pulse bs-map-node__pulse--2"></span>' +
+          '<span class="bs-map-node__core"></span>' +
+          '<span class="bs-map-hub-label">Jakarta • Primary Ops Hub</span>' +
+          '</div>'
+        : '<div class="bs-map-node bs-map-node--edge">' +
+          '<span class="bs-map-node__pulse"></span>' +
+          '<span class="bs-map-node__core"></span>' +
+          '</div>';
+
+      const icon = L.divIcon({
+        html: iconHtml,
+        className: '',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+
+      const marker = L.marker(n.coords, {
+        icon: icon,
+        zIndexOffset: n.primary ? 1000 : 100
+      }).addTo(map);
+
+      marker.bindTooltip(
+        '<strong>' + n.name + '</strong>' +
+          '<div>' + n.role + '</div>' +
+          '<div class="map-tt-meta">' + n.meta + '</div>',
+        {
+          direction: 'top',
+          offset: [0, -12],
+          className: 'bs-map-tooltip',
+          opacity: 1
+        }
+      );
+    });
+
+    // Quick-Focus Region View Buttons
+    const presets = {
+      global: { center: [16, 42], zoom: isMobile ? 1.35 : 2.15 },
+      jakarta: { center: [-4.5, 107.5], zoom: 5 },
+      apac: { center: [6, 118], zoom: isMobile ? 2.5 : 3.25 },
+      euus: { center: [34, -22], zoom: isMobile ? 2 : 2.75 }
+    };
+
+    const focusBtns = document.querySelectorAll('[data-map-focus]');
+    focusBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-map-focus');
+        const target = presets[key];
+        if (!target) return;
+        focusBtns.forEach((b) => b.classList.toggle('is-active', b === btn));
+        map.flyTo(target.center, target.zoom, {
+          duration: prefersReducedMotion ? 0.1 : 1.15,
+          easeLinearity: 0.25
+        });
+      });
+    });
+
+    // Revalidate tile dimensions once scroll-reveal / resize settles
+    window.setTimeout(() => map.invalidateSize(), 400);
+    window.addEventListener('resize', () => map.invalidateSize(), { passive: true });
+  }
+
+  /* ------------------------------------------------------------------------
      BOOTSTRAP
   ------------------------------------------------------------------------ */
   function init() {
@@ -923,6 +1196,7 @@
     initModals();
     initForms();
     initScrollReveal();
+    initGlobalNetworkMap();
   }
 
   if (document.readyState === 'loading') {

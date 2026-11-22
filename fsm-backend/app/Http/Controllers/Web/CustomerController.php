@@ -24,7 +24,7 @@ class CustomerController extends Controller
                     $q->where('created_at', '>=', $thirtyDaysAgo);
                 },
             ])
-            ->when($statusFilter !== '' && in_array($statusFilter, ['active', 'suspended', 'terminated'], true), fn ($q) => $q->where('status', $statusFilter))
+            ->when($statusFilter !== '' && in_array($statusFilter, ['active', 'isolated', 'suspended', 'terminated'], true), fn ($q) => $q->where('status', $statusFilter))
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($sub) use ($search) {
                     $sub->where('customer_code', 'like', "%{$search}%")
@@ -74,7 +74,7 @@ class CustomerController extends Controller
             'ont_serial_number' => 'nullable|string|max:120',
             'fiber_node_id'     => ['nullable', $fiberExists],
             'odp_port_number'   => 'nullable|integer|min:1|max:256',
-            'status'            => 'nullable|in:active,suspended,terminated',
+            'status'            => 'nullable|in:active,isolated,suspended,terminated',
         ]);
 
         if (empty($validated['customer_code'])) {
@@ -115,7 +115,7 @@ class CustomerController extends Controller
             'ont_serial_number' => 'nullable|string|max:120',
             'fiber_node_id'     => ['nullable', $fiberExists],
             'odp_port_number'   => 'nullable|integer|min:1|max:256',
-            'status'            => 'required|in:active,suspended,terminated',
+            'status'            => 'required|in:active,isolated,suspended,terminated',
         ]);
 
         $validated['name'] = strip_tags(trim($validated['name']));
@@ -123,6 +123,42 @@ class CustomerController extends Controller
         $customer->update($validated);
 
         return back()->with('success', "Subscriber {$customer->customer_code} updated.");
+    }
+
+    public function provisionPppoe(Customer $customer)
+    {
+        try {
+            $res = app(\App\Services\Network\MikrotikService::class)->provisionCustomerPppoe($customer);
+            return back()->with('success', "MikroTik PPPoE provisioned for {$customer->customer_code} (Username: {$customer->fresh()->pppoe_username}).");
+        } catch (\Throwable $e) {
+            return back()->with('error', "MikroTik provisioning failed: {$e->getMessage()}");
+        }
+    }
+
+    public function isolate(Customer $customer)
+    {
+        try {
+            $ok = app(\App\Services\Network\MikrotikService::class)->isolateCustomer($customer);
+            if (!$ok) {
+                return back()->with('error', "Customer {$customer->customer_code} has no PPPoE username configured.");
+            }
+            return back()->with('success', "Subscriber {$customer->customer_code} isolated (ISOLIR profile applied and active session kicked).");
+        } catch (\Throwable $e) {
+            return back()->with('error', "MikroTik isolation failed: {$e->getMessage()}");
+        }
+    }
+
+    public function unIsolate(Customer $customer)
+    {
+        try {
+            $ok = app(\App\Services\Network\MikrotikService::class)->unIsolateCustomer($customer);
+            if (!$ok) {
+                return back()->with('error', "Customer {$customer->customer_code} has no PPPoE username configured.");
+            }
+            return back()->with('success', "Subscriber {$customer->customer_code} restored to active profile ({$customer->service_plan}).");
+        } catch (\Throwable $e) {
+            return back()->with('error', "MikroTik restore failed: {$e->getMessage()}");
+        }
     }
 
     public function destroy(Customer $customer)

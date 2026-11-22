@@ -96,6 +96,7 @@ Route::middleware(['auth', 'active', 'tenant.active', 'role:admin,super_admin,no
         Route::patch('tasks/{task}', [TaskController::class, 'update']);
         Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('admin.tasks.destroy');
         Route::post('tasks/{task}/assign', [TaskController::class, 'assign'])->name('admin.tasks.assign');
+        Route::post('tasks/{task}/qris', [TaskController::class, 'generateQris'])->name('admin.tasks.qris');
 
         // Client Requests Inbox (Public Client Portal Submissions)
         Route::get('/client-requests', [ClientRequestController::class, 'index'])->name('admin.client_requests.index');
@@ -112,6 +113,9 @@ Route::middleware(['auth', 'active', 'tenant.active', 'role:admin,super_admin,no
         Route::post('/customers', [\App\Http\Controllers\Web\CustomerController::class, 'store'])->name('admin.customers.store');
         Route::put('/customers/{customer}', [\App\Http\Controllers\Web\CustomerController::class, 'update'])->name('admin.customers.update');
         Route::delete('/customers/{customer}', [\App\Http\Controllers\Web\CustomerController::class, 'destroy'])->name('admin.customers.destroy');
+        Route::post('/customers/{customer}/provision-pppoe', [\App\Http\Controllers\Web\CustomerController::class, 'provisionPppoe'])->name('admin.customers.provision_pppoe');
+        Route::post('/customers/{customer}/isolate', [\App\Http\Controllers\Web\CustomerController::class, 'isolate'])->name('admin.customers.isolate');
+        Route::post('/customers/{customer}/unisolate', [\App\Http\Controllers\Web\CustomerController::class, 'unIsolate'])->name('admin.customers.unisolate');
 
         Route::get('/fiber-assets', [\App\Http\Controllers\Web\FiberNodeController::class, 'index'])->name('admin.fiber_assets.index');
         Route::post('/fiber-assets', [\App\Http\Controllers\Web\FiberNodeController::class, 'store'])

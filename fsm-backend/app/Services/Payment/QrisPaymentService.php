@@ -57,7 +57,25 @@ class QrisPaymentService
      */
     public function generateTaskQris(Task $task, ?float $amount = null, int $expiryMinutes = 15): PaymentTransaction
     {
-        $billAmount = $amount ?? (float) ($task->billing_amount > 0 ? $task->billing_amount : 150000.0);
+        if ($task->payment_status === 'paid') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_status' => ['This work order has already been paid. Generating a duplicate QRIS is blocked.'],
+            ]);
+        }
+
+        if ($task->status === 'rejected') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => ['Cannot generate QRIS for a rejected or cancelled work order.'],
+            ]);
+        }
+
+        $billAmount = $amount ?? (float) ($task->billing_amount ?? 0);
+        if ($billAmount < 1000) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'amount' => ['Billing amount must be at least IDR 1,000 to generate a dynamic QRIS.'],
+            ]);
+        }
+
         $gateway = $this->getGateway();
 
         $res = $gateway->createDynamicQris($task, $billAmount, $expiryMinutes);
@@ -86,6 +104,7 @@ class QrisPaymentService
             'billing_amount' => $billAmount,
             'payment_status' => 'pending',
         ]);
+        $task->touch();
 
         return $transaction;
     }
@@ -111,17 +130,33 @@ class QrisPaymentService
                 return $tx;
             }
 
+            // Reject settling superseded/expired or failed QRIS transactions
+            if (in_array($tx->status, ['expired', 'failed', 'cancelled'], true) || $tx->isExpired()) {
+                Log::warning("Rejected settlement webhook for expired/invalid QRIS ref: {$referenceNo}");
+                return null;
+            }
+
+            // Verify paid amount against invoiced amount when gross_amount is supplied by gateway
+            if (isset($payload['gross_amount']) && is_numeric($payload['gross_amount'])) {
+                $paidAmount = (float) $payload['gross_amount'];
+                if (abs($paidAmount - (float) $tx->amount) > 0.01) {
+                    Log::warning("Payment amount mismatch for ref {$referenceNo}: expected {$tx->amount}, got {$paidAmount}");
+                    return null;
+                }
+            }
+
             $tx->update([
                 'status'   => 'paid',
                 'paid_at'  => now(),
                 'metadata' => array_merge((array) $tx->metadata, ['settlement_payload' => $payload]),
             ]);
 
-            // Mark task as paid
+            // Mark task as paid and touch timestamp for instant Admin/APK live sync
             if ($tx->task_id) {
                 $task = Task::withoutGlobalScopes()->find($tx->task_id);
                 if ($task) {
                     $task->update(['payment_status' => 'paid']);
+                    $task->touch();
 
                     // INSTANT AUTO-UNBLOCK TRIGGER: Restore customer internet on MikroTik!
                     if ($task->customer_id) {

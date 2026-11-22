@@ -81,9 +81,13 @@ class MidtransQrisDriver implements QrisGatewayInterface
             Log::error("Midtrans charge exception: " . $e->getMessage());
         }
 
-        // Fallback to simulator format on network failure
-        $fallback = new QrisSimulatorDriver($this->config);
-        return $fallback->createDynamicQris($task, $amount, $expiryMinutes);
+        // Only fall back to simulator in local/testing environments; fail closed in production
+        if (app()->environment(['local', 'testing'])) {
+            $fallback = new QrisSimulatorDriver($this->config);
+            return $fallback->createDynamicQris($task, $amount, $expiryMinutes);
+        }
+
+        throw new \RuntimeException('Midtrans QRIS gateway unreachable. Please check your Midtrans server key and network connectivity.');
     }
 
     public function verifyWebhookSignature(array $payload, ?string $signatureHeader = null): bool

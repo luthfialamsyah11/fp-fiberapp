@@ -12,6 +12,12 @@ class LocationController extends Controller
 {
     public function update(Request $request)
     {
+        $user = auth()->user();
+        $taskExistsRule = \Illuminate\Validation\Rule::exists('tasks', 'id')->where('technician_id', $user->id);
+        if ($user && $user->tenant_id !== null) {
+            $taskExistsRule->where('tenant_id', $user->tenant_id);
+        }
+
         $request->validate([
             'latitude'    => 'required|numeric|between:-90,90',
             'longitude'   => 'required|numeric|between:-180,180',
@@ -19,7 +25,7 @@ class LocationController extends Controller
             'speed_mps'   => 'nullable|numeric|min:0',
             'heading_deg' => 'nullable|numeric|between:0,360',
             'captured_at' => 'nullable|date',
-            'task_id'     => 'nullable|integer|exists:tasks,id',
+            'task_id'     => ['nullable', 'integer', $taskExistsRule],
             'client_uuid' => 'nullable|string|max:64',
             'source'      => 'nullable|string|in:foreground,background,heartbeat',
         ]);
@@ -155,7 +161,7 @@ class LocationController extends Controller
                 }
             }
 
-            $taskId = !empty($pt['task_id']) && Task::where('id', $pt['task_id'])->exists()
+            $taskId = !empty($pt['task_id']) && Task::where('id', $pt['task_id'])->where('technician_id', $user->id)->exists()
                 ? (int) $pt['task_id']
                 : $defaultTaskId;
 

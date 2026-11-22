@@ -13,8 +13,14 @@ class GenieAcsDriver implements OltDriverInterface
 
     public function __construct(array $config)
     {
-        $host = $config['genieacs_host'] ?? '127.0.0.1';
-        $port = $config['genieacs_port'] ?? 7557;
+        $host = strtolower(trim((string) ($config['genieacs_host'] ?? '127.0.0.1'), '[] '));
+        $port = (int) ($config['genieacs_port'] ?? 7557);
+
+        $blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254', 'metadata.google.internal'];
+        if (!app()->environment('testing') && (in_array($host, $blockedHosts, true) || str_starts_with($host, '169.254.'))) {
+            throw new \InvalidArgumentException("Blocked GenieACS host ({$host}): loopback and cloud metadata targets are prohibited by SSRF policy.");
+        }
+
         $this->baseUrl = "http://{$host}:{$port}";
         $this->timeout = (int) ($config['timeout'] ?? 5);
     }

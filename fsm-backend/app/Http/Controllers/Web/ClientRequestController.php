@@ -156,11 +156,14 @@ class ClientRequestController extends Controller
      */
     public function assign(Request $request, Task $task)
     {
+        $tenantId = \App\Services\TenantContext::id();
+        $techRule = Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true);
+        if ($tenantId !== null) {
+            $techRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
-            'technician_id' => [
-                'required',
-                Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
-            ],
+            'technician_id' => ['required', $techRule],
         ]);
 
         $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);

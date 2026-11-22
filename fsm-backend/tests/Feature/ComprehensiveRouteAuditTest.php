@@ -221,12 +221,25 @@ class ComprehensiveRouteAuditTest extends TestCase
     }
 
     /**
-     * Audit: Master Platform Admin Route Access
+     * Audit: Master Platform Admin Route Access (Root Tenant 1 only; Secondary Tenants receive 403)
      */
     public function test_master_platform_admin_console_access()
     {
-        $masterAdmin = User::create([
+        // Secondary tenant super_admin must be denied (403)
+        $tenantAdmin = User::withoutGlobalScopes()->create([
             'tenant_id' => $this->tenant->id,
+            'name'      => 'Secondary Tenant Admin',
+            'email'     => 'tenantadmin@auditcarrier.net',
+            'password'  => bcrypt('password'),
+            'role'      => 'super_admin',
+            'is_active' => true,
+        ]);
+        $this->actingAs($tenantAdmin)->get('/master-admin')->assertStatus(403);
+
+        // Root Platform Owner (tenant_id = 1) has full Master Console access
+        $rootTenantId = \App\Models\Tenant::find(1)?->id ?? 1;
+        $masterAdmin = User::withoutGlobalScopes()->create([
+            'tenant_id' => $rootTenantId,
             'name'      => 'Master Super Administrator',
             'email'     => 'master@bentengsiber.com',
             'password'  => bcrypt('password'),

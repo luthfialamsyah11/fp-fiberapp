@@ -51,7 +51,7 @@ class DashboardController extends Controller
         $activeTechsCount = $technicians->where('is_active', true)->count();
         $onlineTechsCount = $technicians->filter(fn ($t) => $t->is_active && $t->isEffectivelyOnline())->count();
 
-        $totalProofs = ProofOfWork::count();
+        $totalProofs = ProofOfWork::whereHas('task')->count();
         $totalTasksCount = (int) ($taskStats->total_tasks ?? 0);
         $completedTasksCount = (int) ($taskStats->completed ?? 0);
         $assignedCount = (int) ($taskStats->assigned ?? 0);
@@ -141,7 +141,8 @@ class DashboardController extends Controller
 
         $recentTasks = $taskQuery->orderBy('created_at', 'desc')->take(12)->get();
 
-        $timelineLogs = ProgressUpdate::with(['task', 'user'])
+        $timelineLogs = ProgressUpdate::whereHas('task')
+            ->with(['task', 'user'])
             ->orderBy('created_at', 'desc')
             ->take(8)
             ->get();
@@ -253,9 +254,14 @@ class DashboardController extends Controller
             MAX(updated_at) as max_task_updated
         ")->first();
 
-        $proofAgg = ProofOfWork::selectRaw("COUNT(*) as total_proofs, COALESCE(MAX(id), 0) as max_proof_id, MAX(created_at) as max_proof_created")->first();
-        $progAgg = ProgressUpdate::selectRaw("COUNT(*) as total_progress, COALESCE(MAX(id), 0) as max_prog_id, MAX(created_at) as max_prog_created")->first();
-        $matAgg = TaskMaterial::selectRaw("COUNT(*) as total_materials, COALESCE(MAX(id), 0) as max_mat_id, MAX(created_at) as max_mat_created")->first();
+        $proofAgg = ProofOfWork::whereHas('task')->selectRaw("COUNT(*) as total_proofs, COALESCE(MAX(id), 0) as max_proof_id, MAX(created_at) as max_proof_created")->first();
+        $progAgg = ProgressUpdate::whereHas('task')->selectRaw("COUNT(*) as total_progress, COALESCE(MAX(id), 0) as max_prog_id, MAX(created_at) as max_prog_created")->first();
+        $matAgg = TaskMaterial::whereHas('task')->selectRaw("COUNT(*) as total_materials, COALESCE(MAX(id), 0) as max_mat_id, MAX(created_at) as max_mat_created")->first();
+        $payAgg = \App\Models\PaymentTransaction::selectRaw("
+            COUNT(CASE WHEN status = 'paid' THEN 1 END) as paid_count,
+            COALESCE(MAX(id), 0) as max_pay_id,
+            MAX(paid_at) as max_paid_at
+        ")->first();
         $invAgg = InventoryItem::selectRaw("
             COUNT(*) as total_items,
             COALESCE(SUM(stock), 0) as total_stock,
@@ -279,6 +285,8 @@ class DashboardController extends Controller
             (string) ($taskStats->max_task_updated ?? ''),
             (int) ($progAgg->total_progress ?? 0),
             (int) ($progAgg->max_prog_id ?? 0),
+            (int) ($payAgg->paid_count ?? 0),
+            (string) ($payAgg->max_paid_at ?? ''),
         ]));
 
         $proofsScope = sha1(implode('|', [
@@ -335,7 +343,26 @@ class DashboardController extends Controller
             ];
         }
 
-        $latestProof = ProofOfWork::with('task')->latest('id')->first();
+        $latestPaid = \App\Models\PaymentTransaction::with('task')
+            ->where('status', 'paid')
+            ->whereNotNull('paid_at')
+            ->latest('paid_at')
+            ->first();
+        if ($latestPaid && $latestPaid->paid_at) {
+            $code = $latestPaid->task ? '#TSK-' . str_pad($latestPaid->task->id, 4, '0', STR_PAD_LEFT) : $latestPaid->reference_no;
+            $candidates[] = [
+                'ts'       => $latestPaid->paid_at->timestamp,
+                'priority' => 7,
+                'key'      => 'qris-paid-' . $latestPaid->id . '-' . $latestPaid->paid_at->timestamp,
+                'type'     => 'payment',
+                'title'    => "QRIS Payment Settled on {$code}",
+                'subtitle' => SettingService::formatCurrency((float) $latestPaid->amount) . ' verified — MikroTik auto-unblock triggered',
+                'url'      => $latestPaid->task ? route('admin.tasks.show', $latestPaid->task->id) : route('admin.dashboard'),
+                'time_ago' => $latestPaid->paid_at->diffForHumans(),
+            ];
+        }
+
+        $latestProof = ProofOfWork::whereHas('task')->with('task')->latest('id')->first();
         if ($latestProof && $latestProof->created_at) {
             $code = $latestProof->task ? '#TSK-' . str_pad($latestProof->task->id, 4, '0', STR_PAD_LEFT) : 'Task';
             $slotLabel = strtoupper((string) ($latestProof->slot ?: 'PROOF'));
@@ -367,7 +394,7 @@ class DashboardController extends Controller
             ];
         }
 
-        $latestMat = TaskMaterial::with(['task', 'inventoryItem'])->latest('id')->first();
+        $latestMat = TaskMaterial::whereHas('task')->with(['task', 'inventoryItem'])->latest('id')->first();
         if ($latestMat && $latestMat->created_at) {
             $code = $latestMat->task ? '#TSK-' . str_pad($latestMat->task->id, 4, '0', STR_PAD_LEFT) : 'Task';
             $itemName = $latestMat->inventoryItem?->name ?? 'Material';
@@ -384,7 +411,7 @@ class DashboardController extends Controller
             ];
         }
 
-        $latestProg = ProgressUpdate::with(['task', 'user'])->latest('id')->first();
+        $latestProg = ProgressUpdate::whereHas('task')->with(['task', 'user'])->latest('id')->first();
         if ($latestProg && $latestProg->created_at) {
             $code = $latestProg->task ? '#TSK-' . str_pad($latestProg->task->id, 4, '0', STR_PAD_LEFT) : 'Task';
             $actor = $latestProg->user?->name ?? 'Technician';

@@ -187,6 +187,16 @@
                         </select>
                     </div>
 
+                    <!-- On-Site Billing Amount (Dynamic QRIS) -->
+                    <div>
+                        <label for="task-billing-input" class="block text-xs font-semibold text-slate-700 mb-1.5">
+                            On-Site Billing Amount <span class="text-slate-400 font-normal">(Optional — enables Technician Dynamic QRIS collection)</span>
+                        </label>
+                        <input id="task-billing-input" type="number" step="1000" min="0" name="billing_amount" value="{{ old('billing_amount', $task->billing_amount ?? 0) }}"
+                            class="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all font-mono"
+                            placeholder="0 (Free / Warranty) or e.g. 250000">
+                    </div>
+
                     <!-- Description -->
                     <div>
                         <label for="task-desc-input" class="block text-xs font-semibold text-slate-700 mb-1.5">

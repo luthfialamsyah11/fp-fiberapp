@@ -44,6 +44,11 @@
                 <ion-icon name="shield-checkmark-outline"></ion-icon>
                 <span>Verify SHA-256 Seal</span>
             </button>
+            @if(!empty($task->bast_hash))
+                <a href="{{ route('bast.public_verify', ['hash' => $task->bast_hash]) }}" target="_blank" class="bg-sky-50 border border-sky-200 text-sky-700 px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-sky-100 transition-all inline-flex items-center gap-1.5 shadow-sm">
+                    <ion-icon name="qr-code-outline"></ion-icon> Public BAST Verify
+                </a>
+            @endif
         @endif
 
         @if(in_array($task->status, ['completed', 'on-going'], true))
@@ -169,6 +174,78 @@
             <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-6">
                 <h4 class="text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">Description &amp; Field Instructions</h4>
                 <p class="text-xs text-textPrimary whitespace-pre-line leading-relaxed">{{ $task->description ?: 'No specific description provided.' }}</p>
+            </div>
+
+            <!-- Live Carrier Optical Telemetry & Dynamic QRIS Fintech Panel -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <!-- OLT / ONT Optical Hardware Telemetry -->
+                <div class="rounded-xl border border-indigo-200/80 bg-indigo-50/40 p-4">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <h4 class="text-[11px] font-bold text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                            <ion-icon name="pulse-outline" class="text-indigo-600 text-sm"></ion-icon>
+                            Carrier OLT Optical Telemetry
+                        </h4>
+                        @if($task->hardware_verified_at)
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">Verified</span>
+                        @else
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">Awaiting Sync</span>
+                        @endif
+                    </div>
+                    <div class="flex items-baseline gap-4 text-xs">
+                        <div>
+                            <span class="text-[10px] text-slate-500 block">RX Power</span>
+                            <span class="font-mono font-bold text-sm {{ $task->optical_power_rx_dbm !== null && $task->optical_power_rx_dbm >= -27 ? 'text-emerald-700' : 'text-slate-700' }}">
+                                {{ $task->optical_power_rx_dbm !== null ? $task->optical_power_rx_dbm . ' dBm' : '—' }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-500 block">TX Power</span>
+                            <span class="font-mono font-bold text-sm text-slate-700">
+                                {{ $task->optical_power_tx_dbm !== null ? $task->optical_power_tx_dbm . ' dBm' : '—' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic QRIS On-Site Billing & MikroTik Auto-Unblock -->
+                <div class="rounded-xl border border-emerald-200/80 bg-emerald-50/40 p-4">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <h4 class="text-[11px] font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+                            <ion-icon name="qr-code-outline" class="text-emerald-600 text-sm"></ion-icon>
+                            Dynamic QRIS Billing
+                        </h4>
+                        @php $pStatus = $task->payment_status ?? 'unpaid'; @endphp
+                        <span id="live-payment-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase {{ $pStatus === 'paid' ? 'bg-emerald-600 text-white' : ($pStatus === 'pending' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-600') }}">
+                            {{ strtoupper($pStatus) }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] text-slate-500 block">Invoiced Amount</span>
+                            <span class="font-mono font-bold text-sm text-slate-800">
+                                {{ \App\Services\SettingService::formatCurrency((float) ($task->billing_amount ?? 0)) }}
+                            </span>
+                            @if($task->latestPayment)
+                                <span class="block text-[10px] font-mono text-slate-500 truncate max-w-[160px]">Ref: {{ $task->latestPayment->reference_no }}</span>
+                            @endif
+                        </div>
+                        @if($pStatus !== 'paid' && $task->status !== 'rejected' && auth()->user()->hasAnyRole(['admin', 'super_admin', 'noc_dispatcher']))
+                            <form method="POST" action="{{ route('admin.tasks.qris', $task->id) }}" class="flex items-center gap-1.5">
+                                @csrf
+                                @if((float) ($task->billing_amount ?? 0) < 1000)
+                                    <input type="number" name="amount" min="1000" step="1000" value="150000" class="w-24 rounded-lg border border-emerald-200 bg-white px-2 py-1 text-[11px] font-mono" title="Billing Amount (IDR)">
+                                @endif
+                                <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-all cursor-pointer">
+                                    Generate QRIS
+                                </button>
+                            </form>
+                        @elseif($task->latestPayment && $task->latestPayment->qr_image_url && $pStatus === 'pending')
+                            <a href="{{ $task->latestPayment->qr_image_url }}" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg bg-white border border-emerald-200 text-emerald-700 text-[11px] font-bold hover:bg-emerald-50">
+                                View QR
+                            </a>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             @if($task->client_photo_url)
@@ -888,6 +965,13 @@
 
                 const pill = document.getElementById('live-status-pill');
                 if (pill && data.status_label) pill.textContent = data.status_label;
+                const payPill = document.getElementById('live-payment-pill');
+                if (payPill && data.payment_status) {
+                    payPill.textContent = String(data.payment_status).toUpperCase();
+                    if (data.payment_status === 'paid') {
+                        payPill.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-600 text-white';
+                    }
+                }
                 const progLabel = document.getElementById('live-progress-label');
                 if (progLabel) progLabel.textContent = `Status: ${data.progress_percent}% Completed`;
                 const progBar = document.getElementById('live-progress-bar');

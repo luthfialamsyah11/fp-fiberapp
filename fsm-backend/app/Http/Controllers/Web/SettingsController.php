@@ -16,19 +16,24 @@ class SettingsController extends Controller
     public function index()
     {
         $settings = SettingService::all();
+        $tenant = \App\Services\TenantContext::getTenant();
+        $networkSettings = $tenant?->network_settings ?? [];
+        $paymentSettings = $tenant?->settings['payment'] ?? [];
 
-        $totalGpsPoints = TechnicianLocation::count();
+        $totalGpsPoints = TechnicianLocation::whereHas('technician')->count();
         $databaseSize = $this->formatOldestPingLabel();
         $recentNotificationLogs = Schema::hasTable('notification_logs')
             ? NotificationLog::latest('id')->take(10)->get()
             : collect();
 
-        return view('settings.index', compact('settings', 'totalGpsPoints', 'databaseSize', 'recentNotificationLogs'));
+        return view('settings.index', compact('settings', 'networkSettings', 'paymentSettings', 'totalGpsPoints', 'databaseSize', 'recentNotificationLogs'));
     }
 
     private function formatOldestPingLabel(): string
     {
-        $oldestPoint = TechnicianLocation::orderByRaw('COALESCE(captured_at, created_at) ASC')->first();
+        $oldestPoint = TechnicianLocation::whereHas('technician')
+            ->orderByRaw('COALESCE(captured_at, created_at) ASC')
+            ->first();
         if (!$oldestPoint) {
             return 'No GPS records stored';
         }
@@ -84,9 +89,68 @@ class SettingsController extends Controller
             'notify_customer_email'      => 'nullable|in:0,1',
             'fcm_server_key'             => 'nullable|string|max:500',
             'telemetry_retention_days'   => 'required|in:7,14,30,90,365',
+            // Phase 2 & 3: Active Network Orchestrator & Payment Gateway (per-tenant)
+            'mikrotik_driver'                 => 'nullable|in:simulator,rest',
+            'mikrotik_host'                   => 'nullable|string|max:255',
+            'mikrotik_port'                   => 'nullable|integer|min:1|max:65535',
+            'mikrotik_user'                   => 'nullable|string|max:120',
+            'mikrotik_password'               => 'nullable|string|max:255',
+            'mikrotik_use_ssl'                => 'nullable|in:0,1',
+            'olt_driver'                      => 'nullable|in:simulator,genieacs',
+            'genieacs_host'                   => 'nullable|string|max:255',
+            'genieacs_port'                   => 'nullable|integer|min:1|max:65535',
+            'require_hardware_olt_validation' => 'nullable|in:0,1',
+            'payment_driver'                  => 'nullable|in:simulator,midtrans',
+            'payment_server_key'              => 'nullable|string|max:255',
+            'payment_is_production'           => 'nullable|in:0,1',
         ], [
             'default_country_code.regex' => 'Default country dial code must contain 1 to 5 digits only (e.g., 62 or 1).',
         ]);
+
+        // Extract tenant-scoped network & payment config before saving JSON settings
+        $tenant = \App\Services\TenantContext::getTenant();
+        if ($tenant && ($request->has('mikrotik_driver') || $request->has('olt_driver') || $request->has('payment_driver'))) {
+            $existingNet = (array) ($tenant->network_settings ?? []);
+            $newNet = array_merge($existingNet, [
+                'mikrotik_driver'                 => $validated['mikrotik_driver'] ?? ($existingNet['mikrotik_driver'] ?? 'simulator'),
+                'mikrotik_host'                   => trim((string) ($validated['mikrotik_host'] ?? ($existingNet['mikrotik_host'] ?? ''))),
+                'mikrotik_port'                   => (int) ($validated['mikrotik_port'] ?? ($existingNet['mikrotik_port'] ?? 443)),
+                'mikrotik_user'                   => trim((string) ($validated['mikrotik_user'] ?? ($existingNet['mikrotik_user'] ?? 'admin'))),
+                'mikrotik_use_ssl'                => $request->has('mikrotik_use_ssl'),
+                'olt_driver'                      => $validated['olt_driver'] ?? ($existingNet['olt_driver'] ?? 'simulator'),
+                'genieacs_host'                   => trim((string) ($validated['genieacs_host'] ?? ($existingNet['genieacs_host'] ?? ''))),
+                'genieacs_port'                   => (int) ($validated['genieacs_port'] ?? ($existingNet['genieacs_port'] ?? 7557)),
+                'require_hardware_olt_validation' => $request->has('require_hardware_olt_validation'),
+                'opm_max_attenuation_dbm'         => (float) ($validated['opm_max_attenuation_dbm'] ?? -27.0),
+            ]);
+            if (!empty($validated['mikrotik_password'])) {
+                $newNet['mikrotik_password'] = $validated['mikrotik_password'];
+            }
+
+            $existingTenantSettings = (array) ($tenant->settings ?? []);
+            $existingPay = (array) ($existingTenantSettings['payment'] ?? []);
+            $newPay = array_merge($existingPay, [
+                'driver'        => $validated['payment_driver'] ?? ($existingPay['driver'] ?? 'simulator'),
+                'is_production' => $request->has('payment_is_production'),
+            ]);
+            if (!empty($validated['payment_server_key'])) {
+                $newPay['server_key'] = trim($validated['payment_server_key']);
+            }
+            $existingTenantSettings['payment'] = $newPay;
+
+            $tenant->update([
+                'network_settings' => $newNet,
+                'settings'         => $existingTenantSettings,
+            ]);
+        }
+
+        unset(
+            $validated['mikrotik_driver'], $validated['mikrotik_host'], $validated['mikrotik_port'],
+            $validated['mikrotik_user'], $validated['mikrotik_password'], $validated['mikrotik_use_ssl'],
+            $validated['olt_driver'], $validated['genieacs_host'], $validated['genieacs_port'],
+            $validated['require_hardware_olt_validation'],
+            $validated['payment_driver'], $validated['payment_server_key'], $validated['payment_is_production']
+        );
 
         $validated['auto_assign'] = $request->has('auto_assign') ? '1' : '0';
         $validated['require_proof_photo'] = $request->has('require_proof_photo') ? '1' : '0';
@@ -175,8 +239,11 @@ class SettingsController extends Controller
         ]);
         $retentionDays = (int) ($validated['telemetry_retention_days'] ?? ($settings['telemetry_retention_days'] ?? 30));
 
-        // Always keep the latest 50 points per technician so no active technician loses their route trail
-        $technicianIds = TechnicianLocation::select('technician_id')->distinct()->pluck('technician_id');
+        // Always keep the latest 50 points per technician within CURRENT TENANT only
+        $technicianIds = TechnicianLocation::whereHas('technician')
+            ->select('technician_id')
+            ->distinct()
+            ->pluck('technician_id');
         $protectedIds = [];
 
         foreach ($technicianIds as $techId) {
@@ -189,11 +256,12 @@ class SettingsController extends Controller
         }
 
         $cutoff = now()->subDays($retentionDays);
-        $deleted = TechnicianLocation::whereRaw('COALESCE(captured_at, created_at) < ?', [$cutoff->format('Y-m-d H:i:s')])
+        $deleted = TechnicianLocation::whereHas('technician')
+            ->whereRaw('COALESCE(captured_at, created_at) < ?', [$cutoff->format('Y-m-d H:i:s')])
             ->when(!empty($protectedIds), fn ($q) => $q->whereNotIn('id', $protectedIds))
             ->delete();
 
-        $totalAfter = TechnicianLocation::count();
+        $totalAfter = TechnicianLocation::whereHas('technician')->count();
         $oldestPingLabel = $this->formatOldestPingLabel();
 
         return response()->json([

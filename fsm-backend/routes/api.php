@@ -32,8 +32,9 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,
 Route::get('/public/track/{token}', [CustomerTrackingController::class, 'apiStatus'])->middleware('throttle:60,1');
 Route::post('/public/track/{token}/rating', [CustomerTrackingController::class, 'submitRating'])->middleware('throttle:10,1');
 
-// Public Payment Gateway Webhooks (Midtrans / Xendit / Simulator)
-Route::post('/webhooks/payment', [\App\Http\Controllers\Api\PaymentWebhookController::class, 'handleWebhook']);
+// Public Payment Gateway Webhooks (Midtrans / Xendit / Simulator, Rate-limited)
+Route::post('/webhooks/payment', [\App\Http\Controllers\Api\PaymentWebhookController::class, 'handleWebhook'])
+    ->middleware('throttle:60,1');
 
 // Authenticated Routes
 Route::middleware(['auth:sanctum', 'active', 'tenant.active'])->group(function () {
@@ -99,7 +100,7 @@ Route::middleware(['auth:sanctum', 'active', 'tenant.active'])->group(function (
 
         // Technicians
         Route::get('/technicians', [TechnicianController::class, 'index']);
-        Route::post('/technicians', [TechnicianController::class, 'store']);
+        Route::post('/technicians', [TechnicianController::class, 'store'])->middleware('tenant.quota:technician');
         Route::put('/technicians/{user}', [TechnicianController::class, 'update']);
         Route::delete('/technicians/{user}', [TechnicianController::class, 'destroy']);
 

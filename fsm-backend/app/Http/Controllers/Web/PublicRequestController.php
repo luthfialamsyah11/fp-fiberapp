@@ -190,7 +190,8 @@ class PublicRequestController extends Controller
 
     public function receipt(string $token)
     {
-        $task = Task::where('tracking_token', $token)
+        $task = Task::withoutGlobalScopes()
+            ->where('tracking_token', $token)
             ->with(['technician'])
             ->firstOrFail();
 

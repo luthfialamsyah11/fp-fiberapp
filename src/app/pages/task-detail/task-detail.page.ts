@@ -106,6 +106,13 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   private canvasListenersAttached = false;
   private signatureTimeouts: any[] = [];
 
+  // ─── Dynamic QRIS On-Site Billing & Live Settlement Polling ────────────────
+  qrisAmount: number = 150000;
+  qrisTransaction: any = null;
+  paymentStatus: string = 'unpaid';
+  isGeneratingQris = false;
+  private qrisPollTimer: any = null;
+
   // Bound event listener references for leak-free cleanup
   private touchStartHandler = (e: TouchEvent) => this.handleCanvasTouch(e, 'start');
   private touchMoveHandler = (e: TouchEvent) => this.handleCanvasTouch(e, 'move');
@@ -149,9 +156,14 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.syncSubs.unsubscribe();
+    this.stopQrisPolling();
     this.removeCanvasListeners();
     this.signatureTimeouts.forEach(t => clearTimeout(t));
     this.signatureTimeouts = [];
+  }
+
+  ionViewWillLeave() {
+    this.stopQrisPolling();
   }
 
   trackByMaterialId(index: number, item: any): number {
@@ -202,6 +214,12 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
       if (this.task?.customer_name && !this.customerSignerName) {
         this.customerSignerName = this.task.customer_name;
       }
+
+      if (this.task?.billing_amount && Number(this.task.billing_amount) >= 1000) {
+        this.qrisAmount = Number(this.task.billing_amount);
+      }
+      this.paymentStatus = this.task?.payment_status || 'unpaid';
+      this.loadPaymentStatus();
 
       if (!this.isCanvasDrawn) {
         const t = setTimeout(() => this.initSignatureCanvas(), 300);
@@ -685,6 +703,76 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
       `Hello ${customer}, this is ${techName} from FiberOps on the way to your location for work order: ${this.task.title}. Please ensure someone is available on-site. Thank you.`
     );
     window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
+  }
+
+  async loadPaymentStatus(silent = true) {
+    if (!this.taskId) return;
+    try {
+      const res: any = await this.api.getTaskPaymentStatus(this.taskId);
+      const prevStatus = this.paymentStatus;
+      this.paymentStatus = res?.payment_status || this.task?.payment_status || 'unpaid';
+      if (res?.billing_amount && Number(res.billing_amount) >= 1000) {
+        this.qrisAmount = Number(res.billing_amount);
+      }
+      if (res?.transaction) {
+        this.qrisTransaction = res.transaction;
+      }
+      if (this.task) {
+        this.task.payment_status = this.paymentStatus;
+      }
+      if (this.paymentStatus === 'paid') {
+        this.stopQrisPolling();
+        if (prevStatus !== 'paid' && !silent) {
+          this.showToast('QRIS Payment Settled! Customer MikroTik auto-unblocked.', 'success');
+        }
+      } else if (this.paymentStatus === 'pending' && this.qrisTransaction) {
+        this.startQrisPolling();
+      }
+    } catch (e) {
+      // Non-fatal during offline mode
+    }
+  }
+
+  async generateDynamicQris() {
+    if (this.isGeneratingQris || !this.task) return;
+    const amt = Number(this.qrisAmount);
+    if (!amt || amt < 1000) {
+      this.showToast('Please enter a valid billing amount (min IDR 1,000)', 'warning');
+      return;
+    }
+    this.isGeneratingQris = true;
+    try {
+      const res: any = await this.api.generateTaskQris(this.task.id, amt, 15);
+      this.qrisTransaction = res?.transaction || null;
+      this.paymentStatus = 'pending';
+      this.task.payment_status = 'pending';
+      this.task.billing_amount = amt;
+      this.showToast('Dynamic QRIS ready — ask customer to scan now.', 'success');
+      this.startQrisPolling();
+    } catch (err: any) {
+      const msg = err?.error?.message || 'Failed to generate Dynamic QRIS.';
+      this.showToast(msg, 'danger');
+    } finally {
+      this.isGeneratingQris = false;
+    }
+  }
+
+  private startQrisPolling() {
+    if (this.qrisPollTimer) return;
+    this.qrisPollTimer = setInterval(async () => {
+      if (this.paymentStatus === 'paid') {
+        this.stopQrisPolling();
+        return;
+      }
+      await this.loadPaymentStatus(false);
+    }, 3000);
+  }
+
+  private stopQrisPolling() {
+    if (this.qrisPollTimer) {
+      clearInterval(this.qrisPollTimer);
+      this.qrisPollTimer = null;
+    }
   }
 
   callCustomer() {

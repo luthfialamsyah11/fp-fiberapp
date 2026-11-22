@@ -115,7 +115,30 @@
                                 </span>
                             </td>
                             <td class="py-3.5 px-4 text-right">
-                                <div class="inline-flex items-center gap-1.5">
+                                <div class="inline-flex items-center gap-1.5 flex-wrap justify-end">
+                                    @if($c->status === 'isolated')
+                                        <form method="POST" action="{{ route('admin.customers.unisolate', $c->id) }}" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-2 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-[10px] font-bold transition-all cursor-pointer" title="Un-isolate PPPoE on MikroTik">
+                                                Un-Isolate
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('admin.customers.provision_pppoe', $c->id) }}" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-2 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 text-[10px] font-bold transition-all cursor-pointer" title="Provision PPPoE Secret on MikroTik">
+                                                Sync PPPoE
+                                            </button>
+                                        </form>
+                                        @if(!empty($c->pppoe_username))
+                                            <form method="POST" action="{{ route('admin.customers.isolate', $c->id) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="px-2 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 text-[10px] font-bold transition-all cursor-pointer" title="Isolate Subscriber on MikroTik (ISOLIR)">
+                                                    Isolate
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endif
                                     <a href="{{ route('admin.tasks.create') }}?customer_name={{ urlencode($c->name) }}&customer_phone={{ urlencode($c->phone) }}&address={{ urlencode($c->address) }}"
                                         class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 text-[11px] font-bold transition-all">
                                         + Repair Ticket

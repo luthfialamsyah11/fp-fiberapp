@@ -546,6 +546,61 @@ export class ApiService {
     return firstValueFrom(this.http.delete(`${this.baseUrl}/tasks/${taskId}/materials/${materialId}`));
   }
 
+  // Dynamic QRIS On-Site Billing Collection
+  async generateTaskQris(taskId: number, amount?: number, expiryMinutes = 15): Promise<any> {
+    if (await this.isDemoMode()) {
+      const task: any = this.demoTasks.find(t => t.id === Number(taskId));
+      const billAmt = amount && amount >= 1000 ? amount : (task?.billing_amount || 175000);
+      const ref = `QRIS-DEMO-${taskId}-${Date.now().toString().slice(-5)}`;
+      const qrPayload = `00020101021226680014ID.CO.QRIS.WWW52045812530336054${String(Math.round(billAmt)).padStart(6, '0')}5802ID5913BENTENG_SIBER6007JAKARTA6304DEMO`;
+      const tx = {
+        reference_no: ref,
+        amount: billAmt,
+        status: 'pending',
+        qr_payload: qrPayload,
+        qr_image_url: `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(qrPayload)}`,
+        expires_at: new Date(Date.now() + expiryMinutes * 60000).toISOString(),
+        paid_at: null as string | null,
+      };
+      if (task) {
+        task.billing_amount = billAmt;
+        task.payment_status = 'pending';
+        task._demo_qris = tx;
+        task._demo_qris_created = Date.now();
+      }
+      return { message: 'Dynamic QRIS generated (Demo Sandbox).', transaction: tx };
+    }
+
+    const body: any = { expiry_minutes: expiryMinutes };
+    if (amount && amount >= 1000) body.amount = amount;
+    return firstValueFrom(
+      this.http.post(`${this.baseUrl}/tasks/${taskId}/qris`, body, this.idempotentHeaders())
+    );
+  }
+
+  async getTaskPaymentStatus(taskId: number): Promise<any> {
+    if (await this.isDemoMode()) {
+      const task: any = this.demoTasks.find(t => t.id === Number(taskId));
+      // In Demo Mode, simulate instant QRIS bank settlement 6 seconds after generation
+      if (task?._demo_qris && task.payment_status === 'pending' && Date.now() - (task._demo_qris_created || 0) >= 6000) {
+        task.payment_status = 'paid';
+        task._demo_qris.status = 'paid';
+        task._demo_qris.paid_at = new Date().toISOString();
+      }
+      return {
+        task_id: taskId,
+        billing_amount: task?.billing_amount || 0,
+        payment_status: task?.payment_status || 'unpaid',
+        is_paid: task?.payment_status === 'paid',
+        transaction: task?._demo_qris || null,
+      };
+    }
+
+    return firstValueFrom(
+      this.http.get(`${this.baseUrl}/tasks/${taskId}/payment-status?_ts=${Date.now()}`, this.noCacheHeaders())
+    );
+  }
+
   // Customer Digital Signature (with Offline Queue Fallback)
   async saveTaskSignature(taskId: number, signature: string, signerName: string, idempotencyKey?: string): Promise<any> {
     if (await this.isDemoMode()) {

@@ -12,10 +12,26 @@ use Illuminate\Http\Request;
 class MasterAdminController extends Controller
 {
     /**
+     * Strictly enforce Platform Owner authorization (Root Tenant ID 1 only).
+     * Prevents tenant-level super_admins (tenant_id > 1) from escalating into global master console.
+     */
+    protected function authorizePlatformOwner(): void
+    {
+        $user = auth()->user();
+        $isRootTenant = $user && ($user->tenant_id === null || (int) $user->tenant_id === 1);
+
+        if (!$user || !$user->isSuperAdmin() || !$isRootTenant) {
+            abort(403, 'Access denied: Platform Master Console is restricted to root platform administrators.');
+        }
+    }
+
+    /**
      * Platform Master Admin Overview: List all registered ISPs and national metrics.
      */
     public function index()
     {
+        $this->authorizePlatformOwner();
+
         return TenantContext::withoutTenant(function () {
             $tenants = Tenant::withCount([
                 'users as technicians_count' => function ($query) {
@@ -41,6 +57,8 @@ class MasterAdminController extends Controller
      */
     public function toggleStatus(Tenant $tenant)
     {
+        $this->authorizePlatformOwner();
+
         if ($tenant->id === 1) {
             return back()->with('error', 'Tenant default sistem tidak dapat ditangguhkan.');
         }
@@ -57,6 +75,8 @@ class MasterAdminController extends Controller
      */
     public function updatePlan(Request $request, Tenant $tenant)
     {
+        $this->authorizePlatformOwner();
+
         $validated = $request->validate([
             'plan' => 'required|in:starter,growth,enterprise',
         ]);

@@ -199,11 +199,14 @@ class TaskController extends Controller
 
     public function assign(Request $request, Task $task)
     {
+        $tenantId = TenantContext::id();
+        $techRule = Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true);
+        if ($tenantId !== null) {
+            $techRule->where('tenant_id', $tenantId);
+        }
+
         $request->validate([
-            'technician_id' => [
-                'required',
-                Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
-            ],
+            'technician_id' => ['required', $techRule],
         ]);
 
         if ($task->status === 'completed') {

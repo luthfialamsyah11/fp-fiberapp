@@ -372,6 +372,113 @@
                     </div>
                 </div>
 
+                <!-- 6. Active Network Orchestrator (MikroTik & OLT) & Dynamic QRIS Payment Gateway -->
+                <div class="border-t border-fsmBorder pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-2">
+                            <ion-icon name="hardware-chip-outline" class="text-sm"></ion-icon>
+                            6. Active Network Orchestrator (MikroTik / OLT) &amp; Dynamic QRIS Gateway
+                        </h3>
+                        <span class="text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-semibold">Tenant-Isolated</span>
+                    </div>
+
+                    @php
+                        $net = $networkSettings ?? [];
+                        $pay = $paymentSettings ?? [];
+                    @endphp
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <!-- MikroTik RouterOS REST -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                            <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <ion-icon name="git-network-outline" class="text-blue-600"></ion-icon> MikroTik RouterOS (PPPoE)
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Driver Mode</label>
+                                <select name="mikrotik_driver" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs">
+                                    <option value="simulator" {{ ($net['mikrotik_driver'] ?? 'simulator') === 'simulator' ? 'selected' : '' }}>Simulator (Sandbox)</option>
+                                    <option value="rest" {{ ($net['mikrotik_driver'] ?? '') === 'rest' ? 'selected' : '' }}>Live RouterOS v7 REST API</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Router Host / IP</label>
+                                    <input type="text" name="mikrotik_host" value="{{ old('mikrotik_host', $net['mikrotik_host'] ?? '') }}" placeholder="10.20.30.1" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Port</label>
+                                    <input type="number" name="mikrotik_port" value="{{ old('mikrotik_port', $net['mikrotik_port'] ?? 443) }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">API User</label>
+                                    <input type="text" name="mikrotik_user" value="{{ old('mikrotik_user', $net['mikrotik_user'] ?? 'admin') }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">API Password</label>
+                                    <input type="password" name="mikrotik_password" value="" placeholder="{{ !empty($net['mikrotik_password']) ? '•••••••• (saved)' : 'Enter password' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs">
+                                </div>
+                            </div>
+                            <label class="flex items-center gap-2 text-[11px] text-slate-700 cursor-pointer">
+                                <input type="checkbox" name="mikrotik_use_ssl" value="1" {{ ($net['mikrotik_use_ssl'] ?? true) ? 'checked' : '' }} class="rounded text-blue-600">
+                                Use HTTPS (TLS) for RouterOS REST
+                            </label>
+                        </div>
+
+                        <!-- OLT / GenieACS TR-069 -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                            <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <ion-icon name="pulse-outline" class="text-indigo-600"></ion-icon> OLT / GenieACS Optical Gate
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Telemetry Driver</label>
+                                <select name="olt_driver" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs">
+                                    <option value="simulator" {{ ($net['olt_driver'] ?? 'simulator') === 'simulator' ? 'selected' : '' }}>Simulator (Sandbox)</option>
+                                    <option value="genieacs" {{ ($net['olt_driver'] ?? '') === 'genieacs' ? 'selected' : '' }}>Live GenieACS TR-069 NBI</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">GenieACS Host</label>
+                                    <input type="text" name="genieacs_host" value="{{ old('genieacs_host', $net['genieacs_host'] ?? '') }}" placeholder="acs.isp.net" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Port</label>
+                                    <input type="number" name="genieacs_port" value="{{ old('genieacs_port', $net['genieacs_port'] ?? 7557) }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                                </div>
+                            </div>
+                            <label class="flex items-start gap-2 text-[11px] text-slate-700 cursor-pointer pt-1">
+                                <input type="checkbox" name="require_hardware_olt_validation" value="1" {{ !empty($net['require_hardware_olt_validation']) ? 'checked' : '' }} class="rounded text-indigo-600 mt-0.5">
+                                <span>Enforce live OLT/ONT optical health check before allowing work order completion</span>
+                            </label>
+                        </div>
+
+                        <!-- Dynamic QRIS Payment Gateway -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                            <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <ion-icon name="qr-code-outline" class="text-emerald-600"></ion-icon> Dynamic QRIS Gateway
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Payment Provider</label>
+                                <select name="payment_driver" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs">
+                                    <option value="simulator" {{ ($pay['driver'] ?? 'simulator') === 'simulator' ? 'selected' : '' }}>Simulator (Sandbox)</option>
+                                    <option value="midtrans" {{ ($pay['driver'] ?? '') === 'midtrans' ? 'selected' : '' }}>Live Midtrans Core API (QRIS)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Midtrans Server Key</label>
+                                <input type="password" name="payment_server_key" value="" placeholder="{{ !empty($pay['server_key']) ? '•••••••• (saved)' : 'SB-Mid-server-...' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                            </div>
+                            <label class="flex items-center gap-2 text-[11px] text-slate-700 cursor-pointer">
+                                <input type="checkbox" name="payment_is_production" value="1" {{ !empty($pay['is_production']) ? 'checked' : '' }} class="rounded text-emerald-600">
+                                Production Mode (Live Bank Settlement)
+                            </label>
+                            <p class="text-[10px] text-slate-500 font-mono break-all">Webhook: {{ url('/api/webhooks/payment') }}</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Submit Button Bar -->

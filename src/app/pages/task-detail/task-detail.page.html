@@ -417,6 +417,50 @@
           </div>
           <p class="stage-desc">Ensure proof photos are uploaded, materials recorded, and customer signature captured before concluding.</p>
 
+          <!-- Dynamic QRIS On-Site Billing & Instant MikroTik Unblock Card -->
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:14px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:#065f46;">
+                <ion-icon name="qr-code-outline" style="font-size:18px;color:#059669;"></ion-icon>
+                <span>Dynamic QRIS On-Site Billing</span>
+              </div>
+              <span [style.background]="paymentStatus === 'paid' ? '#059669' : (paymentStatus === 'pending' ? '#d97706' : '#64748b')"
+                    style="color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;text-transform:uppercase;">
+                {{ paymentStatus }}
+              </span>
+            </div>
+
+            <div *ngIf="paymentStatus === 'paid'" style="background:#ffffff;border:1px solid #a7f3d0;border-radius:10px;padding:12px;text-align:center;">
+              <ion-icon name="checkmark-circle" style="font-size:32px;color:#059669;"></ion-icon>
+              <div style="font-weight:800;font-size:13px;color:#065f46;margin-top:4px;">Payment Verified &amp; MikroTik Unblocked</div>
+              <div style="font-size:11px;color:#475569;margin-top:2px;" *ngIf="qrisTransaction?.reference_no">
+                Ref: {{ qrisTransaction.reference_no }} &bull; IDR {{ qrisTransaction.amount | number:'1.0-0' }}
+              </div>
+            </div>
+
+            <div *ngIf="paymentStatus !== 'paid'">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+                <input type="number" [(ngModel)]="qrisAmount" min="1000" step="1000" placeholder="Amount (IDR)"
+                       style="flex:1;padding:9px 12px;border-radius:10px;border:1px solid #86efac;background:#fff;font-size:13px;font-weight:700;color:#0f172a;" />
+                <button type="button" (click)="generateDynamicQris()" [disabled]="isGeneratingQris"
+                        style="padding:10px 14px;border-radius:10px;border:none;background:#059669;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;">
+                  <ion-icon name="qr-code"></ion-icon>
+                  <span>{{ isGeneratingQris ? 'Generating...' : (qrisTransaction ? 'Refresh QRIS' : 'Generate QRIS') }}</span>
+                </button>
+              </div>
+
+              <div *ngIf="qrisTransaction?.qr_image_url" style="background:#fff;border:1px solid #bbf7d0;border-radius:12px;padding:12px;text-align:center;">
+                <img [src]="qrisTransaction.qr_image_url" alt="Dynamic QRIS Code" style="width:210px;height:210px;margin:0 auto;display:block;border-radius:8px;" />
+                <div style="font-size:11px;font-weight:700;color:#0f172a;margin-top:8px;">
+                  IDR {{ qrisTransaction.amount | number:'1.0-0' }} &bull; {{ qrisTransaction.reference_no }}
+                </div>
+                <div style="font-size:10px;color:#059669;margin-top:4px;font-weight:600;">
+                  Waiting for customer scan (auto-syncing every 3s)...
+                </div>
+              </div>
+            </div>
+          </div>
+
           <button class="btn-action-lg btn-complete-task" (click)="completeTask()" [disabled]="isCompleting">
             <ion-icon name="checkmark-circle"></ion-icon>
             <span>{{ isCompleting ? 'Completing...' : 'Mark Work Order Complete' }}</span>

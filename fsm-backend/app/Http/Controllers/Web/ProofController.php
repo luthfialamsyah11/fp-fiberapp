@@ -65,8 +65,10 @@ class ProofController extends Controller
 
         $tasksWithProof = $query->orderBy('updated_at', 'desc')->paginate(12)->withQueryString();
 
-        // Calculate KPI metrics with minimal database overhead
-        $proofSummary = ProofOfWork::selectRaw('COUNT(*) as total, MAX(created_at) as latest_upload_at')->first();
+        // Calculate tenant-scoped KPI metrics with minimal database overhead
+        $proofSummary = ProofOfWork::whereHas('task')
+            ->selectRaw('COUNT(*) as total, MAX(created_at) as latest_upload_at')
+            ->first();
 
         $metrics = [
             'total_proofs'      => (int) ($proofSummary->total ?? 0),

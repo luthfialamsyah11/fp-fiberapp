@@ -8,8 +8,12 @@ use Illuminate\Support\Facades\Log;
 
 class SettingService
 {
-    public static function getFilePath()
+    public static function getFilePath(?int $tenantId = null)
     {
+        $resolvedId = $tenantId ?? TenantContext::id();
+        if ($resolvedId !== null && $resolvedId > 1) {
+            return storage_path("app/settings_tenant_{$resolvedId}.json");
+        }
         return storage_path('app/settings.json');
     }
 

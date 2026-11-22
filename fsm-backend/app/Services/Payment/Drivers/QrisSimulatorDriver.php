@@ -44,18 +44,20 @@ class QrisSimulatorDriver implements QrisGatewayInterface
 
     public function verifyWebhookSignature(array $payload, ?string $signatureHeader = null): bool
     {
-        // For simulator, accept if signature is 'simulated_valid_sig' or in test mode
-        if (!empty($signatureHeader) && $signatureHeader === 'simulated_valid_sig') {
-            return true;
-        }
-
-        // Midtrans style sha512 signature check fallback for simulation
+        // Midtrans-style SHA-512 signature check
         if (!empty($payload['signature_key']) && !empty($payload['order_id']) && !empty($payload['status_code']) && !empty($payload['gross_amount'])) {
             $serverKey = $this->config['server_key'] ?? 'simulated_server_key';
             $computed = hash('sha512', $payload['order_id'] . $payload['status_code'] . $payload['gross_amount'] . $serverKey);
             return hash_equals($computed, (string) $payload['signature_key']);
         }
 
-        return true;
+        // Explicit simulator header token (allowed in non-production OR when simulator webhook secret matches)
+        $expectedSecret = $this->config['webhook_secret'] ?? 'simulated_valid_sig';
+        if (!empty($signatureHeader) && hash_equals((string) $expectedSecret, (string) $signatureHeader)) {
+            return true;
+        }
+
+        // Never blindly accept unsigned webhooks in production
+        return false;
     }
 }

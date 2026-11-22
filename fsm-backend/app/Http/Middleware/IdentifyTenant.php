@@ -33,8 +33,10 @@ class IdentifyTenant
         $tenant = null;
 
         try {
-            // 1. Check Authenticated User (Sanctum / Web Session)
-            $user = Auth::user();
+            // 1. Check Authenticated User (Web Session or Sanctum Bearer Token) without stale tenant bias
+            $user = TenantContext::withoutTenant(function () use ($request) {
+                return $request->user() ?? Auth::user() ?? Auth::guard('sanctum')->user();
+            });
             if ($user && !empty($user->tenant_id)) {
                 $tenant = Tenant::find($user->tenant_id);
             }

@@ -85,13 +85,13 @@ class TenantRegistrationController extends Controller
                 'is_active' => true,
             ]);
 
-            // 3. Seed starter warehouse inventory catalog for rapid onboarding
+            // 3. Seed starter warehouse inventory catalog with valid platform categories (material/device/tool)
             $starterMaterials = [
-                ['code' => 'DC-1C', 'name' => 'Kabel Drop Core FO 1 Core G.657A', 'unit' => 'meter', 'stock' => 1000, 'unit_price' => 1200, 'category' => 'Fiber Drop Cable'],
-                ['code' => 'FC-SC', 'name' => 'Fast Connector SC/UPC Biru', 'unit' => 'pcs', 'stock' => 200, 'unit_price' => 5000, 'category' => 'Passive Accessories'],
-                ['code' => 'PC-SC-2M', 'name' => 'Patch Cord SC/UPC-SC/UPC 2 Meter Simplex', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 18000, 'category' => 'Passive Accessories'],
-                ['code' => 'ROSET-1P', 'name' => 'Roset Optik 1 Port Wallmount', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 12000, 'category' => 'Passive Accessories'],
-                ['code' => 'ONT-XPON', 'name' => 'Modem ONT XPON Gigabit Dual Band WiFi', 'unit' => 'unit', 'stock' => 25, 'unit_price' => 285000, 'category' => 'Active Device ONT'],
+                ['code' => 'DC-1C', 'name' => 'Kabel Drop Core FO 1 Core G.657A', 'unit' => 'meter', 'stock' => 1000, 'unit_price' => 1200, 'category' => 'material'],
+                ['code' => 'FC-SC', 'name' => 'Fast Connector SC/UPC Biru', 'unit' => 'pcs', 'stock' => 200, 'unit_price' => 5000, 'category' => 'material'],
+                ['code' => 'PC-SC-2M', 'name' => 'Patch Cord SC/UPC-SC/UPC 2 Meter Simplex', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 18000, 'category' => 'material'],
+                ['code' => 'ROSET-1P', 'name' => 'Roset Optik 1 Port Wallmount', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 12000, 'category' => 'material'],
+                ['code' => 'ONT-XPON', 'name' => 'Modem ONT XPON Gigabit Dual Band WiFi', 'unit' => 'unit', 'stock' => 25, 'unit_price' => 285000, 'category' => 'device'],
             ];
 
             foreach ($starterMaterials as $mat) {
@@ -101,8 +101,10 @@ class TenantRegistrationController extends Controller
                 ]));
             }
 
-            // 4. Authenticate the newly created ISP Admin
+            // 4. Authenticate the newly created ISP Admin and bind session tenant securely
             Auth::login($adminUser);
+            $request->session()->regenerate();
+            $request->session()->put('active_tenant_id', $tenant->id);
 
             return redirect()->route('admin.dashboard')
                 ->with('success', "Selamat datang di Benteng Siber FiberOps! Akun ISP '{$tenant->name}' berhasil dibuat dengan akses Trial 14 Hari (Paket " . ucfirst($tenant->plan) . ").");

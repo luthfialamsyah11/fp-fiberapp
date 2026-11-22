@@ -19,7 +19,8 @@ class TrackingController extends Controller
             }])
             ->get();
 
-        $historyLogs = TechnicianLocation::with('technician')
+        $historyLogs = TechnicianLocation::whereHas('technician')
+            ->with('technician')
             ->orderBy('id', 'desc')
             ->take(50)
             ->get();
@@ -28,10 +29,10 @@ class TrackingController extends Controller
         $selectedRoute = [];
         $selectedTech = null;
         if ($selectedTechId) {
-            $selectedTech = User::find($selectedTechId);
+            $selectedTech = User::where('role', 'technician')->find($selectedTechId);
             if ($selectedTech) {
                 // Take latest 50 points and order chronologically
-                $selectedRoute = TechnicianLocation::where('technician_id', $selectedTechId)
+                $selectedRoute = TechnicianLocation::where('technician_id', $selectedTech->id)
                     ->orderBy('id', 'desc')
                     ->take(50)
                     ->get()
@@ -102,7 +103,9 @@ class TrackingController extends Controller
                 ];
             });
 
-        $historyQuery = TechnicianLocation::with('technician:id,name')->orderBy('id', 'desc');
+        $historyQuery = TechnicianLocation::whereHas('technician')
+            ->with('technician:id,name')
+            ->orderBy('id', 'desc');
         if ($sinceId > 0) {
             $historyQuery->where('id', '>', $sinceId);
         }
@@ -126,22 +129,26 @@ class TrackingController extends Controller
         $selectedRoute = [];
         $selectedTechId = $request->get('technician_id');
         if ($selectedTechId) {
-            $selectedRoute = TechnicianLocation::where('technician_id', $selectedTechId)
-                ->orderBy('id', 'desc')
-                ->take(50)
-                ->get()
-                ->reverse()
-                ->values()
-                ->map(function ($pt) {
-                    return [
-                        'latitude'  => (float) $pt->latitude,
-                        'longitude' => (float) $pt->longitude,
-                        'time'      => ($pt->captured_at ?? $pt->created_at)->format('H:i:s'),
-                    ];
-                });
+            // Tenant-scoped verification prevents cross-tenant GPS trail IDOR
+            $scopedTech = User::where('role', 'technician')->find($selectedTechId);
+            if ($scopedTech) {
+                $selectedRoute = TechnicianLocation::where('technician_id', $scopedTech->id)
+                    ->orderBy('id', 'desc')
+                    ->take(50)
+                    ->get()
+                    ->reverse()
+                    ->values()
+                    ->map(function ($pt) {
+                        return [
+                            'latitude'  => (float) $pt->latitude,
+                            'longitude' => (float) $pt->longitude,
+                            'time'      => ($pt->captured_at ?? $pt->created_at)->format('H:i:s'),
+                        ];
+                    });
+            }
         }
 
-        $latestLogId = (int) (TechnicianLocation::max('id') ?? 0);
+        $latestLogId = (int) (TechnicianLocation::whereHas('technician')->max('id') ?? 0);
 
         return response()->json([
             'status'         => 'success',

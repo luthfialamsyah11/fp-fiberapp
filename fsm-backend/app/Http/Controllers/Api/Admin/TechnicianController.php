@@ -20,6 +20,14 @@ class TechnicianController extends Controller
 
     public function store(Request $request)
     {
+        $tenant = \App\Services\TenantContext::getTenant();
+        if ($tenant && !$tenant->canAddTechnician()) {
+            return response()->json([
+                'message'        => "Technician quota limit ({$tenant->max_technicians}) for plan {$tenant->plan} reached. Please upgrade your subscription.",
+                'quota_exceeded' => true,
+            ], 422);
+        }
+
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users',

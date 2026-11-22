@@ -16,9 +16,15 @@ class MikrotikRestDriver implements MikrotikDriverInterface
 
     public function __construct(array $config)
     {
-        $host = $config['host'] ?? '127.0.0.1';
-        $port = $config['port'] ?? 443;
+        $host = strtolower(trim((string) ($config['host'] ?? '127.0.0.1'), '[] '));
+        $port = (int) ($config['port'] ?? 443);
         $scheme = !empty($config['use_ssl']) ? 'https' : 'http';
+
+        $blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254', 'metadata.google.internal'];
+        if (!app()->environment('testing') && (in_array($host, $blockedHosts, true) || str_starts_with($host, '169.254.'))) {
+            throw new \InvalidArgumentException("Blocked MikroTik host ({$host}): loopback and cloud metadata targets are prohibited by SSRF policy.");
+        }
+
         $this->baseUrl = "{$scheme}://{$host}:{$port}/rest";
         $this->user = $config['user'] ?? 'admin';
         $this->pass = $config['password'] ?? '';

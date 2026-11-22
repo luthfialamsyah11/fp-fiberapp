@@ -136,6 +136,7 @@ class TaskController extends Controller
             'technician_id'    => ['nullable', $techRule],
             'scheduled_at'     => 'nullable|date',
             'priority'         => 'required|in:low,medium,high',
+            'billing_amount'   => 'nullable|numeric|min:0|max:100000000',
         ]);
 
         // Auto-assign nearest available technician if enabled and technician_id omitted
@@ -287,6 +288,7 @@ class TaskController extends Controller
             'technician_id'    => ['nullable', $techRule],
             'scheduled_at'     => 'nullable|date',
             'priority'         => 'required|in:low,medium,high',
+            'billing_amount'   => 'nullable|numeric|min:0|max:100000000',
             'status'           => 'required|in:pending,assigned,accepted,on-going,completed,rejected',
             'override_reason'  => 'nullable|string|max:500',
         ]);
@@ -344,6 +346,7 @@ class TaskController extends Controller
             'progressUpdates.user',
             'materials.inventoryItem',
             'statusHistories.actor',
+            'latestPayment',
         ]);
 
         $technicians = User::where('role', 'technician')
@@ -400,11 +403,14 @@ class TaskController extends Controller
     public function assign(Request $request, Task $task)
     {
         if ($request->filled('technician_id')) {
+            $tenantId = TenantContext::id();
+            $techRule = Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true);
+            if ($tenantId !== null) {
+                $techRule->where('tenant_id', $tenantId);
+            }
+
             $request->validate([
-                'technician_id' => [
-                    'required',
-                    Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
-                ],
+                'technician_id' => ['required', $techRule],
             ]);
             $newTechId = (int) $request->technician_id;
 
@@ -496,8 +502,14 @@ class TaskController extends Controller
             return back()->with('error', 'Cannot add materials to a completed and BAST-sealed work order. Request rework first.');
         }
 
+        $tenantId = TenantContext::id();
+        $itemRule = Rule::exists('inventory_items', 'id');
+        if ($tenantId !== null) {
+            $itemRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
-            'inventory_item_id' => 'required|exists:inventory_items,id',
+            'inventory_item_id' => ['required', $itemRule],
             'quantity'          => 'required|numeric|min:0.01',
             'serial_number'     => 'nullable|string|max:100',
             'notes'             => 'nullable|string|max:255',
@@ -551,9 +563,32 @@ class TaskController extends Controller
         return back()->with('success', 'Material removed and stock restored to warehouse.');
     }
 
+    public function generateQris(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'amount'         => 'nullable|numeric|min:1000|max:100000000',
+            'expiry_minutes' => 'nullable|integer|min:5|max:120',
+        ]);
+
+        $amount = isset($validated['amount']) ? (float) $validated['amount'] : (float) ($task->billing_amount ?? 0);
+        if ($amount < 1000) {
+            return back()->with('error', 'Billing amount must be at least IDR 1,000 to generate a Dynamic QRIS.');
+        }
+
+        try {
+            $tx = app(\App\Services\Payment\QrisPaymentService::class)
+                ->generateTaskQris($task, $amount, (int) ($validated['expiry_minutes'] ?? 15));
+            return back()->with('success', "Dynamic QRIS generated (Ref: {$tx->reference_no}, Amount: " . SettingService::formatCurrency((float) $tx->amount) . ').');
+        } catch (ValidationException $e) {
+            return back()->with('error', collect($e->errors())->flatten()->first() ?? 'Unable to generate QRIS.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'QRIS generation failed: ' . $e->getMessage());
+        }
+    }
+
     public function liveStatus(Task $task)
     {
-        $task->load(['technician.latestLocation', 'latestProgressUpdate'])
+        $task->load(['technician.latestLocation', 'latestProgressUpdate', 'latestPayment'])
             ->loadCount(['proofs', 'materials', 'progressUpdates']);
         $tech = $task->technician;
         $loc = $tech?->latestLocation;
@@ -577,6 +612,8 @@ class TaskController extends Controller
         $progressUpdatesCount = (int) ($task->progress_updates_count ?? 0);
         $hasSignature = !empty($task->customer_signature);
         $bastHash = (string) ($task->bast_hash ?? '');
+        $paymentStatus = (string) ($task->payment_status ?? 'unpaid');
+        $opticalRx = $task->optical_power_rx_dbm !== null ? (string) $task->optical_power_rx_dbm : '';
         $stateSignature = sha1(implode('|', [
             $task->status,
             (int) $task->progress_percent,
@@ -585,6 +622,8 @@ class TaskController extends Controller
             $progressUpdatesCount,
             $hasSignature ? '1' : '0',
             $bastHash,
+            $paymentStatus,
+            $opticalRx,
             (int) ($task->technician_id ?? 0),
             (string) ($task->updated_at?->toIso8601String() ?? ''),
         ]));
@@ -599,6 +638,17 @@ class TaskController extends Controller
             'progress_updates_count' => $progressUpdatesCount,
             'has_signature'          => $hasSignature,
             'bast_hash'              => $bastHash ?: null,
+            'billing_amount'         => (float) ($task->billing_amount ?? 0),
+            'payment_status'         => $paymentStatus,
+            'optical_power_rx_dbm'   => $task->optical_power_rx_dbm,
+            'optical_power_tx_dbm'   => $task->optical_power_tx_dbm,
+            'hardware_verified_at'   => $task->hardware_verified_at?->toIso8601String(),
+            'latest_payment'         => $task->latestPayment ? [
+                'reference_no' => $task->latestPayment->reference_no,
+                'amount'       => $task->latestPayment->amount,
+                'status'       => $task->latestPayment->status,
+                'paid_at'      => $task->latestPayment->paid_at?->toIso8601String(),
+            ] : null,
             'state_signature'        => $stateSignature,
             'updated_at'             => $task->updated_at?->toIso8601String(),
             'server_time'            => now()->format('H:i:s'),

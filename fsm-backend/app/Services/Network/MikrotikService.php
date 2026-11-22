@@ -65,7 +65,7 @@ class MikrotikService
     public function provisionCustomerPppoe(Customer $customer, ?string $password = null, ?string $profile = null): array
     {
         $username = $customer->pppoe_username ?: ('cid_' . ($customer->customer_code ?: $customer->id));
-        $pass = $password ?: ('sec_' . substr(md5($username . 'bentengsiber'), 0, 8));
+        $pass = $password ?: ('sec_' . \Illuminate\Support\Str::random(12));
         $plan = $profile ?: ($customer->service_plan ?: 'DEFAULT-PROFILE');
 
         $driver = $this->getDriver();
@@ -98,7 +98,7 @@ class MikrotikService
 
         $driver = $this->getDriver();
         $secret = $driver->getSecret($username);
-        $pass = $secret['password'] ?? 'sec_' . substr(md5($username), 0, 8);
+        $pass = $secret['password'] ?? ('sec_' . \Illuminate\Support\Str::random(12));
 
         // Update secret profile to ISOLIR
         $driver->upsertSecret(
@@ -131,7 +131,7 @@ class MikrotikService
 
         $driver = $this->getDriver();
         $secret = $driver->getSecret($username);
-        $pass = $secret['password'] ?? 'sec_' . substr(md5($username), 0, 8);
+        $pass = $secret['password'] ?? ('sec_' . \Illuminate\Support\Str::random(12));
         $normalProfile = $customer->service_plan ?: 'DEFAULT-PROFILE';
 
         // Restore normal profile

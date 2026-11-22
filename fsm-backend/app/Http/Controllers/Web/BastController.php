@@ -10,15 +10,20 @@ class BastController extends Controller
 {
     /**
      * Show & Print official Work Order Acceptance Certificate (BAST) document.
+     * Resolves without global tenant scope so external customers from ANY tenant
+     * can print their certificate via bearer tracking token while enforcing strict tenant auth for staff.
      */
-    public function show(Request $request, Task $task)
+    public function show(Request $request, int|string $task)
     {
+        $task = Task::withoutGlobalScopes()->findOrFail($task);
         $token = $request->query('token');
         $isTokenValid = $token && $task->tracking_token && hash_equals($task->tracking_token, $token);
-        $isPortalStaff = auth()->check() && auth()->user()->isPortalStaff();
-        $isAssignedTech = auth()->check() && $task->technician_id === auth()->id();
+        $user = auth()->user();
+        $isSameTenantStaff = $user && $user->isPortalStaff()
+            && ($user->tenant_id === null || $task->tenant_id === null || (int) $user->tenant_id === (int) $task->tenant_id);
+        $isAssignedTech = $user && (int) $task->technician_id === (int) $user->id;
 
-        if (!$isPortalStaff && !$isAssignedTech && !$isTokenValid) {
+        if (!$isSameTenantStaff && !$isAssignedTech && !$isTokenValid) {
             return redirect()->route('admin.login');
         }
 
@@ -91,14 +96,17 @@ class BastController extends Controller
     /**
      * Verify the cryptographic SHA-256 integrity seal of a BAST certificate.
      */
-    public function verify(Request $request, Task $task)
+    public function verify(Request $request, int|string $task)
     {
+        $task = Task::withoutGlobalScopes()->findOrFail($task);
         $token = $request->query('token');
         $isTokenValid = $token && $task->tracking_token && hash_equals($task->tracking_token, $token);
-        $isPortalStaff = auth()->check() && auth()->user()->isPortalStaff();
-        $isAssignedTech = auth()->check() && $task->technician_id === auth()->id();
+        $user = auth()->user();
+        $isSameTenantStaff = $user && $user->isPortalStaff()
+            && ($user->tenant_id === null || $task->tenant_id === null || (int) $user->tenant_id === (int) $task->tenant_id);
+        $isAssignedTech = $user && (int) $task->technician_id === (int) $user->id;
 
-        if (!$isPortalStaff && !$isAssignedTech && !$isTokenValid) {
+        if (!$isSameTenantStaff && !$isAssignedTech && !$isTokenValid) {
             return response()->json(['message' => 'Unauthorized verification request.'], 403);
         }
 

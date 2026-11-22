@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ISP &amp; FTTH Operations Solutions Playbook | Benteng Siber</title>
-  <meta name="description" content="See how ISP Owners, NOC Dispatchers, Warehouse Admins, Field Technicians, and Subscribers eliminate cash leakage, manual MikroTik isolir, and handover disputes with Benteng Siber FiberOps.">
-  <meta name="keywords" content="ISP Operations Software, FTTH Field Service Management, Stop ISP Cash Leakage, Automated MikroTik Isolir Restore, NOC Auto-Dispatch GIS ODP, ISP Warehouse BOM Control, Subscriber Ticket Radar">
+  <title>ISP &amp; FTTH Operations Solutions Playbook &amp; ROI Calculator | Benteng Siber</title>
+  <meta name="description" content="See how ISP Owners, NOC Dispatchers, Warehouse Admins, Field Technicians, and Subscribers eliminate cash leakage and manual MikroTik isolir—plus estimate your ROI on $250-$500/mo Cloud SaaS or $2,500 Dedicated Project.">
+  <meta name="keywords" content="ISP Operations Software, FTTH Field Service Management, ISP ROI Calculator, Stop ISP Cash Leakage, Automated MikroTik Isolir Restore, NOC Auto-Dispatch GIS ODP, ISP Warehouse BOM Control, Dedicated ISP Software Project">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#ffffff">
   <link rel="canonical" href="https://bentengsiber.com/solutions-isp.html">
@@ -13,20 +13,20 @@
 
   <meta property="og:site_name" content="Benteng Siber">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="ISP &amp; FTTH Operations Solutions Playbook | Benteng Siber">
-  <meta property="og:description" content="Transform ISP field operations from manual WhatsApp dispatch to automated MikroTik provisioning, 3-second QRIS unblock, and SHA-256 BAST accountability.">
+  <meta property="og:title" content="ISP &amp; FTTH Operations Solutions &amp; ROI Calculator | Benteng Siber">
+  <meta property="og:description" content="Transform ISP field operations with automated MikroTik provisioning, 3-second QRIS unblock, SHA-256 BAST, and calculate your monthly savings.">
   <meta property="og:url" content="https://bentengsiber.com/solutions-isp.html">
   <meta property="og:image" content="https://bentengsiber.com/og-image.png">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="ISP &amp; FTTH Solutions Playbook | Benteng Siber">
-  <meta name="twitter:description" content="Built for ISP Owners, NOC Teams, Warehouse Admins, Field Techs, and Subscribers.">
+  <meta name="twitter:description" content="Built for ISP Owners, NOC Teams, Warehouse Admins, Field Techs, and Subscribers ($250-$500/mo or $2,500/project).">
   <meta name="twitter:image" content="https://bentengsiber.com/og-image.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.5">
+  <link rel="stylesheet" href="styles.css?v=1.6">
 
   <script type="application/ld+json">
   {
@@ -34,8 +34,8 @@
     "@graph": [
       {
         "@type": "WebPage",
-        "name": "ISP & FTTH Operations Solutions Playbook | Benteng Siber",
-        "description": "Operational transformation guide for ISP owners, NOC engineers, warehouse managers, field technicians, and fiber subscribers.",
+        "name": "ISP & FTTH Operations Solutions Playbook & ROI Calculator | Benteng Siber",
+        "description": "Operational transformation guide and live ROI calculator for ISP owners, NOC engineers, warehouse managers, field technicians, and fiber subscribers.",
         "url": "https://bentengsiber.com/solutions-isp.html"
       },
       {
@@ -49,7 +49,7 @@
   }
   </script>
 </head>
-<body>
+<body id="top">
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <header class="site-header" id="site-header">
@@ -77,11 +77,41 @@
       </nav>
 
       <div class="header-actions header-actions--compact">
-        <a class="btn btn-ghost" href="index.html#pricing">Pricing</a>
+        <a class="btn btn-ghost hide-xs" href="index.html#pricing">Pricing</a>
         <a class="btn btn-primary hide-xs" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Trial &rarr;</a>
+        <button class="mobile-toggle" id="mobile-menu-open" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-drawer">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
       </div>
     </div>
   </header>
+
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile Navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <span class="brand-name">Benteng Siber</span>
+      <button class="drawer-close" id="mobile-menu-close" type="button" aria-label="Close navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div>
+        <div class="drawer-section-label">Pages</div>
+        <div class="drawer-links">
+          <a href="index.html">Home <span>&rarr;</span></a>
+          <a href="platform-architecture.html">Platform Architecture <span>&rarr;</span></a>
+          <a href="security-governance.html">Security &amp; Zero-Trust <span>&rarr;</span></a>
+          <a href="solutions-isp.html">ISP Solutions &amp; ROI <span>&rarr;</span></a>
+          <a href="playstore.html">Technician Mobile App <span>&rarr;</span></a>
+          <a href="about.html">About &amp; Delivery <span>&rarr;</span></a>
+          <a href="index.html#pricing">Pricing ($250–$2,500) <span>&rarr;</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Free Trial &rarr;</a>
+    </div>
+  </aside>
 
   <main id="main-content">
     <section class="page-hero-compact">
@@ -93,14 +123,76 @@
         </nav>
         <div class="tag-label">OPERATIONAL PLAYBOOK • BUILT FOR CARRIER TEAMS</div>
         <h1>How Every ISP Department Scales With Benteng Siber FiberOps</h1>
-        <p class="section-subtitle" style="max-width:780px;">
-          From stopping cash-collection leakage and automating MikroTik un-isolation to proving exact fiber dBm quality on every installation—discover how Benteng Siber replaces chaotic spreadsheets across every team.
+        <p class="section-subtitle" style="max-width:820px;">
+          From stopping cash-collection leakage and automating MikroTik un-isolation to proving exact fiber dBm quality on every installation—discover how Benteng Siber replaces chaotic spreadsheets and pays for itself in weeks.
         </p>
       </div>
     </section>
 
-    <!-- Before vs After Comparison -->
+    <!-- Interactive ROI Calculator -->
     <section class="section">
+      <div class="container">
+        <div class="section-header section-header--center">
+          <div class="tag-label">INTERACTIVE FINANCIAL ESTIMATOR</div>
+          <h2 class="section-title">ISP Revenue Recovery &amp; Payback Calculator</h2>
+          <p class="section-subtitle">
+            Adjust your subscriber base, monthly isolation rate, and average monthly bill to estimate leakage recovered via Dynamic QRIS, atomic BOM controls, and automated MikroTik unblocking.
+          </p>
+        </div>
+
+        <div class="roi-widget">
+          <div class="roi-control-group">
+            <div class="roi-field">
+              <label for="roi-subs">
+                <span>Active FTTH Subscribers</span>
+                <span class="roi-field-val" id="roi-subs-val">1,500 subs</span>
+              </label>
+              <input class="roi-range" id="roi-subs" type="range" min="200" max="15000" step="100" value="1500">
+            </div>
+
+            <div class="roi-field">
+              <label for="roi-isolir">
+                <span>Monthly ISOLIR / Collection Rate</span>
+                <span class="roi-field-val" id="roi-isolir-val">8% / mo</span>
+              </label>
+              <input class="roi-range" id="roi-isolir" type="range" min="2" max="25" step="1" value="8">
+            </div>
+
+            <div class="roi-field">
+              <label for="roi-arpu">
+                <span>Average Monthly Plan (ARPU in USD)</span>
+                <span class="roi-field-val" id="roi-arpu-val">$22 / mo</span>
+              </label>
+              <input class="roi-range" id="roi-arpu" type="range" min="10" max="80" step="2" value="22">
+            </div>
+          </div>
+
+          <div class="roi-result-card">
+            <div class="roi-result-kicker">ESTIMATED MONTHLY VALUE RECOVERED</div>
+            <div class="roi-result-big tabular-nums" id="roi-monthly-savings">$1,288 / mo</div>
+            <p style="font-size:0.84rem;color:#cbd5e1;margin:0;line-height:1.55;">
+              Conservative projection combining eliminated field cash/BOM leakage and automated MikroTik restoration labor savings.
+            </p>
+            <div class="roi-result-grid">
+              <div>
+                <div class="roi-stat-label">NOC Manual Hours Saved</div>
+                <div class="roi-stat-num tabular-nums" id="roi-noc-hours">33 hrs / mo</div>
+              </div>
+              <div>
+                <div class="roi-stat-label">$2,500 Project Payback</div>
+                <div class="roi-stat-num tabular-nums" id="roi-payback">1.9 mos</div>
+              </div>
+            </div>
+            <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer" style="width:100%;justify-content:center;">
+              Lock In 14-Day Trial or $2,500 Project &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Before vs After Comparison -->
+    <section class="section section-gray">
       <div class="container">
         <div class="section-header section-header--center">
           <div class="tag-label">OPERATIONAL TRANSFORMATION</div>
@@ -133,6 +225,64 @@
       </div>
     </section>
 
+    <!-- Cloud SaaS vs Dedicated Full Project Comparison -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header section-header--center">
+          <div class="tag-label">DEPLOYMENT OPTIONS</div>
+          <h2 class="section-title">Monthly Cloud SaaS ($250–$500/mo) vs. Dedicated Project ($2,500)</h2>
+          <p class="section-subtitle">
+            Start lean on our managed multi-tenant cloud, or own a complete turnkey white-label installation tailored to your ISP infrastructure.
+          </p>
+        </div>
+
+        <div class="spec-table-wrap">
+          <table class="spec-table">
+            <thead>
+              <tr>
+                <th>Capability</th>
+                <th>Starter Cloud ($250/mo)</th>
+                <th>Growth Cloud ($500/mo)</th>
+                <th>Dedicated Project ($2,500)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Billing Model</strong></td>
+                <td>Monthly Subscription (14-Day Trial)</td>
+                <td>Monthly Subscription (14-Day Trial)</td>
+                <td>One-Time Turnkey Project (+ optional $250–$500/mo managed support)</td>
+              </tr>
+              <tr>
+                <td><strong>Field Techs &amp; GIS Nodes</strong></td>
+                <td>Up to 10 Techs / 100 ODP</td>
+                <td>Up to 40 Techs / 500 ODP</td>
+                <td><strong>Unlimited</strong> Techs, ODP/ODC &amp; Regions</td>
+              </tr>
+              <tr>
+                <td><strong>MikroTik &amp; OLT/GenieACS</strong></td>
+                <td>Standard API &amp; QRIS</td>
+                <td>Full RouterOS v7 REST + OLT Gate</td>
+                <td>Multi-Router Cluster + Custom OLT Drivers</td>
+              </tr>
+              <tr>
+                <td><strong>Branding &amp; Android APK</strong></td>
+                <td>Shared Benteng Siber PWA/APK</td>
+                <td>Shared Benteng Siber PWA/APK</td>
+                <td><strong>100% White-Label</strong> Domain, BAST &amp; Signed APK</td>
+              </tr>
+              <tr>
+                <td><strong>Infrastructure Hosting</strong></td>
+                <td>Benteng Siber Multi-Tenant Cloud</td>
+                <td>Benteng Siber Multi-Tenant Cloud</td>
+                <td>Your Dedicated VPS / On-Premise / Cloud Server</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <!-- Solutions by Team -->
     <section class="section section-gray">
       <div class="container">
@@ -150,7 +300,7 @@
               <h3>ISP Owners &amp; Finance</h3>
               <p>Eliminate uncollected field cash via Dynamic QRIS, track exact material cost per installation, and monitor SLA &amp; CSAT KPIs across regions.</p>
             </div>
-            <a class="btn-link" href="index.html#pricing">View USD SaaS Plans &rarr;</a>
+            <a class="btn-link" href="index.html#pricing">View Pricing Plans &rarr;</a>
           </article>
 
           <article class="solution-card">
@@ -186,36 +336,76 @@
             <a class="btn-link" href="https://admin.bentengsiber.com/track" target="_blank" rel="noopener noreferrer">Open Live /track &rarr;</a>
           </article>
         </div>
+      </div>
+    </section>
 
-        <div class="callout-box" style="margin-top:2.5rem;display:flex;align-items:center;justify-content:space-between;gap:1.25rem;flex-wrap:wrap;">
-          <div>
-            <strong>Ready to test the full ISP workflow live?</strong>
-            <div style="font-size:0.88rem;color:var(--text-body);margin-top:0.2rem;">Spin up an isolated multi-tenant workspace on Starter ($249/mo) or Growth ($990/mo) with a 14-day free trial.</div>
-          </div>
+    <section class="cta-band">
+      <div class="container">
+        <h2>Ready to Eliminate Cash Leakage &amp; Manual ISOLIR?</h2>
+        <p>Start on Monthly Cloud ($250–$500/mo) with a 14-day free trial, or launch a $2,500 dedicated white-label deployment in 7 days.</p>
+        <div class="cta-band-actions">
           <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Free Trial &rarr;</a>
+          <a class="btn btn-outline-white" href="about.html">See 7-Day Project Delivery Roadmap</a>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer" style="padding:3rem 0 2.25rem;">
+  <footer class="site-footer">
     <div class="container">
-      <div class="footer-bottom" style="padding-top:0;">
+      <div class="footer-grid">
+        <div>
+          <a class="brand-logo" href="index.html" style="padding:0;">
+            <span class="brand-mark" aria-hidden="true" style="border:1px solid rgba(255,255,255,0.18);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4" stroke="#e8913a" stroke-width="2.3"/></svg>
+            </span>
+            <span class="footer-brand-name">Benteng Siber</span>
+          </a>
+          <p class="footer-desc">Carrier-grade Multi-Tenant ISP Field Service Management, Active Network Orchestrator, and Zero-Trust cybersecurity platform.</p>
+          <div class="footer-status-pill"><span class="status-dot" aria-hidden="true"></span><span>All Production Portals Operational</span></div>
+        </div>
+        <div class="footer-col">
+          <h3>Deep-Dive Pages</h3>
+          <ul>
+            <li><a href="platform-architecture.html">Platform Architecture</a></li>
+            <li><a href="security-governance.html">Security &amp; Zero-Trust</a></li>
+            <li><a href="solutions-isp.html">ISP Solutions &amp; ROI</a></li>
+            <li><a href="playstore.html">Technician Mobile App</a></li>
+            <li><a href="about.html">About &amp; 7-Day Delivery</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Live Portals</h3>
+          <ul>
+            <li><a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer">Super Admin NOC Console</a></li>
+            <li><a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Technician Mobile PWA</a></li>
+            <li><a href="https://admin.bentengsiber.com/request" target="_blank" rel="noopener noreferrer">Client Service Request</a></li>
+            <li><a href="https://admin.bentengsiber.com/track" target="_blank" rel="noopener noreferrer">Subscriber Ticket Radar</a></li>
+            <li><a href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Register ISP (14-Day Trial)</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Governance &amp; Contact</h3>
+          <ul>
+            <li><a href="index.html#pricing">Pricing ($250–$2,500)</a></li>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href=".well-known/security.txt">RFC 9116 security.txt</a></li>
+            <li><a href="https://wa.me/6281223554539" target="_blank" rel="noopener noreferrer">WhatsApp: +62 812-2355-4539</a></li>
+            <li><a href="mailto:leoallogne@gmail.com">leoallogne@gmail.com</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
         <span>&copy; 2026 Benteng Siber. All rights reserved.</span>
         <div class="footer-legal-links">
           <a href="index.html">Home</a>
-          <a href="platform-architecture.html">Architecture</a>
-          <a href="security-governance.html">Security</a>
-          <a href="solutions-isp.html">ISP Solutions</a>
-          <a href="playstore.html">Mobile App</a>
-          <a href="about.html">About</a>
           <a href="privacy-policy.html">Privacy Policy</a>
-          <a href=".well-known/security.txt">RFC 9116</a>
+          <a href="#top">Back to Top &uarr;</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="script.js?v=1.5" defer></script>
+  <script src="script.js?v=1.6" defer></script>
 </body>
 </html>

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Zero-Trust Security, AES-256 Encryption &amp; Audit Governance | Benteng Siber</title>
-  <meta name="description" content="Explore Benteng Siber's Zero-Trust security architecture: anti-IDOR multi-tenant isolation, AES-256-CBC at-rest encryption for MikroTik & Midtrans secrets, SSRF protection, immutable SHA-256 platform audit ledger, and RFC 9116 compliance.">
-  <meta name="keywords" content="Zero-Trust ISP Security, AES-256-CBC Credential Encryption, Anti-IDOR Multi-Tenant SaaS, Immutable SHA-256 Audit Log, SSRF Guard MikroTik, OWASP Security Headers, RFC 9116 security.txt, Benteng Siber Trust Center">
+  <meta name="description" content="Explore Benteng Siber's Zero-Trust security architecture: anti-IDOR multi-tenant isolation, AES-256-CBC at-rest encryption for MikroTik & Midtrans secrets, OWASP API Top 10 defense, immutable SHA-256 platform audit ledger, and RFC 9116 compliance.">
+  <meta name="keywords" content="Zero-Trust ISP Security, AES-256-CBC Credential Encryption, Anti-IDOR Multi-Tenant SaaS, Immutable SHA-256 Audit Log, SSRF Guard MikroTik, OWASP API Top 10 Defense, RFC 9116 security.txt, Benteng Siber Trust Center">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#ffffff">
   <link rel="canonical" href="https://bentengsiber.com/security-governance.html">
@@ -14,7 +14,7 @@
   <meta property="og:site_name" content="Benteng Siber">
   <meta property="og:type" content="article">
   <meta property="og:title" content="Zero-Trust Security &amp; Enterprise Hardening | Benteng Siber">
-  <meta property="og:description" content="Carrier-grade multi-tenant isolation, AES-256 encrypted hardware secrets, immutable SHA-256 audit chains, and verified RFC 9116 security governance.">
+  <meta property="og:description" content="Carrier-grade multi-tenant isolation, AES-256 encrypted hardware secrets, OWASP API Top 10 controls, immutable SHA-256 audit chains, and verified RFC 9116 governance.">
   <meta property="og:url" content="https://bentengsiber.com/security-governance.html">
   <meta property="og:image" content="https://bentengsiber.com/og-image.png">
 
@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.5">
+  <link rel="stylesheet" href="styles.css?v=1.6">
 
   <script type="application/ld+json">
   {
@@ -35,7 +35,7 @@
       {
         "@type": "TechArticle",
         "headline": "Benteng Siber Zero-Trust Security Architecture & Enterprise Hardening",
-        "description": "Security trust center detailing middleware-prioritized multi-tenancy, AES-256-CBC secret encryption, SSRF guards, immutable SHA-256 hash-chained audit logs, and RFC 9116 disclosure policy.",
+        "description": "Security trust center detailing middleware-prioritized multi-tenancy, AES-256-CBC secret encryption, OWASP API Top 10 controls, SSRF guards, immutable SHA-256 hash-chained audit logs, and RFC 9116 disclosure policy.",
         "url": "https://bentengsiber.com/security-governance.html",
         "datePublished": "2026-11-23",
         "dateModified": "2026-11-23",
@@ -53,7 +53,7 @@
   }
   </script>
 </head>
-<body>
+<body id="top">
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <header class="site-header" id="site-header">
@@ -81,11 +81,41 @@
       </nav>
 
       <div class="header-actions header-actions--compact">
-        <a class="btn btn-ghost" href=".well-known/security.txt">RFC 9116</a>
+        <a class="btn btn-ghost hide-xs" href=".well-known/security.txt">RFC 9116</a>
         <a class="btn btn-primary hide-xs" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Trial &rarr;</a>
+        <button class="mobile-toggle" id="mobile-menu-open" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-drawer">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
       </div>
     </div>
   </header>
+
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile Navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <span class="brand-name">Benteng Siber</span>
+      <button class="drawer-close" id="mobile-menu-close" type="button" aria-label="Close navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div>
+        <div class="drawer-section-label">Pages</div>
+        <div class="drawer-links">
+          <a href="index.html">Home <span>&rarr;</span></a>
+          <a href="platform-architecture.html">Platform Architecture <span>&rarr;</span></a>
+          <a href="security-governance.html">Security &amp; Zero-Trust <span>&rarr;</span></a>
+          <a href="solutions-isp.html">ISP Solutions &amp; ROI <span>&rarr;</span></a>
+          <a href="playstore.html">Technician Mobile App <span>&rarr;</span></a>
+          <a href="about.html">About &amp; Delivery <span>&rarr;</span></a>
+          <a href="index.html#pricing">Pricing ($250–$2,500) <span>&rarr;</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Free Trial &rarr;</a>
+    </div>
+  </aside>
 
   <main id="main-content">
     <section class="page-hero-compact">
@@ -97,8 +127,8 @@
         </nav>
         <div class="tag-label">TRUST CENTER • ENTERPRISE HARDENING PHASE 4</div>
         <h1>Zero-Trust Security Architecture &amp; Cryptographic Governance</h1>
-        <p class="section-subtitle" style="max-width:780px;">
-          Built for CISOs, telecom CTOs, and enterprise security auditors. Every layer of Benteng Siber—from HTTP middleware ordering and at-rest AES-256-CBC secret vaults to SSRF guards and immutable hash-chained audit ledgers—is engineered for production resilience.
+        <p class="section-subtitle" style="max-width:820px;">
+          Built for CISOs, telecom CTOs, and enterprise security auditors. Every layer of Benteng Siber—from HTTP middleware ordering and at-rest AES-256-CBC secret vaults to OWASP API Top 10 defenses and immutable SHA-256 hash-chained audit ledgers—is engineered and test-verified for production networks.
         </p>
 
         <div class="kpi-strip">
@@ -115,8 +145,8 @@
             <div class="kpi-box-label">SHA-256 Hash-Chained Platform Audit Log</div>
           </div>
           <div class="kpi-box">
-            <div class="kpi-box-val">RFC 9116</div>
-            <div class="kpi-box-label">OWASP Headers &amp; Verified Disclosure Policy</div>
+            <div class="kpi-box-val">76 Tests</div>
+            <div class="kpi-box-label">842 Automated Security &amp; Isolation Assertions</div>
           </div>
         </div>
       </div>
@@ -127,103 +157,133 @@
         <aside class="doc-toc" aria-label="Security Sections">
           <div class="doc-toc-title">Security Controls</div>
           <ul>
-            <li><a href="#tenant-isolation">1. Anti-IDOR Multi-Tenancy</a></li>
-            <li><a href="#aes-vault">2. AES-256-CBC Secret Vault</a></li>
-            <li><a href="#ssrf-webhook">3. SSRF &amp; Webhook Hardening</a></li>
-            <li><a href="#immutable-ledger">4. Immutable Audit Ledger</a></li>
-            <li><a href="#trial-guardrail">5. Enterprise Trial Guardrails</a></li>
-            <li><a href="#owasp-rfc">6. OWASP Headers &amp; RFC 9116</a></li>
+            <li><a href="#owasp-matrix">1. OWASP API Top 10 Matrix</a></li>
+            <li><a href="#tenant-isolation">2. Anti-IDOR Multi-Tenancy</a></li>
+            <li><a href="#aes-vault">3. AES-256-CBC Secret Vault</a></li>
+            <li><a href="#immutable-ledger">4. Immutable Hash-Chain Ledger</a></li>
+            <li><a href="#ssrf-webhook">5. SSRF &amp; Webhook Hardening</a></li>
+            <li><a href="#trial-guardrail">6. Project &amp; Trial Guardrails</a></li>
+            <li><a href="#owasp-rfc">7. Edge Headers &amp; RFC 9116</a></li>
           </ul>
         </aside>
 
         <div class="doc-content">
-          <article id="tenant-isolation">
-            <h2>1. Middleware-Prioritized Zero-Leak Multi-Tenant Isolation</h2>
+          <article id="owasp-matrix">
+            <h2>1. OWASP API Top 10 Neutralization Matrix</h2>
             <p>
-              In poorly ordered multi-tenant frameworks, route model binding resolves database records <em>before</em> tenant context is established—creating critical cross-tenant IDOR vulnerabilities. Benteng Siber explicitly locks kernel middleware execution order:
-            </p>
-            <div class="callout-box callout-box--navy">
-              <code>Authenticate</code> &rarr; <code>IdentifyTenant</code> &rarr; <code>EnsureTenantActive</code> &rarr; <code>SubstituteBindings</code>
-            </div>
-            <ul>
-              <li><strong>Cross-Tenant Route Binding Blocked:</strong> Every bound model (Task, Customer, ODP, Material, User) is resolved strictly inside the active authenticated tenant scope.</li>
-              <li><strong>Child Table Isolation:</strong> All secondary records—<code>ProofOfWork</code>, <code>ProgressUpdate</code>, <code>TaskMaterial</code>, and <code>TechnicianLocation</code>—are explicitly scoped to the active tenant on every analytics and dashboard query.</li>
-              <li><strong>Root Master Isolation:</strong> Access to <code>/master-admin</code> is restricted solely to the Root Platform Tenant (<code>tenant_id === 1</code>). Secondary tenant Super Admins receive a deterministic <code>HTTP 403 Forbidden</code>.</li>
-            </ul>
-          </article>
-
-          <article id="aes-vault">
-            <h2>2. AES-256-CBC At-Rest Credential Encryption</h2>
-            <p>
-              ISPs store high-privilege integration secrets inside their tenant configuration: MikroTik RouterOS API passwords, OLT/GenieACS credentials, Midtrans Server Keys, and WhatsApp Gateway tokens.
-            </p>
-            <p>
-              Benteng Siber encrypts all tenant <code>network_settings</code> and <code>settings</code> columns at rest in MySQL using <strong>AES-256-CBC with HMAC-SHA256 integrity MAC</strong> via a custom <code>EncryptedArrayOrLegacyJson</code> cast. Even if a raw database dump is exposed, ISP router and payment keys remain cryptographically unreadable.
-            </p>
-            <ul>
-              <li><strong>Hidden Serialization:</strong> Encrypted secret columns are excluded from JSON API responses by default (<code>$hidden</code>).</li>
-              <li><strong>Per-Tenant Config Partitioning:</strong> Runtime settings files are isolated per tenant (<code>settings_tenant_{id}.json</code>) so changes in one ISP can never bleed into another.</li>
-            </ul>
-          </article>
-
-          <article id="ssrf-webhook">
-            <h2>3. Outbound SSRF Guardrails &amp; Signed Webhook Integrity</h2>
-            <p>
-              Because FiberOps communicates with external MikroTik routers, OLT controllers, and custom webhook endpoints, strict outbound validation is mandatory:
-            </p>
-            <ul>
-              <li><strong>SSRF Protection:</strong> Outbound drivers block loopback interfaces (<code>127.0.0.1</code>, <code>::1</code>), link-local addresses, and cloud instance metadata endpoints (<code>169.254.169.254</code>) to prevent internal network pivoting.</li>
-              <li><strong>Payment Webhook Verification:</strong> Midtrans QRIS webhooks enforce rate limiting, cryptographic signature checks, and exact <code>gross_amount</code> matching against the database invoice before triggering MikroTik un-isolation.</li>
-              <li><strong>Brute-Force &amp; Replay Defense:</strong> Login routes enforce <code>5 requests/minute</code> throttling; mobile mutation endpoints require idempotency keys to stop replay or duplicate stock deductions.</li>
-            </ul>
-          </article>
-
-          <article id="immutable-ledger">
-            <h2>4. Immutable SHA-256 Hash-Chained Platform Audit Ledger</h2>
-            <p>
-              Every privileged platform action performed inside the Root Master Console—such as suspending a tenant, switching a subscription tier, extending trial limits, or logging an Enterprise activation inquiry—is permanently recorded in <code>platform_audit_logs</code>.
+              Every API surface across <code>admin.bentengsiber.com</code> and the mobile technician API is hardened against the most critical carrier and SaaS threat vectors:
             </p>
             <div class="spec-table-wrap">
               <table class="spec-table">
                 <thead>
                   <tr>
-                    <th>Audit Field</th>
-                    <th>Security Guarantee</th>
+                    <th>OWASP Risk</th>
+                    <th>Attack Vector</th>
+                    <th>Benteng Siber Production Control</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td><code>prev_hash</code> &amp; <code>entry_hash</code></td>
-                    <td>Each log entry hashes the previous entry's SHA-256 digest plus current actor, action, tenant, payload, IP, and timestamp—forming a tamper-evident blockchain-style ledger.</td>
+                    <td><code>API1: BOLA / IDOR</code></td>
+                    <td>Cross-tenant or cross-tech ticket access</td>
+                    <td>Prioritized <code>TenantScope</code> middleware + strict technician ownership check (HTTP 403) + tenant-scoped child queries.</td>
                   </tr>
                   <tr>
-                    <td><strong>Append-Only Enforcement</strong></td>
-                    <td>Application-layer model hooks throw an immediate exception on any <code>UPDATE</code> or <code>DELETE</code> attempt against existing audit records.</td>
+                    <td><code>API2: Broken Auth</code></td>
+                    <td>Credential stuffing &amp; token abuse</td>
+                    <td>Laravel Sanctum scoped bearer tokens, <code>5/min</code> login throttling, and Root-only Master Console enforcement (<code>tenant_id === 1</code>).</td>
                   </tr>
                   <tr>
-                    <td><strong>Live Chain Verification</strong></td>
-                    <td>Master Console displays real-time chain integrity verification (<code>VERIFIED</code> vs. <code>BROKEN</code>) across all governance entries.</td>
+                    <td><code>API4: Resource Abuse</code></td>
+                    <td>Free unlimited quota exploitation</td>
+                    <td>Public <code>/register-isp</code> caps self-service trials to Starter ($250/mo) &amp; Growth ($500/mo); Dedicated $2,500 Projects require verification.</td>
+                  </tr>
+                  <tr>
+                    <td><code>API7: SSRF</code></td>
+                    <td>Router/OLT URL pointing to cloud metadata</td>
+                    <td>Outbound drivers strictly reject loopback (<code>127.0.0.1</code>, <code>::1</code>), link-local, and cloud metadata IPs (<code>169.254.169.254</code>).</td>
+                  </tr>
+                  <tr>
+                    <td><code>A02: Crypto Failures</code></td>
+                    <td>Plaintext MikroTik/Midtrans secrets in DB</td>
+                    <td>Custom <code>EncryptedArrayOrLegacyJson</code> cast encrypts secrets at-rest with AES-256-CBC + HMAC-SHA256 MAC and hides them from JSON.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </article>
 
-          <article id="trial-guardrail">
-            <h2>5. Enterprise Abuse Prevention &amp; Verification Guardrails</h2>
+          <article id="tenant-isolation">
+            <h2>2. Middleware-Prioritized Zero-Leak Multi-Tenant Isolation</h2>
             <p>
-              To protect multi-tenant cluster capacity from automated abuse, public self-registration at <code>/register-isp</code> automatically provisions instant 14-day trials only for <strong>Starter ($249/mo)</strong> and <strong>Growth Regional ($990/mo)</strong> tiers.
+              To eliminate subtle Route Model Binding IDOR vulnerabilities where models hydrate before tenant resolution, Benteng Siber locks the HTTP Kernel middleware priority order:
             </p>
+            <div class="callout-box callout-box--navy">
+              <code>Authenticate</code> &rarr; <code>IdentifyTenant</code> &rarr; <code>EnsureTenantActive</code> &rarr; <code>SubstituteBindings</code>
+            </div>
+            <ul>
+              <li><strong>Child Table Scoping:</strong> All secondary records—<code>ProofOfWork</code>, <code>ProgressUpdate</code>, <code>TaskMaterial</code>, and <code>TechnicianLocation</code>—are explicitly tenant-filtered on every query and analytics endpoint.</li>
+              <li><strong>Per-Tenant Config Partitioning:</strong> Tenant settings are isolated into dedicated files (<code>settings_tenant_{id}.json</code>) preventing cross-ISP config drift.</li>
+            </ul>
+          </article>
+
+          <article id="aes-vault">
+            <h2>3. AES-256-CBC At-Rest Credential Encryption</h2>
             <p>
-              The unlimited <strong>Enterprise Carrier ($4,950/mo)</strong> tier is guarded server-side and routes directly through our Verified Enterprise Activation workflow—recording each request into the immutable platform audit trail for rapid architect onboarding.
+              ISPs entrust Benteng Siber with MikroTik RouterOS API passwords, OLT/GenieACS credentials, Midtrans Server Keys, and WhatsApp Gateway tokens. Every sensitive column in <code>tenants.network_settings</code> and <code>tenants.settings</code> is transparently encrypted at rest in MySQL using <strong>AES-256-CBC + HMAC-SHA256</strong> and excluded from serialized API payloads.
+            </p>
+          </article>
+
+          <article id="immutable-ledger">
+            <h2>4. Immutable SHA-256 Hash-Chained Platform Audit Ledger</h2>
+            <p>
+              Every Master Console governance action—suspending a tenant, upgrading a plan, extending trials, or logging a $2,500 Dedicated Project activation request—is appended to <code>platform_audit_logs</code>. Model hooks throw an exception on any <code>UPDATE</code> or <code>DELETE</code> attempt, and every row links cryptographically to its predecessor:
+            </p>
+            <div class="hash-chain">
+              <div class="hash-block">
+                <div class="hash-block-head"><span>BLOCK #001</span><span>VERIFIED</span></div>
+                <div class="hash-block-action">tenant.plan.updated</div>
+                <div class="hash-block-digest">
+                  prev: <span>GENESIS</span><br>
+                  hash: <span>a91f4c08d3...8b2e</span>
+                </div>
+              </div>
+              <div class="hash-block">
+                <div class="hash-block-head"><span>BLOCK #002</span><span>VERIFIED</span></div>
+                <div class="hash-block-action">tenant.status.suspended</div>
+                <div class="hash-block-digest">
+                  prev: <span>a91f4c08d3...8b2e</span><br>
+                  hash: <span>4e7b91f0c2...19d4</span>
+                </div>
+              </div>
+              <div class="hash-block">
+                <div class="hash-block-head"><span>BLOCK #003</span><span>VERIFIED</span></div>
+                <div class="hash-block-action">enterprise.project.inquiry</div>
+                <div class="hash-block-digest">
+                  prev: <span>4e7b91f0c2...19d4</span><br>
+                  hash: <span>f20c88a41e...63a7</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article id="ssrf-webhook">
+            <h2>5. Outbound SSRF Guardrails &amp; Signed Webhook Integrity</h2>
+            <ul>
+              <li><strong>Exact Gross Amount Verification:</strong> Midtrans QRIS webhooks validate cryptographic signatures and exact invoice totals before dispatching <code>UnIsolateCustomerOnPaymentJob</code>.</li>
+              <li><strong>Idempotent Mobile State Machines:</strong> Every technician write operation carries an idempotency key so unstable cellular retries never duplicate inventory deductions or status transitions.</li>
+            </ul>
+          </article>
+
+          <article id="trial-guardrail">
+            <h2>6. Cloud SaaS ($250–$500/mo) &amp; Dedicated Project ($2,500) Guardrails</h2>
+            <p>
+              Self-service registration at <code>/register-isp</code> automatically activates instant 14-day trials for <strong>Starter ISP Cloud ($250/mo)</strong> and <strong>Growth Regional Cloud ($500/mo)</strong>. Unlimited <strong>Dedicated Full Project ($2,500/project)</strong> deployments route through direct architect verification—recording every inquiry into the immutable platform audit ledger.
             </p>
           </article>
 
           <article id="owasp-rfc">
-            <h2>6. OWASP Edge Headers &amp; RFC 9116 Vulnerability Disclosure</h2>
-            <p>
-              All Benteng Siber web domains enforce strict HTTP response hardening at the server edge:
-            </p>
+            <h2>7. OWASP Edge Headers &amp; RFC 9116 Vulnerability Disclosure</h2>
             <ul>
               <li><code>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</code></li>
               <li><code>X-Content-Type-Options: nosniff</code> &amp; <code>X-Frame-Options: SAMEORIGIN</code></li>
@@ -232,32 +292,80 @@
             </ul>
             <div style="margin-top:1.75rem;display:flex;gap:0.9rem;flex-wrap:wrap;">
               <a class="btn btn-primary" href=".well-known/security.txt">Inspect RFC 9116 security.txt &rarr;</a>
-              <a class="btn btn-outline-navy" href="solutions-isp.html">Explore ISP Solutions Playbook</a>
+              <a class="btn btn-outline-navy" href="solutions-isp.html">Open ISP ROI Calculator</a>
             </div>
           </article>
         </div>
       </div>
     </section>
+
+    <section class="cta-band">
+      <div class="container">
+        <h2>Ready for Audited, Zero-Trust ISP Operations?</h2>
+        <p>Evaluate our security controls live on a 14-day cloud trial ($250–$500/mo) or schedule a $2,500 dedicated white-label deployment.</p>
+        <div class="cta-band-actions">
+          <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Free Trial &rarr;</a>
+          <a class="btn btn-outline-white" href="platform-architecture.html">Inspect System Architecture</a>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <footer class="site-footer" style="padding:3rem 0 2.25rem;">
+  <footer class="site-footer">
     <div class="container">
-      <div class="footer-bottom" style="padding-top:0;">
+      <div class="footer-grid">
+        <div>
+          <a class="brand-logo" href="index.html" style="padding:0;">
+            <span class="brand-mark" aria-hidden="true" style="border:1px solid rgba(255,255,255,0.18);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4" stroke="#e8913a" stroke-width="2.3"/></svg>
+            </span>
+            <span class="footer-brand-name">Benteng Siber</span>
+          </a>
+          <p class="footer-desc">Carrier-grade Multi-Tenant ISP Field Service Management, Active Network Orchestrator, and Zero-Trust cybersecurity platform.</p>
+          <div class="footer-status-pill"><span class="status-dot" aria-hidden="true"></span><span>All Production Portals Operational</span></div>
+        </div>
+        <div class="footer-col">
+          <h3>Deep-Dive Pages</h3>
+          <ul>
+            <li><a href="platform-architecture.html">Platform Architecture</a></li>
+            <li><a href="security-governance.html">Security &amp; Zero-Trust</a></li>
+            <li><a href="solutions-isp.html">ISP Solutions &amp; ROI</a></li>
+            <li><a href="playstore.html">Technician Mobile App</a></li>
+            <li><a href="about.html">About &amp; 7-Day Delivery</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Live Portals</h3>
+          <ul>
+            <li><a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer">Super Admin NOC Console</a></li>
+            <li><a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Technician Mobile PWA</a></li>
+            <li><a href="https://admin.bentengsiber.com/request" target="_blank" rel="noopener noreferrer">Client Service Request</a></li>
+            <li><a href="https://admin.bentengsiber.com/track" target="_blank" rel="noopener noreferrer">Subscriber Ticket Radar</a></li>
+            <li><a href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Register ISP (14-Day Trial)</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Governance &amp; Contact</h3>
+          <ul>
+            <li><a href="index.html#pricing">Pricing ($250–$2,500)</a></li>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href=".well-known/security.txt">RFC 9116 security.txt</a></li>
+            <li><a href="https://wa.me/6281223554539" target="_blank" rel="noopener noreferrer">WhatsApp: +62 812-2355-4539</a></li>
+            <li><a href="mailto:leoallogne@gmail.com">leoallogne@gmail.com</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
         <span>&copy; 2026 Benteng Siber. All rights reserved.</span>
         <div class="footer-legal-links">
           <a href="index.html">Home</a>
-          <a href="platform-architecture.html">Architecture</a>
-          <a href="security-governance.html">Security</a>
-          <a href="solutions-isp.html">ISP Solutions</a>
-          <a href="playstore.html">Mobile App</a>
-          <a href="about.html">About</a>
           <a href="privacy-policy.html">Privacy Policy</a>
-          <a href=".well-known/security.txt">RFC 9116</a>
+          <a href="#top">Back to Top &uarr;</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="script.js?v=1.5" defer></script>
+  <script src="script.js?v=1.6" defer></script>
 </body>
 </html>

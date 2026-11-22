@@ -489,42 +489,43 @@
       'map.legendHub': 'Primary Ops Hub (Jakarta, ID)',
       'map.legendEdge': 'Global Cloud & API Edge Nodes',
       'map.legendRoute': 'Encrypted TLS 1.3 & Webhook Sync Routes',
-      'pricing.eyebrow': 'MULTI-TENANT ISP SAAS PLANS',
-      'pricing.title': 'Predictable Carrier Pricing, Instant 14-Day Cloud Trial',
-      'pricing.subtitle': 'Provision an isolated Zero-Trust FiberOps tenant in under 60 seconds on Starter or Growth, or request dedicated Enterprise Carrier onboarding verified by our architects.',
+      'pricing.eyebrow': 'MULTI-TENANT ISP SAAS & TURNKEY PROJECT PLANS',
+      'pricing.title': 'Flexible Monthly Cloud ($250–$500) or $2,500 Dedicated Project',
+      'pricing.subtitle': 'Provision an isolated Zero-Trust FiberOps tenant in under 60 seconds on Starter or Growth, or commission a complete $2,500 turnkey deployment on your own ISP infrastructure.',
       'pricing.trialBadge': '14-Day Free Trial',
       'pricing.popularBadge': 'MOST POPULAR FOR REGIONAL ISPs',
-      'pricing.verifiedBadge': 'Verified Onboarding',
+      'pricing.verifiedBadge': 'One-Time Project',
       'pricing.perMonth': '/ month',
+      'pricing.perProject': '/ project',
       'pricing.customPeriod': 'SLA & Volume',
-      'pricing.t1Name': 'Starter ISP',
-      'pricing.t1Price': '$249',
-      'pricing.t1Desc': 'Built for growing local ISPs & FTTH operators transitioning off manual WhatsApp and spreadsheet dispatch.',
+      'pricing.t1Name': 'Starter ISP Cloud',
+      'pricing.t1Price': '$250',
+      'pricing.t1Desc': 'Managed monthly cloud for growing local ISPs & FTTH operators transitioning off manual WhatsApp dispatch.',
       'pricing.t1f1': 'Up to 10 Field Technicians & 100 ODP/ODC GIS Nodes',
       'pricing.t1f2': '5-Role Granular RBAC & Isolated Multi-Tenant Cloud',
       'pricing.t1f3': 'Offline-First Technician PWA & Android APK',
       'pricing.t1f4': 'On-Site Dynamic QRIS & SHA-256 Public BAST (/bast/verify)',
       'pricing.t1f5': 'AES-256-CBC Encrypted Tenant Credentials',
       'pricing.t1Cta': 'Start Starter Trial →',
-      'pricing.t2Name': 'Growth Regional',
-      'pricing.t2Price': '$990',
-      'pricing.t2Desc': 'Full hardware network orchestration, automated MikroTik restoration, and OLT optical telemetry gates.',
+      'pricing.t2Name': 'Growth Regional Cloud',
+      'pricing.t2Price': '$500',
+      'pricing.t2Desc': 'Full monthly cloud SaaS with automated MikroTik restoration, OLT optical telemetry gates, and live fleet radar.',
       'pricing.t2f1': 'Up to 40 Field Technicians & 500 ODP/ODC GIS Nodes',
       'pricing.t2f2': 'MikroTik RouterOS v7 REST Auto-Provisioning & 3s QRIS Unblock',
       'pricing.t2f3': 'Live OLT / GenieACS TR-069 Optical Power (-dBm) Gate',
       'pricing.t2f4': 'Async ShouldQueue Hardware Workers & Signed Webhooks',
       'pricing.t2f5': 'GPS Auto-Dispatch, Atomic BOM Ledger & Live /track Radar',
       'pricing.t2Cta': 'Start Growth 14-Day Trial →',
-      'pricing.t3Name': 'Enterprise Carrier',
-      'pricing.t3Price': '$4,950',
-      'pricing.t3Desc': 'For national NAPs, multi-city ISPs, and carrier deployments requiring unlimited scale and dedicated SLA.',
+      'pricing.t3Name': 'Dedicated Full Project',
+      'pricing.t3Price': '$2,500',
+      'pricing.t3Desc': 'Complete dedicated FiberOps v4.0 deployment on your ISP infrastructure, custom domain, and white-label Android APK.',
       'pricing.t3f1': 'Unlimited Field Technicians, ODP/ODC & Multi-Region NOC',
-      'pricing.t3f2': 'Custom Branded Domain, White-Label BAST & APK Signing',
-      'pricing.t3f3': 'Dedicated Multi-Router MikroTik & OLT/ACS Cluster Drivers',
-      'pricing.t3f4': 'Immutable SHA-256 Platform Audit Trail & 99.99% Priority SLA',
-      'pricing.t3f5': 'Direct Provisioning via Verified Enterprise Sales Activation',
-      'pricing.t3Cta': 'Request Enterprise Activation →',
-      'pricing.footnote': 'Instant 14-day trials activate automatically for Starter & Growth with zero credit card required. Enterprise Carrier tiers undergo direct verification to guarantee dedicated infrastructure capacity.',
+      'pricing.t3f2': 'Custom Branded Domain, White-Label BAST & Dedicated APK Build',
+      'pricing.t3f3': 'Full MikroTik, OLT/GenieACS & Payment Gateway Integration',
+      'pricing.t3f4': 'Immutable SHA-256 Audit Ledger & 7-Day Turnkey Handover',
+      'pricing.t3f5': 'Optional Managed Cloud Maintenance ($250–$500/mo)',
+      'pricing.t3Cta': 'Book $2,500 Project Deployment →',
+      'pricing.footnote': "Choose flexible monthly cloud SaaS ($250–$500/mo with instant 14-day free trial) or own a dedicated turnkey deployment ($2,500/project) tailored to your ISP's brand, routers, and compliance rules.",
       'res.eyebrow': 'SECURITY INSIGHTS & ARCHITECTURE',
       'res.title': 'Technical briefings from Benteng Siber',
       'res.cta': 'View RFC 9116 Policy →',
@@ -732,42 +733,43 @@
       'map.legendHub': 'Pusat Operasi Utama (Jakarta, ID)',
       'map.legendEdge': 'Node Cloud & API Edge Global',
       'map.legendRoute': 'Rute Sinkron TLS 1.3 & Webhook Terenkripsi',
-      'pricing.eyebrow': 'PAKET SAAS ISP MULTI-TENANT',
-      'pricing.title': 'Harga Carrier Transparan, Trial Cloud Instan 14 Hari',
-      'pricing.subtitle': 'Aktifkan tenant Zero-Trust FiberOps terisolasi di bawah 60 detik pada paket Starter atau Growth, atau ajukan onboarding Enterprise Carrier terverifikasi oleh arsitek kami.',
+      'pricing.eyebrow': 'PAKET CLOUD SAAS & PROYEK TERDEDIKASI ISP',
+      'pricing.title': 'Cloud Bulanan Fleksibel ($250–$500) atau Proyek Penuh $2,500',
+      'pricing.subtitle': 'Aktifkan tenant Zero-Trust FiberOps terisolasi di bawah 60 detik pada paket bulanan Starter/Growth, atau bangun instalasi proyek penuh $2,500 khusus di server & brand ISP Anda.',
       'pricing.trialBadge': 'Gratis Trial 14 Hari',
       'pricing.popularBadge': 'PALING POPULER UNTUK ISP REGIONAL',
-      'pricing.verifiedBadge': 'Onboarding Terverifikasi',
+      'pricing.verifiedBadge': 'Sekali Bayar Proyek',
       'pricing.perMonth': '/ bulan',
+      'pricing.perProject': '/ proyek',
       'pricing.customPeriod': 'SLA & Skala Khusus',
-      'pricing.t1Name': 'Starter ISP',
-      'pricing.t1Price': '$249',
-      'pricing.t1Desc': 'Cocok untuk ISP lokal & operator FTTH berkembang yang beralih dari laporan WhatsApp & spreadsheet manual.',
+      'pricing.t1Name': 'Starter ISP Cloud',
+      'pricing.t1Price': '$250',
+      'pricing.t1Desc': 'Cloud bulanan terkelola untuk ISP lokal & operator FTTH berkembang yang beralih dari laporan WhatsApp manual.',
       'pricing.t1f1': 'Hingga 10 Teknisi Lapangan & 100 Node GIS ODP/ODC',
       'pricing.t1f2': '5 Peran RBAC Granular & Cloud Multi-Tenant Terisolasi',
       'pricing.t1f3': 'PWA Teknisi Offline-First & APK Android Native',
       'pricing.t1f4': 'QRIS Dinamis On-Site & BAST Publik SHA-256 (/bast/verify)',
       'pricing.t1f5': 'Enkripsi Kredensial Tenant AES-256-CBC At-Rest',
       'pricing.t1Cta': 'Mulai Trial Starter →',
-      'pricing.t2Name': 'Growth Regional',
-      'pricing.t2Price': '$990',
-      'pricing.t2Desc': 'Orkestrasi perangkat jaringan penuh, pemulihan MikroTik otomatis, dan gerbang telemetri optik OLT.',
+      'pricing.t2Name': 'Growth Regional Cloud',
+      'pricing.t2Price': '$500',
+      'pricing.t2Desc': 'Cloud SaaS bulanan penuh dengan pemulihan MikroTik otomatis, gerbang telemetri optik OLT, dan radar armada langsung.',
       'pricing.t2f1': 'Hingga 40 Teknisi Lapangan & 500 Node GIS ODP/ODC',
       'pricing.t2f2': 'Auto-Provisioning MikroTik RouterOS v7 REST & Buka Isolir 3 Detik',
       'pricing.t2f3': 'Gerbang Daya Optik (-dBm) OLT / GenieACS TR-069 Langsung',
       'pricing.t2f4': 'Worker Hardware Asinkron ShouldQueue & Webhook Bertanda Tangan',
       'pricing.t2f5': 'Auto-Dispatch GPS, Ledger BOM Atomik & Radar /track Langsung',
       'pricing.t2Cta': 'Mulai Trial Growth 14 Hari →',
-      'pricing.t3Name': 'Enterprise Carrier',
-      'pricing.t3Price': '$4,950',
-      'pricing.t3Desc': 'Untuk NAP nasional, ISP multi-kota, dan operator besar yang membutuhkan skala tanpa batas dan SLA terdedikasi.',
+      'pricing.t3Name': 'Proyek Penuh Terdedikasi',
+      'pricing.t3Price': '$2,500',
+      'pricing.t3Desc': 'Implementasi FiberOps v4.0 penuh di infrastruktur ISP Anda sendiri lengkap dengan custom domain & APK white-label.',
       'pricing.t3f1': 'Teknisi Lapangan, ODP/ODC & NOC Multi-Wilayah Tanpa Batas',
-      'pricing.t3f2': 'Custom Domain, BAST White-Label & Penandatanganan APK Khusus',
-      'pricing.t3f3': 'Driver Cluster Multi-Router MikroTik & OLT/ACS Terdedikasi',
-      'pricing.t3f4': 'Jejak Audit Platform SHA-256 Kekal & Prioritas SLA 99.99%',
-      'pricing.t3f5': 'Aktivasi Langsung via Verifikasi Sales Enterprise Resmi',
-      'pricing.t3Cta': 'Ajukan Aktivasi Enterprise →',
-      'pricing.footnote': 'Trial instan 14 hari aktif otomatis untuk Starter & Growth tanpa kartu kredit. Paket Enterprise Carrier melalui verifikasi langsung untuk menjamin kapasitas infrastruktur terdedikasi.',
+      'pricing.t3f2': 'Custom Domain, BAST White-Label & Build APK Khusus Brand Anda',
+      'pricing.t3f3': 'Integrasi Penuh MikroTik, OLT/GenieACS & Payment Gateway',
+      'pricing.t3f4': 'Ledger Audit SHA-256 Kekal & Serah Terima Turnkey 7 Hari',
+      'pricing.t3f5': 'Opsi Maintenance & Cloud Terkelola ($250–$500/bln)',
+      'pricing.t3Cta': 'Pesan Implementasi Proyek $2,500 →',
+      'pricing.footnote': 'Pilih langganan Cloud SaaS bulanan ($250–$500/bln dengan trial gratis 14 hari) atau miliki implementasi proyek penuh ($2,500/proyek) yang disesuaikan dengan brand, router, dan kepatuhan ISP Anda.',
       'res.eyebrow': 'WAWASAN KEAMANAN & ARSITEKTUR',
       'res.title': 'Ringkasan teknis dari Benteng Siber',
       'res.cta': 'Lihat Kebijakan RFC 9116 →',
@@ -972,20 +974,35 @@
       attributionControl: true
     });
 
-    // Real Geographic World Map Tiles (CartoDB Positron — Crisp Bright Corporate Theme)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
-    }).addTo(map);
+    // Real Geographic World Map Tiles (Esri World Light Gray Canvas — Zero API Key, Zero Watermark, Enterprise Clean)
+    let fallbackActivated = false;
+    const baseLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      {
+        maxZoom: 16,
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+      }
+    ).addTo(map);
 
-    // Subtle city/country reference labels layer at light opacity for geographic precision
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19,
-      opacity: 0.52,
-      pane: 'shadowPane'
-    }).addTo(map);
+    // Subtle crisp country/city reference labels layer
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+      {
+        maxZoom: 16,
+        opacity: 0.65,
+        pane: 'shadowPane'
+      }
+    ).addTo(map);
+
+    // Automatic resilient fallback to OpenStreetMap Standard if ArcGIS is ever blocked by a corporate proxy
+    baseLayer.on('tileerror', () => {
+      if (fallbackActivated) return;
+      fallbackActivated = true;
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+    });
 
     const nodes = {
       jakarta: {
@@ -1198,6 +1215,48 @@
   }
 
   /* ------------------------------------------------------------------------
+     11. INTERACTIVE ISP ROI & REVENUE RECOVERY ESTIMATOR (SOLUTIONS-ISP.HTML)
+  ------------------------------------------------------------------------ */
+  function initRoiCalculator() {
+    const subsEl = document.getElementById('roi-subs');
+    const isolirEl = document.getElementById('roi-isolir');
+    const arpuEl = document.getElementById('roi-arpu');
+    if (!subsEl || !isolirEl || !arpuEl) return;
+
+    const subsOut = document.getElementById('roi-subs-val');
+    const isolirOut = document.getElementById('roi-isolir-val');
+    const arpuOut = document.getElementById('roi-arpu-val');
+    const totalOut = document.getElementById('roi-monthly-savings');
+    const nocOut = document.getElementById('roi-noc-hours');
+    const paybackOut = document.getElementById('roi-payback');
+
+    function recalculate() {
+      const subs = Number(subsEl.value) || 1500;
+      const isolirRate = Number(isolirEl.value) || 8;
+      const arpu = Number(arpuEl.value) || 22;
+
+      if (subsOut) subsOut.textContent = subs.toLocaleString() + ' subs';
+      if (isolirOut) isolirOut.textContent = isolirRate + '% / mo';
+      if (arpuOut) arpuOut.textContent = '$' + arpu + ' / mo';
+
+      const monthlyIsolirTickets = Math.round(subs * (isolirRate / 100));
+      // Conservative estimate: 3.5% field cash/BOM leakage prevented + 4 min NOC manual handling saved per ticket + repeat truck roll reduction
+      const leakageRecovered = subs * arpu * 0.032;
+      const nocHoursSaved = Math.round((monthlyIsolirTickets * 5) / 60 + subs * 0.015);
+      const laborSaved = nocHoursSaved * 6.5;
+      const totalMonthlyBenefit = Math.round(leakageRecovered + laborSaved);
+      const paybackMonths = totalMonthlyBenefit > 0 ? Math.max(0.4, 2500 / totalMonthlyBenefit) : 3.0;
+
+      if (totalOut) totalOut.textContent = '$' + totalMonthlyBenefit.toLocaleString() + ' / mo';
+      if (nocOut) nocOut.textContent = nocHoursSaved.toLocaleString() + ' hrs / mo';
+      if (paybackOut) paybackOut.textContent = paybackMonths.toFixed(1) + ' mos';
+    }
+
+    [subsEl, isolirEl, arpuEl].forEach((input) => input.addEventListener('input', recalculate));
+    recalculate();
+  }
+
+  /* ------------------------------------------------------------------------
      BOOTSTRAP
   ------------------------------------------------------------------------ */
   function init() {
@@ -1211,6 +1270,7 @@
     initForms();
     initScrollReveal();
     initGlobalNetworkMap();
+    initRoiCalculator();
   }
 
   if (document.readyState === 'loading') {

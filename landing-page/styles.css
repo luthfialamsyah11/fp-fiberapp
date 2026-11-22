@@ -2987,6 +2987,271 @@ textarea.form-control {
   margin-top: 0.3rem;
 }
 
+/* Dark Technical Code / JSON Payload Window */
+.code-window {
+  margin-top: 1.25rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #0b1628;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 36px rgba(1, 24, 53, 0.22);
+}
+
+.code-window-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: #061020;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+.code-dots {
+  display: inline-flex;
+  gap: 0.38rem;
+  align-items: center;
+}
+
+.code-dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #334155;
+}
+
+.code-dots span:nth-child(1) { background: #f87171; }
+.code-dots span:nth-child(2) { background: #fbbf24; }
+.code-dots span:nth-child(3) { background: #34d399; }
+
+.code-window pre {
+  margin: 0;
+  padding: 1.15rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: #e2e8f0;
+}
+
+.code-key { color: #7dd3fc; }
+.code-str { color: #86efac; }
+.code-num { color: #fbbf24; }
+.code-comment { color: #64748b; }
+
+/* Architecture SVG Diagram Container */
+.diagram-frame {
+  margin-top: 1.5rem;
+  padding: 1.35rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: var(--shadow-card);
+  overflow-x: auto;
+}
+
+.diagram-frame svg {
+  width: 100%;
+  min-width: 680px;
+  height: auto;
+  display: block;
+}
+
+/* Visual Immutable Hash-Chain Ledger Blocks */
+.hash-chain {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .hash-chain {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.hash-block {
+  position: relative;
+  padding: 1.15rem 1.2rem;
+  border-radius: var(--radius-md);
+  background: #0b1628;
+  color: #e2e8f0;
+  border: 1px solid rgba(232, 145, 58, 0.35);
+  box-shadow: 0 10px 26px rgba(1, 24, 53, 0.16);
+}
+
+.hash-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-light);
+  margin-bottom: 0.6rem;
+}
+
+.hash-block-action {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.hash-block-digest {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  word-break: break-all;
+}
+
+.hash-block-digest span {
+  color: #34d399;
+}
+
+/* Interactive ISP ROI & Revenue Recovery Widget */
+.roi-widget {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-white);
+  box-shadow: 0 18px 44px rgba(15, 53, 89, 0.1);
+}
+
+@media (min-width: 900px) {
+  .roi-widget {
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+  }
+}
+
+.roi-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.roi-field label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--navy-deep);
+  margin-bottom: 0.5rem;
+}
+
+.roi-field-val {
+  font-family: var(--font-mono);
+  color: var(--accent-hover);
+  font-size: 0.95rem;
+}
+
+.roi-range {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.roi-result-card {
+  padding: 1.75rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(155deg, var(--navy-deep) 0%, #0f3559 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.roi-result-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--accent-light);
+  text-transform: uppercase;
+}
+
+.roi-result-big {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.roi-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.roi-stat-label {
+  font-size: 0.74rem;
+  color: #cbd5e1;
+}
+
+.roi-stat-num {
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #34d399;
+  margin-top: 2px;
+}
+
+/* 7-Day Dedicated Project Delivery Timeline */
+.delivery-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .delivery-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.delivery-card {
+  padding: 1.45rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-white);
+  box-shadow: var(--shadow-card);
+}
+
+.delivery-day {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.delivery-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.45rem;
+}
+
+.delivery-card p {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+
 /* ==========================================================================
    8B. MULTI-TENANT SAAS PRICING GRID (#pricing)
    ========================================================================== */

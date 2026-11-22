@@ -45,6 +45,9 @@ Route::get('tasks/{task}/bast', [BastController::class, 'show'])->name('admin.ta
 Route::get('tasks/{task}/bast/verify', [BastController::class, 'verify'])
     ->middleware('throttle:60,1')
     ->name('admin.tasks.bast.verify');
+Route::get('bast/verify/{hash}', [BastController::class, 'publicVerify'])
+    ->middleware('throttle:60,1')
+    ->name('bast.public_verify');
 
 // Public Admin Authentication Routes
 Route::middleware('guest')->group(function () {

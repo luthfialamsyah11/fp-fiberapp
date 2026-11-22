@@ -26,12 +26,14 @@ class Tenant extends Model
         'brand_logo_url',
         'brand_color',
         'settings',
+        'network_settings',
     ];
 
     protected $casts = [
         'trial_ends_at'        => 'datetime',
         'subscription_ends_at' => 'datetime',
         'settings'             => 'array',
+        'network_settings'     => 'array',
         'max_technicians'      => 'integer',
         'max_fiber_nodes'      => 'integer',
     ];

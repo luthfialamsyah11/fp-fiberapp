@@ -17,19 +17,25 @@ class Task extends Model
         'additional_notes', 'scheduled_at',
         'tracking_token', 'customer_signature', 'customer_signer_name', 'customer_signed_at',
         'completed_at', 'bast_hash', 'bast_sealed_at',
+        'optical_power_rx_dbm', 'optical_power_tx_dbm', 'hardware_verified_at',
+        'billing_amount', 'payment_status',
         'customer_rating', 'customer_feedback', 'customer_rated_at', 'sla_escalated_at'
     ];
 
     protected $casts = [
-        'scheduled_at'       => 'datetime',
-        'customer_signed_at' => 'datetime',
-        'completed_at'       => 'datetime',
-        'bast_sealed_at'     => 'datetime',
-        'customer_rated_at'  => 'datetime',
-        'sla_escalated_at'   => 'datetime',
-        'customer_rating'    => 'integer',
-        'latitude'           => 'float',
-        'longitude'          => 'float',
+        'scheduled_at'          => 'datetime',
+        'customer_signed_at'    => 'datetime',
+        'completed_at'          => 'datetime',
+        'bast_sealed_at'        => 'datetime',
+        'hardware_verified_at'  => 'datetime',
+        'customer_rated_at'     => 'datetime',
+        'sla_escalated_at'      => 'datetime',
+        'customer_rating'       => 'integer',
+        'optical_power_rx_dbm'  => 'float',
+        'optical_power_tx_dbm'  => 'float',
+        'billing_amount'        => 'float',
+        'latitude'              => 'float',
+        'longitude'             => 'float',
     ];
 
     protected $appends = [
@@ -197,6 +203,16 @@ class Task extends Model
     public function proofOfWork()
     {
         return $this->hasMany(ProofOfWork::class)->orderBy('id', 'asc');
+    }
+
+    public function paymentTransactions()
+    {
+        return $this->hasMany(PaymentTransaction::class, 'task_id')->orderByDesc('id');
+    }
+
+    public function latestPayment()
+    {
+        return $this->hasOne(PaymentTransaction::class, 'task_id')->latestOfMany();
     }
 
     public function scopeActive($query)

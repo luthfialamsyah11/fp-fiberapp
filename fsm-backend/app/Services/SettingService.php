@@ -62,6 +62,14 @@ class SettingService
         return $settings[$key] ?? $default;
     }
 
+    public static function set(string $key, mixed $value): void
+    {
+        $settings = self::all();
+        $settings[$key] = (string) $value;
+        File::ensureDirectoryExists(dirname(self::getFilePath()));
+        File::put(self::getFilePath(), json_encode($settings, JSON_PRETTY_PRINT));
+    }
+
     public static function formatCurrency(float $amount): string
     {
         $currency = strtoupper((string) self::get('currency', 'USD'));

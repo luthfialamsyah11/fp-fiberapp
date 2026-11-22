@@ -546,10 +546,32 @@
         </div>
 
         <!-- Cryptographic SHA-256 BAST Seal Footer -->
-        <div style="margin-top: 28px; padding: 12px 16px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-size: 11px; color: #334155; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+        @if($task->optical_power_rx_dbm || $task->payment_status === 'paid')
+        <div style="margin-top: 20px; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            @if($task->optical_power_rx_dbm)
+            <div>
+                <span style="font-weight: 700; color: #0284c7;">&#10003; LIVE OLT HARDWARE TELEMETRY:</span>
+                <div>RX Power: <strong>{{ $task->optical_power_rx_dbm }} dBm</strong> | TX: {{ $task->optical_power_tx_dbm ?? '2.5' }} dBm</div>
+                <div style="color: #64748b; font-size: 10px;">Verified by TR-069/OLT on {{ $task->hardware_verified_at?->format('d/m/Y H:i') }} UTC</div>
+            </div>
+            @endif
+            @if($task->payment_status === 'paid' && $task->latestPayment)
+            <div>
+                <span style="font-weight: 700; color: #059669;">&#10003; DYNAMIC QRIS SETTLED:</span>
+                <div>Ref: <code>{{ $task->latestPayment->reference_no }}</code> | Rp {{ number_format($task->latestPayment->amount, 0, ',', '.') }}</div>
+                <div style="color: #64748b; font-size: 10px;">Instant Auto-Restoration Confirmed at {{ $task->latestPayment->paid_at?->format('d/m/Y H:i') }}</div>
+            </div>
+            @endif
+        </div>
+        @endif
+
+        <div style="margin-top: 20px; padding: 12px 16px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-size: 11px; color: #334155; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
             <div>
                 <div style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">CRYPTOGRAPHIC TAMPER-EVIDENT SEAL (SHA-256)</div>
                 <div style="word-break: break-all;">DIGEST: {{ $task->bast_hash ?? $task->computeBastHash() }}</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 3px;">
+                    Public Ledger: <a href="{{ url('/bast/verify/' . ($task->bast_hash ?? $task->computeBastHash())) }}" target="_blank" style="color: #0284c7; text-decoration: underline;">{{ url('/bast/verify/' . substr($task->bast_hash ?? $task->computeBastHash(), 0, 16)) }}...</a>
+                </div>
             </div>
             <div style="text-align: right;">
                 @if($task->status !== 'completed')

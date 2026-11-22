@@ -23,7 +23,7 @@ class BastController extends Controller
         }
 
         $task->ensureTrackingToken();
-        $task->load(['technician', 'materials.inventoryItem', 'proofOfWork']);
+        $task->load(['technician', 'materials.inventoryItem', 'proofOfWork', 'latestPayment', 'tenant']);
 
         // Ensure cryptographic seal is computed if task is completed
         if ($task->status === 'completed' && empty($task->bast_hash)) {
@@ -37,6 +37,55 @@ class BastController extends Controller
         $isIntegrityVerified = $task->isBastIntegrityValid();
 
         return view('bast.print', compact('task', 'isIntegrityVerified'));
+    }
+
+    /**
+     * Public tamper-evident cryptographic verification route.
+     * Anyone scanning the QR on a printed BAST or visiting /bast/verify/{hash}
+     * can verify the legal authenticity, hardware telemetry, and payment state.
+     */
+    public function publicVerify(Request $request, string $hash)
+    {
+        $task = Task::withoutGlobalScopes()
+            ->where('bast_hash', $hash)
+            ->with(['tenant', 'customer', 'technician', 'materials.inventoryItem', 'proofOfWork', 'latestPayment'])
+            ->first();
+
+        if (!$task) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'BAST Certificate not found or invalid seal.', 'verified' => false], 404);
+            }
+            return view('bast.verify_public', [
+                'task'               => null,
+                'searched_hash'      => $hash,
+                'isIntegrityVerified'=> false,
+            ]);
+        }
+
+        $isIntegrityVerified = $task->isBastIntegrityValid();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'verified'            => $isIntegrityVerified,
+                'task_id'             => $task->id,
+                'certificate_number'  => 'BAST/FSM/' . ($task->created_at?->format('Y') ?? date('Y')) . '/' . str_pad((string) $task->id, 5, '0', STR_PAD_LEFT),
+                'tenant_name'         => $task->tenant?->name ?? 'Benteng Siber Carrier Network',
+                'customer_name'       => $task->customer_name,
+                'technician_name'     => $task->technician?->name,
+                'bast_hash'           => $task->bast_hash,
+                'bast_sealed_at'      => $task->bast_sealed_at?->toIso8601String(),
+                'optical_rx_dbm'      => $task->optical_power_rx_dbm,
+                'hardware_verified'   => (bool) $task->hardware_verified_at,
+                'payment_status'      => $task->payment_status,
+                'payment_reference'   => $task->latestPayment?->reference_no,
+            ]);
+        }
+
+        return view('bast.verify_public', [
+            'task'                => $task,
+            'searched_hash'       => $hash,
+            'isIntegrityVerified' => $isIntegrityVerified,
+        ]);
     }
 
     /**

@@ -63,8 +63,9 @@ class TaskStateMachine
                 $this->assertGeofenceGate($lockedTask, $actor);
             }
 
+            $hardwareTelemetry = null;
             if ($toStatus === 'completed') {
-                $this->assertCompletionGates($lockedTask, $actor, $isAdminOverride);
+                $hardwareTelemetry = $this->assertCompletionGates($lockedTask, $actor, $isAdminOverride);
             }
 
             $updates = ['status' => $toStatus];
@@ -78,6 +79,13 @@ class TaskStateMachine
                 $updates['bast_hash']      = $lockedTask->computeBastHash();
                 $updates['bast_sealed_at'] = now();
 
+                // Record hardware optical telemetry if validated
+                if (!empty($hardwareTelemetry)) {
+                    $updates['optical_power_rx_dbm'] = $hardwareTelemetry['rx_power_dbm'] ?? null;
+                    $updates['optical_power_tx_dbm'] = $hardwareTelemetry['tx_power_dbm'] ?? null;
+                    $updates['hardware_verified_at'] = now();
+                }
+
                 // Auto-provision port on linked ODP fiber node for new installation tasks
                 if ($lockedTask->fiber_node_id && ($lockedTask->service_category === 'new_install' || str_contains(strtolower((string) $lockedTask->title), 'install'))) {
                     $fiberNode = \App\Models\FiberNode::find($lockedTask->fiber_node_id);
@@ -86,11 +94,19 @@ class TaskStateMachine
                     }
                     if ($lockedTask->customer_id) {
                         $cust = \App\Models\Customer::find($lockedTask->customer_id);
-                        if ($cust && empty($cust->fiber_node_id)) {
-                            $cust->update([
-                                'fiber_node_id'   => $lockedTask->fiber_node_id,
-                                'status'          => 'active',
-                            ]);
+                        if ($cust) {
+                            if (empty($cust->fiber_node_id)) {
+                                $cust->update([
+                                    'fiber_node_id' => $lockedTask->fiber_node_id,
+                                    'status'        => 'active',
+                                ]);
+                            }
+                            // Auto-provision MikroTik PPPoE Secret for customer
+                            try {
+                                app(\App\Services\Network\MikrotikService::class)->provisionCustomerPppoe($cust);
+                            } catch (\Throwable $e) {
+                                \Illuminate\Support\Facades\Log::warning("MikroTik auto-provision skipped or failed: {$e->getMessage()}");
+                            }
                         }
                     }
                 }
@@ -160,10 +176,10 @@ class TaskStateMachine
         }
     }
 
-    protected function assertCompletionGates(Task $task, User $actor, bool $isAdminOverride): void
+    protected function assertCompletionGates(Task $task, User $actor, bool $isAdminOverride): ?array
     {
         if ($isAdminOverride) {
-            return;
+            return null;
         }
 
         $requireProof = SettingService::get('require_proof_photo', '1');
@@ -200,9 +216,29 @@ class TaskStateMachine
             }
         }
 
+        // Live Carrier Hardware OLT / ONT Optical Telemetry Quality Gate
+        $tenantSettings = \App\Services\TenantContext::getTenant()?->network_settings ?? [];
+        $requireHwOlt = SettingService::get('require_hardware_olt_validation', '0') == '1' || !empty($tenantSettings['require_hardware_olt_validation']);
+        if ($requireHwOlt) {
+            $maxAtten = (float) ($tenantSettings['opm_max_attenuation_dbm'] ?? SettingService::get('opm_max_attenuation_dbm', '-27.0'));
+            $ontSn = $task->customer?->ont_serial_number;
+
+            // Fallback: look in task materials for ONT item with serial number
+            if (empty($ontSn)) {
+                $matWithSn = $task->materials()->whereNotNull('serial_number')->where('serial_number', '!=', '')->first();
+                $ontSn = $matWithSn?->serial_number;
+            }
+
+            if (!empty($ontSn)) {
+                $diag = app(\App\Services\Network\OltService::class)->assertOpticalHealth($ontSn, $maxAtten);
+            }
+        }
+
         if ($actor->role === 'technician') {
             $this->assertGeofenceGate($task, $actor);
         }
+
+        return $diag ?? null;
     }
 
     protected function recordTimelineProgress(Task $task, User $actor, string $from, string $to, ?string $reason): void

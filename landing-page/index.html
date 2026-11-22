@@ -47,7 +47,7 @@
 
   <!-- Unified Bright Corporate Stylesheet & Leaflet Global Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="styles.css?v=1.4">
+  <link rel="stylesheet" href="styles.css?v=1.5">
 
   <!-- Structured Data (JSON-LD Schema.org: Organization, WebSite, SoftwareApplication, BreadcrumbList, FAQPage) -->
   <script type="application/ld+json">
@@ -260,31 +260,40 @@
             <svg class="nav-chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
           </button>
           <div class="dropdown-menu" role="menu">
-            <a class="dropdown-link" href="#solutions" role="menuitem">
+            <a class="dropdown-link" href="platform-architecture.html" role="menuitem">
               <span class="dropdown-icon" aria-hidden="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               </span>
               <span>
-                <span class="dropdown-title"><span data-i18n="dd.sol1Title">Zero-Trust FiberOps NOC</span> <span class="pill-badge pill-badge--live">LIVE</span></span>
-                <span class="dropdown-desc" data-i18n="dd.sol1Desc">Super Admin dispatch, GIS OLT/ODP, BOM ledger &amp; SLA control.</span>
+                <span class="dropdown-title"><span data-i18n="dd.sol1Title">Zero-Trust FiberOps NOC</span> <span class="pill-badge pill-badge--live">v4.0</span></span>
+                <span class="dropdown-desc" data-i18n="dd.sol1Desc">5-role RBAC dispatch, GIS OLT/ODP, MikroTik/OLT sync &amp; BOM control.</span>
               </span>
             </a>
-            <a class="dropdown-link" href="#platform" role="menuitem">
+            <a class="dropdown-link" href="playstore.html" role="menuitem">
               <span class="dropdown-icon" aria-hidden="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
               </span>
               <span>
                 <span class="dropdown-title" data-i18n="dd.sol2Title">Technician Mobile PWA &amp; APK</span>
-                <span class="dropdown-desc" data-i18n="dd.sol2Desc">Offline-first sync, 3-slot optical dBm photo proof &amp; e-signature.</span>
+                <span class="dropdown-desc" data-i18n="dd.sol2Desc">Offline-first sync, 3-slot optical dBm proof &amp; On-Site Dynamic QRIS.</span>
               </span>
             </a>
-            <a class="dropdown-link" href="#active-defense" role="menuitem">
+            <a class="dropdown-link" href="security-governance.html" role="menuitem">
               <span class="dropdown-icon" aria-hidden="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
               </span>
               <span>
                 <span class="dropdown-title" data-i18n="dd.sol3Title">Cyber Posture &amp; RFC 9116</span>
-                <span class="dropdown-desc" data-i18n="dd.sol3Desc">Anti-IDOR APIs, SHA-256 BAST seals &amp; passive audit architecture.</span>
+                <span class="dropdown-desc" data-i18n="dd.sol3Desc">AES-256 multi-tenant secrets, SHA-256 BAST &amp; immutable audit chain.</span>
+              </span>
+            </a>
+            <a class="dropdown-link" href="solutions-isp.html" role="menuitem">
+              <span class="dropdown-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </span>
+              <span>
+                <span class="dropdown-title" data-i18n="dd.sol4Title">ISP &amp; FTTH Solutions Playbook</span>
+                <span class="dropdown-desc" data-i18n="dd.sol4Desc">Before/After workflows for Owners, NOC, Warehouse &amp; Subscribers.</span>
               </span>
             </a>
           </div>
@@ -344,11 +353,11 @@
           </div>
         </div>
 
-        <a class="nav-link" href="#platform" data-i18n="nav.platform">Platform</a>
+        <a class="nav-link" href="platform-architecture.html" data-i18n="nav.architecture">Architecture</a>
+        <a class="nav-link" href="security-governance.html" data-i18n="nav.security">Security</a>
         <a class="nav-link" href="#pricing" data-i18n="nav.pricing">Pricing</a>
-        <a class="nav-link" href="#resources" data-i18n="nav.resources">Resources</a>
+        <a class="nav-link" href="about.html" data-i18n="nav.about">About</a>
         <a class="nav-link" href="#faq" data-i18n="nav.faq">FAQ</a>
-        <a class="nav-link" href="#contact-us" data-i18n="nav.contact">Contact</a>
       </nav>
 
       <!-- Header Right Actions -->
@@ -390,6 +399,16 @@
     </div>
     <div class="drawer-body">
       <div>
+        <div class="drawer-section-label" data-i18n="drawer.pagesLabel">Deep-Dive Pages</div>
+        <div class="drawer-links">
+          <a href="platform-architecture.html"><span data-i18n="nav.architecture">Architecture</span> <span aria-hidden="true">&rarr;</span></a>
+          <a href="security-governance.html"><span data-i18n="nav.security">Security</span> <span aria-hidden="true">&rarr;</span></a>
+          <a href="solutions-isp.html"><span data-i18n="drawer.ispSolutions">ISP Solutions Playbook</span> <span aria-hidden="true">&rarr;</span></a>
+          <a href="playstore.html"><span data-i18n="footer.android">Android Native Edition</span> <span aria-hidden="true">&rarr;</span></a>
+          <a href="about.html"><span data-i18n="nav.about">About</span> <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </div>
+      <div>
         <div class="drawer-section-label" data-i18n="drawer.navLabel">Navigation</div>
         <div class="drawer-links">
           <a href="#solutions"><span data-i18n="nav.solutions">Solutions</span> <span aria-hidden="true">&rarr;</span></a>
@@ -397,7 +416,6 @@
           <a href="#pricing"><span data-i18n="nav.pricing">Pricing</span> <span aria-hidden="true">&rarr;</span></a>
           <a href="#active-defense"><span data-i18n="drawer.defense">Zero-Trust Defense</span> <span aria-hidden="true">&rarr;</span></a>
           <a href="#ecosystem"><span data-i18n="nav.portals">Live Portals</span> <span aria-hidden="true">&rarr;</span></a>
-          <a href="#resources"><span data-i18n="nav.resources">Resources</span> <span aria-hidden="true">&rarr;</span></a>
           <a href="#faq"><span data-i18n="nav.faq">FAQ</span> <span aria-hidden="true">&rarr;</span></a>
           <a href="#contact-us"><span data-i18n="nav.contact">Contact</span> <span aria-hidden="true">&rarr;</span></a>
         </div>
@@ -1417,9 +1435,10 @@
         <div class="footer-col">
           <h3 data-i18n="footer.col3">Governance &amp; Legal</h3>
           <ul>
-            <li><a href="#about" data-i18n="footer.about">About Benteng Siber</a></li>
-            <li><a href="#resources" data-i18n="nav.resources">Resources</a></li>
-            <li><a href="#faq" data-i18n="nav.faq">FAQ</a></li>
+            <li><a href="platform-architecture.html" data-i18n="nav.architecture">Architecture</a></li>
+            <li><a href="security-governance.html" data-i18n="nav.security">Security</a></li>
+            <li><a href="solutions-isp.html" data-i18n="drawer.ispSolutions">ISP Solutions Playbook</a></li>
+            <li><a href="about.html" data-i18n="footer.about">About Benteng Siber</a></li>
             <li><a href="privacy-policy.html" data-i18n="footer.privacy">Privacy Policy &amp; Data Governance</a></li>
             <li><a href=".well-known/security.txt">RFC 9116 security.txt</a></li>
           </ul>
@@ -1603,6 +1622,6 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
-  <script src="script.js?v=1.4" defer></script>
+  <script src="script.js?v=1.5" defer></script>
 </body>
 </html>

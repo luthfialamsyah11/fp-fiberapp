@@ -129,8 +129,8 @@
      4. HERO ROTATING THREAT HEADLINE (REDUCED-MOTION AWARE)
   ------------------------------------------------------------------------ */
   let rotatingPhrases = [
-    'Unverified Field Operations',
     'API & IDOR Authorization Flaws',
+    'Unverified Field Operations',
     'Tampered BAST & Stock Leaks',
     'External Security Exposure'
   ];
@@ -766,14 +766,14 @@
       rotatingPhrases =
         lang === 'id'
           ? [
-              'Operasi Lapangan Tanpa Verifikasi',
               'Celah Otorisasi API & IDOR',
+              'Operasi Lapangan Tanpa Verifikasi',
               'Manipulasi BAST & Kebocoran Stok',
               'Eksposur Keamanan Eksternal'
             ]
           : [
-              'Unverified Field Operations',
               'API & IDOR Authorization Flaws',
+              'Unverified Field Operations',
               'Tampered BAST & Stock Leaks',
               'External Security Exposure'
             ];

@@ -54,7 +54,7 @@
   --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --container-max: 1200px;
+  --container-max: min(100%, 1720px);
   --header-h: 80px;
   --section-py: 5.25rem;
   --radius-sm: 6px;
@@ -185,7 +185,7 @@ button {
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 clamp(1.25rem, 3.5vw, 4rem);
 }
 
 .section {
@@ -208,7 +208,7 @@ button {
 }
 
 .section-header {
-  max-width: 720px;
+  max-width: 840px;
   margin-bottom: 3rem;
 }
 
@@ -405,20 +405,21 @@ button {
 }
 
 .header-inner {
-  max-width: 1320px;
+  width: 100%;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 clamp(1.25rem, 3.5vw, 4rem);
   height: var(--header-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 @media (min-width: 1120px) {
   .header-inner {
-    padding: 0 0 0 1.5rem;
-    gap: 1rem;
+    padding: 0 clamp(1.25rem, 3.5vw, 4rem);
+    gap: 1.25rem;
   }
 }
 
@@ -865,6 +866,7 @@ button {
 }
 
 .announcement-inner {
+  width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
   display: flex;
@@ -872,7 +874,8 @@ button {
   justify-content: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  padding-right: 2rem;
+  padding: 0 clamp(1.25rem, 3.5vw, 4rem);
+  padding-right: 3rem;
   position: relative;
   z-index: 1;
 }
@@ -966,23 +969,36 @@ button {
     padding: 4.75rem 0 5.25rem;
   }
   .hero-grid {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 3.5rem;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: clamp(2.5rem, 4vw, 5rem);
   }
 }
 
 .hero-title {
-  font-size: clamp(2rem, 4.1vw, 3.15rem);
+  font-size: clamp(2rem, 3.8vw, 3.25rem);
   font-weight: 800;
   line-height: 1.15;
   color: var(--navy-deep);
-  max-width: 640px;
+  max-width: min(100%, 860px);
   margin-bottom: 1.25rem;
+}
+
+.hero-title-prefix {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.hero-rotator-line {
+  display: block;
+  min-height: 2.35em;
+  color: var(--accent);
+  position: relative;
 }
 
 .hero-rotating-wrap {
   display: inline;
   color: var(--accent);
+  word-break: break-word;
 }
 
 .hero-cursor {
@@ -990,7 +1006,7 @@ button {
   width: 3px;
   height: 0.9em;
   background-color: var(--accent);
-  vertical-align: -0.08em;
+  vertical-align: -0.06em;
   margin-left: 3px;
   animation: blinkCursor 0.8s step-end infinite;
 }
@@ -1004,7 +1020,7 @@ button {
   font-size: 1.08rem;
   line-height: 1.75;
   color: var(--text-body);
-  max-width: 570px;
+  max-width: min(100%, 740px);
   margin-bottom: 2rem;
 }
 

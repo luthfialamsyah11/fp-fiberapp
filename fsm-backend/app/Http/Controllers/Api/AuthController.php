@@ -19,7 +19,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::withoutGlobalScopes()->where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid email or password.'], 401);
@@ -27,6 +27,14 @@ class AuthController extends Controller
 
         if (!$user->is_active) {
             return response()->json(['message' => 'Your account has been deactivated.'], 403);
+        }
+
+        if (!empty($user->tenant_id)) {
+            $tenant = \App\Models\Tenant::find($user->tenant_id);
+            if ($tenant && !$tenant->isActive()) {
+                return response()->json(['message' => 'Your organization subscription is suspended or expired.'], 403);
+            }
+            \App\Services\TenantContext::setTenant($tenant);
         }
 
         // Preserve technician's explicit offline preference across logins; default new/null accounts to online

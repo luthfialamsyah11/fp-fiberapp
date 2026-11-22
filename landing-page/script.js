@@ -137,40 +137,41 @@
 
   function initHeroRotator() {
     const target = document.getElementById('hero-rotating-text');
-    if (!target || prefersReducedMotion) return;
+    if (!target) return;
 
     let phraseIdx = 0;
-    let charIdx = rotatingPhrases[0].length;
-    let deleting = false;
+    target.style.display = 'inline-block';
+    target.style.transition = 'transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s ease';
+    target.style.transform = 'translateY(0)';
+    target.style.opacity = '1';
 
-    function tick() {
-      const current = rotatingPhrases[phraseIdx % rotatingPhrases.length];
-      if (!deleting) {
-        if (charIdx < current.length) {
-          charIdx += 1;
-          target.textContent = current.slice(0, charIdx);
-          window.setTimeout(tick, 42);
-        } else {
-          deleting = true;
-          window.setTimeout(tick, 2400);
-        }
-      } else {
-        if (charIdx > 0) {
-          charIdx -= 1;
-          target.textContent = current.slice(0, charIdx);
-          window.setTimeout(tick, 22);
-        } else {
-          deleting = false;
-          phraseIdx = (phraseIdx + 1) % rotatingPhrases.length;
-          window.setTimeout(tick, 260);
-        }
-      }
+    if (prefersReducedMotion) return;
+
+    function flipNext() {
+      // Smooth slide up & fade out
+      target.style.transform = 'translateY(-16px)';
+      target.style.opacity = '0';
+
+      window.setTimeout(() => {
+        phraseIdx = (phraseIdx + 1) % rotatingPhrases.length;
+        target.textContent = rotatingPhrases[phraseIdx];
+
+        // Instantly prime at bottom without transition
+        target.style.transition = 'none';
+        target.style.transform = 'translateY(16px)';
+        target.style.opacity = '0';
+
+        // Force browser layout repaint
+        void target.offsetHeight;
+
+        // Slide into active view
+        target.style.transition = 'transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s ease';
+        target.style.transform = 'translateY(0)';
+        target.style.opacity = '1';
+      }, 420);
     }
 
-    window.setTimeout(() => {
-      deleting = true;
-      tick();
-    }, 2600);
+    window.setInterval(flipNext, 3400);
   }
 
   /* ------------------------------------------------------------------------

@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\FiberNode;
 use App\Services\SettingService;
+use App\Services\TenantContext;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class FiberNodeController extends Controller
 {
@@ -45,11 +47,24 @@ class FiberNodeController extends Controller
 
     public function store(Request $request)
     {
+        $tenant = TenantContext::getTenant();
+        if ($tenant && !$tenant->canAddFiberNode()) {
+            return back()->withInput()->with('error', "Your subscription plan limit of {$tenant->max_fiber_nodes} fiber nodes has been reached. Please upgrade your plan in settings to register more network assets.");
+        }
+
+        $tenantId = TenantContext::id();
+        $codeUnique = Rule::unique('fiber_nodes', 'code');
+        $parentExists = Rule::exists('fiber_nodes', 'id');
+        if ($tenantId !== null) {
+            $codeUnique->where('tenant_id', $tenantId);
+            $parentExists->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
-            'code'        => 'required|string|max:60|unique:fiber_nodes,code',
+            'code'        => ['required', 'string', 'max:60', $codeUnique],
             'name'        => 'required|string|max:160',
             'node_type'   => 'required|in:olt,odc,odp,closure',
-            'parent_id'   => 'nullable|exists:fiber_nodes,id',
+            'parent_id'   => ['nullable', $parentExists],
             'latitude'    => 'nullable|numeric|between:-90,90|required_with:longitude',
             'longitude'   => 'nullable|numeric|between:-180,180|required_with:latitude',
             'address'     => 'nullable|string|max:500',
@@ -71,10 +86,16 @@ class FiberNodeController extends Controller
 
     public function update(Request $request, FiberNode $fiberNode)
     {
+        $tenantId = TenantContext::id();
+        $parentExists = Rule::exists('fiber_nodes', 'id');
+        if ($tenantId !== null) {
+            $parentExists->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
             'name'        => 'required|string|max:160',
             'node_type'   => 'required|in:olt,odc,odp,closure',
-            'parent_id'   => 'nullable|exists:fiber_nodes,id',
+            'parent_id'   => ['nullable', $parentExists],
             'latitude'    => 'nullable|numeric|between:-90,90|required_with:longitude',
             'longitude'   => 'nullable|numeric|between:-180,180|required_with:latitude',
             'address'     => 'nullable|string|max:500',

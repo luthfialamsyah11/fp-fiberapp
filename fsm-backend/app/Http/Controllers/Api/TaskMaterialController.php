@@ -7,8 +7,10 @@ use App\Models\InventoryItem;
 use App\Models\Task;
 use App\Models\TaskMaterial;
 use App\Services\SettingService;
+use App\Services\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class TaskMaterialController extends Controller
 {
@@ -51,8 +53,14 @@ class TaskMaterialController extends Controller
             return response()->json(['message' => 'Materials cannot be modified after a work order is completed or closed.'], 422);
         }
 
+        $tenantId = TenantContext::id() ?? $task->tenant_id;
+        $itemRule = Rule::exists('inventory_items', 'id');
+        if ($tenantId !== null) {
+            $itemRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
-            'inventory_item_id' => 'required|exists:inventory_items,id',
+            'inventory_item_id' => ['required', $itemRule],
             'quantity'          => 'required|numeric|min:0.01',
             'serial_number'     => 'nullable|string|max:100',
             'notes'             => 'nullable|string|max:255',

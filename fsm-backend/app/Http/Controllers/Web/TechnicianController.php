@@ -34,6 +34,11 @@ class TechnicianController extends Controller
 
     public function store(Request $request)
     {
+        $tenant = \App\Services\TenantContext::getTenant();
+        if ($tenant && !$tenant->canAddTechnician()) {
+            return back()->withInput()->with('error', "Your subscription plan limit of {$tenant->max_technicians} active field technicians has been reached. Please upgrade your plan in settings to provision additional technicians.");
+        }
+
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => 'required|string|email|max:255|unique:users',

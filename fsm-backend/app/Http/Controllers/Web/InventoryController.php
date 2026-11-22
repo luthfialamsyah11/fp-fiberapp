@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InventoryItem;
 use App\Models\TaskMaterial;
 use App\Services\SettingService;
+use App\Services\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -136,8 +137,14 @@ class InventoryController extends Controller
             'code' => strtoupper(trim((string) $request->input('code', ''))),
         ]);
 
+        $tenantId = TenantContext::id();
+        $codeRule = Rule::unique('inventory_items', 'code');
+        if ($tenantId !== null) {
+            $codeRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
-            'code'        => 'required|string|max:50|unique:inventory_items,code',
+            'code'        => ['required', 'string', 'max:50', $codeRule],
             'name'        => 'required|string|max:255',
             'unit'        => 'required|string|max:20',
             'stock'       => 'required|numeric|min:0',
@@ -162,8 +169,14 @@ class InventoryController extends Controller
             ]);
         }
 
+        $tenantId = TenantContext::id();
+        $codeRule = Rule::unique('inventory_items', 'code')->ignore($inventory->id);
+        if ($tenantId !== null) {
+            $codeRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
-            'code'        => ['sometimes', 'required', 'string', 'max:50', Rule::unique('inventory_items', 'code')->ignore($inventory->id)],
+            'code'        => ['sometimes', 'required', 'string', 'max:50', $codeRule],
             'name'        => 'required|string|max:255',
             'unit'        => 'required|string|max:20',
             'stock'       => 'required|numeric|min:0',

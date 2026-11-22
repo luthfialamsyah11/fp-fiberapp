@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\FiberNode;
+use App\Services\TenantContext;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -51,8 +53,16 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+        $tenantId = TenantContext::id();
+        $uniqueCustCode = Rule::unique('customers', 'customer_code');
+        $fiberExists = Rule::exists('fiber_nodes', 'id');
+        if ($tenantId !== null) {
+            $uniqueCustCode->where('tenant_id', $tenantId);
+            $fiberExists->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
-            'customer_code'     => 'nullable|string|max:40|unique:customers,customer_code',
+            'customer_code'     => ['nullable', 'string', 'max:40', $uniqueCustCode],
             'name'              => 'required|string|max:200',
             'phone'             => 'required|string|max:50',
             'email'             => 'nullable|email|max:255',
@@ -62,14 +72,18 @@ class CustomerController extends Controller
             'service_plan'      => 'nullable|string|max:120',
             'pppoe_username'    => 'nullable|string|max:120',
             'ont_serial_number' => 'nullable|string|max:120',
-            'fiber_node_id'     => 'nullable|exists:fiber_nodes,id',
+            'fiber_node_id'     => ['nullable', $fiberExists],
             'odp_port_number'   => 'nullable|integer|min:1|max:256',
             'status'            => 'nullable|in:active,suspended,terminated',
         ]);
 
         if (empty($validated['customer_code'])) {
-            $nextNum = (Customer::max('id') ?? 0) + 1;
-            $validated['customer_code'] = 'CUST-' . str_pad((string) $nextNum, 4, '0', STR_PAD_LEFT);
+            $count = Customer::count();
+            do {
+                $count++;
+                $candidate = 'CUST-' . str_pad((string) $count, 4, '0', STR_PAD_LEFT);
+            } while (Customer::where('customer_code', $candidate)->exists());
+            $validated['customer_code'] = $candidate;
         }
 
         $validated['name'] = strip_tags(trim($validated['name']));
@@ -83,6 +97,12 @@ class CustomerController extends Controller
 
     public function update(Request $request, Customer $customer)
     {
+        $tenantId = TenantContext::id();
+        $fiberExists = Rule::exists('fiber_nodes', 'id');
+        if ($tenantId !== null) {
+            $fiberExists->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
             'name'              => 'required|string|max:200',
             'phone'             => 'required|string|max:50',
@@ -93,7 +113,7 @@ class CustomerController extends Controller
             'service_plan'      => 'nullable|string|max:120',
             'pppoe_username'    => 'nullable|string|max:120',
             'ont_serial_number' => 'nullable|string|max:120',
-            'fiber_node_id'     => 'nullable|exists:fiber_nodes,id',
+            'fiber_node_id'     => ['nullable', $fiberExists],
             'odp_port_number'   => 'nullable|integer|min:1|max:256',
             'status'            => 'required|in:active,suspended,terminated',
         ]);

@@ -28,7 +28,13 @@ class TaskPaymentController extends Controller
             'expiry_minutes' => 'nullable|integer|min:5|max:120',
         ]);
 
-        $amount = isset($validated['amount']) ? (float) $validated['amount'] : null;
+        $amount = isset($validated['amount']) ? (float) $validated['amount'] : (float) ($task->billing_amount ?? 0);
+        if ($amount < 1000) {
+            return response()->json([
+                'message' => 'Cannot generate QRIS: work order has zero billing amount and no override amount was specified. Please specify an amount of at least IDR 1,000.',
+            ], 422);
+        }
+
         $expiry = (int) ($validated['expiry_minutes'] ?? 15);
 
         $transaction = $this->paymentService->generateTaskQris($task, $amount, $expiry);

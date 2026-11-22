@@ -8,6 +8,7 @@ use App\Models\InventoryItem;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\SettingService;
+use App\Services\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -57,6 +58,12 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
+        $tenantId = TenantContext::id();
+        $techRule = Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true);
+        if ($tenantId !== null) {
+            $techRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
             'title'            => 'required|string|max:255',
             'customer_name'    => 'required|string|max:255',
@@ -65,10 +72,7 @@ class TaskController extends Controller
             'priority'         => 'sometimes|in:low,medium,high',
             'latitude'         => 'nullable|numeric|between:-90,90',
             'longitude'        => 'nullable|numeric|between:-180,180',
-            'technician_id'    => [
-                'nullable',
-                Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
-            ],
+            'technician_id'    => ['nullable', $techRule],
             'scheduled_at'     => 'nullable|date',
             'customer_phone'   => 'nullable|string|max:50',
             'additional_notes' => 'nullable|string',
@@ -113,6 +117,12 @@ class TaskController extends Controller
 
     public function update(Request $request, Task $task)
     {
+        $tenantId = TenantContext::id();
+        $techRule = Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true);
+        if ($tenantId !== null) {
+            $techRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
             'title'            => 'sometimes|string|max:255',
             'description'      => 'sometimes|string',
@@ -122,10 +132,7 @@ class TaskController extends Controller
             'priority'         => 'sometimes|in:low,medium,high',
             'status'           => 'sometimes|in:pending,assigned,accepted,on-going,completed,rejected',
             'override_reason'  => 'nullable|string|max:500',
-            'technician_id'    => [
-                'nullable',
-                Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
-            ],
+            'technician_id'    => ['nullable', $techRule],
             'latitude'         => 'nullable|numeric',
             'longitude'        => 'nullable|numeric',
             'scheduled_at'     => 'nullable|date',

@@ -10,6 +10,7 @@ use App\Models\Task;
 use App\Models\TaskMaterial;
 use App\Models\User;
 use App\Services\SettingService;
+use App\Services\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -110,21 +111,29 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
+        $tenantId = TenantContext::id();
+        $customerRule = Rule::exists('customers', 'id');
+        $fiberRule = Rule::exists('fiber_nodes', 'id');
+        $techRule = Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true);
+
+        if ($tenantId !== null) {
+            $customerRule->where('tenant_id', $tenantId);
+            $fiberRule->where('tenant_id', $tenantId);
+            $techRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
             'title'            => 'required|string|max:255',
             'customer_name'    => 'required|string|max:255',
             'customer_phone'   => 'nullable|string|max:50',
             'address'          => 'required|string',
             'description'      => 'nullable|string',
-            'customer_id'      => 'nullable|exists:customers,id',
-            'fiber_node_id'    => 'nullable|exists:fiber_nodes,id',
+            'customer_id'      => ['nullable', $customerRule],
+            'fiber_node_id'    => ['nullable', $fiberRule],
             'service_category' => 'nullable|string|in:new_install,repair,maintenance,dismantle,relocation',
             'latitude'         => 'nullable|numeric|between:-90,90',
             'longitude'        => 'nullable|numeric|between:-180,180',
-            'technician_id'    => [
-                'nullable',
-                Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
-            ],
+            'technician_id'    => ['nullable', $techRule],
             'scheduled_at'     => 'nullable|date',
             'priority'         => 'required|in:low,medium,high',
         ]);
@@ -253,21 +262,29 @@ class TaskController extends Controller
 
     public function update(Request $request, Task $task)
     {
+        $tenantId = TenantContext::id();
+        $customerRule = Rule::exists('customers', 'id');
+        $fiberRule = Rule::exists('fiber_nodes', 'id');
+        $techRule = Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true);
+
+        if ($tenantId !== null) {
+            $customerRule->where('tenant_id', $tenantId);
+            $fiberRule->where('tenant_id', $tenantId);
+            $techRule->where('tenant_id', $tenantId);
+        }
+
         $validated = $request->validate([
             'title'            => 'required|string|max:255',
             'customer_name'    => 'required|string|max:255',
             'customer_phone'   => 'nullable|string|max:50',
             'address'          => 'required|string',
             'description'      => 'nullable|string',
-            'customer_id'      => 'nullable|exists:customers,id',
-            'fiber_node_id'    => 'nullable|exists:fiber_nodes,id',
+            'customer_id'      => ['nullable', $customerRule],
+            'fiber_node_id'    => ['nullable', $fiberRule],
             'service_category' => 'nullable|string|in:new_install,repair,maintenance,dismantle,relocation',
             'latitude'         => 'nullable|numeric|between:-90,90',
             'longitude'        => 'nullable|numeric|between:-180,180',
-            'technician_id'    => [
-                'nullable',
-                Rule::exists('users', 'id')->where('role', 'technician')->where('is_active', true),
-            ],
+            'technician_id'    => ['nullable', $techRule],
             'scheduled_at'     => 'nullable|date',
             'priority'         => 'required|in:low,medium,high',
             'status'           => 'required|in:pending,assigned,accepted,on-going,completed,rejected',

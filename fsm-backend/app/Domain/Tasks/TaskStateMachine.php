@@ -86,14 +86,14 @@ class TaskStateMachine
                     $updates['hardware_verified_at'] = now();
                 }
 
-                // Auto-provision port on linked ODP fiber node for new installation tasks
+                // Auto-provision port on linked ODP fiber node for new installation tasks (row-locked to prevent over-allocation race condition)
                 if ($lockedTask->fiber_node_id && ($lockedTask->service_category === 'new_install' || str_contains(strtolower((string) $lockedTask->title), 'install'))) {
-                    $fiberNode = \App\Models\FiberNode::find($lockedTask->fiber_node_id);
+                    $fiberNode = \App\Models\FiberNode::where('id', $lockedTask->fiber_node_id)->lockForUpdate()->first();
                     if ($fiberNode && $fiberNode->used_ports < $fiberNode->total_ports) {
                         $fiberNode->increment('used_ports');
                     }
                     if ($lockedTask->customer_id) {
-                        $cust = \App\Models\Customer::find($lockedTask->customer_id);
+                        $cust = \App\Models\Customer::where('id', $lockedTask->customer_id)->lockForUpdate()->first();
                         if ($cust) {
                             if (empty($cust->fiber_node_id)) {
                                 $cust->update([
@@ -115,9 +115,9 @@ class TaskStateMachine
                 $updates['bast_hash']      = null;
                 $updates['bast_sealed_at'] = null;
 
-                // Roll back provisioned port on ODP fiber node
+                // Roll back provisioned port on ODP fiber node with row-level lock
                 if ($lockedTask->fiber_node_id && ($lockedTask->service_category === 'new_install' || str_contains(strtolower((string) $lockedTask->title), 'install'))) {
-                    $fiberNode = \App\Models\FiberNode::find($lockedTask->fiber_node_id);
+                    $fiberNode = \App\Models\FiberNode::where('id', $lockedTask->fiber_node_id)->lockForUpdate()->first();
                     if ($fiberNode && $fiberNode->used_ports > 0) {
                         $fiberNode->decrement('used_ports');
                     }

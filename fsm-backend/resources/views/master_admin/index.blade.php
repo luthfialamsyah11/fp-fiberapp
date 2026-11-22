@@ -189,5 +189,77 @@
         </div>
     </div>
 
+    <!-- Immutable SHA-256 Platform Governance Audit Ledger -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h2 class="text-base font-bold text-[#0f3559] font-display flex items-center gap-2">
+                    Immutable Platform Audit Ledger
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">Append-only SHA-256 hash-chained log of all tenant lifecycle changes, plan upgrades, and enterprise inquiries.</p>
+            </div>
+            @php $chainOk = ($auditIntegrity['valid'] ?? true); @endphp
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border {{ $chainOk ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200' }}">
+                <span class="w-2 h-2 rounded-full {{ $chainOk ? 'bg-emerald-500' : 'bg-red-600 animate-ping' }}"></span>
+                {{ $chainOk ? 'SHA-256 Chain Verified (' . ($auditIntegrity['checked'] ?? 0) . ' entries)' : 'CHAIN TAMPER ALERT (#' . ($auditIntegrity['broken_id'] ?? '?') . ')' }}
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+                <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="px-4 py-3">Timestamp</th>
+                        <th class="px-4 py-3">Actor &amp; IP</th>
+                        <th class="px-4 py-3">Action</th>
+                        <th class="px-4 py-3">Target ISP</th>
+                        <th class="px-4 py-3">State Diff</th>
+                        <th class="px-4 py-3 text-right">Entry Hash (SHA-256)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse(($auditLogs ?? collect()) as $log)
+                        <tr class="hover:bg-slate-50/70">
+                            <td class="px-4 py-3 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                                {{ $log->created_at?->format('d M Y H:i:s') }}
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="font-bold text-slate-800 block">{{ $log->actor_name }}</span>
+                                <span class="text-[10px] text-slate-400 font-mono">{{ $log->actor_email }} &bull; {{ $log->ip_address ?? '-' }}</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-0.5 rounded font-mono font-bold text-[10px] uppercase
+                                    {{ str_contains($log->action, 'suspended') ? 'bg-red-50 text-red-700 border border-red-200' : (str_contains($log->action, 'plan') ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : (str_contains($log->action, 'enterprise') ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200')) }}">
+                                    {{ $log->action }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 font-semibold text-slate-800">
+                                {{ $log->target_tenant_name ?? '—' }}
+                            </td>
+                            <td class="px-4 py-3 font-mono text-[10px] text-slate-600 max-w-xs truncate">
+                                @if($log->before_state && $log->after_state)
+                                    {{ json_encode($log->before_state) }} &rarr; {{ json_encode($log->after_state) }}
+                                @elseif($log->after_state)
+                                    {{ json_encode($log->after_state) }}
+                                @else
+                                    —
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-right font-mono text-[10px] text-slate-400" title="{{ $log->entry_hash }}">
+                                {{ substr($log->entry_hash, 0, 14) }}&hellip;
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-slate-400">
+                                No platform governance actions recorded yet. Every suspension, plan change, and onboarding event will be sealed here.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 @endsection

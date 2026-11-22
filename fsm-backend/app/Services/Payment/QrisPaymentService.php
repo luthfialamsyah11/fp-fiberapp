@@ -158,29 +158,29 @@ class QrisPaymentService
                     $task->update(['payment_status' => 'paid']);
                     $task->touch();
 
-                    // INSTANT AUTO-UNBLOCK TRIGGER: Restore customer internet on MikroTik!
+                    // INSTANT ASYNC AUTO-UNBLOCK TRIGGER: Dispatch queued MikroTik un-isolation after DB commit
                     if ($task->customer_id) {
-                        $customer = \App\Models\Customer::withoutGlobalScopes()->find($task->customer_id);
-                        if ($customer) {
-                            try {
-                                $mikrotik = MikrotikService::forTenant($tx->tenant);
-                                $mikrotik->unIsolateCustomer($customer);
-                                Log::info("Instant auto-unblock completed for customer CID: {$customer->customer_code} upon QRIS payment {$referenceNo}");
-                            } catch (\Throwable $e) {
-                                Log::error("Failed to auto-unblock customer on MikroTik after payment: {$e->getMessage()}");
-                            }
-                        }
+                        \App\Jobs\UnIsolateCustomerOnPaymentJob::dispatch(
+                            (int) ($tx->tenant_id ?? 1),
+                            (int) $task->customer_id,
+                            $referenceNo
+                        )->afterCommit();
                     }
 
-                    // Dispatch webhook notification
-                    SettingService::dispatchWebhook('TASK_PAYMENT_SETTLED', [
-                        'task_id'        => $task->id,
-                        'customer_name'  => $task->customer_name,
-                        'reference_no'   => $referenceNo,
-                        'amount'         => $tx->amount,
-                        'payment_method' => 'qris',
-                        'paid_at'        => now()->toIso8601String(),
-                    ]);
+                    // Dispatch tenant-scoped webhook notification asynchronously after DB commit
+                    \App\Jobs\DispatchWebhookJob::dispatch(
+                        (int) ($tx->tenant_id ?? 1),
+                        'TASK_PAYMENT_SETTLED',
+                        [
+                            'task_id'        => $task->id,
+                            'customer_name'  => $task->customer_name,
+                            'reference_no'   => $referenceNo,
+                            'amount'         => $tx->amount,
+                            'payment_method' => 'qris',
+                            'paid_at'        => now()->toIso8601String(),
+                        ],
+                        (int) $task->id
+                    )->afterCommit();
                 }
             }
 

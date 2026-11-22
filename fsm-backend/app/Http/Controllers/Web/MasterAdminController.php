@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlatformAuditLog;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Task;
 use App\Services\TenantContext;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class MasterAdminController extends Controller
 {
@@ -48,7 +50,14 @@ class MasterAdminController extends Controller
                 'total_tasks'       => Task::count(),
             ];
 
-            return view('master_admin.index', compact('tenants', 'metrics'));
+            $auditLogs = Schema::hasTable('platform_audit_logs')
+                ? PlatformAuditLog::orderByDesc('id')->take(25)->get()
+                : collect();
+            $auditIntegrity = Schema::hasTable('platform_audit_logs')
+                ? PlatformAuditLog::verifyChainIntegrity()
+                : ['valid' => true, 'checked' => 0, 'broken_id' => null];
+
+            return view('master_admin.index', compact('tenants', 'metrics', 'auditLogs', 'auditIntegrity'));
         });
     }
 
@@ -63,8 +72,18 @@ class MasterAdminController extends Controller
             return back()->with('error', 'Tenant default sistem tidak dapat ditangguhkan.');
         }
 
-        $newStatus = $tenant->status === 'suspended' ? 'active' : 'suspended';
+        $oldStatus = $tenant->status;
+        $newStatus = $oldStatus === 'suspended' ? 'active' : 'suspended';
         $tenant->update(['status' => $newStatus]);
+
+        if (Schema::hasTable('platform_audit_logs')) {
+            PlatformAuditLog::record(
+                $newStatus === 'suspended' ? 'tenant.suspended' : 'tenant.activated',
+                $tenant,
+                ['status' => $oldStatus],
+                ['status' => $newStatus]
+            );
+        }
 
         $statusLabel = $newStatus === 'active' ? 'diaktifkan kembali' : 'ditangguhkan (suspended)';
         return back()->with('success', "Status ISP '{$tenant->name}' berhasil {$statusLabel}.");
@@ -89,6 +108,13 @@ class MasterAdminController extends Controller
 
         $limits = $planLimits[$validated['plan']] ?? $planLimits['starter'];
 
+        $beforeState = [
+            'plan'            => $tenant->plan,
+            'status'          => $tenant->status,
+            'max_technicians' => $tenant->max_technicians,
+            'max_fiber_nodes' => $tenant->max_fiber_nodes,
+        ];
+
         $tenant->update([
             'plan'                 => $validated['plan'],
             'max_technicians'      => $limits['techs'],
@@ -96,6 +122,20 @@ class MasterAdminController extends Controller
             'status'               => 'active',
             'subscription_ends_at' => now()->addMonth(),
         ]);
+
+        if (Schema::hasTable('platform_audit_logs')) {
+            PlatformAuditLog::record(
+                'tenant.plan_updated',
+                $tenant,
+                $beforeState,
+                [
+                    'plan'            => $tenant->plan,
+                    'status'          => $tenant->status,
+                    'max_technicians' => $tenant->max_technicians,
+                    'max_fiber_nodes' => $tenant->max_fiber_nodes,
+                ]
+            );
+        }
 
         return back()->with('success', "Paket ISP '{$tenant->name}' berhasil diubah ke " . ucfirst($validated['plan']) . ".");
     }

@@ -25,11 +25,14 @@ Route::get('/request/receipt/{token}', [PublicRequestController::class, 'receipt
     ->middleware('throttle:60,1')
     ->name('public.request.receipt');
 
-// Public Self-Service ISP Onboarding Registration
+// Public Self-Service ISP Onboarding Registration (Starter & Growth Instant Trial + Enterprise Sales Inquiry)
 Route::get('/register-isp', [\App\Http\Controllers\Web\TenantRegistrationController::class, 'showRegistrationForm'])->name('tenant.register');
 Route::post('/register-isp', [\App\Http\Controllers\Web\TenantRegistrationController::class, 'register'])
     ->middleware('throttle:10,1')
     ->name('tenant.register.post');
+Route::post('/register-isp/enterprise-inquiry', [\App\Http\Controllers\Web\TenantRegistrationController::class, 'enterpriseInquiry'])
+    ->middleware('throttle:5,1')
+    ->name('tenant.enterprise_inquiry');
 
 // Public Customer Live Tracking Page (Uber-Style, Rate-Limited)
 Route::get('/track', [CustomerTrackingController::class, 'lookupForm'])->name('tracking.lookup');

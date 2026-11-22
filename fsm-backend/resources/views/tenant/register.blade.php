@@ -69,6 +69,19 @@
             </p>
         </div>
 
+        @if (session('enterprise_success'))
+            <div class="m-6 sm:m-10 mb-0 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <strong class="font-bold block">Permintaan Enterprise Diterima!</strong>
+                    <span class="text-xs text-emerald-800">{{ session('enterprise_success') }}</span>
+                </div>
+                <a href="https://wa.me/6281223554539?text={{ urlencode('Halo tim Benteng Siber, kami baru saja mengirimkan Enterprise Inquiry dan ingin menjadwalkan demo arsitektur.') }}" target="_blank" rel="noopener noreferrer"
+                    class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold whitespace-nowrap">
+                    Fast-Track via WhatsApp &rarr;
+                </a>
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="m-6 sm:m-10 mb-0 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
                 <strong class="font-bold flex items-center gap-1.5 mb-1">
@@ -183,31 +196,32 @@
                         </ul>
                     </label>
 
-                    <!-- Enterprise Card -->
-                    <label class="relative border-2 rounded-xl p-4 cursor-pointer hover:border-[#0f3559] transition-all has-[:checked]:border-[#0f3559] has-[:checked]:bg-blue-50/40">
-                        <input type="radio" name="plan" value="enterprise" class="sr-only" {{ old('plan') === 'enterprise' ? 'checked' : '' }}>
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="font-display font-bold text-sm text-[#0f3559] block">Enterprise</span>
-                                <span class="text-xs text-slate-500">Tier-1 Telco & Multi-Branch</span>
+                    <!-- Enterprise Card (Verified Sales Activation — No Unverified 9999-Node Abuse) -->
+                    <div class="relative border-2 border-dashed border-[#0f3559]/40 bg-slate-50/70 rounded-xl p-4 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="font-display font-bold text-sm text-[#0f3559] block">Enterprise</span>
+                                    <span class="text-xs text-slate-500">Tier-1 Telco &amp; Multi-Branch</span>
+                                </div>
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-[#0f3559] text-white uppercase">Verified</span>
                             </div>
-                            <span class="text-xs font-extrabold text-[#0f3559]">Kustom</span>
+                            <ul class="mt-3 space-y-1 text-xs text-slate-600 border-t border-slate-200/60 pt-2.5">
+                                <li class="flex items-center gap-1.5 font-semibold text-slate-800">
+                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                    Unlimited Teknisi &amp; ODP
+                                </li>
+                                <li class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                    Custom Domain &amp; Dedicated SLA
+                                </li>
+                            </ul>
                         </div>
-                        <ul class="mt-3 space-y-1 text-xs text-slate-600 border-t border-slate-200/60 pt-2.5">
-                            <li class="flex items-center gap-1.5 font-semibold text-slate-800">
-                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Unlimited Teknisi & ODP
-                            </li>
-                            <li class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Custom Domain Sendiri
-                            </li>
-                            <li class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Dedicated SLA & Support
-                            </li>
-                        </ul>
-                    </label>
+                        <button type="button" onclick="document.getElementById('enterprise-inquiry-modal').classList.remove('hidden')"
+                            class="mt-3 w-full py-2 px-3 rounded-lg bg-[#0f3559] hover:bg-[#011835] text-white text-xs font-bold transition-all cursor-pointer">
+                            Hubungi Enterprise Sales &rarr;
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -297,6 +311,57 @@
     <footer class="max-w-6xl w-full mx-auto text-center py-4 text-xs text-slate-400">
         &copy; 2026 Benteng Siber. Platform Manajemen Layanan Lapangan FiberOps &amp; Pertahanan Siber Telekomunikasi.
     </footer>
+
+    <!-- Enterprise Sales Inquiry Modal -->
+    <div id="enterprise-inquiry-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) this.classList.add('hidden')">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-[#011835] to-[#0f3559] px-6 py-4 flex items-center justify-between text-white">
+                <div>
+                    <h3 class="font-display font-bold text-base">Aktivasi Paket Enterprise Carrier</h3>
+                    <p class="text-[11px] text-slate-300">Unlimited Teknisi, Custom Domain, Integrasi OLT/MikroTik &amp; Dedicated SLA</p>
+                </div>
+                <button type="button" onclick="document.getElementById('enterprise-inquiry-modal').classList.add('hidden')" class="text-slate-300 hover:text-white text-xl font-bold cursor-pointer">&times;</button>
+            </div>
+            <form action="{{ route('tenant.enterprise_inquiry') }}" method="POST" class="p-6 space-y-4 text-xs">
+                @csrf
+                <input type="text" name="website_hp" value="" class="hidden" tabindex="-1" autocomplete="off">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Nama Perusahaan / ISP *</label>
+                        <input type="text" name="enterprise_company" required placeholder="PT Telco Nasional" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Nama PIC *</label>
+                        <input type="text" name="enterprise_name" required placeholder="Direktur / CTO" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Email Korporat *</label>
+                        <input type="email" name="enterprise_email" required placeholder="cto@telco.net.id" class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">WhatsApp Aktif *</label>
+                        <input type="text" name="enterprise_phone" required placeholder="0812..." class="w-full px-3 py-2 rounded-lg border border-slate-300">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Estimasi Jumlah Teknisi *</label>
+                        <input type="number" name="estimated_technicians" min="1" value="50" required class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Estimasi Node ODP/ODC</label>
+                        <input type="number" name="estimated_fiber_nodes" min="0" value="500" class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Kebutuhan Khusus (OLT, Custom Domain, Billing)</label>
+                    <textarea name="notes" rows="2" placeholder="Contoh: Integrasi 4 OLT ZTE C320 + GenieACS + Custom Domain noc.ispkami.net" class="w-full px-3 py-2 rounded-lg border border-slate-300"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" onclick="document.getElementById('enterprise-inquiry-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-[#e8913a] hover:bg-[#d07e2e] text-white font-bold shadow-sm cursor-pointer">Kirim Permintaan Enterprise &rarr;</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>

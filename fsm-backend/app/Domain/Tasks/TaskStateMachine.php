@@ -101,11 +101,14 @@ class TaskStateMachine
                                     'status'        => 'active',
                                 ]);
                             }
-                            // Auto-provision MikroTik PPPoE Secret for customer
+                            // Auto-provision MikroTik PPPoE Secret asynchronously after DB commit
                             try {
-                                app(\App\Services\Network\MikrotikService::class)->provisionCustomerPppoe($cust);
+                                \App\Jobs\ProvisionCustomerPppoeJob::dispatch(
+                                    (int) ($lockedTask->tenant_id ?? \App\Services\TenantContext::id() ?? 1),
+                                    (int) $cust->id
+                                )->afterCommit();
                             } catch (\Throwable $e) {
-                                \Illuminate\Support\Facades\Log::warning("MikroTik auto-provision skipped or failed: {$e->getMessage()}");
+                                \Illuminate\Support\Facades\Log::warning("MikroTik async auto-provision dispatch failed: {$e->getMessage()}");
                             }
                         }
                     }

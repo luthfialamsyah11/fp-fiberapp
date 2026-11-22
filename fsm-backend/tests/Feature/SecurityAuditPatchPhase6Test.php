@@ -2,16 +2,23 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Tasks\TaskStateMachine;
+use App\Models\Customer;
 use App\Models\InventoryItem;
+use App\Models\PaymentTransaction;
+use App\Models\ProofOfWork;
 use App\Models\Task;
+use App\Models\TechnicianLocation;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Payment\Drivers\QrisSimulatorDriver;
+use App\Services\SettingService;
 use App\Services\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -105,6 +112,12 @@ class SecurityAuditPatchPhase6Test extends TestCase
         $this->postJson("/api/tasks/{$task->id}/qris", ['amount' => 49.00])
             ->assertStatus(201)
             ->assertJsonPath('transaction.amount', 49);
+
+        // Payment status API must return tenant currency metadata for Mobile PWA dynamic formatting
+        $this->getJson("/api/tasks/{$task->id}/payment-status")
+            ->assertStatus(200)
+            ->assertJsonPath('currency', 'USD')
+            ->assertJsonPath('is_paid', false);
 
         // 2. Web NOC Console also accepts $25.00 USD
         $this->actingAs($this->usdAdmin)
@@ -237,5 +250,135 @@ class SecurityAuditPatchPhase6Test extends TestCase
         } finally {
             app()->detectEnvironment(fn () => $originalEnv);
         }
+    }
+
+    /** @test */
+    public function equator_zero_latitude_enforces_geofence_gate_instead_of_bypassing(): void
+    {
+        TenantContext::setTenant($this->usdTenant);
+        SettingService::set('geofence_check_meters', '100');
+
+        // Pontianak / Equator task with latitude = 0.0 (previously treated as falsy!)
+        $task = Task::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'technician_id'  => $this->usdTech->id,
+            'title'          => 'Equator FTTH Install',
+            'customer_name'  => 'Equator Subscriber',
+            'customer_phone' => '+628111000222',
+            'address'        => 'Jl. Khatulistiwa 0.0',
+            'latitude'       => 0.0,
+            'longitude'      => 109.333,
+            'status'         => 'accepted',
+            'priority'       => 'medium',
+        ]);
+
+        // Technician GPS is ~5.5km north of the Equator site
+        TechnicianLocation::create([
+            'technician_id' => $this->usdTech->id,
+            'task_id'       => $task->id,
+            'latitude'      => 0.05,
+            'longitude'     => 109.333,
+        ]);
+
+        $fsm = app(TaskStateMachine::class);
+
+        try {
+            $fsm->transition($task, 'on-going', $this->usdTech);
+            $this->fail('Expected ValidationException on geofence when task latitude is 0.0.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('geofence', $e->errors());
+        }
+    }
+
+    /** @test */
+    public function olt_hardware_gate_blocks_completion_when_ont_serial_is_missing_for_linked_subscriber(): void
+    {
+        $this->usdTenant->update([
+            'network_settings' => [
+                'olt_driver'                      => 'simulator',
+                'require_hardware_olt_validation' => true,
+                'opm_max_attenuation_dbm'         => -27.0,
+            ],
+        ]);
+        TenantContext::setTenant($this->usdTenant->fresh());
+        SettingService::set('geofence_check_meters', '0');
+
+        $customer = Customer::create([
+            'tenant_id'         => $this->usdTenant->id,
+            'customer_code'     => 'CUST-NO-ONT',
+            'name'              => 'Subscriber Missing ONT SN',
+            'phone'             => '+14155550199',
+            'address'           => '500 Fiber Way',
+            'service_plan'      => '1Gbps',
+            'ont_serial_number' => null,
+            'status'            => 'active',
+        ]);
+
+        $task = Task::create([
+            'tenant_id'          => $this->usdTenant->id,
+            'technician_id'      => $this->usdTech->id,
+            'customer_id'        => $customer->id,
+            'title'              => 'FTTH Activation Missing ONT SN',
+            'customer_name'      => $customer->name,
+            'customer_phone'     => $customer->phone,
+            'address'            => $customer->address,
+            'status'             => 'on-going',
+            'priority'           => 'high',
+            'customer_signature' => 'data:image/png;base64,iVBORw0KGgo=',
+        ]);
+
+        ProofOfWork::create([
+            'task_id'     => $task->id,
+            'image'       => 'proofs/sample_ont.jpg',
+            'slot'        => 'after',
+            'description' => 'Installed drop cable',
+        ]);
+
+        $fsm = app(TaskStateMachine::class);
+
+        try {
+            $fsm->transition($task, 'completed', $this->usdTech);
+            $this->fail('Expected ValidationException on ont_serial_number when OLT gate is enabled and ONT SN is missing.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('ont_serial_number', $e->errors());
+        }
+    }
+
+    /** @test */
+    public function idempotency_middleware_acquires_atomic_lock_and_replays_cached_response(): void
+    {
+        TenantContext::setTenant($this->usdTenant);
+        $task = Task::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'technician_id'  => $this->usdTech->id,
+            'title'          => 'Idempotent Checkout Task',
+            'customer_name'  => 'Replay Customer',
+            'customer_phone' => '+14155550144',
+            'address'        => '88 Mission St',
+            'status'         => 'on-going',
+            'priority'       => 'medium',
+            'billing_amount' => 35.00,
+        ]);
+
+        Sanctum::actingAs($this->usdTech);
+        $idemKey = 'idem-test-' . Str::uuid();
+
+        $first = $this->withHeaders(['Idempotency-Key' => $idemKey])
+            ->postJson("/api/tasks/{$task->id}/qris", ['amount' => 35.00]);
+        $first->assertStatus(201);
+        $firstRef = $first->json('transaction.reference_no');
+        $this->assertNotEmpty($firstRef);
+
+        $second = $this->withHeaders(['Idempotency-Key' => $idemKey])
+            ->postJson("/api/tasks/{$task->id}/qris", ['amount' => 35.00]);
+        $second->assertStatus(201);
+        $second->assertHeader('X-Idempotent-Replay', 'true');
+        $this->assertSame($firstRef, $second->json('transaction.reference_no'));
+
+        $this->assertSame(
+            1,
+            PaymentTransaction::where('task_id', $task->id)->count(),
+            'Idempotent replay must not create a duplicate PaymentTransaction row.'
+        );
     }
 }

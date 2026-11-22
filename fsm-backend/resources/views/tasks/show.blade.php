@@ -230,13 +230,19 @@
                             @endif
                         </div>
                         @if($pStatus !== 'paid' && $task->status !== 'rejected' && auth()->user()->hasAnyRole(['admin', 'super_admin', 'noc_dispatcher']))
+                            @php
+                                $payCurrency = app(\App\Services\Payment\QrisPaymentService::class)->getTenantCurrency();
+                                $payMin = $payCurrency === 'IDR' ? 1000 : 1;
+                                $payStep = $payCurrency === 'IDR' ? '1000' : '0.01';
+                                $payDefault = $payCurrency === 'IDR' ? '150000' : '49.00';
+                            @endphp
                             <form method="POST" action="{{ route('admin.tasks.qris', $task->id) }}" class="flex items-center gap-1.5">
                                 @csrf
-                                @if((float) ($task->billing_amount ?? 0) < 1000)
-                                    <input type="number" name="amount" min="1000" step="1000" value="150000" class="w-24 rounded-lg border border-emerald-200 bg-white px-2 py-1 text-[11px] font-mono" title="Billing Amount (IDR)">
+                                @if((float) ($task->billing_amount ?? 0) < $payMin)
+                                    <input type="number" name="amount" min="{{ $payMin }}" step="{{ $payStep }}" value="{{ $payDefault }}" class="w-24 rounded-lg border border-emerald-200 bg-white px-2 py-1 text-[11px] font-mono" title="Billing Amount ({{ $payCurrency }})">
                                 @endif
                                 <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-all cursor-pointer">
-                                    Generate QRIS
+                                    Generate Payment QR
                                 </button>
                             </form>
                         @elseif($task->latestPayment && $task->latestPayment->qr_image_url && $pStatus === 'pending')

@@ -106,12 +106,30 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   private canvasListenersAttached = false;
   private signatureTimeouts: any[] = [];
 
-  // ─── Dynamic QRIS On-Site Billing & Live Settlement Polling ────────────────
-  qrisAmount: number = 150000;
+  // ─── Dynamic Payment (Stripe USD / QRIS) & Live Settlement Polling ─────────
+  tenantCurrency: string = 'USD';
+  qrisAmount: number = 49;
   qrisTransaction: any = null;
   paymentStatus: string = 'unpaid';
   isGeneratingQris = false;
+  private isPollingPayment = false;
   private qrisPollTimer: any = null;
+
+  get minPaymentAmount(): number {
+    return this.tenantCurrency === 'IDR' ? 1000 : 1;
+  }
+
+  get paymentInputStep(): number {
+    return this.tenantCurrency === 'IDR' ? 1000 : 0.01;
+  }
+
+  formatPaymentAmount(val: any): string {
+    const num = Number(val || 0);
+    if (this.tenantCurrency === 'IDR') {
+      return `IDR ${Math.round(num).toLocaleString('en-US')}`;
+    }
+    return `${this.tenantCurrency} ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
 
   // Bound event listener references for leak-free cleanup
   private touchStartHandler = (e: TouchEvent) => this.handleCanvasTouch(e, 'start');
@@ -191,10 +209,17 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
       this.isLoading = true;
     }
     try {
-      // 1. Get Me profile
+      // 1. Get Me profile & tenant currency config
       try {
         const uRes: any = await this.api.getMe();
         this.user = uRes?.data ?? uRes;
+        const cfgCurrency = String(uRes?.config?.currency || '').toUpperCase();
+        if (cfgCurrency) {
+          this.tenantCurrency = cfgCurrency;
+          if (!this.task?.billing_amount && this.qrisAmount === 49 && cfgCurrency === 'IDR') {
+            this.qrisAmount = 150000;
+          }
+        }
       } catch (err) {
         console.warn('Profile fetch warning in task detail', err);
       }
@@ -215,7 +240,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
         this.customerSignerName = this.task.customer_name;
       }
 
-      if (this.task?.billing_amount && Number(this.task.billing_amount) >= 1000) {
+      if (this.task?.billing_amount && Number(this.task.billing_amount) >= this.minPaymentAmount) {
         this.qrisAmount = Number(this.task.billing_amount);
       }
       this.paymentStatus = this.task?.payment_status || 'unpaid';
@@ -706,12 +731,16 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async loadPaymentStatus(silent = true) {
-    if (!this.taskId) return;
+    if (!this.taskId || this.isPollingPayment) return;
+    this.isPollingPayment = true;
     try {
       const res: any = await this.api.getTaskPaymentStatus(this.taskId);
+      if (res?.currency) {
+        this.tenantCurrency = String(res.currency).toUpperCase();
+      }
       const prevStatus = this.paymentStatus;
       this.paymentStatus = res?.payment_status || this.task?.payment_status || 'unpaid';
-      if (res?.billing_amount && Number(res.billing_amount) >= 1000) {
+      if (res?.billing_amount && Number(res.billing_amount) >= this.minPaymentAmount) {
         this.qrisAmount = Number(res.billing_amount);
       }
       if (res?.transaction) {
@@ -720,24 +749,32 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
       if (this.task) {
         this.task.payment_status = this.paymentStatus;
       }
+      const isExpired = Boolean(
+        this.qrisTransaction?.expires_at && Date.parse(this.qrisTransaction.expires_at) < Date.now()
+      );
       if (this.paymentStatus === 'paid') {
         this.stopQrisPolling();
         if (prevStatus !== 'paid' && !silent) {
-          this.showToast('QRIS Payment Settled! Customer MikroTik auto-unblocked.', 'success');
+          this.showToast('Payment Settled! Customer MikroTik auto-unblocked.', 'success');
         }
-      } else if (this.paymentStatus === 'pending' && this.qrisTransaction) {
+      } else if (this.paymentStatus === 'pending' && this.qrisTransaction && !isExpired) {
         this.startQrisPolling();
+      } else if (isExpired) {
+        this.stopQrisPolling();
       }
     } catch (e) {
       // Non-fatal during offline mode
+    } finally {
+      this.isPollingPayment = false;
     }
   }
 
   async generateDynamicQris() {
     if (this.isGeneratingQris || !this.task) return;
     const amt = Number(this.qrisAmount);
-    if (!amt || amt < 1000) {
-      this.showToast('Please enter a valid billing amount (min IDR 1,000)', 'warning');
+    const minAmt = this.minPaymentAmount;
+    if (!amt || amt < minAmt) {
+      this.showToast(`Please enter a valid billing amount (min ${this.formatPaymentAmount(minAmt)})`, 'warning');
       return;
     }
     this.isGeneratingQris = true;
@@ -747,10 +784,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
       this.paymentStatus = 'pending';
       this.task.payment_status = 'pending';
       this.task.billing_amount = amt;
-      this.showToast('Dynamic QRIS ready — ask customer to scan now.', 'success');
+      this.showToast('Payment QR ready — ask customer to scan now.', 'success');
       this.startQrisPolling();
     } catch (err: any) {
-      const msg = err?.error?.message || 'Failed to generate Dynamic QRIS.';
+      const msg = err?.error?.message || 'Failed to generate Payment QR.';
       this.showToast(msg, 'danger');
     } finally {
       this.isGeneratingQris = false;
@@ -760,6 +797,7 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   private startQrisPolling() {
     if (this.qrisPollTimer) return;
     this.qrisPollTimer = setInterval(async () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       if (this.paymentStatus === 'paid') {
         this.stopQrisPolling();
         return;
@@ -789,10 +827,10 @@ export class TaskDetailPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openMaps() {
-    if (this.task?.latitude && this.task?.longitude) {
+    if (this.hasValidCoordinates(this.task)) {
       this.navigationService.openNavigationOptions(
-        this.task.latitude,
-        this.task.longitude,
+        Number(this.task.latitude),
+        Number(this.task.longitude),
         this.task.customer_name ? `${this.task.customer_name} (${this.task.title})` : this.task.title
       );
     } else {

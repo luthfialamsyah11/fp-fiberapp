@@ -151,7 +151,7 @@ class TaskStateMachine
     protected function assertGeofenceGate(Task $task, User $actor): void
     {
         $maxMeters = (int) SettingService::get('geofence_check_meters', '0');
-        if ($maxMeters <= 0 || !$task->latitude || !$task->longitude) {
+        if ($maxMeters <= 0 || $task->latitude === null || $task->longitude === null) {
             return;
         }
 
@@ -234,6 +234,10 @@ class TaskStateMachine
 
             if (!empty($ontSn)) {
                 $diag = app(\App\Services\Network\OltService::class)->assertOpticalHealth($ontSn, $maxAtten);
+            } elseif (!empty($task->customer_id) || !empty($task->fiber_node_id)) {
+                throw ValidationException::withMessages([
+                    'ont_serial_number' => ['Live OLT optical validation is enabled, but no ONT Serial Number is recorded on the subscriber profile or BOM materials.'],
+                ]);
             }
         }
 

@@ -64,6 +64,7 @@ class TaskPaymentController extends Controller
 
         return response()->json([
             'task_id'        => $task->id,
+            'currency'       => $this->paymentService->getTenantCurrency(),
             'billing_amount' => $task->billing_amount,
             'payment_status' => $task->payment_status,
             'is_paid'        => $task->payment_status === 'paid',
@@ -71,6 +72,8 @@ class TaskPaymentController extends Controller
                 'reference_no' => $latest->reference_no,
                 'amount'       => $latest->amount,
                 'status'       => $latest->status,
+                'provider'     => $latest->provider,
+                'qr_payload'   => $latest->qr_payload,
                 'qr_image_url' => $latest->qr_image_url,
                 'paid_at'      => $latest->paid_at?->toIso8601String(),
                 'expires_at'   => $latest->expires_at?->toIso8601String(),

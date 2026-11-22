@@ -39,7 +39,7 @@ class CustomerTrackingController extends Controller
             return back()->withInput()->with('error', 'Please enter at least 4 digits of the phone number used during registration.');
         }
 
-        $task = Task::query()
+        $task = Task::withoutGlobalScopes()
             ->where(function ($q) use ($ticket) {
                 $trimmed = strtoupper($ticket);
                 if (str_starts_with($trimmed, 'TSK-')) {
@@ -69,7 +69,8 @@ class CustomerTrackingController extends Controller
      */
     public function show(string $token)
     {
-        $task = Task::where('tracking_token', $token)
+        $task = Task::withoutGlobalScopes()
+            ->where('tracking_token', $token)
             ->with(['technician', 'progressUpdates'])
             ->firstOrFail();
 
@@ -84,7 +85,8 @@ class CustomerTrackingController extends Controller
      */
     public function apiStatus(string $token)
     {
-        $task = Task::where('tracking_token', $token)
+        $task = Task::withoutGlobalScopes()
+            ->where('tracking_token', $token)
             ->with(['technician', 'progressUpdates'])
             ->first();
 
@@ -171,7 +173,7 @@ class CustomerTrackingController extends Controller
         }
 
         $result = DB::transaction(function () use ($token, $validated, $cleanFeedback) {
-            $task = Task::where('tracking_token', $token)->lockForUpdate()->first();
+            $task = Task::withoutGlobalScopes()->where('tracking_token', $token)->lockForUpdate()->first();
             if (!$task) {
                 return ['status' => 404, 'body' => ['message' => 'Tracking session not found.']];
             }

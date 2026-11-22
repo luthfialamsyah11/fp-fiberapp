@@ -16,7 +16,11 @@ class TenantScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (TenantContext::isScopingEnabled()) {
-            if (app()->runningInConsole() && !Schema::hasColumn($model->getTable(), 'tenant_id')) {
+            try {
+                if (!Schema::hasColumn($model->getTable(), 'tenant_id')) {
+                    return;
+                }
+            } catch (\Throwable $e) {
                 return;
             }
             $builder->where($model->qualifyColumn('tenant_id'), TenantContext::id());

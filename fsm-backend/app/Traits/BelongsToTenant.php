@@ -19,8 +19,12 @@ trait BelongsToTenant
 
         static::creating(function ($model) {
             if (empty($model->tenant_id)) {
-                if (!app()->runningInConsole() || Schema::hasColumn($model->getTable(), 'tenant_id')) {
-                    $model->tenant_id = TenantContext::id() ?? 1;
+                try {
+                    if (Schema::hasColumn($model->getTable(), 'tenant_id')) {
+                        $model->tenant_id = TenantContext::id() ?? 1;
+                    }
+                } catch (\Throwable $e) {
+                    // Fallback if schema check fails during pre-migration
                 }
             }
         });

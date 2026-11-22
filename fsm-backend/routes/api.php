@@ -33,7 +33,7 @@ Route::get('/public/track/{token}', [CustomerTrackingController::class, 'apiStat
 Route::post('/public/track/{token}/rating', [CustomerTrackingController::class, 'submitRating'])->middleware('throttle:10,1');
 
 // Authenticated Routes
-Route::middleware(['auth:sanctum', 'active'])->group(function () {
+Route::middleware(['auth:sanctum', 'active', 'tenant.active'])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);

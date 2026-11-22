@@ -36,12 +36,14 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\IdentifyTenant::class,
         ],
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\IdentifyTenant::class,
         ],
     ];
 
@@ -67,5 +69,8 @@ class Kernel extends HttpKernel
         'role'       => \App\Http\Middleware\RoleMiddleware::class,
         'active'     => \App\Http\Middleware\EnsureUserIsActive::class,
         'idempotent' => \App\Http\Middleware\IdempotencyMiddleware::class,
+        'tenant.identify' => \App\Http\Middleware\IdentifyTenant::class,
+        'tenant.active'   => \App\Http\Middleware\EnsureTenantActive::class,
+        'tenant.quota'    => \App\Http\Middleware\EnsureTenantQuota::class,
     ];
 }

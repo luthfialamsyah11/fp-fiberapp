@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Traits\BelongsToTenant;
 
 class Task extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
-        'title', 'customer_name', 'customer_phone', 'customer_email', 'description', 'address', 'location',
+        'tenant_id', 'title', 'customer_name', 'customer_phone', 'customer_email', 'description', 'address', 'location',
         'latitude', 'longitude', 'technician_id', 'customer_id', 'fiber_node_id', 'status', 'priority',
         'source', 'service_category', 'client_photo',
         'additional_notes', 'scheduled_at',

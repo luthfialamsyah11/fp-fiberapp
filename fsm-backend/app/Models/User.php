@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Traits\BelongsToTenant;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, BelongsToTenant;
 
     /**
      * Technician heartbeat expiry window in seconds (2 minutes = 8 missed 15s heartbeats).
@@ -62,7 +63,7 @@ class User extends Authenticatable
     }
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'phone', 'is_active', 'is_online', 'last_seen_at'
+        'tenant_id', 'name', 'email', 'password', 'role', 'phone', 'is_active', 'is_online', 'last_seen_at'
     ];
 
     protected $hidden = ['password', 'remember_token'];

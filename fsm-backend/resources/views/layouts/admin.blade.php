@@ -244,6 +244,13 @@
             </a>
             @endif
 
+            @if($isSuperAdmin && (auth()->user()?->tenant_id === 1 || empty(auth()->user()?->tenant_id)))
+            <a href="{{ route('master_admin.index') }}" data-tooltip="Master Platform" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('master_admin.*') ? 'active text-white' : '' }}">
+                <ion-icon name="globe-outline" class="nav-icon text-lg mr-3 flex-shrink-0 text-emerald-400"></ion-icon>
+                <span class="sidebar-label truncate">Master Platform</span>
+            </a>
+            @endif
+
             <a href="{{ route('admin.guide') }}" data-tooltip="Admin Operations Guide" class="nav-item flex items-center px-3 py-2.5 rounded-xl text-slate-300 text-sm {{ request()->routeIs('admin.guide') ? 'active text-white' : '' }}">
                 <ion-icon name="book-outline" class="nav-icon text-lg mr-3 flex-shrink-0 text-amber-400"></ion-icon>
                 <span class="sidebar-label truncate">Admin Operations Guide</span>

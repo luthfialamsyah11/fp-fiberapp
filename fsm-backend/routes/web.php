@@ -25,6 +25,12 @@ Route::get('/request/receipt/{token}', [PublicRequestController::class, 'receipt
     ->middleware('throttle:60,1')
     ->name('public.request.receipt');
 
+// Public Self-Service ISP Onboarding Registration
+Route::get('/register-isp', [\App\Http\Controllers\Web\TenantRegistrationController::class, 'showRegistrationForm'])->name('tenant.register');
+Route::post('/register-isp', [\App\Http\Controllers\Web\TenantRegistrationController::class, 'register'])
+    ->middleware('throttle:10,1')
+    ->name('tenant.register.post');
+
 // Public Customer Live Tracking Page (Uber-Style, Rate-Limited)
 Route::get('/track', [CustomerTrackingController::class, 'lookupForm'])->name('tracking.lookup');
 Route::post('/track/lookup', [CustomerTrackingController::class, 'processLookup'])
@@ -53,7 +59,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // Protected Portal Staff Routes (Granular Multi-Role RBAC)
-Route::middleware(['auth', 'active', 'role:admin,super_admin,noc_dispatcher,warehouse_admin,field_supervisor'])->group(function () {
+Route::middleware(['auth', 'active', 'tenant.active', 'role:admin,super_admin,noc_dispatcher,warehouse_admin,field_supervisor'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -105,7 +111,9 @@ Route::middleware(['auth', 'active', 'role:admin,super_admin,noc_dispatcher,ware
         Route::delete('/customers/{customer}', [\App\Http\Controllers\Web\CustomerController::class, 'destroy'])->name('admin.customers.destroy');
 
         Route::get('/fiber-assets', [\App\Http\Controllers\Web\FiberNodeController::class, 'index'])->name('admin.fiber_assets.index');
-        Route::post('/fiber-assets', [\App\Http\Controllers\Web\FiberNodeController::class, 'store'])->name('admin.fiber_assets.store');
+        Route::post('/fiber-assets', [\App\Http\Controllers\Web\FiberNodeController::class, 'store'])
+            ->middleware('tenant.quota:fiber_node')
+            ->name('admin.fiber_assets.store');
         Route::put('/fiber-assets/{fiberNode}', [\App\Http\Controllers\Web\FiberNodeController::class, 'update'])->name('admin.fiber_assets.update');
         Route::delete('/fiber-assets/{fiberNode}', [\App\Http\Controllers\Web\FiberNodeController::class, 'destroy'])->name('admin.fiber_assets.destroy');
     });
@@ -132,9 +140,17 @@ Route::middleware(['auth', 'active', 'role:admin,super_admin,noc_dispatcher,ware
         ])->except(['show']);
         Route::post('staff/{staff}/toggle-status', [\App\Http\Controllers\Web\StaffController::class, 'toggleStatus'])->name('admin.staff.toggle_status');
 
+        Route::post('technicians', [TechnicianController::class, 'store'])
+            ->middleware('tenant.quota:technician')
+            ->name('admin.technicians.store');
         Route::resource('technicians', TechnicianController::class, [
             'as' => 'admin'
-        ])->except(['show']);
+        ])->except(['show', 'store']);
+
+        // Platform Master Console: Multi-Tenant Oversight
+        Route::get('/master-admin', [\App\Http\Controllers\Web\MasterAdminController::class, 'index'])->name('master_admin.index');
+        Route::post('/master-admin/tenants/{tenant}/toggle', [\App\Http\Controllers\Web\MasterAdminController::class, 'toggleStatus'])->name('master_admin.tenants.toggle');
+        Route::post('/master-admin/tenants/{tenant}/plan', [\App\Http\Controllers\Web\MasterAdminController::class, 'updatePlan'])->name('master_admin.tenants.plan');
 
         Route::get('/settings', [\App\Http\Controllers\Web\SettingsController::class, 'index'])->name('admin.settings');
         Route::post('/settings', [\App\Http\Controllers\Web\SettingsController::class, 'update'])->name('admin.settings.update');

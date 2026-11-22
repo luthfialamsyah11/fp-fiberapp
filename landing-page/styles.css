@@ -340,6 +340,20 @@ button {
   transform: translateY(-1px);
 }
 
+.btn-outline-accent {
+  background-color: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+.btn-outline-accent:hover {
+  background-color: var(--accent);
+  color: var(--text-white);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .btn-outline-white {
   background-color: transparent;
   color: var(--text-white);

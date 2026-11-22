@@ -71,7 +71,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => 'required|string|email|max:255|unique:users,email',
-            'password'  => 'required|string|min:6|confirmed',
+            'password'  => 'required|string|min:8|confirmed',
             'role'      => ['required', 'string', Rule::in(['super_admin', 'noc_dispatcher', 'warehouse_admin', 'field_supervisor'])],
             'phone'     => 'nullable|string|max:30',
             'is_active' => 'boolean',
@@ -116,7 +116,7 @@ class StaffController extends Controller
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($staff->id)],
-            'password'  => 'nullable|string|min:6|confirmed',
+            'password'  => 'nullable|string|min:8|confirmed',
             'role'      => ['required', 'string', Rule::in(['super_admin', 'noc_dispatcher', 'warehouse_admin', 'field_supervisor', 'admin'])],
             'phone'     => 'nullable|string|max:30',
             'is_active' => 'boolean',
@@ -148,6 +148,10 @@ class StaffController extends Controller
      */
     public function toggleStatus(User $staff)
     {
+        if (!in_array($staff->role, User::PORTAL_ROLES, true)) {
+            abort(404, 'User is not a portal staff member.');
+        }
+
         if (auth()->id() === $staff->id) {
             return back()->with('error', 'You cannot deactivate your own active session.');
         }

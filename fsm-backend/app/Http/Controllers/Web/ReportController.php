@@ -123,7 +123,15 @@ class ReportController extends Controller
                 } elseif ($timeframe === 'this_month') {
                     $q->whereMonth('created_at', Carbon::now()->month)->whereYear('created_at', Carbon::now()->year);
                 } elseif ($timeframe === 'custom' && $startDate && $endDate) {
-                    $q->whereBetween('created_at', [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()]);
+                    try {
+                        $from = Carbon::parse($startDate)->startOfDay();
+                        $to = Carbon::parse($endDate)->endOfDay();
+                        if ($from->lte($to)) {
+                            $q->whereBetween('created_at', [$from, $to]);
+                        }
+                    } catch (\Throwable $e) {
+                        // Ignore invalid date input safely
+                    }
                 }
             }, 'tasks.proofs'])
             ->get()
@@ -274,10 +282,15 @@ class ReportController extends Controller
                 break;
             case 'custom':
                 if ($startDate && $endDate) {
-                    $query->whereBetween('created_at', [
-                        Carbon::parse($startDate)->startOfDay(),
-                        Carbon::parse($endDate)->endOfDay()
-                    ]);
+                    try {
+                        $from = Carbon::parse($startDate)->startOfDay();
+                        $to = Carbon::parse($endDate)->endOfDay();
+                        if ($from->lte($to)) {
+                            $query->whereBetween('created_at', [$from, $to]);
+                        }
+                    } catch (\Throwable $e) {
+                        // Ignore malformed date query strings safely instead of throwing HTTP 500
+                    }
                 }
                 break;
             default:

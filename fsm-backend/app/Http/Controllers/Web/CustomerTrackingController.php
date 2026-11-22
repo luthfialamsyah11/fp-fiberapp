@@ -182,6 +182,10 @@ class CustomerTrackingController extends Controller
                 return ['status' => 422, 'body' => ['message' => 'Rating can only be submitted after the work order is completed.']];
             }
 
+            if ($this->isTrackingExpired($task)) {
+                return ['status' => 410, 'body' => ['message' => 'This tracking and rating session expired 24 hours after work order completion.']];
+            }
+
             if ($task->customer_rated_at !== null || $task->customer_rating !== null) {
                 return ['status' => 409, 'body' => ['message' => 'Thank you — feedback has already been submitted for this work order.']];
             }

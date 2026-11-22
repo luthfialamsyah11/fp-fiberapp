@@ -151,7 +151,7 @@ class PublicRequestController extends Controller
                     'ip_address'  => $request->ip(),
                 ]);
 
-                $systemUserId = User::where('role', 'admin')->orderBy('id')->value('id');
+                $systemUserId = User::whereIn('role', ['admin', 'super_admin'])->orderBy('id')->value('id');
                 if ($systemUserId) {
                     ProgressUpdate::create([
                         'task_id'          => $task->id,
@@ -192,8 +192,12 @@ class PublicRequestController extends Controller
     {
         $task = Task::withoutGlobalScopes()
             ->where('tracking_token', $token)
-            ->with(['technician'])
+            ->with(['technician', 'tenant'])
             ->firstOrFail();
+
+        if ($task->tenant) {
+            \App\Services\TenantContext::setTenant($task->tenant);
+        }
 
         $settings = SettingService::all();
 

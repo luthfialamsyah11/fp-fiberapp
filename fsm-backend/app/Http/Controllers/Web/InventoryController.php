@@ -111,19 +111,27 @@ class InventoryController extends Controller
                 'Description',
             ]);
 
+            $sanitizeCsvCell = function ($value): string {
+                $str = (string) ($value ?? '');
+                if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                    return "'" . $str;
+                }
+                return $str;
+            };
+
             foreach ($items as $item) {
                 fputcsv($handle, [
-                    $item->code,
-                    $item->name,
-                    $item->category,
+                    $sanitizeCsvCell($item->code),
+                    $sanitizeCsvCell($item->name),
+                    $sanitizeCsvCell($item->category),
                     $item->is_active ? 'Active' : 'Inactive',
                     $item->stock,
-                    $item->unit,
+                    $sanitizeCsvCell($item->unit),
                     $item->unit_price,
                     round((float) $item->stock * (float) $item->unit_price, 2),
                     (int) ($item->task_materials_count ?? 0),
                     (float) ($item->task_materials_sum_quantity ?? 0),
-                    $item->description ?? '',
+                    $sanitizeCsvCell($item->description ?? ''),
                 ]);
             }
 

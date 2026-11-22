@@ -270,8 +270,6 @@ class AdversarialSecurityAndQuotaAuditTest extends TestCase
             ->postJson("/api/tasks/{$task->id}/qris", []);
 
         $res->assertStatus(422);
-        $res->assertJsonFragment([
-            'message' => 'Cannot generate QRIS: work order has zero billing amount and no override amount was specified. Please specify an amount of at least IDR 1,000.',
-        ]);
+        $this->assertStringContainsString('work order has zero billing amount', (string) $res->json('message'));
     }
 }

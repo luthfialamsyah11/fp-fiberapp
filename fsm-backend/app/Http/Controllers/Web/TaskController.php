@@ -565,20 +565,24 @@ class TaskController extends Controller
 
     public function generateQris(Request $request, Task $task)
     {
+        $paymentService = app(\App\Services\Payment\QrisPaymentService::class);
+        $currency = $paymentService->getTenantCurrency();
+        $minAmount = $currency === 'IDR' ? 1000 : 1;
+
         $validated = $request->validate([
-            'amount'         => 'nullable|numeric|min:1000|max:100000000',
+            'amount'         => "nullable|numeric|min:{$minAmount}|max:100000000",
             'expiry_minutes' => 'nullable|integer|min:5|max:120',
         ]);
 
         $amount = isset($validated['amount']) ? (float) $validated['amount'] : (float) ($task->billing_amount ?? 0);
-        if ($amount < 1000) {
-            return back()->with('error', 'Billing amount must be at least IDR 1,000 to generate a Dynamic QRIS.');
+        if ($amount < $minAmount) {
+            $minLabel = $currency === 'IDR' ? 'IDR 1,000' : "{$currency} 1.00";
+            return back()->with('error', "Billing amount must be at least {$minLabel} to generate an on-site payment link/QR.");
         }
 
         try {
-            $tx = app(\App\Services\Payment\QrisPaymentService::class)
-                ->generateTaskQris($task, $amount, (int) ($validated['expiry_minutes'] ?? 15));
-            return back()->with('success', "Dynamic QRIS generated (Ref: {$tx->reference_no}, Amount: " . SettingService::formatCurrency((float) $tx->amount) . ').');
+            $tx = $paymentService->generateTaskQris($task, $amount, (int) ($validated['expiry_minutes'] ?? 15));
+            return back()->with('success', "Dynamic payment QR generated (Ref: {$tx->reference_no}, Amount: " . SettingService::formatCurrency((float) $tx->amount) . ').');
         } catch (ValidationException $e) {
             return back()->with('error', collect($e->errors())->flatten()->first() ?? 'Unable to generate QRIS.');
         } catch (\Throwable $e) {

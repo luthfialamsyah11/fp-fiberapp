@@ -41,20 +41,26 @@ class IdentifyTenant
                 $tenant = Tenant::find($user->tenant_id);
             }
 
-            // 2. Check Explicit Request Headers (Mobile PWA & API)
+            // 2. Check Explicit Request Headers (Slug allowed for active tenants; sequential integer ID restricted to non-production)
             if (!$tenant && $request->hasHeader('X-Tenant-Slug')) {
-                $tenant = Tenant::where('slug', $request->header('X-Tenant-Slug'))->first();
+                $slug = strtolower(trim((string) $request->header('X-Tenant-Slug')));
+                if ($slug !== '' && preg_match('/^[a-z0-9\-]{2,50}$/', $slug)) {
+                    $tenant = Tenant::where('slug', $slug)->first();
+                }
             }
 
-            if (!$tenant && $request->hasHeader('X-Tenant-ID')) {
-                $tenant = Tenant::find($request->header('X-Tenant-ID'));
-            }
+            if (!$tenant && !app()->environment('production')) {
+                if ($request->hasHeader('X-Tenant-ID') && is_numeric($request->header('X-Tenant-ID'))) {
+                    $tenant = Tenant::find((int) $request->header('X-Tenant-ID'));
+                }
 
-            // 3. Check Query Parameter (Development & Testing)
-            if (!$tenant && $request->filled('tenant')) {
-                $tenant = Tenant::where('slug', $request->query('tenant'))
-                    ->orWhere('id', is_numeric($request->query('tenant')) ? (int)$request->query('tenant') : 0)
-                    ->first();
+                // 3. Query Parameter (Development & Testing only — blocks anonymous tenant spoofing in production)
+                if (!$tenant && $request->filled('tenant')) {
+                    $qTenant = (string) $request->query('tenant');
+                    $tenant = Tenant::where('slug', $qTenant)
+                        ->orWhere('id', is_numeric($qTenant) ? (int) $qTenant : 0)
+                        ->first();
+                }
             }
 
             // 4. Check Subdomain / Host Resolution

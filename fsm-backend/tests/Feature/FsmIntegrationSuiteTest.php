@@ -385,7 +385,8 @@ class FsmIntegrationSuiteTest extends TestCase
         try {
             $res = $this->get('/storage/proof/unit_test_img.png');
             $res->assertStatus(200);
-            $res->assertHeader('Access-Control-Allow-Origin', '*');
+            $res->assertHeader('Access-Control-Allow-Origin', 'https://app.bentengsiber.com');
+            $res->assertHeader('X-Content-Type-Options', 'nosniff');
 
             // Path traversal attempt must return 404
             $this->get('/storage/..%2F.env')->assertStatus(404);

@@ -88,8 +88,8 @@ Route::middleware(['auth:sanctum', 'active', 'tenant.active'])->group(function (
     Route::post('/tasks/{task}/qris', [\App\Http\Controllers\Api\TaskPaymentController::class, 'generateQris'])->middleware(['throttle:30,1', 'idempotent']);
     Route::get('/tasks/{task}/payment-status', [\App\Http\Controllers\Api\TaskPaymentController::class, 'paymentStatus']);
 
-    // Admin Routes
-    Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+    // Admin Routes (Supports legacy admin + multi-tenant super_admin owners)
+    Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
 
         // Tasks

@@ -51,13 +51,18 @@ class QrisSimulatorDriver implements QrisGatewayInterface
             return hash_equals($computed, (string) $payload['signature_key']);
         }
 
-        // Explicit simulator header token (allowed in non-production OR when simulator webhook secret matches)
-        $expectedSecret = $this->config['webhook_secret'] ?? 'simulated_valid_sig';
-        if (!empty($signatureHeader) && hash_equals((string) $expectedSecret, (string) $signatureHeader)) {
+        // Explicit simulator header token: never allow hardcoded fallback secret in production
+        $configuredSecret = trim((string) ($this->config['webhook_secret'] ?? ''));
+        if (app()->environment('production') && ($configuredSecret === '' || $configuredSecret === 'simulated_valid_sig')) {
+            return false;
+        }
+
+        $expectedSecret = $configuredSecret !== '' ? $configuredSecret : 'simulated_valid_sig';
+        if (!empty($signatureHeader) && hash_equals($expectedSecret, (string) $signatureHeader)) {
             return true;
         }
 
-        // Never blindly accept unsigned webhooks in production
+        // Never blindly accept unsigned webhooks
         return false;
     }
 }

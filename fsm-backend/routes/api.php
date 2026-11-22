@@ -32,8 +32,10 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,
 Route::get('/public/track/{token}', [CustomerTrackingController::class, 'apiStatus'])->middleware('throttle:60,1');
 Route::post('/public/track/{token}/rating', [CustomerTrackingController::class, 'submitRating'])->middleware('throttle:10,1');
 
-// Public Payment Gateway Webhooks (Midtrans / Xendit / Simulator, Rate-limited)
+// Public Payment Gateway Webhooks (Midtrans / Xendit / Stripe / Simulator, Rate-limited)
 Route::post('/webhooks/payment', [\App\Http\Controllers\Api\PaymentWebhookController::class, 'handleWebhook'])
+    ->middleware('throttle:60,1');
+Route::post('/webhooks/stripe', [\App\Http\Controllers\Api\PaymentWebhookController::class, 'handleStripeWebhook'])
     ->middleware('throttle:60,1');
 
 // Authenticated Routes

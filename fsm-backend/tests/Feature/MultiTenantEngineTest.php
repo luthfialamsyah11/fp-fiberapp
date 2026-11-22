@@ -52,8 +52,8 @@ class MultiTenantEngineTest extends TestCase
         $this->assertEquals('PT Citra Nusantara Fiber', $tenant->name);
         $this->assertEquals('growth', $tenant->plan);
         $this->assertEquals('trial', $tenant->status);
-        $this->assertEquals(20, $tenant->max_technicians);
-        $this->assertEquals(250, $tenant->max_fiber_nodes);
+        $this->assertEquals(40, $tenant->max_technicians);
+        $this->assertEquals(500, $tenant->max_fiber_nodes);
         $this->assertTrue($tenant->trial_ends_at->isFuture());
 
         // Verify Admin User

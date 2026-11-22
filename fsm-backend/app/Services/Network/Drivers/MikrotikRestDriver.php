@@ -100,4 +100,45 @@ class MikrotikRestDriver implements MikrotikDriverInterface
         }
         return null;
     }
+
+    public function listSecrets(int $limit = 500): array
+    {
+        $res = $this->client()->get("{$this->baseUrl}/ppp/secret");
+        if ($res->failed()) {
+            Log::warning("MikroTik REST listSecrets failed: HTTP {$res->status()}");
+            return [];
+        }
+
+        $rows = $res->json();
+        if (!is_array($rows)) {
+            return [];
+        }
+
+        return array_slice($rows, 0, max(1, $limit));
+    }
+
+    public function testConnection(): array
+    {
+        try {
+            $res = $this->client()->get("{$this->baseUrl}/system/identity");
+            if ($res->successful()) {
+                $identity = (string) ($res->json('name') ?? 'RouterOS');
+                return [
+                    'ok'       => true,
+                    'identity' => $identity,
+                    'message'  => "Connected to MikroTik RouterOS ({$identity}).",
+                ];
+            }
+
+            return [
+                'ok'      => false,
+                'message' => "RouterOS returned HTTP {$res->status()}.",
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'ok'      => false,
+                'message' => 'Connection error: ' . $e->getMessage(),
+            ];
+        }
+    }
 }

@@ -97,6 +97,60 @@ class NotificationService
         }
     }
 
+    public function notifyPaymentLinkReady(Task $task, \App\Models\PaymentTransaction $tx): void
+    {
+        $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+        $currency = strtoupper((string) ($tx->metadata['currency'] ?? 'USD'));
+        $formattedAmount = $currency === 'IDR'
+            ? 'IDR ' . number_format((float) $tx->amount, 0)
+            : $currency . ' ' . number_format((float) $tx->amount, 2);
+        $payLink = str_starts_with((string) $tx->qr_payload, 'http')
+            ? $tx->qr_payload
+            : ($task->tracking_url ?: url('/track/' . $task->ensureTrackingToken()));
+
+        if ($task->customer_phone) {
+            $msg = "FiberOps Billing: Your service invoice {$code} ({$formattedAmount}) is ready. Pay securely online to activate/restore internet automatically: {$payLink}";
+            $this->enqueueWhatsApp($task->id, $task->customer_phone, 'PAYMENT_LINK_READY', $msg);
+        }
+
+        if ($task->customer_email) {
+            $this->enqueueEmail(
+                $task->id,
+                $task->customer_email,
+                'PAYMENT_LINK_READY',
+                "Service Invoice Ready — {$code} ({$formattedAmount})",
+                "Hello {$task->customer_name},\n\nYour invoice {$code} for {$formattedAmount} is ready.\nSecure Payment Link: {$payLink}\n\nYour fiber internet restores automatically within seconds after payment."
+            );
+        }
+    }
+
+    public function notifyPaymentSettledAndUnblocked(Task $task, \App\Models\PaymentTransaction $tx): void
+    {
+        $code = '#TSK-' . str_pad($task->id, 4, '0', STR_PAD_LEFT);
+        $currency = strtoupper((string) ($tx->metadata['currency'] ?? 'USD'));
+        $formattedAmount = $currency === 'IDR'
+            ? 'IDR ' . number_format((float) $tx->amount, 0)
+            : $currency . ' ' . number_format((float) $tx->amount, 2);
+        $verifyUrl = !empty($task->bast_hash)
+            ? url('/bast/verify/' . $task->bast_hash)
+            : ($task->tracking_url ?: url('/track/' . $task->ensureTrackingToken()));
+
+        if ($task->customer_phone) {
+            $msg = "FiberOps Payment Confirmed ({$formattedAmount}, Ref: {$tx->reference_no}): Thank you! Your MikroTik internet access is being restored automatically. Receipt/Status: {$verifyUrl}";
+            $this->enqueueWhatsApp($task->id, $task->customer_phone, 'PAYMENT_SETTLED_UNBLOCKED', $msg);
+        }
+
+        if ($task->customer_email) {
+            $this->enqueueEmail(
+                $task->id,
+                $task->customer_email,
+                'PAYMENT_SETTLED_UNBLOCKED',
+                "Payment Confirmed & Service Restored — {$code}",
+                "Hello {$task->customer_name},\n\nWe received your payment of {$formattedAmount} (Ref: {$tx->reference_no}).\nYour fiber connection is restoring automatically on your ISP router.\nStatus & Certificate: {$verifyUrl}\n"
+            );
+        }
+    }
+
     public function dispatchWebhookAsync(string $event, array $payload, ?int $taskId = null): void
     {
         $log = $this->recordLog($taskId, 'webhook', SettingService::get('webhook_url', ''), $event, $payload);

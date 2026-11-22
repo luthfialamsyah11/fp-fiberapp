@@ -16,11 +16,23 @@
                 <p class="text-xs text-slate-500 mt-0.5">Manage active ISP subscribers, PPPoE credentials, ONT serial numbers, linked ODP ports, and repeat-outage risk.</p>
             </div>
         </div>
-        <button type="button" onclick="document.getElementById('modal-add-customer').classList.remove('hidden')"
-            class="px-4 py-2 rounded-xl bg-primary hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer">
-            <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
-            <span>Register Subscriber</span>
-        </button>
+        <div class="flex items-center gap-2 flex-wrap">
+            <button type="button" onclick="document.getElementById('modal-sync-mikrotik').classList.remove('hidden')"
+                class="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer">
+                <ion-icon name="sync-outline" class="text-base"></ion-icon>
+                <span>1-Click MikroTik Sync</span>
+            </button>
+            <button type="button" onclick="document.getElementById('modal-import-csv').classList.remove('hidden')"
+                class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-xs font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer">
+                <ion-icon name="cloud-upload-outline" class="text-base"></ion-icon>
+                <span>Import CSV</span>
+            </button>
+            <button type="button" onclick="document.getElementById('modal-add-customer').classList.remove('hidden')"
+                class="px-4 py-2 rounded-xl bg-primary hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm cursor-pointer">
+                <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
+                <span>Register Subscriber</span>
+            </button>
+        </div>
     </div>
 
     <!-- KPI Cards -->
@@ -83,6 +95,9 @@
                                 <div class="font-semibold text-slate-800">{{ $c->service_plan ?: 'Standard FTTH' }}</div>
                                 @if($c->pppoe_username)
                                     <div class="text-[10px] font-mono text-slate-500">PPPoE: {{ $c->pppoe_username }}</div>
+                                @endif
+                                @if($c->router)
+                                    <div class="text-[10px] font-mono text-indigo-600 font-semibold">Router: {{ $c->router->code }}</div>
                                 @endif
                                 @if($c->ont_serial_number)
                                     <div class="text-[10px] font-mono text-slate-500">ONT: {{ $c->ont_serial_number }}</div>
@@ -213,6 +228,17 @@
                     <label class="block font-semibold text-slate-700 mb-1">ODP Port #</label>
                     <input type="number" name="odp_port_number" min="1" max="256" placeholder="1..16" class="w-full rounded-xl border border-slate-200 px-3 py-2">
                 </div>
+                @if(isset($routers) && $routers->count() > 0)
+                <div class="sm:col-span-2">
+                    <label class="block font-semibold text-slate-700 mb-1">Assigned MikroTik POP Router (Optional)</label>
+                    <select name="router_id" class="w-full rounded-xl border border-slate-200 px-3 py-2">
+                        <option value="">-- Use Default Tenant Router --</option>
+                        @foreach($routers as $r)
+                            <option value="{{ $r->id }}">[{{ $r->code }}] {{ $r->name }} ({{ strtoupper($r->driver) }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
             </div>
             <div>
                 <label class="block font-semibold text-slate-700 mb-1">Installation Address *</label>
@@ -221,6 +247,73 @@
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button type="button" onclick="document.getElementById('modal-add-customer').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold cursor-pointer">Cancel</button>
                 <button type="submit" class="px-5 py-2 rounded-xl bg-primary hover:bg-blue-700 text-white font-bold cursor-pointer">Save Subscriber</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 1-Click Sync from MikroTik Modal -->
+<div id="modal-sync-mikrotik" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+        <div class="bg-indigo-900 text-white px-5 py-4 flex items-center justify-between">
+            <h3 class="text-sm font-bold">1-Click MikroTik PPPoE Sync</h3>
+            <button type="button" onclick="document.getElementById('modal-sync-mikrotik').classList.add('hidden')" class="text-slate-300 hover:text-white cursor-pointer"><ion-icon name="close" class="text-lg"></ion-icon></button>
+        </div>
+        <form method="POST" action="{{ route('admin.customers.sync_mikrotik') }}" class="p-5 space-y-4 text-xs">
+            @csrf
+            <p class="text-slate-600 leading-relaxed">
+                Pull existing PPPoE secrets straight from your MikroTik RouterOS v7 node and upsert them into Subscriber CRM automatically (mapping active &amp; ISOLIR profiles in seconds).
+            </p>
+            <div>
+                <label class="block font-semibold text-slate-700 mb-1">Select Source POP Router</label>
+                <select name="router_id" class="w-full rounded-xl border border-slate-200 px-3 py-2">
+                    <option value="">Default Tenant Router (from Settings)</option>
+                    @if(isset($routers))
+                        @foreach($routers as $r)
+                            <option value="{{ $r->id }}">[{{ $r->code }}] {{ $r->name }} ({{ strtoupper($r->driver) }})</option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-sync-mikrotik').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold cursor-pointer">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer">Sync Subscribers Now &rarr;</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 1-Click Bulk CSV Import Modal -->
+<div id="modal-import-csv" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+        <div class="bg-emerald-900 text-white px-5 py-4 flex items-center justify-between">
+            <h3 class="text-sm font-bold">Bulk Import Subscribers (CSV)</h3>
+            <button type="button" onclick="document.getElementById('modal-import-csv').classList.add('hidden')" class="text-slate-300 hover:text-white cursor-pointer"><ion-icon name="close" class="text-lg"></ion-icon></button>
+        </div>
+        <form method="POST" action="{{ route('admin.customers.import_csv') }}" enctype="multipart/form-data" class="p-5 space-y-4 text-xs">
+            @csrf
+            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2">
+                <span class="text-emerald-900 font-semibold">Need the exact CSV column layout?</span>
+                <a href="{{ route('admin.customers.import_template') }}" class="px-2.5 py-1 rounded-lg bg-white text-emerald-800 border border-emerald-300 font-bold hover:bg-emerald-100">Download Template</a>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-700 mb-1">Upload CSV File (Max 2,000 rows, 5 MB) *</label>
+                <input type="file" name="csv_file" accept=".csv,text/csv" required class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+            </div>
+            @if(isset($routers) && $routers->count() > 0)
+            <div>
+                <label class="block font-semibold text-slate-700 mb-1">Assign Imported Subscribers to Router (Optional)</label>
+                <select name="router_id" class="w-full rounded-xl border border-slate-200 px-3 py-2">
+                    <option value="">-- Default Router --</option>
+                    @foreach($routers as $r)
+                        <option value="{{ $r->id }}">[{{ $r->code }}] {{ $r->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-import-csv').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold cursor-pointer">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer">Upload &amp; Import CSV &rarr;</button>
             </div>
         </form>
     </div>

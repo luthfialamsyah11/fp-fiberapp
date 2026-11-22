@@ -23,4 +23,18 @@ interface MikrotikDriverInterface
      * Get active session info (uptime, ip, caller-id, rx/tx bytes).
      */
     public function getActiveSession(string $username): ?array;
+
+    /**
+     * List existing PPPoE secrets from RouterOS for 1-click bulk subscriber import.
+     *
+     * @return array<int, array{name:string, profile:string, service?:string, comment?:string, disabled?:string}>
+     */
+    public function listSecrets(int $limit = 500): array;
+
+    /**
+     * Verify live API connectivity & return router identity metadata.
+     *
+     * @return array{ok:bool, identity?:string, message:string}
+     */
+    public function testConnection(): array;
 }

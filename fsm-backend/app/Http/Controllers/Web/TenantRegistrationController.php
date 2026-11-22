@@ -41,21 +41,23 @@ class TenantRegistrationController extends Controller
             'contact_phone' => 'required|string|max:30',
             'password'      => ['required', 'confirmed', Password::min(8)],
             'plan'          => 'required|in:starter,growth',
+            'currency'      => 'nullable|in:USD,EUR,GBP,AUD,IDR',
         ], [
-            'slug.unique'          => 'Subdomain ini sudah digunakan oleh ISP lain. Silakan pilih subdomain lain.',
-            'contact_email.unique' => 'Email ini sudah terdaftar di sistem Benteng Siber.',
-            'slug.alpha_dash'      => 'Subdomain hanya boleh berupa huruf, angka, dan strip (-).',
-            'plan.in'              => 'Paket Enterprise memerlukan verifikasi tim sales Benteng Siber. Silakan pilih Starter/Growth untuk uji coba instan atau kirim Enterprise Inquiry.',
+            'slug.unique'          => 'This subdomain is already taken by another ISP. Please choose a different subdomain.',
+            'contact_email.unique' => 'This email address is already registered on Benteng Siber.',
+            'slug.alpha_dash'      => 'Subdomain may only contain letters, numbers, and dashes (-).',
+            'plan.in'              => 'Dedicated Full Project ($2,500) & Enterprise deployments require architect verification. Select Starter ($250/mo) or Growth ($500/mo) for an instant 14-day trial, or submit a Dedicated Project booking.',
         ]);
 
         $planLimits = [
-            'starter' => ['techs' => 5, 'nodes' => 50],
-            'growth'  => ['techs' => 20, 'nodes' => 250],
+            'starter' => ['techs' => 10, 'nodes' => 100],
+            'growth'  => ['techs' => 40, 'nodes' => 500],
         ];
 
         $limits = $planLimits[$validated['plan']] ?? $planLimits['starter'];
+        $currency = strtoupper((string) ($validated['currency'] ?? 'USD'));
 
-        return DB::transaction(function () use ($validated, $limits, $request) {
+        return DB::transaction(function () use ($validated, $limits, $currency, $request) {
             // 1. Create Tenant Record
             $tenant = Tenant::create([
                 'name'                 => $validated['company_name'],
@@ -71,8 +73,12 @@ class TenantRegistrationController extends Controller
                 'subscription_ends_at' => null,
                 'brand_color'          => '#0f3559',
                 'settings'             => [
-                    'currency'        => 'IDR',
+                    'currency'        => $currency,
                     'default_sla_hrs' => 4,
+                    'payment'         => [
+                        'driver'        => 'simulator',
+                        'is_production' => false,
+                    ],
                 ],
             ]);
 
@@ -90,14 +96,22 @@ class TenantRegistrationController extends Controller
                 'is_active' => true,
             ]);
 
-            // 3. Seed starter warehouse inventory catalog with valid platform categories (material/device/tool)
-            $starterMaterials = [
-                ['code' => 'DC-1C', 'name' => 'Kabel Drop Core FO 1 Core G.657A', 'unit' => 'meter', 'stock' => 1000, 'unit_price' => 1200, 'category' => 'material'],
-                ['code' => 'FC-SC', 'name' => 'Fast Connector SC/UPC Biru', 'unit' => 'pcs', 'stock' => 200, 'unit_price' => 5000, 'category' => 'material'],
-                ['code' => 'PC-SC-2M', 'name' => 'Patch Cord SC/UPC-SC/UPC 2 Meter Simplex', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 18000, 'category' => 'material'],
-                ['code' => 'ROSET-1P', 'name' => 'Roset Optik 1 Port Wallmount', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 12000, 'category' => 'material'],
-                ['code' => 'ONT-XPON', 'name' => 'Modem ONT XPON Gigabit Dual Band WiFi', 'unit' => 'unit', 'stock' => 25, 'unit_price' => 285000, 'category' => 'device'],
-            ];
+            // 3. Seed starter warehouse inventory catalog (USD global catalog by default, IDR if selected)
+            $starterMaterials = $currency === 'IDR'
+                ? [
+                    ['code' => 'DC-1C', 'name' => 'Kabel Drop Core FO 1 Core G.657A', 'unit' => 'meter', 'stock' => 1000, 'unit_price' => 1200, 'category' => 'material'],
+                    ['code' => 'FC-SC', 'name' => 'Fast Connector SC/UPC Biru', 'unit' => 'pcs', 'stock' => 200, 'unit_price' => 5000, 'category' => 'material'],
+                    ['code' => 'PC-SC-2M', 'name' => 'Patch Cord SC/UPC-SC/UPC 2 Meter Simplex', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 18000, 'category' => 'material'],
+                    ['code' => 'ROSET-1P', 'name' => 'Roset Optik 1 Port Wallmount', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 12000, 'category' => 'material'],
+                    ['code' => 'ONT-XPON', 'name' => 'Modem ONT XPON Gigabit Dual Band WiFi', 'unit' => 'unit', 'stock' => 25, 'unit_price' => 285000, 'category' => 'device'],
+                ]
+                : [
+                    ['code' => 'DC-1C', 'name' => 'FTTH Drop-Core Fiber Cable 1C G.657A', 'unit' => 'meter', 'stock' => 1000, 'unit_price' => 0.12, 'category' => 'material'],
+                    ['code' => 'FC-SC', 'name' => 'SC/APC Fast Optical Connector', 'unit' => 'pcs', 'stock' => 200, 'unit_price' => 0.45, 'category' => 'material'],
+                    ['code' => 'PC-SC-2M', 'name' => 'Simplex Patch Cord SC/APC 2m', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 1.50, 'category' => 'material'],
+                    ['code' => 'ROSET-1P', 'name' => 'Wall-Mount Optical Termination Box (1-Port)', 'unit' => 'pcs', 'stock' => 50, 'unit_price' => 1.10, 'category' => 'material'],
+                    ['code' => 'ONT-XPON', 'name' => 'XPON Gigabit Dual-Band Wi-Fi ONT', 'unit' => 'unit', 'stock' => 25, 'unit_price' => 22.00, 'category' => 'device'],
+                ];
 
             foreach ($starterMaterials as $mat) {
                 InventoryItem::create(array_merge($mat, [
@@ -115,6 +129,7 @@ class TenantRegistrationController extends Controller
                     [
                         'slug'            => $tenant->slug,
                         'plan'            => $tenant->plan,
+                        'currency'        => $currency,
                         'status'          => $tenant->status,
                         'max_technicians' => $tenant->max_technicians,
                         'max_fiber_nodes' => $tenant->max_fiber_nodes,
@@ -128,14 +143,15 @@ class TenantRegistrationController extends Controller
             $request->session()->regenerate();
             $request->session()->put('active_tenant_id', $tenant->id);
 
+            $planLabel = $tenant->plan === 'growth' ? 'Growth Cloud ($500/mo)' : 'Starter Cloud ($250/mo)';
             return redirect()->route('admin.dashboard')
-                ->with('success', "Selamat datang di Benteng Siber FiberOps! Akun ISP '{$tenant->name}' berhasil dibuat dengan akses Trial 14 Hari (Paket " . ucfirst($tenant->plan) . ").");
+                ->with('success', "Welcome to Benteng Siber FiberOps! Organization '{$tenant->name}' is live with a 14-Day Free Trial ({$planLabel}, {$currency}).");
         });
     }
 
     /**
-     * Capture qualified Enterprise Carrier / Multi-Branch ISP sales leads
-     * instead of exposing unlimited 9999-node quotas to unverified self-service trials.
+     * Capture qualified $2,500 Dedicated Turnkey Project & Enterprise Carrier leads
+     * instead of exposing unlimited quotas to unverified self-service trials.
      */
     public function enterpriseInquiry(Request $request)
     {
@@ -150,12 +166,18 @@ class TenantRegistrationController extends Controller
             'enterprise_phone'       => 'required|string|max:40',
             'estimated_technicians'  => 'required|integer|min:1|max:50000',
             'estimated_fiber_nodes'  => 'nullable|integer|min:0|max:500000',
+            'router_count'           => 'nullable|integer|min:1|max:1000',
+            'deployment_target'      => 'nullable|in:dedicated_cloud,on_premise,hybrid',
+            'timeline'               => 'nullable|in:asap,within_30_days,evaluating',
             'notes'                  => 'nullable|string|max:1000',
         ]);
 
         $cleanCompany = strip_tags(trim($validated['enterprise_company']));
         $cleanName = strip_tags(trim($validated['enterprise_name']));
         $cleanNotes = isset($validated['notes']) ? strip_tags(trim($validated['notes'])) : null;
+        $deploymentTarget = $validated['deployment_target'] ?? 'dedicated_cloud';
+        $timeline = $validated['timeline'] ?? 'asap';
+        $routerCount = (int) ($validated['router_count'] ?? 2);
 
         if (Schema::hasTable('platform_audit_logs')) {
             PlatformAuditLog::record(
@@ -163,10 +185,14 @@ class TenantRegistrationController extends Controller
                 null,
                 null,
                 [
+                    'package'               => 'dedicated_full_project_2500_usd',
                     'company'               => $cleanCompany,
                     'contact_phone'         => trim($validated['enterprise_phone']),
                     'estimated_technicians' => (int) $validated['estimated_technicians'],
                     'estimated_fiber_nodes' => (int) ($validated['estimated_fiber_nodes'] ?? 0),
+                    'router_count'          => $routerCount,
+                    'deployment_target'     => $deploymentTarget,
+                    'timeline'              => $timeline,
                     'notes'                 => $cleanNotes,
                 ],
                 null,
@@ -176,15 +202,28 @@ class TenantRegistrationController extends Controller
         }
 
         DispatchWebhookJob::dispatch(1, 'ENTERPRISE_SALES_INQUIRY', [
+            'package'               => 'dedicated_full_project_2500_usd',
             'company'               => $cleanCompany,
             'contact_name'          => $cleanName,
             'contact_email'         => strtolower(trim($validated['enterprise_email'])),
             'contact_phone'         => trim($validated['enterprise_phone']),
             'estimated_technicians' => (int) $validated['estimated_technicians'],
             'estimated_fiber_nodes' => (int) ($validated['estimated_fiber_nodes'] ?? 0),
+            'router_count'          => $routerCount,
+            'deployment_target'     => $deploymentTarget,
+            'timeline'              => $timeline,
             'notes'                 => $cleanNotes,
         ]);
 
-        return back()->with('enterprise_success', "Terima kasih {$cleanName}! Permintaan aktivasi paket Enterprise untuk {$cleanCompany} telah dicatat. Tim Solutions Engineering kami akan segera menghubungi Anda via WhatsApp/Email.");
+        return back()->with([
+            'enterprise_success' => "Booking received for {$cleanCompany}! Our Lead Architect will contact {$cleanName} shortly to kick off your 7-day \$2,500 Turnkey Deployment.",
+            'enterprise_lead'    => [
+                'company'    => $cleanCompany,
+                'name'       => $cleanName,
+                'routers'    => $routerCount,
+                'techs'      => (int) $validated['estimated_technicians'],
+                'deployment' => $deploymentTarget,
+            ],
+        ]);
     }
 }

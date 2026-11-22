@@ -5,20 +5,27 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\NotificationLog;
 use App\Models\TechnicianLocation;
+use App\Models\TenantRouter;
+use App\Services\Network\MikrotikService;
 use App\Services\SettingService;
+use App\Services\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
     public function index()
     {
         $settings = SettingService::all();
-        $tenant = \App\Services\TenantContext::getTenant();
+        $tenant = TenantContext::getTenant();
         $networkSettings = $tenant?->network_settings ?? [];
         $paymentSettings = $tenant?->settings['payment'] ?? [];
+        $routers = Schema::hasTable('tenant_routers')
+            ? TenantRouter::orderByDesc('is_default')->orderBy('name')->get()
+            : collect();
 
         $totalGpsPoints = TechnicianLocation::whereHas('technician')->count();
         $databaseSize = $this->formatOldestPingLabel();
@@ -26,7 +33,7 @@ class SettingsController extends Controller
             ? NotificationLog::latest('id')->take(10)->get()
             : collect();
 
-        return view('settings.index', compact('settings', 'networkSettings', 'paymentSettings', 'totalGpsPoints', 'databaseSize', 'recentNotificationLogs'));
+        return view('settings.index', compact('settings', 'networkSettings', 'paymentSettings', 'routers', 'totalGpsPoints', 'databaseSize', 'recentNotificationLogs'));
     }
 
     private function formatOldestPingLabel(): string
@@ -100,16 +107,17 @@ class SettingsController extends Controller
             'genieacs_host'                   => 'nullable|string|max:255',
             'genieacs_port'                   => 'nullable|integer|min:1|max:65535',
             'require_hardware_olt_validation' => 'nullable|in:0,1',
-            'payment_driver'                  => 'nullable|in:simulator,midtrans',
+            'payment_driver'                  => 'nullable|in:simulator,stripe,midtrans',
             'payment_server_key'              => 'nullable|string|max:255',
+            'payment_webhook_secret'          => 'nullable|string|max:255',
             'payment_is_production'           => 'nullable|in:0,1',
         ], [
             'default_country_code.regex' => 'Default country dial code must contain 1 to 5 digits only (e.g., 62 or 1).',
         ]);
 
         // Extract tenant-scoped network & payment config before saving JSON settings
-        $tenant = \App\Services\TenantContext::getTenant();
-        if ($tenant && ($request->has('mikrotik_driver') || $request->has('olt_driver') || $request->has('payment_driver'))) {
+        $tenant = TenantContext::getTenant();
+        if ($tenant && ($request->has('mikrotik_driver') || $request->has('olt_driver') || $request->has('payment_driver') || $request->has('currency'))) {
             $existingNet = (array) ($tenant->network_settings ?? []);
             $newNet = array_merge($existingNet, [
                 'mikrotik_driver'                 => $validated['mikrotik_driver'] ?? ($existingNet['mikrotik_driver'] ?? 'simulator'),
@@ -128,6 +136,9 @@ class SettingsController extends Controller
             }
 
             $existingTenantSettings = (array) ($tenant->settings ?? []);
+            if (!empty($validated['currency'])) {
+                $existingTenantSettings['currency'] = $validated['currency'];
+            }
             $existingPay = (array) ($existingTenantSettings['payment'] ?? []);
             $newPay = array_merge($existingPay, [
                 'driver'        => $validated['payment_driver'] ?? ($existingPay['driver'] ?? 'simulator'),
@@ -135,6 +146,9 @@ class SettingsController extends Controller
             ]);
             if (!empty($validated['payment_server_key'])) {
                 $newPay['server_key'] = trim($validated['payment_server_key']);
+            }
+            if (!empty($validated['payment_webhook_secret'])) {
+                $newPay['webhook_secret'] = trim($validated['payment_webhook_secret']);
             }
             $existingTenantSettings['payment'] = $newPay;
 
@@ -149,7 +163,7 @@ class SettingsController extends Controller
             $validated['mikrotik_user'], $validated['mikrotik_password'], $validated['mikrotik_use_ssl'],
             $validated['olt_driver'], $validated['genieacs_host'], $validated['genieacs_port'],
             $validated['require_hardware_olt_validation'],
-            $validated['payment_driver'], $validated['payment_server_key'], $validated['payment_is_production']
+            $validated['payment_driver'], $validated['payment_server_key'], $validated['payment_webhook_secret'], $validated['payment_is_production']
         );
 
         $validated['auto_assign'] = $request->has('auto_assign') ? '1' : '0';
@@ -287,5 +301,83 @@ class SettingsController extends Controller
                 ? "SLA escalation sweep complete: {$escalated} overdue work order(s) escalated."
                 : 'SLA escalation sweep complete: all active work orders are within SLA thresholds.'
         );
+    }
+
+    /**
+     * Add a MikroTik POP router to this tenant's Multi-Router Fleet (password encrypted AES-256 at rest).
+     */
+    public function storeRouter(Request $request)
+    {
+        $tenantId = TenantContext::id();
+        $uniqueCode = Rule::unique('tenant_routers', 'code');
+        if ($tenantId !== null) {
+            $uniqueCode->where('tenant_id', $tenantId);
+        }
+
+        $validated = $request->validate([
+            'name'              => 'required|string|max:140',
+            'code'              => ['required', 'alpha_dash', 'max:40', $uniqueCode],
+            'driver'            => 'required|in:simulator,rest',
+            'host'              => 'nullable|string|max:255',
+            'port'              => 'nullable|integer|min:1|max:65535',
+            'username'          => 'nullable|string|max:120',
+            'password'          => 'nullable|string|max:255',
+            'isolation_profile' => 'nullable|string|max:80',
+            'use_ssl'           => 'nullable|in:0,1',
+            'is_default'        => 'nullable|in:0,1',
+        ]);
+
+        if ($validated['driver'] === 'rest') {
+            $host = strtolower(trim((string) ($validated['host'] ?? ''), '[] '));
+            $blocked = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.169.254', 'metadata.google.internal'];
+            if ($host === '' || in_array($host, $blocked, true) || str_starts_with($host, '169.254.')) {
+                return back()->with('error', 'Router host is required and cannot point to loopback or cloud metadata endpoints (SSRF guard).');
+            }
+        }
+
+        $isDefault = $request->boolean('is_default') || TenantRouter::count() === 0;
+        if ($isDefault) {
+            TenantRouter::query()->update(['is_default' => false]);
+        }
+
+        $router = TenantRouter::create([
+            'tenant_id'         => $tenantId ?? 1,
+            'name'              => strip_tags(trim($validated['name'])),
+            'code'              => strtoupper(trim($validated['code'])),
+            'driver'            => $validated['driver'],
+            'host'              => trim((string) ($validated['host'] ?? '')),
+            'port'              => (int) ($validated['port'] ?? 443),
+            'username'          => trim((string) ($validated['username'] ?? 'admin')),
+            'password'          => $validated['password'] ?? '',
+            'isolation_profile' => trim((string) ($validated['isolation_profile'] ?? 'ISOLIR')) ?: 'ISOLIR',
+            'use_ssl'           => $request->has('use_ssl'),
+            'is_default'        => $isDefault,
+            'is_active'         => true,
+        ]);
+
+        return back()->with('success', "POP Router '{$router->name}' ({$router->code}) saved with AES-256 encrypted credentials.");
+    }
+
+    /**
+     * Test connectivity to a tenant's MikroTik POP router.
+     */
+    public function testRouter(TenantRouter $router)
+    {
+        $result = MikrotikService::forTenant()->testRouterConnection($router);
+        if (!empty($result['ok'])) {
+            return back()->with('success', "[{$router->code}] {$result['message']}");
+        }
+
+        return back()->with('error', "[{$router->code}] {$result['message']}");
+    }
+
+    /**
+     * Remove a POP router from this tenant's fleet.
+     */
+    public function destroyRouter(TenantRouter $router)
+    {
+        $label = $router->name;
+        $router->delete();
+        return back()->with('success', "POP Router '{$label}' removed.");
     }
 }

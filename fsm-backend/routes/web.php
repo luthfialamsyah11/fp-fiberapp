@@ -113,6 +113,9 @@ Route::middleware(['auth', 'active', 'tenant.active', 'role:admin,super_admin,no
 
         // Subscriber CRM & Fiber GIS Asset Registry (OLT / ODC / ODP)
         Route::get('/customers', [\App\Http\Controllers\Web\CustomerController::class, 'index'])->name('admin.customers.index');
+        Route::get('/customers/import-template', [\App\Http\Controllers\Web\CustomerController::class, 'importTemplate'])->name('admin.customers.import_template');
+        Route::post('/customers/import-csv', [\App\Http\Controllers\Web\CustomerController::class, 'importCsv'])->name('admin.customers.import_csv');
+        Route::post('/customers/sync-mikrotik', [\App\Http\Controllers\Web\CustomerController::class, 'syncFromMikrotik'])->name('admin.customers.sync_mikrotik');
         Route::post('/customers', [\App\Http\Controllers\Web\CustomerController::class, 'store'])->name('admin.customers.store');
         Route::put('/customers/{customer}', [\App\Http\Controllers\Web\CustomerController::class, 'update'])->name('admin.customers.update');
         Route::delete('/customers/{customer}', [\App\Http\Controllers\Web\CustomerController::class, 'destroy'])->name('admin.customers.destroy');
@@ -164,6 +167,9 @@ Route::middleware(['auth', 'active', 'tenant.active', 'role:admin,super_admin,no
 
         Route::get('/settings', [\App\Http\Controllers\Web\SettingsController::class, 'index'])->name('admin.settings');
         Route::post('/settings', [\App\Http\Controllers\Web\SettingsController::class, 'update'])->name('admin.settings.update');
+        Route::post('/settings/routers', [\App\Http\Controllers\Web\SettingsController::class, 'storeRouter'])->name('admin.settings.routers.store');
+        Route::post('/settings/routers/{router}/test', [\App\Http\Controllers\Web\SettingsController::class, 'testRouter'])->name('admin.settings.routers.test');
+        Route::delete('/settings/routers/{router}', [\App\Http\Controllers\Web\SettingsController::class, 'destroyRouter'])->name('admin.settings.routers.destroy');
         Route::post('/settings/test-webhook', [\App\Http\Controllers\Web\SettingsController::class, 'testWebhook'])->name('admin.settings.test_webhook');
         Route::post('/settings/purge-cache', [\App\Http\Controllers\Web\SettingsController::class, 'purgeCache'])->name('admin.settings.purge_cache');
         Route::post('/settings/escalate-sla', [\App\Http\Controllers\Web\SettingsController::class, 'escalateSlaNow'])->name('admin.settings.escalate_sla');

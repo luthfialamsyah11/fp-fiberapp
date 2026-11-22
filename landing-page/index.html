@@ -47,7 +47,7 @@
 
   <!-- Unified Bright Corporate Stylesheet & Leaflet Global Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-  <link rel="stylesheet" href="styles.css?v=1.6">
+  <link rel="stylesheet" href="styles.css?v=1.7">
 
   <!-- Structured Data (JSON-LD Schema.org: Organization, WebSite, SoftwareApplication, BreadcrumbList, FAQPage) -->
   <script type="application/ld+json">
@@ -467,13 +467,13 @@
           </p>
 
           <div class="hero-actions">
-            <a class="btn btn-primary" href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer" data-i18n="hero.ctaPrimary">
-              Open Admin Console &rarr;
+            <a class="btn btn-primary" href="https://admin.bentengsiber.com/login?demo=admin" target="_blank" rel="noopener noreferrer" data-i18n="hero.ctaPrimary">
+              1-Click Live Admin Demo &rarr;
             </a>
             <a class="btn btn-outline-navy" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer" data-i18n="hero.ctaSecondary">
               Launch Technician PWA Demo
             </a>
-            <a class="btn btn-outline-accent" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer" data-i18n="hero.ctaRegister">
+            <a class="btn btn-outline-accent" href="https://admin.bentengsiber.com/register-isp?plan=growth" target="_blank" rel="noopener noreferrer" data-i18n="hero.ctaRegister">
               Start 14-Day ISP Trial &rarr;
             </a>
           </div>
@@ -1012,7 +1012,7 @@
               <li data-i18n="pricing.t1f5">AES-256-CBC Encrypted Tenant Credentials</li>
             </ul>
             <div class="pricing-actions">
-              <a class="btn btn-outline-navy" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer" data-i18n="pricing.t1Cta">
+              <a class="btn btn-outline-navy" href="https://admin.bentengsiber.com/register-isp?plan=starter" target="_blank" rel="noopener noreferrer" data-i18n="pricing.t1Cta">
                 Start Starter Trial &rarr;
               </a>
             </div>
@@ -1042,7 +1042,7 @@
               <li data-i18n="pricing.t2f5">GPS Auto-Dispatch, Atomic BOM Ledger &amp; Live /track Radar</li>
             </ul>
             <div class="pricing-actions">
-              <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer" data-i18n="pricing.t2Cta">
+              <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp?plan=growth" target="_blank" rel="noopener noreferrer" data-i18n="pricing.t2Cta">
                 Start Growth 14-Day Trial &rarr;
               </a>
             </div>
@@ -1070,9 +1070,12 @@
               <li data-i18n="pricing.t3f4">Immutable SHA-256 Audit Ledger &amp; 7-Day Turnkey Handover</li>
               <li data-i18n="pricing.t3f5">Optional Managed Cloud Maintenance ($250–$500/mo)</li>
             </ul>
-            <div class="pricing-actions">
-              <a class="btn btn-navy" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer" data-i18n="pricing.t3Cta">
+            <div class="pricing-actions" style="display:flex;flex-direction:column;gap:0.55rem;">
+              <a class="btn btn-navy" href="https://admin.bentengsiber.com/register-isp?inquiry=project" target="_blank" rel="noopener noreferrer" data-i18n="pricing.t3Cta">
                 Book $2,500 Project Deployment &rarr;
+              </a>
+              <a class="btn btn-ghost" href="proposal.html" style="font-size:0.82rem;justify-content:center;" data-i18n="pricing.proposalCta">
+                Download 1-Page Executive Proposal (PDF) &rarr;
               </a>
             </div>
           </article>
@@ -1621,7 +1624,18 @@
     </div>
   </div>
 
+  <!-- Floating High-Converting WhatsApp & Executive Proposal Dock -->
+  <div class="floating-wa-dock" aria-label="Quick Sales & Proposal Actions">
+    <a class="floating-dock-pill floating-dock-pill--proposal" href="proposal.html" data-i18n="dock.proposal">
+      Executive Proposal (PDF) &rarr;
+    </a>
+    <a class="floating-dock-pill floating-dock-pill--wa" href="https://wa.me/6281223554539?text=Hi%20Benteng%20Siber!%20I%27m%20interested%20in%20FiberOps%20(%24250-%24500%2Fmo%20Cloud%20or%20%242%2C500%20Dedicated%20ISP%20Project)%20for%20our%20network." target="_blank" rel="noopener noreferrer">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+      <span data-i18n="dock.wa">WhatsApp Architect</span>
+    </a>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
-  <script src="script.js?v=1.6" defer></script>
+  <script src="script.js?v=1.7" defer></script>
 </body>
 </html>

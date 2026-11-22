@@ -74,4 +74,28 @@ class MikrotikSimulatorDriver implements MikrotikDriverInterface
     {
         return self::$sessions[$username] ?? null;
     }
+
+    public function listSecrets(int $limit = 500): array
+    {
+        if (!empty(self::$secrets)) {
+            return array_slice(array_values(self::$secrets), 0, max(1, $limit));
+        }
+
+        // Realistic sample secrets for instant zero-config sandbox demos
+        return array_slice([
+            ['name' => 'pppoe_downtown_01', 'profile' => 'Fiber-100Mbps', 'service' => 'pppoe', 'comment' => 'Apex Coffee Roasters | +14155550101', 'disabled' => 'false'],
+            ['name' => 'pppoe_downtown_02', 'profile' => 'Fiber-300Mbps', 'service' => 'pppoe', 'comment' => 'Harbor Dental Clinic | +14155550102', 'disabled' => 'false'],
+            ['name' => 'pppoe_northpop_03', 'profile' => 'ISOLIR', 'service' => 'pppoe', 'comment' => 'Metro Logistics Hub | +14155550103', 'disabled' => 'false'],
+        ], 0, max(1, $limit));
+    }
+
+    public function testConnection(): array
+    {
+        $host = $this->config['host'] ?? 'simulator.local';
+        return [
+            'ok'       => true,
+            'identity' => 'MikroTik-CCR2004-SIM (' . $host . ')',
+            'message'  => 'Simulator RouterOS v7 REST connection verified (0.4ms).',
+        ];
+    }
 }

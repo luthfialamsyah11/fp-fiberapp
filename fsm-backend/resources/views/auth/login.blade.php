@@ -117,7 +117,7 @@
                             <ion-icon name="key-outline" class="text-[#e8913a] text-sm"></ion-icon>
                             <span>Quick Access Roles</span>
                         </div>
-                        <span class="text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">1-Click Fill</span>
+                        <span class="text-[10px] font-mono font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider">1-Click Instant Login</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2.5">
@@ -128,9 +128,9 @@
                         >
                             <span class="inline-flex items-center gap-1.5 font-bold">
                                 <ion-icon name="shield-checkmark-outline" class="text-sm text-[#0f3559]"></ion-icon>
-                                <span>Super Admin</span>
+                                <span>Demo Super Admin</span>
                             </span>
-                            <span class="text-[10px] font-normal text-slate-500">Full NOC &amp; Dispatch</span>
+                            <span class="text-[10px] font-normal text-slate-500">Instant NOC &amp; MikroTik</span>
                         </button>
 
                         <button
@@ -140,9 +140,9 @@
                         >
                             <span class="inline-flex items-center gap-1.5 font-bold text-emerald-700">
                                 <ion-icon name="eye-outline" class="text-sm text-emerald-600"></ion-icon>
-                                <span>Supervisor</span>
+                                <span>Demo Supervisor</span>
                             </span>
-                            <span class="text-[10px] font-normal text-slate-500">Tracking, Proofs &amp; Reports</span>
+                            <span class="text-[10px] font-normal text-slate-500">Live Tracking &amp; QA</span>
                         </button>
                     </div>
 
@@ -336,16 +336,35 @@
                 }, 900);
             }
 
+            function instantDemoLogin(email, pass, roleLabel, btnEl) {
+                fillCredentials(email, pass, roleLabel, btnEl);
+                if (form) {
+                    if (btnSubmit) btnSubmit.disabled = true;
+                    if (btnText) btnText.textContent = 'Launching ' + roleLabel + ' Sandbox...';
+                    if (btnIcon) btnIcon.classList.add('hidden');
+                    if (btnSpinner) btnSpinner.classList.remove('hidden');
+                    form.submit();
+                }
+            }
+
             if (btnFillAdmin) {
                 btnFillAdmin.addEventListener('click', function () {
-                    fillCredentials('admin@fsm.com', 'password123', 'Super Admin', btnFillAdmin);
+                    instantDemoLogin('admin@fsm.com', 'password123', 'Super Admin', btnFillAdmin);
                 });
             }
 
             if (btnFillSupervisor) {
                 btnFillSupervisor.addEventListener('click', function () {
-                    fillCredentials('supervisor@fsm.com', 'password123', 'Supervisor', btnFillSupervisor);
+                    instantDemoLogin('supervisor@fsm.com', 'password123', 'Supervisor', btnFillSupervisor);
                 });
+            }
+
+            // Support direct 1-click sandbox deep link from landing page (?demo=admin)
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('demo') === 'admin' && !document.querySelector('[role="alert"]')) {
+                setTimeout(function () {
+                    instantDemoLogin('admin@fsm.com', 'password123', 'Super Admin', btnFillAdmin);
+                }, 250);
             }
 
             if (toggleBtn && passwordInput && eyeIcon) {

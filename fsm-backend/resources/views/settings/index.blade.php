@@ -454,27 +454,35 @@
                             </label>
                         </div>
 
-                        <!-- Dynamic QRIS Payment Gateway -->
+                        <!-- Global Payment Gateway (Stripe USD & Midtrans QRIS) -->
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                             <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                                <ion-icon name="qr-code-outline" class="text-emerald-600"></ion-icon> Dynamic QRIS Gateway
+                                <ion-icon name="card-outline" class="text-emerald-600"></ion-icon> Global Payment Gateway
                             </div>
                             <div>
                                 <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Payment Provider</label>
                                 <select name="payment_driver" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs">
-                                    <option value="simulator" {{ ($pay['driver'] ?? 'simulator') === 'simulator' ? 'selected' : '' }}>Simulator (Sandbox)</option>
-                                    <option value="midtrans" {{ ($pay['driver'] ?? '') === 'midtrans' ? 'selected' : '' }}>Live Midtrans Core API (QRIS)</option>
+                                    <option value="simulator" {{ ($pay['driver'] ?? 'simulator') === 'simulator' ? 'selected' : '' }}>Simulator (Instant Sandbox)</option>
+                                    <option value="stripe" {{ ($pay['driver'] ?? '') === 'stripe' ? 'selected' : '' }}>Stripe Checkout (Global USD/EUR/GBP)</option>
+                                    <option value="midtrans" {{ ($pay['driver'] ?? '') === 'midtrans' ? 'selected' : '' }}>Midtrans Core API (Indonesia QRIS)</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Midtrans Server Key</label>
-                                <input type="password" name="payment_server_key" value="" placeholder="{{ !empty($pay['server_key']) ? '•••••••• (saved)' : 'SB-Mid-server-...' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Secret / Server Key (AES-256 Vault)</label>
+                                <input type="password" name="payment_server_key" value="" placeholder="{{ !empty($pay['server_key']) ? '•••••••• (encrypted & saved)' : 'sk_live_... or Mid-server-...' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Stripe Webhook Signing Secret (Optional)</label>
+                                <input type="password" name="payment_webhook_secret" value="" placeholder="{{ !empty($pay['webhook_secret']) ? '•••••••• (encrypted & saved)' : 'whsec_...' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
                             </div>
                             <label class="flex items-center gap-2 text-[11px] text-slate-700 cursor-pointer">
                                 <input type="checkbox" name="payment_is_production" value="1" {{ !empty($pay['is_production']) ? 'checked' : '' }} class="rounded text-emerald-600">
-                                Production Mode (Live Bank Settlement)
+                                Production Mode (Live Settlement)
                             </label>
-                            <p class="text-[10px] text-slate-500 font-mono break-all">Webhook: {{ url('/api/webhooks/payment') }}</p>
+                            <div class="text-[10px] text-slate-500 font-mono space-y-0.5 break-all">
+                                <div>Stripe Hook: {{ url('/api/webhooks/stripe') }}</div>
+                                <div>QRIS Hook: {{ url('/api/webhooks/payment') }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -492,6 +500,106 @@
                 </button>
             </div>
         </form>
+    </div>
+
+    <!-- 7. Multi-Router POP Fleet Manager (Separate CRUD outside main form) -->
+    <div class="bg-white rounded-2xl border border-fsmBorder shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-fsmBorder bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <ion-icon name="git-branch-outline" class="text-indigo-600"></ion-icon>
+                    Multi-Router MikroTik POP Fleet ({{ isset($routers) ? $routers->count() : 0 }} Active)
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Manage multiple district/POP MikroTik RouterOS v7 nodes with AES-256 encrypted credentials and 1-click connection testing.</p>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-5">
+            @if(isset($routers) && $routers->count() > 0)
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                <th class="py-2.5 px-3.5">Router POP</th>
+                                <th class="py-2.5 px-3.5">Driver &amp; Endpoint</th>
+                                <th class="py-2.5 px-3.5">ISOLIR Profile</th>
+                                <th class="py-2.5 px-3.5">Health</th>
+                                <th class="py-2.5 px-3.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($routers as $r)
+                                <tr>
+                                    <td class="py-2.5 px-3.5">
+                                        <span class="font-bold text-slate-900">{{ $r->name }}</span>
+                                        <span class="ml-1.5 font-mono text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">{{ $r->code }}</span>
+                                        @if($r->is_default)
+                                            <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">DEFAULT</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-2.5 px-3.5 font-mono text-[11px] text-slate-600">
+                                        {{ strtoupper($r->driver) }} &bull; {{ $r->host ?: 'simulator' }}:{{ $r->port }}
+                                    </td>
+                                    <td class="py-2.5 px-3.5 font-mono text-[11px] text-slate-700">{{ $r->isolation_profile }}</td>
+                                    <td class="py-2.5 px-3.5">
+                                        @if($r->last_test_status === 'connected')
+                                            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">CONNECTED</span>
+                                        @elseif($r->last_test_status === 'failed')
+                                            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold">FAILED</span>
+                                        @else
+                                            <span class="text-[10px] text-slate-400">Untested</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-2.5 px-3.5 text-right">
+                                        <div class="inline-flex items-center gap-1.5">
+                                            <form method="POST" action="{{ route('admin.settings.routers.test', $r->id) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 text-[10px] font-bold cursor-pointer">Test</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.settings.routers.destroy', $r->id) }}" class="inline">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-600 text-red-700 hover:text-white border border-red-200 text-[10px] font-bold cursor-pointer">Remove</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('admin.settings.routers.store') }}" class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+                @csrf
+                <div class="font-bold text-slate-800">Add MikroTik POP Router</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <input type="text" name="name" required placeholder="POP Name (e.g. North CCR2004)" class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                    <input type="text" name="code" required placeholder="Code (e.g. POP-NORTH)" class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono uppercase">
+                    <select name="driver" class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                        <option value="simulator">Simulator (Sandbox)</option>
+                        <option value="rest">Live RouterOS v7 REST</option>
+                    </select>
+                    <input type="text" name="host" placeholder="Host / Public IP (e.g. 203.0.113.10)" class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono">
+                    <input type="number" name="port" value="443" placeholder="Port" class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono">
+                    <input type="text" name="username" value="admin" placeholder="API User" class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono">
+                    <input type="password" name="password" placeholder="API Password (AES-256)" class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                    <input type="text" name="isolation_profile" value="ISOLIR" placeholder="Isolation Profile" class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono">
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <div class="flex items-center gap-4">
+                        <label class="inline-flex items-center gap-1.5 text-[11px] text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="use_ssl" value="1" checked class="rounded text-indigo-600"> HTTPS (TLS)
+                        </label>
+                        <label class="inline-flex items-center gap-1.5 text-[11px] text-slate-700 cursor-pointer">
+                            <input type="checkbox" name="is_default" value="1" class="rounded text-indigo-600"> Set as Default Tenant Router
+                        </label>
+                    </div>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer">
+                        + Add POP Router
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

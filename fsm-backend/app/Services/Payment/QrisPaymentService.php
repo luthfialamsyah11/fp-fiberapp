@@ -6,8 +6,10 @@ use App\Models\PaymentTransaction;
 use App\Models\Task;
 use App\Models\Tenant;
 use App\Services\Network\MikrotikService;
+use App\Services\NotificationService;
 use App\Services\Payment\Drivers\MidtransQrisDriver;
 use App\Services\Payment\Drivers\QrisSimulatorDriver;
+use App\Services\Payment\Drivers\StripePaymentDriver;
 use App\Services\SettingService;
 use App\Services\TenantContext;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +30,12 @@ class QrisPaymentService
         return new self($tenant);
     }
 
+    public function getTenantCurrency(): string
+    {
+        $currency = strtoupper((string) ($this->tenant?->settings['currency'] ?? SettingService::get('currency', 'USD')));
+        return in_array($currency, ['USD', 'EUR', 'GBP', 'AUD', 'IDR'], true) ? $currency : 'USD';
+    }
+
     public function getGateway(): QrisGatewayInterface
     {
         if ($this->gateway !== null) {
@@ -35,9 +43,12 @@ class QrisPaymentService
         }
 
         $settings = $this->tenant?->settings['payment'] ?? [];
+        $settings['currency'] = $this->getTenantCurrency();
         $driver = $settings['driver'] ?? config('services.payment.driver', 'simulator');
 
-        if ($driver === 'midtrans') {
+        if ($driver === 'stripe') {
+            $this->gateway = new StripePaymentDriver($settings);
+        } elseif ($driver === 'midtrans') {
             $this->gateway = new MidtransQrisDriver($settings);
         } else {
             $this->gateway = new QrisSimulatorDriver($settings);
@@ -53,26 +64,29 @@ class QrisPaymentService
     }
 
     /**
-     * Generate dynamic QRIS for a field service task.
+     * Generate dynamic payment QR / checkout link for a field service task (Stripe USD or Midtrans QRIS).
      */
     public function generateTaskQris(Task $task, ?float $amount = null, int $expiryMinutes = 15): PaymentTransaction
     {
         if ($task->payment_status === 'paid') {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'payment_status' => ['This work order has already been paid. Generating a duplicate QRIS is blocked.'],
+                'payment_status' => ['This work order has already been paid. Generating a duplicate invoice is blocked.'],
             ]);
         }
 
         if ($task->status === 'rejected') {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'status' => ['Cannot generate QRIS for a rejected or cancelled work order.'],
+                'status' => ['Cannot generate payment QR for a rejected or cancelled work order.'],
             ]);
         }
 
+        $currency = $this->getTenantCurrency();
+        $minAmount = $currency === 'IDR' ? 1000.0 : 1.0;
         $billAmount = $amount ?? (float) ($task->billing_amount ?? 0);
-        if ($billAmount < 1000) {
+        if ($billAmount < $minAmount) {
+            $formattedMin = $currency === 'IDR' ? 'IDR 1,000' : "{$currency} 1.00";
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'amount' => ['Billing amount must be at least IDR 1,000 to generate a dynamic QRIS.'],
+                'amount' => ["Billing amount must be at least {$formattedMin} to generate an on-site payment link/QR."],
             ]);
         }
 
@@ -91,13 +105,13 @@ class QrisPaymentService
             'customer_id'    => $task->customer_id,
             'reference_no'   => $res['reference_no'],
             'amount'         => $res['amount'],
-            'payment_method' => 'qris',
+            'payment_method' => ($res['provider'] ?? '') === 'stripe' ? 'stripe_checkout' : 'qris',
             'provider'       => $res['provider'] ?? 'simulator',
             'qr_payload'     => $res['qr_payload'],
             'qr_image_url'   => $res['qr_image_url'],
             'status'         => 'pending',
             'expires_at'     => $res['expires_at'],
-            'metadata'       => $res['raw_response'] ?? null,
+            'metadata'       => array_merge((array) ($res['raw_response'] ?? []), ['currency' => $currency]),
         ]);
 
         $task->update([
@@ -105,6 +119,12 @@ class QrisPaymentService
             'payment_status' => 'pending',
         ]);
         $task->touch();
+
+        try {
+            app(NotificationService::class)->notifyPaymentLinkReady($task, $transaction);
+        } catch (\Throwable $e) {
+            Log::warning("Payment link notification skipped for task #{$task->id}: " . $e->getMessage());
+        }
 
         return $transaction;
     }
@@ -176,11 +196,17 @@ class QrisPaymentService
                             'customer_name'  => $task->customer_name,
                             'reference_no'   => $referenceNo,
                             'amount'         => $tx->amount,
-                            'payment_method' => 'qris',
+                            'payment_method' => $tx->payment_method ?? 'qris',
                             'paid_at'        => now()->toIso8601String(),
                         ],
                         (int) $task->id
                     )->afterCommit();
+
+                    try {
+                        app(NotificationService::class)->notifyPaymentSettledAndUnblocked($task, $tx);
+                    } catch (\Throwable $e) {
+                        Log::warning("Payment settled customer notification skipped for task #{$task->id}: " . $e->getMessage());
+                    }
                 }
             }
 

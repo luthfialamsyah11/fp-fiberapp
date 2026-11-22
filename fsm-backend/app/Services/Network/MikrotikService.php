@@ -4,10 +4,12 @@ namespace App\Services\Network;
 
 use App\Models\Customer;
 use App\Models\Tenant;
+use App\Models\TenantRouter;
 use App\Services\Network\Drivers\MikrotikRestDriver;
 use App\Services\Network\Drivers\MikrotikSimulatorDriver;
 use App\Services\TenantContext;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class MikrotikService
 {
@@ -22,6 +24,68 @@ class MikrotikService
     public static function forTenant(?Tenant $tenant = null): self
     {
         return new self($tenant);
+    }
+
+    /**
+     * Build a driver instance for a specific TenantRouter (multi-router POP architecture).
+     */
+    public function getDriverForRouter(?TenantRouter $router = null): MikrotikDriverInterface
+    {
+        if ($this->driver !== null && $router === null) {
+            return $this->driver;
+        }
+
+        if ($router === null && $this->tenant && Schema::hasTable('tenant_routers')) {
+            $router = TenantRouter::withoutGlobalScopes()
+                ->where('tenant_id', $this->tenant->id)
+                ->where('is_active', true)
+                ->orderByDesc('is_default')
+                ->orderBy('id')
+                ->first();
+        }
+
+        if ($router !== null) {
+            if ($router->driver === 'rest') {
+                return new MikrotikRestDriver([
+                    'host'       => $router->host ?: '127.0.0.1',
+                    'port'       => $router->port ?: 443,
+                    'user'       => $router->username ?: 'admin',
+                    'password'   => (string) ($router->password ?? ''),
+                    'use_ssl'    => (bool) $router->use_ssl,
+                    'verify_ssl' => (bool) $router->verify_ssl,
+                    'timeout'    => 4,
+                ]);
+            }
+
+            return new MikrotikSimulatorDriver([
+                'host' => $router->host ?: $router->code,
+            ]);
+        }
+
+        return $this->getDriver();
+    }
+
+    /**
+     * Resolve the router driver assigned to a specific subscriber, falling back to default router.
+     */
+    public function getDriverForCustomer(Customer $customer): MikrotikDriverInterface
+    {
+        if ($this->driver !== null) {
+            return $this->driver;
+        }
+
+        if (!empty($customer->router_id) && Schema::hasTable('tenant_routers')) {
+            $router = TenantRouter::withoutGlobalScopes()
+                ->where('id', $customer->router_id)
+                ->where('tenant_id', $customer->tenant_id ?? $this->tenant?->id)
+                ->where('is_active', true)
+                ->first();
+            if ($router) {
+                return $this->getDriverForRouter($router);
+            }
+        }
+
+        return $this->getDriverForRouter(null);
     }
 
     public function getDriver(): MikrotikDriverInterface
@@ -68,7 +132,7 @@ class MikrotikService
         $pass = $password ?: ('sec_' . \Illuminate\Support\Str::random(12));
         $plan = $profile ?: ($customer->service_plan ?: 'DEFAULT-PROFILE');
 
-        $driver = $this->getDriver();
+        $driver = $this->getDriverForCustomer($customer);
         $res = $driver->upsertSecret(
             $username,
             $pass,
@@ -89,14 +153,15 @@ class MikrotikService
      * Isolate a customer due to unpaid bill or disciplinary block.
      * Changes secret profile to ISOLIR and kicks active session.
      */
-    public function isolateCustomer(Customer $customer, string $isolationProfile = 'ISOLIR'): bool
+    public function isolateCustomer(Customer $customer, ?string $isolationProfile = null): bool
     {
         $username = $customer->pppoe_username;
         if (empty($username)) {
             return false;
         }
 
-        $driver = $this->getDriver();
+        $profile = $isolationProfile ?: ($customer->router?->isolation_profile ?: 'ISOLIR');
+        $driver = $this->getDriverForCustomer($customer);
         $secret = $driver->getSecret($username);
         $pass = $secret['password'] ?? ('sec_' . \Illuminate\Support\Str::random(12));
 
@@ -104,7 +169,7 @@ class MikrotikService
         $driver->upsertSecret(
             $username,
             $pass,
-            $isolationProfile,
+            $profile,
             'pppoe',
             "ISOLATED: {$customer->name} [CID: {$customer->customer_code}]"
         );
@@ -113,7 +178,7 @@ class MikrotikService
         $driver->removeActiveSession($username);
 
         $customer->update(['status' => 'isolated']);
-        Log::info("Customer {$username} isolated on MikroTik [Profile: {$isolationProfile}]");
+        Log::info("Customer {$username} isolated on MikroTik [Profile: {$profile}]");
 
         return true;
     }
@@ -129,7 +194,7 @@ class MikrotikService
             return false;
         }
 
-        $driver = $this->getDriver();
+        $driver = $this->getDriverForCustomer($customer);
         $secret = $driver->getSecret($username);
         $pass = $secret['password'] ?? ('sec_' . \Illuminate\Support\Str::random(12));
         $normalProfile = $customer->service_plan ?: 'DEFAULT-PROFILE';
@@ -162,7 +227,7 @@ class MikrotikService
             return ['status' => 'unprovisioned'];
         }
 
-        $driver = $this->getDriver();
+        $driver = $this->getDriverForCustomer($customer);
         $secret = $driver->getSecret($username);
         $active = $driver->getActiveSession($username);
 
@@ -177,5 +242,26 @@ class MikrotikService
             'bytes_in'     => $active['bytes-in'] ?? 0,
             'bytes_out'    => $active['bytes-out'] ?? 0,
         ];
+    }
+
+    /**
+     * Pull PPPoE secrets from a specific tenant router (or default router) for 1-click import.
+     */
+    public function listRouterSecrets(?TenantRouter $router = null, int $limit = 500): array
+    {
+        return $this->getDriverForRouter($router)->listSecrets($limit);
+    }
+
+    /**
+     * Test connectivity to a specific tenant router and update health metadata.
+     */
+    public function testRouterConnection(TenantRouter $router): array
+    {
+        $result = $this->getDriverForRouter($router)->testConnection();
+        $router->update([
+            'last_tested_at'   => now(),
+            'last_test_status' => !empty($result['ok']) ? 'connected' : 'failed',
+        ]);
+        return $result;
     }
 }

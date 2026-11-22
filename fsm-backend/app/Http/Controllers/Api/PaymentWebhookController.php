@@ -61,4 +61,70 @@ class PaymentWebhookController extends Controller
             'status'       => 'paid',
         ], 200);
     }
+
+    /**
+     * Global Stripe Checkout webhook receiver (`checkout.session.completed`).
+     * Verifies HMAC-SHA256 `Stripe-Signature` header using the tenant's encrypted webhook_secret.
+     */
+    public function handleStripeWebhook(Request $request)
+    {
+        $rawBody = (string) $request->getContent();
+        $event = json_decode($rawBody, true);
+        if (!is_array($event)) {
+            return response()->json(['message' => 'Malformed Stripe webhook payload.'], 400);
+        }
+
+        $type = (string) ($event['type'] ?? '');
+        if ($type !== 'checkout.session.completed') {
+            return response()->json(['message' => 'Stripe event acknowledged (ignored).'], 200);
+        }
+
+        $session = (array) ($event['data']['object'] ?? []);
+        $referenceNo = (string) ($session['client_reference_id'] ?? ($session['metadata']['reference_no'] ?? ''));
+        $paymentStatus = strtolower((string) ($session['payment_status'] ?? ''));
+
+        if ($referenceNo === '') {
+            return response()->json(['message' => 'Missing Stripe client_reference_id.'], 400);
+        }
+
+        if ($paymentStatus !== 'paid') {
+            return response()->json(['message' => 'Checkout session not paid yet.'], 200);
+        }
+
+        $tx = PaymentTransaction::withoutGlobalScopes()->where('reference_no', $referenceNo)->first();
+        if (!$tx) {
+            return response()->json(['message' => 'Transaction not found.'], 404);
+        }
+
+        $gateway = QrisPaymentService::forTenant($tx->tenant)->getGateway();
+        $sigHeader = $request->header('Stripe-Signature');
+        $isValid = $gateway->verifyWebhookSignature(array_merge($event, ['_raw_body' => $rawBody]), $sigHeader);
+
+        if (!$isValid) {
+            Log::warning("Stripe webhook signature verification failed for ref: {$referenceNo}");
+            return response()->json(['message' => 'Invalid Stripe-Signature header.'], 403);
+        }
+
+        $currency = strtolower((string) ($session['currency'] ?? 'usd'));
+        $zeroDecimalCurrencies = ['idr', 'jpy', 'krw', 'vnd'];
+        $amountTotal = isset($session['amount_total']) && is_numeric($session['amount_total'])
+            ? (in_array($currency, $zeroDecimalCurrencies, true) ? (float) $session['amount_total'] : ((float) $session['amount_total'] / 100))
+            : null;
+
+        $payload = ['stripe_event_id' => $event['id'] ?? null, 'currency' => strtoupper($currency)];
+        if ($amountTotal !== null) {
+            $payload['gross_amount'] = $amountTotal;
+        }
+
+        $settled = $this->paymentService->processPaymentConfirmation($referenceNo, $payload, 'stripe');
+        if (!$settled) {
+            return response()->json(['message' => 'Transaction could not be settled (amount mismatch or expired).'], 422);
+        }
+
+        return response()->json([
+            'message'      => 'Stripe payment confirmed and MikroTik auto-unblock queued.',
+            'reference_no' => $referenceNo,
+            'status'       => 'paid',
+        ], 200);
+    }
 }

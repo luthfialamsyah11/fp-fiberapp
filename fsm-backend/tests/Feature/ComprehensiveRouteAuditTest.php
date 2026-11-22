@@ -140,8 +140,8 @@ class ComprehensiveRouteAuditTest extends TestCase
         // 3. Public Customer Self-Service Request Portal
         $this->get('/request')->assertStatus(200)->assertSee('Submit Fiber Service or Repair Request');
 
-        // 4. Public Self-Service ISP Onboarding Registration
-        $this->get('/register-isp')->assertStatus(200)->assertSee('Daftarkan ISP');
+        // 4. Public Self-Service ISP Onboarding Registration (Global English USD)
+        $this->get('/register-isp')->assertStatus(200)->assertSee('Provision Your Zero-Trust ISP Command Center');
 
         // 5. Public Live Tracking Lookup Form
         $this->get('/track')->assertStatus(200);

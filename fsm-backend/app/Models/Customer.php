@@ -22,6 +22,7 @@ class Customer extends Model
         'pppoe_username',
         'ont_serial_number',
         'fiber_node_id',
+        'router_id',
         'odp_port_number',
         'status',
     ];
@@ -35,6 +36,11 @@ class Customer extends Model
     public function fiberNode()
     {
         return $this->belongsTo(FiberNode::class, 'fiber_node_id');
+    }
+
+    public function router()
+    {
+        return $this->belongsTo(TenantRouter::class, 'router_id');
     }
 
     public function tasks()

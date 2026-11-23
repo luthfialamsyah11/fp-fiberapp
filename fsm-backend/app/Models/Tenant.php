@@ -112,6 +112,20 @@ class Tenant extends Model
     }
 
     /**
+     * Single source of truth for subscription plan technician & fiber node quotas.
+     */
+    public static function planLimits(string $plan): array
+    {
+        $map = [
+            'starter'    => ['techs' => 10, 'nodes' => 100],
+            'growth'     => ['techs' => 40, 'nodes' => 500],
+            'enterprise' => ['techs' => 9999, 'nodes' => 9999],
+        ];
+
+        return $map[$plan] ?? $map['starter'];
+    }
+
+    /**
      * Check if tenant is allowed to add more fiber nodes (ODP/ODC) under their current plan.
      */
     public function canAddFiberNode(): bool

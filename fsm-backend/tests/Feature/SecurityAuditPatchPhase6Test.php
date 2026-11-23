@@ -10,12 +10,16 @@ use App\Models\ProofOfWork;
 use App\Models\Task;
 use App\Models\TechnicianLocation;
 use App\Models\Tenant;
+use App\Models\TenantRouter;
 use App\Models\User;
 use App\Services\Payment\Drivers\QrisSimulatorDriver;
+use App\Services\Payment\Drivers\StripePaymentDriver;
 use App\Services\SettingService;
 use App\Services\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -380,5 +384,233 @@ class SecurityAuditPatchPhase6Test extends TestCase
             PaymentTransaction::where('task_id', $task->id)->count(),
             'Idempotent replay must not create a duplicate PaymentTransaction row.'
         );
+    }
+
+    /** @test */
+    public function stripe_webhook_rejects_simulator_provider_mismatch_and_settles_stripe_even_after_driver_switch(): void
+    {
+        $whSecret = 'whsec_test_audit_bug06_secret';
+        $this->usdTenant->update([
+            'settings' => [
+                'currency' => 'USD',
+                'payment'  => [
+                    'driver'         => 'simulator', // Active driver switched away from stripe
+                    'server_key'     => 'sk_test_dummy',
+                    'webhook_secret' => $whSecret,
+                    'is_production'  => false,
+                ],
+            ],
+        ]);
+        TenantContext::setTenant($this->usdTenant->fresh());
+
+        $task = Task::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'technician_id'  => $this->usdTech->id,
+            'title'          => 'Stripe Webhook Isolation Check',
+            'customer_name'  => 'Global Client',
+            'customer_phone' => '+14155550900',
+            'address'        => '100 Main St',
+            'status'         => 'on-going',
+            'priority'       => 'medium',
+            'billing_amount' => 49.00,
+        ]);
+
+        // 1. A SIMULATOR transaction must NOT be settleable via /api/webhooks/stripe (cross-driver forgery blocked!)
+        $simTx = PaymentTransaction::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'task_id'        => $task->id,
+            'reference_no'   => 'SIM-CROSS-01',
+            'amount'         => 49.00,
+            'payment_method' => 'qris',
+            'provider'       => 'simulator',
+            'status'         => 'pending',
+            'expires_at'     => now()->addMinutes(30),
+        ]);
+
+        $simPayload = json_encode([
+            'id'   => 'evt_forged_sim',
+            'type' => 'checkout.session.completed',
+            'data' => [
+                'object' => [
+                    'client_reference_id' => $simTx->reference_no,
+                    'payment_status'      => 'paid',
+                    'currency'            => 'usd',
+                    'amount_total'        => 4900,
+                ],
+            ],
+        ]);
+
+        $this->call(
+            'POST',
+            '/api/webhooks/stripe',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_STRIPE_SIGNATURE' => 'simulated_valid_sig'],
+            $simPayload
+        )->assertStatus(422);
+        $this->assertEquals('pending', $simTx->fresh()->status);
+
+        // 2. A real STRIPE transaction MUST still settle cleanly via valid Stripe HMAC even though tenant switched active driver to simulator!
+        $stripeTx = PaymentTransaction::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'task_id'        => $task->id,
+            'reference_no'   => 'STR-VALID-02',
+            'amount'         => 49.00,
+            'payment_method' => 'stripe_checkout',
+            'provider'       => 'stripe',
+            'status'         => 'pending',
+            'expires_at'     => now()->addMinutes(30),
+        ]);
+
+        $stripeBody = json_encode([
+            'id'   => 'evt_real_stripe_02',
+            'type' => 'checkout.session.completed',
+            'data' => [
+                'object' => [
+                    'client_reference_id' => $stripeTx->reference_no,
+                    'payment_status'      => 'paid',
+                    'currency'            => 'usd',
+                    'amount_total'        => 4900,
+                ],
+            ],
+        ]);
+        $ts = time();
+        $sig = hash_hmac('sha256', "{$ts}.{$stripeBody}", $whSecret);
+
+        $this->call(
+            'POST',
+            '/api/webhooks/stripe',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json', 'HTTP_STRIPE_SIGNATURE' => "t={$ts},v1={$sig}"],
+            $stripeBody
+        )->assertStatus(200);
+        $this->assertEquals('paid', $stripeTx->fresh()->status);
+    }
+
+    /** @test */
+    public function stripe_driver_treats_idr_as_two_decimal_currency_and_jpy_as_zero_decimal(): void
+    {
+        TenantContext::setTenant($this->usdTenant);
+        $task = Task::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'technician_id'  => $this->usdTech->id,
+            'title'          => 'IDR Stripe Minor Unit Test',
+            'customer_name'  => 'Budi',
+            'customer_phone' => '+6281111111',
+            'address'        => 'Jakarta',
+            'status'         => 'on-going',
+            'priority'       => 'medium',
+            'billing_amount' => 250000,
+        ]);
+
+        $capturedUnitAmounts = [];
+        Http::fake(function (\Illuminate\Http\Client\Request $request) use (&$capturedUnitAmounts) {
+            $data = $request->data();
+            $capturedUnitAmounts[$data['line_items[0][price_data][currency]'] ?? ''] = $data['line_items[0][price_data][unit_amount]'] ?? null;
+            return Http::response([
+                'id'  => 'cs_test_123',
+                'url' => 'https://checkout.stripe.com/c/pay/cs_test_123',
+            ], 200);
+        });
+
+        $idrDriver = new StripePaymentDriver(['server_key' => 'sk_test_123', 'currency' => 'IDR']);
+        $idrDriver->createDynamicQris($task, 250000.0);
+
+        $jpyDriver = new StripePaymentDriver(['server_key' => 'sk_test_123', 'currency' => 'JPY']);
+        $jpyDriver->createDynamicQris($task, 5000.0);
+
+        // Per Stripe spec: IDR is 2-decimal (250,000 IDR => 25,000,000 sen), JPY is 0-decimal (5,000 JPY => 5,000)
+        $this->assertSame(25000000, (int) ($capturedUnitAmounts['idr'] ?? 0));
+        $this->assertSame(5000, (int) ($capturedUnitAmounts['jpy'] ?? 0));
+    }
+
+    /** @test */
+    public function master_admin_plan_update_applies_canonical_quotas_without_halving_limits(): void
+    {
+        $rootAdmin = User::withoutGlobalScopes()->create([
+            'tenant_id' => $this->rootTenant->id,
+            'name'      => 'Root Platform Owner',
+            'email'     => 'platform-owner@bentengsiber.com',
+            'password'  => Hash::make('SecurePass#2026'),
+            'role'      => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($rootAdmin)
+            ->post("/master-admin/tenants/{$this->usdTenant->id}/plan", ['plan' => 'growth'])
+            ->assertRedirect();
+
+        $fresh = $this->usdTenant->fresh();
+        $this->assertSame(40, $fresh->max_technicians);
+        $this->assertSame(500, $fresh->max_fiber_nodes);
+
+        $this->actingAs($rootAdmin)
+            ->post("/master-admin/tenants/{$this->usdTenant->id}/plan", ['plan' => 'starter'])
+            ->assertRedirect();
+
+        $fresh = $this->usdTenant->fresh();
+        $this->assertSame(10, $fresh->max_technicians);
+        $this->assertSame(100, $fresh->max_fiber_nodes);
+    }
+
+    /** @test */
+    public function settings_router_normalizes_case_and_boolean_zero_flags_and_csv_supports_semicolon(): void
+    {
+        TenantContext::setTenant($this->usdTenant);
+
+        // 1. Create POP-JKT-01 then attempt lowercase duplicate pop-jkt-01 (must fail validation cleanly, NOT HTTP 500!)
+        $this->actingAs($this->usdAdmin)->post('/settings/routers', [
+            'name'   => 'Jakarta Core POP',
+            'code'   => 'POP-JKT-01',
+            'driver' => 'simulator',
+        ])->assertSessionHas('success');
+
+        $this->actingAs($this->usdAdmin)->post('/settings/routers', [
+            'name'   => 'Duplicate Lowercase POP',
+            'code'   => 'pop-jkt-01',
+            'driver' => 'simulator',
+        ])->assertSessionHasErrors('code');
+        $this->assertSame(1, TenantRouter::where('tenant_id', $this->usdTenant->id)->count());
+
+        // 2. Explicit '0' on payment_is_production must store false (NOT true from $request->has()) + AUD currency allowed
+        $this->actingAs($this->usdAdmin)->post('/settings', [
+            'company_name'             => 'Global USD Fiber LLC',
+            'support_email'            => 'ops@globalusd.io',
+            'support_phone'            => '+14155550100',
+            'default_country_code'     => '1',
+            'currency'                 => 'AUD',
+            'gps_refresh_interval'     => 15,
+            'map_style'                => 'openstreetmap',
+            'sla_warning_hours'        => 4,
+            'geofence_check_meters'    => 100,
+            'telemetry_retention_days' => 30,
+            'payment_driver'           => 'stripe',
+            'payment_is_production'    => '0',
+            'mikrotik_driver'          => 'simulator',
+            'mikrotik_use_ssl'         => '0',
+        ])->assertSessionHas('success');
+
+        $freshTenant = $this->usdTenant->fresh();
+        $this->assertSame('AUD', $freshTenant->settings['currency'] ?? null);
+        $this->assertFalse((bool) ($freshTenant->settings['payment']['is_production'] ?? true));
+        $this->assertFalse((bool) ($freshTenant->network_settings['mikrotik_use_ssl'] ?? true));
+
+        // 3. Semicolon-delimited Excel CSV import works seamlessly
+        $csvContent = "customer_code;name;phone;pppoe_username;service_plan;status\n"
+            . "EU-001;Hans Mueller;+491512345;hans_pppoe;1Gbps Fiber;active\n";
+        $csvFile = UploadedFile::fake()->createWithContent('subscribers_eu.csv', $csvContent);
+
+        $this->actingAs($this->usdAdmin)->post('/customers/import-csv', [
+            'csv_file' => $csvFile,
+        ])->assertSessionHas('success');
+
+        $this->assertDatabaseHas('customers', [
+            'tenant_id'      => $this->usdTenant->id,
+            'customer_code'  => 'EU-001',
+            'pppoe_username' => 'hans_pppoe',
+        ]);
     }
 }

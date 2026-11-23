@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
+use App\Services\Payment\Drivers\StripePaymentDriver;
 use App\Services\Payment\QrisPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -91,14 +92,23 @@ class PaymentWebhookController extends Controller
             return response()->json(['message' => 'Checkout session not paid yet.'], 200);
         }
 
-        $tx = PaymentTransaction::withoutGlobalScopes()->where('reference_no', $referenceNo)->first();
-        if (!$tx) {
+        $tx = PaymentTransaction::withoutGlobalScopes()->with('tenant')->where('reference_no', $referenceNo)->first();
+        if (!$tx || !$tx->tenant) {
             return response()->json(['message' => 'Transaction not found.'], 404);
         }
 
-        $gateway = QrisPaymentService::forTenant($tx->tenant)->getGateway();
+        if ($tx->provider !== 'stripe') {
+            Log::warning("Stripe webhook rejected: transaction {$referenceNo} belongs to provider '{$tx->provider}'.");
+            return response()->json(['message' => 'Transaction provider mismatch.'], 422);
+        }
+
+        // Always verify Stripe webhooks with StripePaymentDriver (never fall back to simulator/midtrans)
+        $tenantPaymentSettings = (array) ($tx->tenant->settings['payment'] ?? []);
+        $tenantPaymentSettings['currency'] = QrisPaymentService::forTenant($tx->tenant)->getTenantCurrency();
+        $stripeDriver = new StripePaymentDriver($tenantPaymentSettings);
+
         $sigHeader = $request->header('Stripe-Signature');
-        $isValid = $gateway->verifyWebhookSignature(array_merge($event, ['_raw_body' => $rawBody]), $sigHeader);
+        $isValid = $stripeDriver->verifyWebhookSignature(array_merge($event, ['_raw_body' => $rawBody]), $sigHeader);
 
         if (!$isValid) {
             Log::warning("Stripe webhook signature verification failed for ref: {$referenceNo}");
@@ -106,9 +116,8 @@ class PaymentWebhookController extends Controller
         }
 
         $currency = strtolower((string) ($session['currency'] ?? 'usd'));
-        $zeroDecimalCurrencies = ['idr', 'jpy', 'krw', 'vnd'];
         $amountTotal = isset($session['amount_total']) && is_numeric($session['amount_total'])
-            ? (in_array($currency, $zeroDecimalCurrencies, true) ? (float) $session['amount_total'] : ((float) $session['amount_total'] / 100))
+            ? (in_array($currency, StripePaymentDriver::ZERO_DECIMAL_CURRENCIES, true) ? (float) $session['amount_total'] : ((float) $session['amount_total'] / 100))
             : null;
 
         $payload = ['stripe_event_id' => $event['id'] ?? null, 'currency' => strtoupper($currency)];

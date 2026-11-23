@@ -10,6 +10,7 @@ use App\Services\Network\MikrotikService;
 use App\Services\SettingService;
 use App\Services\TenantContext;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -58,7 +59,7 @@ class SettingsController extends Controller
             'company_name'               => 'required|string|max:255',
             'support_email'              => 'required|email|max:255',
             'support_phone'              => 'required|string|max:50',
-            'currency'                   => 'nullable|in:USD,EUR,GBP,IDR',
+            'currency'                   => 'nullable|in:USD,EUR,GBP,AUD,IDR',
             'default_country_code'       => ['required', 'regex:/^[0-9]{1,5}$/'],
             'gps_refresh_interval'       => 'required|in:5,15,30,60,300',
             'map_style'                  => 'required|in:openstreetmap,mapbox,carto',
@@ -124,11 +125,11 @@ class SettingsController extends Controller
                 'mikrotik_host'                   => trim((string) ($validated['mikrotik_host'] ?? ($existingNet['mikrotik_host'] ?? ''))),
                 'mikrotik_port'                   => (int) ($validated['mikrotik_port'] ?? ($existingNet['mikrotik_port'] ?? 443)),
                 'mikrotik_user'                   => trim((string) ($validated['mikrotik_user'] ?? ($existingNet['mikrotik_user'] ?? 'admin'))),
-                'mikrotik_use_ssl'                => $request->has('mikrotik_use_ssl'),
+                'mikrotik_use_ssl'                => $request->boolean('mikrotik_use_ssl'),
                 'olt_driver'                      => $validated['olt_driver'] ?? ($existingNet['olt_driver'] ?? 'simulator'),
                 'genieacs_host'                   => trim((string) ($validated['genieacs_host'] ?? ($existingNet['genieacs_host'] ?? ''))),
                 'genieacs_port'                   => (int) ($validated['genieacs_port'] ?? ($existingNet['genieacs_port'] ?? 7557)),
-                'require_hardware_olt_validation' => $request->has('require_hardware_olt_validation'),
+                'require_hardware_olt_validation' => $request->boolean('require_hardware_olt_validation'),
                 'opm_max_attenuation_dbm'         => (float) ($validated['opm_max_attenuation_dbm'] ?? -27.0),
             ]);
             if (!empty($validated['mikrotik_password'])) {
@@ -142,7 +143,7 @@ class SettingsController extends Controller
             $existingPay = (array) ($existingTenantSettings['payment'] ?? []);
             $newPay = array_merge($existingPay, [
                 'driver'        => $validated['payment_driver'] ?? ($existingPay['driver'] ?? 'simulator'),
-                'is_production' => $request->has('payment_is_production'),
+                'is_production' => $request->boolean('payment_is_production'),
             ]);
             if (!empty($validated['payment_server_key'])) {
                 $newPay['server_key'] = trim($validated['payment_server_key']);
@@ -166,15 +167,15 @@ class SettingsController extends Controller
             $validated['payment_driver'], $validated['payment_server_key'], $validated['payment_webhook_secret'], $validated['payment_is_production']
         );
 
-        $validated['auto_assign'] = $request->has('auto_assign') ? '1' : '0';
-        $validated['require_proof_photo'] = $request->has('require_proof_photo') ? '1' : '0';
-        $validated['require_customer_signature'] = $request->has('require_customer_signature') ? '1' : '0';
-        $validated['require_opm_reading'] = $request->has('require_opm_reading') ? '1' : '0';
+        $validated['auto_assign'] = $request->boolean('auto_assign') ? '1' : '0';
+        $validated['require_proof_photo'] = $request->boolean('require_proof_photo') ? '1' : '0';
+        $validated['require_customer_signature'] = $request->boolean('require_customer_signature') ? '1' : '0';
+        $validated['require_opm_reading'] = $request->boolean('require_opm_reading') ? '1' : '0';
         $validated['opm_max_attenuation_dbm'] = (string) ($validated['opm_max_attenuation_dbm'] ?? '-27.0');
-        $validated['notify_emergency_tickets'] = $request->has('notify_emergency_tickets') ? '1' : '0';
-        $validated['notify_task_completed'] = $request->has('notify_task_completed') ? '1' : '0';
-        $validated['notify_customer_whatsapp'] = $request->has('notify_customer_whatsapp') ? '1' : '0';
-        $validated['notify_customer_email'] = $request->has('notify_customer_email') ? '1' : '0';
+        $validated['notify_emergency_tickets'] = $request->boolean('notify_emergency_tickets') ? '1' : '0';
+        $validated['notify_task_completed'] = $request->boolean('notify_task_completed') ? '1' : '0';
+        $validated['notify_customer_whatsapp'] = $request->boolean('notify_customer_whatsapp') ? '1' : '0';
+        $validated['notify_customer_email'] = $request->boolean('notify_customer_email') ? '1' : '0';
         $validated['currency'] = $validated['currency'] ?? 'USD';
         $validated['default_country_code'] = $validated['default_country_code'] ?: '62';
         $validated['webhook_url'] = trim((string) ($validated['webhook_url'] ?? ''));
@@ -308,6 +309,11 @@ class SettingsController extends Controller
      */
     public function storeRouter(Request $request)
     {
+        // Normalize router code to uppercase BEFORE uniqueness validation to prevent case-sensitivity unique crashes
+        $request->merge([
+            'code' => strtoupper(trim((string) $request->input('code', ''))),
+        ]);
+
         $tenantId = TenantContext::id();
         $uniqueCode = Rule::unique('tenant_routers', 'code');
         if ($tenantId !== null) {
@@ -335,25 +341,27 @@ class SettingsController extends Controller
             }
         }
 
-        $isDefault = $request->boolean('is_default') || TenantRouter::count() === 0;
-        if ($isDefault) {
-            TenantRouter::query()->update(['is_default' => false]);
-        }
+        $router = DB::transaction(function () use ($request, $validated, $tenantId) {
+            $isDefault = $request->boolean('is_default') || TenantRouter::count() === 0;
+            if ($isDefault) {
+                TenantRouter::query()->update(['is_default' => false]);
+            }
 
-        $router = TenantRouter::create([
-            'tenant_id'         => $tenantId ?? 1,
-            'name'              => strip_tags(trim($validated['name'])),
-            'code'              => strtoupper(trim($validated['code'])),
-            'driver'            => $validated['driver'],
-            'host'              => trim((string) ($validated['host'] ?? '')),
-            'port'              => (int) ($validated['port'] ?? 443),
-            'username'          => trim((string) ($validated['username'] ?? 'admin')),
-            'password'          => $validated['password'] ?? '',
-            'isolation_profile' => trim((string) ($validated['isolation_profile'] ?? 'ISOLIR')) ?: 'ISOLIR',
-            'use_ssl'           => $request->has('use_ssl'),
-            'is_default'        => $isDefault,
-            'is_active'         => true,
-        ]);
+            return TenantRouter::create([
+                'tenant_id'         => $tenantId ?? 1,
+                'name'              => strip_tags(trim($validated['name'])),
+                'code'              => strtoupper(trim($validated['code'])),
+                'driver'            => $validated['driver'],
+                'host'              => trim((string) ($validated['host'] ?? '')),
+                'port'              => (int) ($validated['port'] ?? 443),
+                'username'          => trim((string) ($validated['username'] ?? 'admin')),
+                'password'          => $validated['password'] ?? '',
+                'isolation_profile' => trim((string) ($validated['isolation_profile'] ?? 'ISOLIR')) ?: 'ISOLIR',
+                'use_ssl'           => $request->boolean('use_ssl'),
+                'is_default'        => $isDefault,
+                'is_active'         => true,
+            ]);
+        });
 
         return back()->with('success', "POP Router '{$router->name}' ({$router->code}) saved with AES-256 encrypted credentials.");
     }
@@ -377,7 +385,16 @@ class SettingsController extends Controller
     public function destroyRouter(TenantRouter $router)
     {
         $label = $router->name;
+        $wasDefault = (bool) $router->is_default;
         $router->delete();
+
+        if ($wasDefault) {
+            $replacement = TenantRouter::where('is_active', true)->orderBy('id')->first();
+            if ($replacement) {
+                $replacement->update(['is_default' => true]);
+            }
+        }
+
         return back()->with('success', "POP Router '{$label}' removed.");
     }
 }

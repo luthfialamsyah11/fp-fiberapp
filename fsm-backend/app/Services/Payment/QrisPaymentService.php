@@ -145,6 +145,11 @@ class QrisPaymentService
                 return null;
             }
 
+            if ($provider !== null && !empty($tx->provider) && $tx->provider !== $provider) {
+                Log::warning("Payment webhook provider mismatch for ref {$referenceNo}: expected {$tx->provider}, got {$provider}");
+                return null;
+            }
+
             // Strictly idempotent: if already settled, return immediately without re-triggering
             if ($tx->status === 'paid') {
                 return $tx;

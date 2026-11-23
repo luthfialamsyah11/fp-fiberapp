@@ -100,13 +100,7 @@ class MasterAdminController extends Controller
             'plan' => 'required|in:starter,growth,enterprise',
         ]);
 
-        $planLimits = [
-            'starter'    => ['techs' => 5, 'nodes' => 50],
-            'growth'     => ['techs' => 20, 'nodes' => 250],
-            'enterprise' => ['techs' => 9999, 'nodes' => 9999],
-        ];
-
-        $limits = $planLimits[$validated['plan']] ?? $planLimits['starter'];
+        $limits = Tenant::planLimits($validated['plan']);
 
         $beforeState = [
             'plan'            => $tenant->plan,

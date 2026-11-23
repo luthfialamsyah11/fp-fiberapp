@@ -214,7 +214,17 @@ class CustomerController extends Controller
             return back()->with('error', 'Unable to read uploaded CSV file.');
         }
 
-        $headerRow = fgetcsv($handle);
+        $firstLine = fgets($handle);
+        if ($firstLine === false || trim($firstLine) === '') {
+            fclose($handle);
+            return back()->with('error', 'Uploaded CSV file is empty.');
+        }
+
+        // Auto-detect comma vs semicolon CSV delimiter (Excel in Europe/Indonesia/LATAM exports ';')
+        $delimiter = substr_count($firstLine, ';') > substr_count($firstLine, ',') ? ';' : ',';
+        rewind($handle);
+
+        $headerRow = fgetcsv($handle, 0, $delimiter);
         if (!$headerRow) {
             fclose($handle);
             return back()->with('error', 'Uploaded CSV file is empty.');
@@ -227,7 +237,7 @@ class CustomerController extends Controller
         $processed = 0;
         $routerId = $validated['router_id'] ?? null;
 
-        while (($row = fgetcsv($handle)) !== false && $processed < 2000) {
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false && $processed < 2000) {
             $processed++;
             if (count($row) < 2) {
                 $skipped++;

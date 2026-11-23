@@ -236,8 +236,24 @@ export class TaskSyncService {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
       osc.connect(gain);
       gain.connect(ctx.destination);
+
+      let closed = false;
+      const cleanup = () => {
+        if (closed) return;
+        closed = true;
+        try {
+          osc.disconnect();
+          gain.disconnect();
+        } catch {}
+        if (typeof ctx.close === 'function' && ctx.state !== 'closed') {
+          ctx.close().catch(() => {});
+        }
+      };
+
+      osc.onended = cleanup;
       osc.start();
       osc.stop(ctx.currentTime + 0.26);
+      setTimeout(cleanup, 450);
     } catch {
       // Autoplay policy may block audio until first user gesture; safe to ignore
     }

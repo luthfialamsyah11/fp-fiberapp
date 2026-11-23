@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Start Your 14-Day ISP Cloud Trial or Book $2,500 Turnkey Deployment | Benteng Siber</title>
-    <meta name="description" content="Launch an isolated Zero-Trust ISP Field Service Management tenant in 60 seconds ($250–$500/mo with 14-day free trial) or book a $2,500 Dedicated White-Label Project delivered in 7 days.">
+    <title>Start Your 14-Day ISP Cloud Trial or Book $2,500 Full Setup | Benteng Siber</title>
+    <meta name="description" content="Launch an isolated Zero-Trust ISP Field Service Management tenant in 60 seconds ($500–$1,000/mo with 14-day free trial) or book a $2,500 Full Setup Dedicated White-Label Deployment delivered in 7 days.">
     <meta name="theme-color" content="#0f3559">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -175,7 +175,7 @@
                 </h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <!-- Starter Cloud ($250/mo) -->
+                    <!-- Starter Cloud ($500/mo) -->
                     <label class="relative border-2 rounded-xl p-5 cursor-pointer hover:border-[#0f3559] transition-all has-[:checked]:border-[#0f3559] has-[:checked]:bg-blue-50/40 flex flex-col justify-between">
                         <div>
                             <input type="radio" name="plan" value="starter" class="sr-only" {{ $selectedPlan === 'starter' ? 'checked' : '' }}>
@@ -184,7 +184,7 @@
                                     <span class="font-display font-bold text-sm text-[#0f3559] block">Starter ISP Cloud</span>
                                     <span class="text-[11px] text-slate-500">Local ISPs &amp; Growing WISPs</span>
                                 </div>
-                                <span class="text-sm font-extrabold text-[#e8913a] whitespace-nowrap">$250<span class="text-[10px] font-semibold text-slate-500">/mo</span></span>
+                                <span class="text-sm font-extrabold text-[#e8913a] whitespace-nowrap">$500<span class="text-[10px] font-semibold text-slate-500">/mo</span></span>
                             </div>
                             <ul class="mt-3.5 space-y-1.5 text-xs text-slate-600 border-t border-slate-200/70 pt-3">
                                 <li class="font-semibold text-slate-800">&#10003; Up to 10 Field Technicians</li>
@@ -196,7 +196,7 @@
                         <div class="mt-4 pt-2 border-t border-slate-100 text-[11px] font-bold text-emerald-700">14-Day Instant Free Trial</div>
                     </label>
 
-                    <!-- Growth Cloud ($500/mo) -->
+                    <!-- Growth Cloud ($1,000/mo) -->
                     <label class="relative border-2 rounded-xl p-5 cursor-pointer hover:border-[#0f3559] transition-all has-[:checked]:border-[#e8913a] has-[:checked]:bg-amber-50/35 flex flex-col justify-between">
                         <div class="absolute -top-2.5 right-3 bg-[#e8913a] text-[#011835] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                             Most Popular
@@ -208,7 +208,7 @@
                                     <span class="font-display font-bold text-sm text-[#0f3559] block">Growth Regional Cloud</span>
                                     <span class="text-[11px] text-slate-500">Full Hardware Orchestration</span>
                                 </div>
-                                <span class="text-sm font-extrabold text-[#e8913a] whitespace-nowrap">$500<span class="text-[10px] font-semibold text-slate-500">/mo</span></span>
+                                <span class="text-sm font-extrabold text-[#e8913a] whitespace-nowrap">$1,000<span class="text-[10px] font-semibold text-slate-500">/mo</span></span>
                             </div>
                             <ul class="mt-3.5 space-y-1.5 text-xs text-slate-600 border-t border-slate-200/70 pt-3">
                                 <li class="font-semibold text-slate-800">&#10003; Up to 40 Field Technicians</li>
@@ -220,15 +220,15 @@
                         <div class="mt-4 pt-2 border-t border-slate-100 text-[11px] font-bold text-emerald-700">14-Day Instant Free Trial</div>
                     </label>
 
-                    <!-- Dedicated Full Project ($2,500 one-time) -->
+                    <!-- Full Setup Dedicated Project ($2,500 one-time) -->
                     <div class="relative border-2 border-[#0f3559] bg-gradient-to-b from-slate-50 to-white rounded-xl p-5 flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-start gap-2">
                                 <div>
-                                    <span class="font-display font-bold text-sm text-[#0f3559] block">Dedicated Full Project</span>
+                                    <span class="font-display font-bold text-sm text-[#0f3559] block">Full Setup Project</span>
                                     <span class="text-[11px] text-slate-500">100% White-Label Ownership</span>
                                 </div>
-                                <span class="text-sm font-extrabold text-[#0f3559] whitespace-nowrap">$2,500<span class="text-[10px] font-semibold text-slate-500">/proj</span></span>
+                                <span class="text-sm font-extrabold text-[#0f3559] whitespace-nowrap">$2,500<span class="text-[10px] font-semibold text-slate-500">/full</span></span>
                             </div>
                             <ul class="mt-3.5 space-y-1.5 text-xs text-slate-600 border-t border-slate-200/70 pt-3">
                                 <li class="font-semibold text-slate-800">&#10003; Unlimited Techs, ODP &amp; Routers</li>
@@ -364,7 +364,7 @@
                         <select name="deployment_target" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 bg-white">
                             <option value="dedicated_cloud">Dedicated Cloud VPS (AWS / DO / Vultr)</option>
                             <option value="on_premise">On-Premise NOC Server</option>
-                            <option value="hybrid">Managed by Benteng Siber ($250–$500/mo)</option>
+                            <option value="hybrid">Managed by Benteng Siber ($500–$1,000/mo)</option>
                         </select>
                     </div>
                     <div>

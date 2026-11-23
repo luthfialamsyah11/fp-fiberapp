@@ -19,6 +19,14 @@ use Illuminate\Support\Str;
  */
 class StripePaymentDriver implements QrisGatewayInterface
 {
+    /**
+     * Official Stripe zero-decimal currencies (IDR is a two-decimal currency in Stripe's API).
+     */
+    public const ZERO_DECIMAL_CURRENCIES = [
+        'bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga',
+        'pyg', 'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf',
+    ];
+
     protected string $secretKey;
     protected string $webhookSecret;
     protected string $currency;
@@ -35,8 +43,7 @@ class StripePaymentDriver implements QrisGatewayInterface
     {
         $referenceNo = 'STR-' . $task->id . '-' . strtoupper(Str::random(8));
         $expiresAt = now()->addMinutes(max(30, $expiryMinutes)); // Stripe minimum checkout expiry is 30 min
-        $zeroDecimalCurrencies = ['idr', 'jpy', 'krw', 'vnd'];
-        $unitAmount = in_array($this->currency, $zeroDecimalCurrencies, true)
+        $unitAmount = in_array($this->currency, self::ZERO_DECIMAL_CURRENCIES, true)
             ? (int) round($amount)
             : (int) round($amount * 100);
 

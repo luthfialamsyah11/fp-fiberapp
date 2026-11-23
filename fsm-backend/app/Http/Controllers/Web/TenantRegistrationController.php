@@ -46,15 +46,10 @@ class TenantRegistrationController extends Controller
             'slug.unique'          => 'This subdomain is already taken by another ISP. Please choose a different subdomain.',
             'contact_email.unique' => 'This email address is already registered on Benteng Siber.',
             'slug.alpha_dash'      => 'Subdomain may only contain letters, numbers, and dashes (-).',
-            'plan.in'              => 'Dedicated Full Project ($2,500) & Enterprise deployments require architect verification. Select Starter ($250/mo) or Growth ($500/mo) for an instant 14-day trial, or submit a Dedicated Project booking.',
+            'plan.in'              => 'Full Setup Dedicated Project ($2,500) & Enterprise deployments require architect verification. Select Starter ($500/mo) or Growth ($1,000/mo) for an instant 14-day trial, or submit a Full Setup booking.',
         ]);
 
-        $planLimits = [
-            'starter' => ['techs' => 10, 'nodes' => 100],
-            'growth'  => ['techs' => 40, 'nodes' => 500],
-        ];
-
-        $limits = $planLimits[$validated['plan']] ?? $planLimits['starter'];
+        $limits = Tenant::planLimits($validated['plan']);
         $currency = strtoupper((string) ($validated['currency'] ?? 'USD'));
 
         return DB::transaction(function () use ($validated, $limits, $currency, $request) {
@@ -143,7 +138,7 @@ class TenantRegistrationController extends Controller
             $request->session()->regenerate();
             $request->session()->put('active_tenant_id', $tenant->id);
 
-            $planLabel = $tenant->plan === 'growth' ? 'Growth Cloud ($500/mo)' : 'Starter Cloud ($250/mo)';
+            $planLabel = $tenant->plan === 'growth' ? 'Growth Cloud ($1,000/mo)' : 'Starter Cloud ($500/mo)';
             return redirect()->route('admin.dashboard')
                 ->with('success', "Welcome to Benteng Siber FiberOps! Organization '{$tenant->name}' is live with a 14-Day Free Trial ({$planLabel}, {$currency}).");
         });

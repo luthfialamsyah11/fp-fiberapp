@@ -1,6 +1,6 @@
 # Benteng Siber FiberOps v4.0 — Global USD Client Acquisition & Outreach Playbook
 
-**Target Pricing:** `$250/mo` (Starter Cloud) | `$500/mo` (Growth Cloud) | `$2,500/project` (7-Day Dedicated White-Label Deployment)
+**Target Pricing:** `$500/mo` (Starter Cloud) | `$1,000/mo` (Growth Cloud) | `$2,500` (Full Setup — 7-Day Dedicated White-Label Deployment)
 **Primary Demo Link (1-Click):** `https://admin.bentengsiber.com/login?demo=admin`
 **Technician PWA Demo:** `https://app.bentengsiber.com/?demo=1`
 **Executive Proposal PDF:** `https://bentengsiber.com/proposal.html`
@@ -18,7 +18,7 @@
 | **0:10–0:25** | Open Technician PWA (`app.bentengsiber.com/?demo=1`) → Tap **Generate Payment QR** | *"On-site, your field tech generates a live Stripe or QRIS payment QR right inside the offline-first Android app—zero cash handling, zero revenue leakage."* |
 | **0:25–0:40** | Trigger Payment Settlement → Show NOC Console flipping to **PAID & ACTIVE** | *"The second the subscriber scans and pays, a signed webhook triggers our async queue worker to restore their MikroTik PPPoE profile automatically in under 3 seconds."* |
 | **0:40–0:52** | Show **OLT `-dBm` Optical Gate** + **Public QR BAST (`/bast/verify`)** | *"Before closing any ticket, we validate optical power, deduct warehouse BOM atomically, and seal a SHA-256 digital BAST certificate anyone can verify by camera."* |
-| **0:52–1:00** | Show `bentengsiber.com/#pricing` (`$250/mo`, `$500/mo`, `$2,500/project`) | *"Launch your 14-day cloud trial at $250/mo, or own a complete white-label deployment on your own server for $2,500 delivered in 7 days. Link in bio."* |
+| **0:52–1:00** | Show `bentengsiber.com/#pricing` (`$500/mo`, `$1,000/mo`, `$2,500` Full Setup) | *"Launch your 14-day cloud trial from $500/mo, or own a complete white-label full setup on your own server for $2,500 delivered in 7 days. Link in bio."* |
 
 ---
 
@@ -48,7 +48,7 @@
   > You can test the live NOC console right now in 1 click (no signup):
   > https://admin.bentengsiber.com/login?demo=admin
   >
-  > Open to a quick 7-day pilot on 1 POP router? Plans start at **$250/mo** or **$2,500 one-time** for a 100% white-label deployment on your own server.
+  > Open to a quick 7-day pilot on 1 POP router? Plans start at **$500/mo** (or **$1,000/mo** Growth), or **$2,500 one-time** for a 100% white-label full setup on your own server.
   >
   > Best,
   > Benteng Siber Architecture Team
@@ -80,16 +80,16 @@
 
 ---
 
-## 3. WhatsApp Closing Script (`$250/mo` Trial → `$2,500` Turnkey Project)
+## 3. Direct Voice + 5-Min Google Meet Closing Script (`$500/mo`–`$1,000/mo` Trial → `$2,500` Full Setup)
 
 1. **Qualify in 30 seconds:**
    *"Awesome to connect! Quick context so I tailor the setup: roughly how many active subscribers, MikroTik routers, and field techs are you running right now?"*
 2. **Send the 1-Click Demo + Proposal:**
    *"Here's our live NOC sandbox (1-click login): https://admin.bentengsiber.com/login?demo=admin — and our 1-page proposal PDF: https://bentengsiber.com/proposal.html"*
-3. **Anchor the `$2,500` Turnkey Value vs. Monthly SaaS:**
-   *"You have two clean paths: start immediately on Managed Cloud at **$250–$500/mo** (14-day free trial), OR if you have 15+ techs or want your own domain, server, and branded Android APK with zero per-seat fees forever, we do a **7-day Dedicated Turnkey Project for $2,500 one-time** (50% kickoff, 50% on Day-7 production handover)."*
+3. **Anchor the `$2,500` Full Setup Value vs. Monthly SaaS:**
+   *"You have two clean paths: start immediately on Managed Cloud at **$500–$1,000/mo** (14-day free trial), OR if you want your own domain, server, and branded Android APK with zero per-seat fees forever, we do a **7-day Full Setup White-Label Deployment for $2,500 one-time** (50% kickoff, 50% on Day-7 production handover)."*
 4. **Close on Next Step:**
-   *"Want me to spin up your free 14-day trial workspace today, or should we lock in a Day-1 kickoff slot for the $2,500 white-label deployment?"*
+   *"Want me to spin up your free 14-day trial workspace today, or should we lock in a Day-1 kickoff slot for the $2,500 full setup deployment?"*
 
 ---
 

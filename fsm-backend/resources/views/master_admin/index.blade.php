@@ -119,7 +119,7 @@
                         <!-- Usage Stats -->
                         <td class="px-5 py-4 text-xs text-slate-600">
                             <span>Total Tiket: <strong class="text-slate-900">{{ $t->tasks_count }}</strong></span><br>
-                            <span class="text-[11px] text-slate-400">Terdaftar: {{ $t->created_at->format('d M Y') }}</span>
+                            <span class="text-[11px] text-slate-400">Terdaftar: {{ $t->created_at?->format('d M Y') ?? '—' }}</span>
                         </td>
 
                         <!-- Status -->
@@ -132,7 +132,7 @@
                             @elseif($t->status === 'trial')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    Trial (Sisa {{ max(0, now()->diffInDays($t->trial_ends_at, false)) }} Hari)
+                                    Trial (Sisa {{ $t->trial_ends_at ? max(0, now()->diffInDays($t->trial_ends_at, false)) : 0 }} Hari)
                                 </span>
                             @elseif($t->status === 'suspended')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
@@ -153,14 +153,14 @@
                                 <form action="{{ route('master_admin.tenants.plan', $t->id) }}" method="POST" class="inline-block">
                                     @csrf
                                     <select name="plan" onchange="this.form.submit()" class="text-[11px] font-semibold py-1 px-2 border border-slate-300 rounded bg-white text-slate-700 cursor-pointer">
-                                        <option value="starter" {{ $t->plan === 'starter' ? 'selected' : '' }}>Set Starter</option>
-                                        <option value="growth" {{ $t->plan === 'growth' ? 'selected' : '' }}>Set Growth</option>
-                                        <option value="enterprise" {{ $t->plan === 'enterprise' ? 'selected' : '' }}>Set Enterprise</option>
+                                        <option value="starter" {{ $t->plan === 'starter' ? 'selected' : '' }}>Starter ($500/mo)</option>
+                                        <option value="growth" {{ $t->plan === 'growth' ? 'selected' : '' }}>Growth ($1,000/mo)</option>
+                                        <option value="enterprise" {{ $t->plan === 'enterprise' ? 'selected' : '' }}>Full Setup / Enterprise</option>
                                     </select>
                                 </form>
 
                                 <!-- Toggle Suspend Form -->
-                                @if($t->id !== 1)
+                                @if((int) $t->id !== 1)
                                 <form action="{{ route('master_admin.tenants.toggle', $t->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin mengubah status tenant {{ $t->name }}?')">
                                     @csrf
                                     @if($t->status === 'suspended')

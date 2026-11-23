@@ -31,6 +31,7 @@ export class ApiService {
   private demoUser = { ...DEMO_USER };
   private demoTasks = createInitialDemoTasks();
   private demoInventory = DEMO_INVENTORY.map(item => ({ ...item }));
+  private flushOfflinePromise: Promise<{ synced: number; remaining: number }> | null = null;
 
   private clientConfig: FsmClientConfig = {
     company_name: 'FiberOps Global Carrier',
@@ -546,17 +547,24 @@ export class ApiService {
     return firstValueFrom(this.http.delete(`${this.baseUrl}/tasks/${taskId}/materials/${materialId}`));
   }
 
-  // Dynamic QRIS On-Site Billing Collection
+  // Dynamic On-Site Billing Collection (Stripe USD / Midtrans QRIS / Simulator)
   async generateTaskQris(taskId: number, amount?: number, expiryMinutes = 15): Promise<any> {
+    const currency = (this.clientConfig.currency || 'USD').toUpperCase();
+    const minAmount = currency === 'IDR' ? 1000 : 1;
+
     if (await this.isDemoMode()) {
       const task: any = this.demoTasks.find(t => t.id === Number(taskId));
-      const billAmt = amount && amount >= 1000 ? amount : (task?.billing_amount || 175000);
-      const ref = `QRIS-DEMO-${taskId}-${Date.now().toString().slice(-5)}`;
-      const qrPayload = `00020101021226680014ID.CO.QRIS.WWW52045812530336054${String(Math.round(billAmt)).padStart(6, '0')}5802ID5913BENTENG_SIBER6007JAKARTA6304DEMO`;
+      const fallbackAmt = currency === 'IDR' ? 175000 : 49;
+      const billAmt = amount && amount >= minAmount ? amount : (task?.billing_amount || fallbackAmt);
+      const ref = `PAY-DEMO-${taskId}-${Date.now().toString().slice(-5)}`;
+      const qrPayload = currency === 'IDR'
+        ? `00020101021226680014ID.CO.QRIS.WWW52045812530336054${String(Math.round(billAmt)).padStart(6, '0')}5802ID5913BENTENG_SIBER6007JAKARTA6304DEMO`
+        : `https://checkout.stripe.com/c/pay/demo_${ref}`;
       const tx = {
         reference_no: ref,
         amount: billAmt,
         status: 'pending',
+        provider: 'simulator',
         qr_payload: qrPayload,
         qr_image_url: `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(qrPayload)}`,
         expires_at: new Date(Date.now() + expiryMinutes * 60000).toISOString(),
@@ -568,11 +576,13 @@ export class ApiService {
         task._demo_qris = tx;
         task._demo_qris_created = Date.now();
       }
-      return { message: 'Dynamic QRIS generated (Demo Sandbox).', transaction: tx };
+      return { message: 'Dynamic payment link/QR generated (Demo Sandbox).', currency, transaction: tx };
     }
 
     const body: any = { expiry_minutes: expiryMinutes };
-    if (amount && amount >= 1000) body.amount = amount;
+    if (amount !== undefined && amount !== null && Number(amount) > 0) {
+      body.amount = Number(amount);
+    }
     return firstValueFrom(
       this.http.post(`${this.baseUrl}/tasks/${taskId}/qris`, body, this.idempotentHeaders())
     );
@@ -581,7 +591,7 @@ export class ApiService {
   async getTaskPaymentStatus(taskId: number): Promise<any> {
     if (await this.isDemoMode()) {
       const task: any = this.demoTasks.find(t => t.id === Number(taskId));
-      // In Demo Mode, simulate instant QRIS bank settlement 6 seconds after generation
+      // In Demo Mode, simulate instant payment settlement 6 seconds after generation
       if (task?._demo_qris && task.payment_status === 'pending' && Date.now() - (task._demo_qris_created || 0) >= 6000) {
         task.payment_status = 'paid';
         task._demo_qris.status = 'paid';
@@ -589,6 +599,7 @@ export class ApiService {
       }
       return {
         task_id: taskId,
+        currency: (this.clientConfig.currency || 'USD').toUpperCase(),
         billing_amount: task?.billing_amount || 0,
         payment_status: task?.payment_status || 'unpaid',
         is_paid: task?.payment_status === 'paid',
@@ -632,8 +643,21 @@ export class ApiService {
   /**
    * Replay all queued offline work order mutations in strict FIFO causal order
    * using their original UUIDv4 Idempotency-Key so retries never duplicate data.
+   * Protected by an in-flight mutex promise to prevent concurrent duplicate replays.
    */
   async flushOfflineMutations(): Promise<{ synced: number; remaining: number }> {
+    if (this.flushOfflinePromise) {
+      return this.flushOfflinePromise;
+    }
+
+    this.flushOfflinePromise = this.executeFlushOfflineMutations().finally(() => {
+      this.flushOfflinePromise = null;
+    });
+
+    return this.flushOfflinePromise;
+  }
+
+  private async executeFlushOfflineMutations(): Promise<{ synced: number; remaining: number }> {
     if (await this.isDemoMode()) {
       return { synced: 0, remaining: 0 };
     }
@@ -680,8 +704,14 @@ export class ApiService {
         if (this.isOfflineNetworkError(err)) {
           break; // Network dropped again; stop FIFO replay to preserve causal order
         }
-        // If server rejected permanently (e.g. 422 / 409 / 404 after 3 attempts), drop stale item so queue never deadlocks
-        if (err?.status >= 400 && err?.status < 500) {
+        const status = Number(err?.status || 0);
+        // NEVER discard offline work on auth expiry (401/403), timeouts (408), or rate limits (429)
+        if (status === 401 || status === 403 || status === 408 || status === 429) {
+          await this.offlineQueue.markMutationAttempt(item.id, `Paused (HTTP ${status}) — awaiting retry`);
+          break;
+        }
+        // Only drop permanently rejected business-rule mutations (400/404/409/422) so queue never deadlocks
+        if (status === 400 || status === 404 || status === 409 || status === 422) {
           await this.offlineQueue.removeMutation(item.id);
         } else {
           await this.offlineQueue.markMutationAttempt(item.id, err?.message || 'Retry failed');

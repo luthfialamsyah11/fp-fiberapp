@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
+use App\Services\Payment\Drivers\MidtransQrisDriver;
+use App\Services\Payment\Drivers\QrisSimulatorDriver;
 use App\Services\Payment\Drivers\StripePaymentDriver;
 use App\Services\Payment\QrisPaymentService;
 use Illuminate\Http\Request;
@@ -37,20 +39,32 @@ class PaymentWebhookController extends Controller
             return response()->json(['message' => 'Non-settlement webhook acknowledged.'], 200);
         }
 
-        // Verify gateway signature if present
-        $tx = PaymentTransaction::withoutGlobalScopes()->where('reference_no', $referenceNo)->first();
-        if ($tx) {
-            $gateway = QrisPaymentService::forTenant($tx->tenant)->getGateway();
-            $sigHeader = $request->header('X-Callback-Signature') ?? $request->header('X-Signature');
-            $isValid = $gateway->verifyWebhookSignature($payload, $sigHeader);
-
-            if (!$isValid) {
-                Log::warning("Payment webhook signature verification failed for ref: {$referenceNo}");
-                return response()->json(['message' => 'Invalid webhook signature.'], 403);
-            }
+        // Verify gateway signature strictly against the transaction's original provider
+        $tx = PaymentTransaction::withoutGlobalScopes()->with('tenant')->where('reference_no', $referenceNo)->first();
+        if (!$tx || !$tx->tenant) {
+            return response()->json(['message' => 'Transaction not found or could not be processed.'], 404);
         }
 
-        $settled = $this->paymentService->processPaymentConfirmation($referenceNo, $payload);
+        if ($tx->provider === 'stripe') {
+            Log::warning("Stripe transaction {$referenceNo} sent to non-Stripe webhook endpoint.");
+            return response()->json(['message' => 'Stripe payments must settle via /api/webhooks/stripe.'], 422);
+        }
+
+        $tenantPaySettings = (array) ($tx->tenant->settings['payment'] ?? []);
+        $tenantPaySettings['currency'] = QrisPaymentService::forTenant($tx->tenant)->getTenantCurrency();
+        $gateway = $tx->provider === 'midtrans'
+            ? new MidtransQrisDriver($tenantPaySettings)
+            : new QrisSimulatorDriver($tenantPaySettings);
+
+        $sigHeader = $request->header('X-Callback-Signature') ?? $request->header('X-Signature');
+        $isValid = $gateway->verifyWebhookSignature($payload, $sigHeader);
+
+        if (!$isValid) {
+            Log::warning("Payment webhook signature verification failed for ref: {$referenceNo}");
+            return response()->json(['message' => 'Invalid webhook signature.'], 403);
+        }
+
+        $settled = $this->paymentService->processPaymentConfirmation($referenceNo, $payload, $tx->provider);
 
         if (!$settled) {
             return response()->json(['message' => 'Transaction not found or could not be processed.'], 404);

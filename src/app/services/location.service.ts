@@ -35,6 +35,7 @@ export class LocationService {
   private lastKnownPosition: Position | null = null;
   private wakeLockSentinel: any = null;
   private listenersRegistered = false;
+  private foregroundLowAccuracyFallback = false;
 
   readonly status$ = new BehaviorSubject<GpsHealthStatus>('offline');
   readonly statusMessage$ = new BehaviorSubject<string>('Offline');
@@ -265,10 +266,23 @@ export class LocationService {
     }
   }
 
-  private async startForegroundWatcher(): Promise<void> {
+  private async startForegroundWatcher(useLowAccuracy = false): Promise<void> {
+    // In Demo Mode, skip native browser watchPosition so denied/missing PC GPS never overrides Demo GPS Live
+    if (await this.api.isDemoMode()) {
+      return;
+    }
     try {
+      if (this.watchId !== null) {
+        await Geolocation.clearWatch({ id: this.watchId }).catch(() => {});
+        this.watchId = null;
+      }
+
       const id = await Geolocation.watchPosition(
-        { enableHighAccuracy: true, timeout: 12000, maximumAge: 3000 },
+        {
+          enableHighAccuracy: !useLowAccuracy,
+          timeout: useLowAccuracy ? 15000 : 10000,
+          maximumAge: useLowAccuracy ? 60000 : 5000,
+        },
         async (position, err) => {
           if (!this.isTracking) return;
           if (err) {
@@ -276,7 +290,15 @@ export class LocationService {
             const msg = String((err as any)?.message || '').toLowerCase();
             if (code === 1 || msg.includes('denied') || msg.includes('permission')) {
               this.setHealth('no_permission', 'Location permission needed');
-            } else {
+              return;
+            }
+            // Automatically switch to Wi-Fi/Network location if high-accuracy satellite times out indoors/on PC
+            if (!useLowAccuracy && !this.foregroundLowAccuracyFallback) {
+              this.foregroundLowAccuracyFallback = true;
+              await this.startForegroundWatcher(true);
+              return;
+            }
+            if (this.status$.value !== 'ok') {
               this.setHealth('gps_off', 'GPS signal unavailable');
             }
             return;
@@ -300,7 +322,9 @@ export class LocationService {
       this.watchId = id;
     } catch (e: any) {
       console.error('[LocationService] Failed to start Geolocation watch:', e);
-      this.setHealth('gps_off', 'GPS unavailable');
+      if (this.status$.value !== 'ok') {
+        this.setHealth('gps_off', 'GPS unavailable');
+      }
     }
   }
 
@@ -336,9 +360,14 @@ export class LocationService {
   private async dispatchPosition(position: Position, source: 'foreground' | 'background' | 'heartbeat') {
     const { latitude, longitude, accuracy, speed, heading } = position.coords;
 
-    // Client-side sanity guard against Null Island (0,0) or > 1000m wildly inaccurate fixes
+    // Client-side sanity guard against Null Island (0,0) or wildly corrupt (> 10km) fixes
     if (Math.abs(latitude) < 0.0001 && Math.abs(longitude) < 0.0001) return;
-    if (accuracy && accuracy > 1000) return;
+    if (accuracy && accuracy > 10000) {
+      if (this.status$.value !== 'ok') {
+        this.setHealth('gps_off', `Weak GPS (±${Math.round(accuracy / 1000)}km) — move near window/outdoors`);
+      }
+      return;
+    }
 
     const point: GpsTelemetryPoint = {
       latitude,
@@ -355,7 +384,13 @@ export class LocationService {
     try {
       await this.api.updateLocation(point);
       this.lastSuccessfulSyncTime = Date.now();
-      this.setHealth('ok', accuracy && accuracy > 250 ? `Online (Low GPS ±${Math.round(accuracy)}m)` : 'Online • GPS Live');
+      let liveLabel = 'Online • GPS Live';
+      if (accuracy && accuracy > 1000) {
+        liveLabel = `Online • Network Location ±${(accuracy / 1000).toFixed(1)}km`;
+      } else if (accuracy && accuracy > 200) {
+        liveLabel = `Online • Indoor GPS ±${Math.round(accuracy)}m`;
+      }
+      this.setHealth('ok', liveLabel);
       await this.flushOfflineQueue();
     } catch (apiErr: any) {
       if (apiErr?.status === 401 || apiErr?.status === 403) {
@@ -390,15 +425,64 @@ export class LocationService {
   }
 
   async getCurrentPosition(): Promise<Position> {
-    const pos = await Geolocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 5000,
-    });
-    if (pos?.coords) {
-      this.lastKnownPosition = pos;
+    try {
+      const pos = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 8000,
+        maximumAge: 10000,
+      });
+      if (pos?.coords) {
+        this.lastKnownPosition = pos;
+      }
+      return pos;
+    } catch (highAccErr: any) {
+      const code = highAccErr?.code;
+      const msg = String(highAccErr?.message || '').toLowerCase();
+      const isDenied = code === 1 || msg.includes('denied') || msg.includes('permission');
+
+      // Stage 2: Automatic Wi-Fi / Network Location fallback (fixes PC browsers & indoor phones!)
+      if (!isDenied) {
+        try {
+          const fallbackPos = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: false,
+            timeout: 12000,
+            maximumAge: 60000,
+          });
+          if (fallbackPos?.coords) {
+            this.lastKnownPosition = fallbackPos;
+          }
+          return fallbackPos;
+        } catch {
+          // Fall through to Demo Mode check below
+        }
+      }
+
+      // Stage 3: In Demo Mode (?demo=1), synthesize a smooth sandbox GPS fix so PC demos never flash red alerts
+      if (await this.api.isDemoMode()) {
+        const jitterLat = (Math.random() - 0.5) * 0.0004;
+        const jitterLng = (Math.random() - 0.5) * 0.0004;
+        const demoPos: Position = {
+          timestamp: Date.now(),
+          coords: {
+            latitude: -6.2088 + jitterLat,
+            longitude: 106.8456 + jitterLng,
+            accuracy: 16,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: 90,
+            speed: 0,
+            magneticHeading: null,
+            trueHeading: null,
+            headingAccuracy: null,
+            course: 90,
+          },
+        };
+        this.lastKnownPosition = demoPos;
+        return demoPos;
+      }
+
+      throw highAccErr;
     }
-    return pos;
   }
 
   /**
@@ -427,6 +511,7 @@ export class LocationService {
 
   async stopTracking() {
     this.isTracking = false;
+    this.foregroundLowAccuracyFallback = false;
     if (this.bgWatcherId !== null) {
       const idToRemove = this.bgWatcherId;
       this.bgWatcherId = null;

@@ -33,6 +33,28 @@ class User extends Authenticatable
         return in_array($this->role, ['admin', 'super_admin'], true);
     }
 
+    /**
+     * Platform Owner gate for /master-admin Console.
+     * Supports optional PLATFORM_OWNER_EMAILS env allowlist to isolate public demo accounts from HQ Master Console.
+     */
+    public function isPlatformOwner(): bool
+    {
+        if (!$this->isSuperAdmin()) {
+            return false;
+        }
+
+        $allowlist = array_values(array_filter(array_map(
+            fn ($e) => strtolower(trim($e)),
+            explode(',', (string) config('app.platform_owner_emails', env('PLATFORM_OWNER_EMAILS', '')))
+        )));
+
+        if (!empty($allowlist)) {
+            return in_array(strtolower((string) $this->email), $allowlist, true);
+        }
+
+        return $this->tenant_id === null || (int) $this->tenant_id === 1;
+    }
+
     public function isPortalStaff(): bool
     {
         return in_array($this->role, self::PORTAL_ROLES, true);
@@ -69,6 +91,7 @@ class User extends Authenticatable
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
+        'tenant_id'    => 'integer',
         'is_active'    => 'boolean',
         'is_online'    => 'boolean',
         'last_seen_at' => 'datetime',

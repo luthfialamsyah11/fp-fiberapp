@@ -20,9 +20,8 @@ class MasterAdminController extends Controller
     protected function authorizePlatformOwner(): void
     {
         $user = auth()->user();
-        $isRootTenant = $user && ($user->tenant_id === null || (int) $user->tenant_id === 1);
 
-        if (!$user || !$user->isSuperAdmin() || !$isRootTenant) {
+        if (!$user || !$user->isPlatformOwner()) {
             abort(403, 'Access denied: Platform Master Console is restricted to root platform administrators.');
         }
     }

@@ -33,6 +33,7 @@ export class AppComponent {
   private lastTimeBackPress = 0;
   private timePeriodToExit = 2000;
   private hasShownPermissionPrompt = false;
+  private telemetryListenersBound = false;
 
   constructor() {
     this.initializeApp();
@@ -87,23 +88,26 @@ export class AppComponent {
       // Initialize native FCM push notifications (graceful no-op on web)
       this.pushService.initForAuthenticatedUser();
 
-      // Initialize & auto-flush offline work order mutations when network returns or app resumes
+      // Initialize & auto-flush offline work order mutations when network returns or app resumes (bound once)
       await this.offlineQueue.init();
       this.api.flushOfflineMutations().catch(() => {});
-      window.addEventListener('online', () => {
-        this.api.flushOfflineMutations().then(res => {
-          if (res.synced > 0) {
-            this.taskSync.refreshTasks(false);
-          }
-        }).catch(() => {});
-      });
-      App.addListener('appStateChange', ({ isActive }) => {
-        if (isActive) {
+      if (!this.telemetryListenersBound) {
+        this.telemetryListenersBound = true;
+        window.addEventListener('online', () => {
           this.api.flushOfflineMutations().then(res => {
-            if (res.synced > 0) this.taskSync.refreshTasks(false);
+            if (res.synced > 0) {
+              this.taskSync.refreshTasks(false);
+            }
           }).catch(() => {});
-        }
-      });
+        });
+        App.addListener('appStateChange', ({ isActive }) => {
+          if (isActive) {
+            this.api.flushOfflineMutations().then(res => {
+              if (res.synced > 0) this.taskSync.refreshTasks(false);
+            }).catch(() => {});
+          }
+        });
+      }
 
       const meRes: any = await this.api.getMe().catch(() => null);
       const user = meRes?.data ?? meRes;

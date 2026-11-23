@@ -613,4 +613,117 @@ class SecurityAuditPatchPhase6Test extends TestCase
             'pppoe_username' => 'hans_pppoe',
         ]);
     }
+
+    /** @test */
+    public function master_platform_owner_cast_and_allowlist_controls_access_and_sidebar(): void
+    {
+        $rootAdmin = User::withoutGlobalScopes()->create([
+            'tenant_id' => $this->rootTenant->id,
+            'name'      => 'Root Demo Admin',
+            'email'     => 'admin@fsm.com',
+            'password'  => Hash::make('SecurePass#2026'),
+            'role'      => 'admin',
+            'is_active' => true,
+        ]);
+
+        $hqOwner = User::withoutGlobalScopes()->create([
+            'tenant_id' => $this->rootTenant->id,
+            'name'      => 'Benteng Siber HQ Owner',
+            'email'     => 'leoallogne@gmail.com',
+            'password'  => Hash::make('SecurePass#2026'),
+            'role'      => 'super_admin',
+            'is_active' => true,
+        ]);
+
+        // 1. Default mode: integer cast ensures tenant_id === 1 matches reliably and renders Master Platform link + console
+        $this->assertSame(1, $rootAdmin->fresh()->tenant_id);
+        $this->assertTrue($rootAdmin->fresh()->isPlatformOwner());
+        $this->actingAs($rootAdmin)->get('/master-admin')->assertStatus(200)->assertSee('Master Platform');
+
+        // 2. Production allowlist mode: isolates public demo admin@fsm.com out of /master-admin while HQ Owner retains access
+        config(['app.platform_owner_emails' => 'leoallogne@gmail.com']);
+        try {
+            $this->assertFalse($rootAdmin->fresh()->isPlatformOwner());
+            $this->assertTrue($hqOwner->fresh()->isPlatformOwner());
+
+            $this->actingAs($rootAdmin)->get('/master-admin')->assertStatus(403);
+            $this->actingAs($hqOwner)->get('/master-admin')->assertStatus(200);
+        } finally {
+            config(['app.platform_owner_emails' => '']);
+        }
+    }
+
+    /** @test */
+    public function non_stripe_webhook_enforces_transaction_provider_driver_and_rejects_stripe_transactions(): void
+    {
+        $this->usdTenant->update([
+            'settings' => [
+                'currency' => 'IDR',
+                'payment'  => [
+                    'driver'        => 'simulator', // Active driver toggled back to simulator
+                    'server_key'    => 'Mid-server-secret-2026',
+                    'is_production' => false,
+                ],
+            ],
+        ]);
+        TenantContext::setTenant($this->usdTenant->fresh());
+
+        $task = Task::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'technician_id'  => $this->usdTech->id,
+            'title'          => 'Provider Locked Webhook Test',
+            'customer_name'  => 'Siti',
+            'customer_phone' => '+6281199999',
+            'address'        => 'Bandung',
+            'status'         => 'on-going',
+            'priority'       => 'medium',
+            'billing_amount' => 150000,
+        ]);
+
+        // 1. Stripe tx submitted to non-Stripe /api/webhooks/payment must be rejected with 422
+        $stripeTx = PaymentTransaction::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'task_id'        => $task->id,
+            'reference_no'   => 'STR-WRONG-ENDPOINT',
+            'amount'         => 150000,
+            'payment_method' => 'stripe_checkout',
+            'provider'       => 'stripe',
+            'status'         => 'pending',
+            'expires_at'     => now()->addMinutes(30),
+        ]);
+
+        $this->postJson('/api/webhooks/payment', [
+            'order_id'           => $stripeTx->reference_no,
+            'transaction_status' => 'settlement',
+        ], ['X-Callback-Signature' => 'simulated_valid_sig'])->assertStatus(422);
+
+        // 2. Midtrans tx must reject simulator signature even when active tenant driver is simulator, and accept real Midtrans SHA-512
+        $midtransTx = PaymentTransaction::create([
+            'tenant_id'      => $this->usdTenant->id,
+            'task_id'        => $task->id,
+            'reference_no'   => 'BS-MID-LOCK-01',
+            'amount'         => 150000,
+            'payment_method' => 'qris',
+            'provider'       => 'midtrans',
+            'status'         => 'pending',
+            'expires_at'     => now()->addMinutes(30),
+        ]);
+
+        $this->postJson('/api/webhooks/payment', [
+            'order_id'           => $midtransTx->reference_no,
+            'status_code'        => '200',
+            'gross_amount'       => '150000.00',
+            'transaction_status' => 'settlement',
+        ], ['X-Callback-Signature' => 'simulated_valid_sig'])->assertStatus(403);
+
+        $validMidtransSig = hash('sha512', $midtransTx->reference_no . '200' . '150000.00' . 'Mid-server-secret-2026');
+        $this->postJson('/api/webhooks/payment', [
+            'order_id'           => $midtransTx->reference_no,
+            'status_code'        => '200',
+            'gross_amount'       => '150000.00',
+            'transaction_status' => 'settlement',
+            'signature_key'      => $validMidtransSig,
+        ])->assertStatus(200);
+        $this->assertEquals('paid', $midtransTx->fresh()->status);
+    }
 }

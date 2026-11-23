@@ -472,8 +472,8 @@
                                 <input type="password" name="payment_server_key" value="" placeholder="{{ !empty($pay['server_key']) ? '•••••••• (encrypted & saved)' : 'sk_live_... or Mid-server-...' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Stripe Webhook Signing Secret (Optional)</label>
-                                <input type="password" name="payment_webhook_secret" value="" placeholder="{{ !empty($pay['webhook_secret']) ? '•••••••• (encrypted & saved)' : 'whsec_...' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
+                                <label class="block text-[10px] font-semibold text-slate-500 uppercase mb-1">Stripe Webhook Signing Secret (Required for Live Stripe)</label>
+                                <input type="password" name="payment_webhook_secret" value="" placeholder="{{ !empty($pay['webhook_secret']) ? '•••••••• (encrypted & saved)' : 'whsec_... (required for auto-unblock)' }}" class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-mono">
                             </div>
                             <label class="flex items-center gap-2 text-[11px] text-slate-700 cursor-pointer">
                                 <input type="checkbox" name="payment_is_production" value="1" {{ !empty($pay['is_production']) ? 'checked' : '' }} class="rounded text-emerald-600">

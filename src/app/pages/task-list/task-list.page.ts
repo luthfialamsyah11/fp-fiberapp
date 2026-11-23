@@ -177,11 +177,43 @@ export class TaskListPage implements OnDestroy {
       const perm = await this.locationService.ensurePermissions();
       if (perm === 'denied') {
         await this.locationService.openLocationSettings();
+        const toast = await this.toastCtrl.create({
+          message: 'Location permission is blocked. Enable Location in browser/device settings, then tap retry.',
+          duration: 4000,
+          position: 'top',
+          color: 'warning',
+        });
+        await toast.present();
         return;
       }
     }
-    await this.locationService.stopTracking();
-    await this.locationService.startTracking();
+
+    try {
+      const pos = await this.locationService.forceSyncNow();
+      await this.locationService.stopTracking();
+      await this.locationService.startTracking();
+      this.refreshGpsAccuracy();
+      const accLabel = pos?.coords?.accuracy ? ` (±${Math.round(pos.coords.accuracy)}m)` : '';
+      const toast = await this.toastCtrl.create({
+        message: `GPS locked & synced with NOC${accLabel}`,
+        duration: 2400,
+        position: 'top',
+        color: 'success',
+      });
+      await toast.present();
+    } catch (err: any) {
+      const code = err?.code;
+      const msg = code === 1
+        ? 'Browser/OS blocked Location access. Click the lock icon near the URL bar and set Location to Allow.'
+        : 'Device could not obtain a GPS/Wi-Fi location fix. Enable Windows/Android Location Services and retry.';
+      const toast = await this.toastCtrl.create({
+        message: msg,
+        duration: 4500,
+        position: 'top',
+        color: 'warning',
+      });
+      await toast.present();
+    }
   }
 
   async exitDemoMode() {
@@ -245,13 +277,23 @@ export class TaskListPage implements OnDestroy {
     if (this.isSyncing) return;
     this.isSyncing = true;
     try {
+      // True bidirectional sync: push offline mutations & buffered GPS first, then pull latest tasks from NOC
+      const [flushRes] = await Promise.all([
+        this.api.flushOfflineMutations().catch(() => ({ synced: 0, remaining: 0 })),
+        this.locationService.flushOfflineQueue().catch(() => {}),
+      ]);
       await this.taskSync.refreshTasks(true);
       this.refreshGpsAccuracy();
+      const summary = flushRes.synced > 0
+        ? `Synced ${flushRes.synced} offline action(s) & refreshed work orders`
+        : (flushRes.remaining > 0
+          ? `Work orders refreshed (${flushRes.remaining} offline item(s) still awaiting connection/auth)`
+          : 'Work orders & telemetry synced');
       const toast = await this.toastCtrl.create({
-        message: 'Work orders & telemetry synced',
-        duration: 1800,
+        message: summary,
+        duration: 2400,
         position: 'top',
-        color: 'dark',
+        color: flushRes.synced > 0 ? 'success' : 'dark',
       });
       await toast.present();
     } finally {

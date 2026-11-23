@@ -1263,6 +1263,71 @@
   }
 
   /* ------------------------------------------------------------------------
+     12. ARCHITECTURE PAYLOAD INSPECTOR & TOC SCROLLSPY (PLATFORM-ARCHITECTURE)
+  ------------------------------------------------------------------------ */
+  function initArchitectureInspector() {
+    const inspector = document.querySelector('[data-payload-inspector]');
+    if (inspector) {
+      const tabBtns = inspector.querySelectorAll('.payload-tab-btn');
+      const panels = inspector.querySelectorAll('.payload-panel');
+
+      tabBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-payload-tab');
+          tabBtns.forEach((b) => {
+            const active = b === btn;
+            b.classList.toggle('is-active', active);
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+          panels.forEach((p) => {
+            p.classList.toggle('is-active', p.getAttribute('data-payload-panel') === target);
+          });
+        });
+      });
+
+      inspector.querySelectorAll('[data-copy-payload]').forEach((copyBtn) => {
+        copyBtn.addEventListener('click', () => {
+          const panel = copyBtn.closest('.payload-panel');
+          const pre = panel ? panel.querySelector('pre') : null;
+          if (!pre) return;
+          const text = pre.textContent || '';
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+              const orig = copyBtn.textContent;
+              copyBtn.textContent = 'Copied ✓';
+              window.setTimeout(() => { copyBtn.textContent = orig; }, 1600);
+            }).catch(() => {});
+          }
+        });
+      });
+    }
+
+    // Active Table of Contents scroll spy on documentation subpages
+    const tocLinks = Array.from(document.querySelectorAll('.doc-toc a[href^="#"]'));
+    if (tocLinks.length > 0 && 'IntersectionObserver' in window) {
+      const sections = tocLinks
+        .map((a) => document.querySelector(a.getAttribute('href')))
+        .filter(Boolean);
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = entry.target.getAttribute('id');
+              tocLinks.forEach((link) => {
+                link.classList.toggle('is-active', link.getAttribute('href') === '#' + id);
+              });
+            }
+          });
+        },
+        { rootMargin: '-20% 0px -65% 0px', threshold: 0.05 }
+      );
+
+      sections.forEach((sec) => observer.observe(sec));
+    }
+  }
+
+  /* ------------------------------------------------------------------------
      BOOTSTRAP
   ------------------------------------------------------------------------ */
   function init() {
@@ -1277,6 +1342,7 @@
     initScrollReveal();
     initGlobalNetworkMap();
     initRoiCalculator();
+    initArchitectureInspector();
   }
 
   if (document.readyState === 'loading') {

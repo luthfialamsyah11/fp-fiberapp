@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Platform Architecture &amp; Hardware Orchestration (v4.0) | Benteng Siber</title>
-  <meta name="description" content="Deep-dive technical documentation of Benteng Siber FiberOps v4.0: 5-role Multi-Tenant RBAC, MikroTik RouterOS v7 REST auto-provisioning & 3s QRIS unblock, OLT/GenieACS optical power gate, ShouldQueue workers, and SHA-256 public BAST.">
-  <meta name="keywords" content="FiberOps Architecture, MikroTik RouterOS v7 REST API, OLT GenieACS TR-069 Optical Gate, Dynamic QRIS Auto Unblock, ISP Field Service Management Architecture, SHA-256 BAST Verification, Multi-Tenant SaaS ISP">
+  <meta name="description" content="Complete engineering blueprint of Benteng Siber FiberOps v4.0: 3-level Multi-Tenant isolation (Platform Owner + 5 Tenant Roles), Multi-Router MikroTik RouterOS v7 REST fleet, OLT/GenieACS optical gate, Stripe USD & Midtrans QRIS 3s auto-unblock, Hybrid Mobile GPS, and SHA-256 public BAST.">
+  <meta name="keywords" content="FiberOps Architecture, Multi-Tenant ISP SaaS, MikroTik RouterOS v7 REST API, Multi-Router POP Fleet, OLT GenieACS TR-069 Optical Gate, Stripe Checkout ISP Auto Unblock, Dynamic QRIS, Hybrid Mobile GPS, Offline FIFO Sync, SHA-256 BAST">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#ffffff">
   <link rel="canonical" href="https://bentengsiber.com/platform-architecture.html">
@@ -13,20 +13,20 @@
 
   <meta property="og:site_name" content="Benteng Siber">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="FiberOps v4.0 Platform Architecture &amp; Hardware Orchestration | Benteng Siber">
-  <meta property="og:description" content="How Benteng Siber unifies 5-role multi-tenant NOC operations, MikroTik PPPoE automation, OLT optical gates, Dynamic QRIS 3s auto-unblock, and SHA-256 public BAST.">
+  <meta property="og:title" content="FiberOps v4.0 Complete Platform Architecture &amp; Hardware Orchestration | Benteng Siber">
+  <meta property="og:description" content="Carrier-grade blueprint: Multi-Tenant 5+1 RBAC, Multi-Router MikroTik REST fleet, OLT -dBm optical gate, Stripe USD & QRIS 3s auto-unblock, Hybrid GPS offline app, and VPS sizing.">
   <meta property="og:url" content="https://bentengsiber.com/platform-architecture.html">
   <meta property="og:image" content="https://bentengsiber.com/og-image.png">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FiberOps v4.0 Platform Architecture | Benteng Siber">
-  <meta name="twitter:description" content="Multi-Tenant ISP FSM, MikroTik RouterOS v7 REST, OLT/GenieACS optical validation, and Dynamic QRIS async workers.">
+  <meta name="twitter:description" content="Multi-Tenant ISP FSM, Multi-Router MikroTik REST, OLT/GenieACS optical validation, Stripe USD/QRIS webhooks, and Zero-Loss Offline Sync.">
   <meta name="twitter:image" content="https://bentengsiber.com/og-image.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1.7">
+  <link rel="stylesheet" href="styles.css?v=1.8">
 
   <script type="application/ld+json">
   {
@@ -34,8 +34,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Benteng Siber FiberOps v4.0 Platform Architecture & Hardware Orchestration",
-        "description": "Technical guide covering 5-role multi-tenant RBAC, MikroTik RouterOS v7 REST PPPoE automation, OLT/GenieACS TR-069 optical power validation, Dynamic QRIS async un-isolation, and SHA-256 public BAST certificates.",
+        "headline": "Benteng Siber FiberOps v4.0 Complete Platform Architecture & Hardware Orchestration",
+        "description": "Technical blueprint covering 3-level multi-tenant RBAC, Multi-Router MikroTik RouterOS v7 REST PPPoE automation, OLT/GenieACS TR-069 optical power validation, Stripe USD & Midtrans QRIS async un-isolation, Hybrid Mobile GPS, offline FIFO sync, and SHA-256 public BAST certificates.",
         "url": "https://bentengsiber.com/platform-architecture.html",
         "datePublished": "2026-11-23",
         "dateModified": "2026-11-23",
@@ -81,7 +81,7 @@
       </nav>
 
       <div class="header-actions header-actions--compact">
-        <a class="btn btn-ghost hide-xs" href="index.html#pricing">Pricing</a>
+        <a class="btn btn-ghost hide-xs" href="proposal.html">Proposal PDF</a>
         <a class="btn btn-primary hide-xs" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Trial &rarr;</a>
         <button class="mobile-toggle" id="mobile-menu-open" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-drawer">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -106,6 +106,7 @@
           <a href="platform-architecture.html">Platform Architecture <span>&rarr;</span></a>
           <a href="security-governance.html">Security &amp; Zero-Trust <span>&rarr;</span></a>
           <a href="solutions-isp.html">ISP Solutions &amp; ROI <span>&rarr;</span></a>
+          <a href="proposal.html">Executive Proposal (PDF) <span>&rarr;</span></a>
           <a href="playstore.html">Technician Mobile App <span>&rarr;</span></a>
           <a href="about.html">About &amp; Delivery <span>&rarr;</span></a>
           <a href="index.html#pricing">Pricing ($500–$2,500) <span>&rarr;</span></a>
@@ -125,28 +126,34 @@
           <span aria-hidden="true">/</span>
           <span>Platform Architecture</span>
         </nav>
-        <div class="tag-label">TECHNICAL BLUEPRINT • FIBEROPS v4.0</div>
-        <h1>Multi-Tenant ISP Platform &amp; Hardware Orchestration Architecture</h1>
-        <p class="section-subtitle" style="max-width:820px;">
-          A complete engineering breakdown of how Benteng Siber coordinates NOC dispatchers, offline-first field technicians, live MikroTik RouterOS &amp; OLT/GenieACS hardware, On-Site Dynamic QRIS billing, and SHA-256 certified public BAST handovers—available as Cloud SaaS ($500–$1,000/mo) or Full Setup Dedicated Project ($2,500).
+        <div class="tag-label">CTO TECHNICAL BLUEPRINT • FIBEROPS v4.0</div>
+        <h1>Complete Multi-Tenant ISP Platform &amp; Hardware Orchestration Architecture</h1>
+        <p class="section-subtitle" style="max-width:860px;">
+          End-to-end engineering specification of how Benteng Siber orchestrates 3-level Multi-Tenant governance, Multi-Router MikroTik RouterOS v7 POP fleets, live OLT/GenieACS optical gates, Global Stripe USD &amp; Midtrans QRIS auto-unblock, Hybrid GPS offline mobile sync, and SHA-256 public BAST certificates—available via Managed Cloud ($500–$1,000/mo) or Full Setup ($2,500).
         </p>
+
+        <div class="arch-hero-actions">
+          <a class="btn btn-primary" href="https://admin.bentengsiber.com/login?demo=admin" target="_blank" rel="noopener noreferrer">Open Live NOC Sandbox (1-Click) &rarr;</a>
+          <a class="btn btn-navy" href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Launch Technician PWA Demo</a>
+          <a class="btn btn-outline-navy" href="proposal.html">1-Page Executive Proposal (PDF)</a>
+        </div>
 
         <div class="kpi-strip">
           <div class="kpi-box">
-            <div class="kpi-box-val">5 Roles</div>
-            <div class="kpi-box-label">Granular Multi-Tenant RBAC + Root Master</div>
+            <div class="kpi-box-val">5 + 1 Roles</div>
+            <div class="kpi-box-label">Tenant ISP 5-Role RBAC + Root Master Platform</div>
           </div>
           <div class="kpi-box">
             <div class="kpi-box-val">&lt; 150 ms</div>
-            <div class="kpi-box-label">Signed Payment Webhook ACK via ShouldQueue</div>
+            <div class="kpi-box-label">Provider-Locked Webhook ACK via ShouldQueue</div>
           </div>
           <div class="kpi-box">
-            <div class="kpi-box-val">3 Seconds</div>
-            <div class="kpi-box-label">QRIS Settlement to MikroTik PPPoE Un-Isolate</div>
+            <div class="kpi-box-val">&lt; 3 Seconds</div>
+            <div class="kpi-box-label">Stripe USD / QRIS Settlement &rarr; MikroTik Unblock</div>
           </div>
           <div class="kpi-box">
-            <div class="kpi-box-val">SHA-256</div>
-            <div class="kpi-box-label">Public QR-Scannable BAST &amp; Hash-Chained Audit</div>
+            <div class="kpi-box-val">97 Tests</div>
+            <div class="kpi-box-label">963 Automated Security, FSM &amp; Hardware Assertions</div>
           </div>
         </div>
       </div>
@@ -155,26 +162,29 @@
     <section class="section">
       <div class="container doc-layout">
         <aside class="doc-toc" aria-label="Table of Contents">
-          <div class="doc-toc-title">Architecture Guide</div>
+          <div class="doc-toc-title">Architecture Blueprint</div>
           <ul>
-            <li><a href="#topology">1. End-to-End System Topology</a></li>
-            <li><a href="#rbac">2. Multi-Tenant 5-Role RBAC</a></li>
-            <li><a href="#orchestrator">3. MikroTik &amp; OLT/GenieACS</a></li>
-            <li><a href="#qris-flow">4. Dynamic QRIS &amp; Async Workers</a></li>
-            <li><a href="#fsm-bom">5. Work Order FSM &amp; Atomic BOM</a></li>
-            <li><a href="#bast-verify">6. Public Certified BAST Payload</a></li>
-            <li><a href="#mobile-sync">7. Offline-First PWA &amp; APK Sync</a></li>
+            <li><a href="#topology" class="is-active">1. 4-Tier Carrier Topology</a></li>
+            <li><a href="#multitenant">2. 3-Level Isolation &amp; 5+1 RBAC</a></li>
+            <li><a href="#orchestrator">3. Multi-Router Fleet &amp; OLT Gate</a></li>
+            <li><a href="#payments">4. Stripe USD &amp; QRIS Orchestration</a></li>
+            <li><a href="#fsm-concurrency">5. Deterministic FSM &amp; Atomic Locks</a></li>
+            <li><a href="#payload-inspector">6. Live API &amp; Payload Inspector</a></li>
+            <li><a href="#mobile-gps-sync">7. Hybrid Mobile GPS &amp; Offline Sync</a></li>
+            <li><a href="#infrastructure">8. Cloud vs. $2,500 Full Setup Sizing</a></li>
+            <li><a href="#qa-verification">9. Automated Test &amp; Audit Proof</a></li>
           </ul>
         </aside>
 
         <div class="doc-content">
+          <!-- SECTION 1: 4-TIER CARRIER SYSTEM TOPOLOGY -->
           <article id="topology">
-            <h2>1. End-to-End Carrier System Topology</h2>
+            <h2>1. 4-Tier End-to-End Carrier System Topology</h2>
             <p>
-              FiberOps v4.0 cleanly decouples user-facing real-time workflows from high-latency telecom hardware I/O. HTTP webhooks and mobile requests validate, lock state atomically in MySQL, and enqueue resilient background jobs that speak directly to each tenant's encrypted MikroTik and OLT drivers.
+              FiberOps v4.0 strictly separates real-time human workflows from high-latency telecom hardware I/O. Every mobile tap, admin dispatch, and payment callback passes through Zero-Trust tenant resolution, atomic <code>Cache::lock</code> idempotency, and MySQL row locks before delegating router and ACS calls to resilient <code>ShouldQueue</code> workers.
             </p>
             <div class="diagram-frame">
-              <svg viewBox="0 0 920 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Benteng Siber FiberOps v4.0 end-to-end system data flow diagram">
+              <svg viewBox="0 0 980 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Benteng Siber FiberOps v4.0 4-tier architecture diagram">
                 <defs>
                   <marker id="arrowNavy" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                     <path d="M 0 1 L 10 5 L 0 9 z" fill="#0f3559"/>
@@ -182,202 +192,521 @@
                   <marker id="arrowAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                     <path d="M 0 1 L 10 5 L 0 9 z" fill="#e8913a"/>
                   </marker>
+                  <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+                  </marker>
                 </defs>
-                <!-- Left Column: Clients -->
-                <rect x="16" y="18" width="210" height="62" rx="10" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
-                <text x="121" y="44" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#011835">Super Admin NOC Console</text>
-                <text x="121" y="63" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#475569">5-Role RBAC • GIS • 4s Pulse</text>
 
-                <rect x="16" y="99" width="210" height="62" rx="10" fill="#fff7ed" stroke="#e8913a" stroke-width="1.8"/>
-                <text x="121" y="125" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#011835">Technician PWA &amp; APK</text>
-                <text x="121" y="144" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#9a3412">Offline Queue • QRIS • 3s Sync</text>
+                <!-- Tier Labels -->
+                <text x="115" y="16" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#64748b">TIER 1 • PORTALS &amp; APPS</text>
+                <text x="385" y="16" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#64748b">TIER 2 • ZERO-TRUST CORE</text>
+                <text x="635" y="16" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#64748b">TIER 3 • ASYNC WORKERS</text>
+                <text x="865" y="16" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#64748b">TIER 4 • HARDWARE &amp; FINTECH</text>
 
-                <rect x="16" y="180" width="210" height="62" rx="10" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
-                <text x="121" y="206" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#011835">Public Subscriber Portals</text>
-                <text x="121" y="225" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#475569">/request • /track • /bast/verify</text>
+                <!-- Tier 1: Portals -->
+                <rect x="14" y="28" width="202" height="54" rx="9" fill="#011835" stroke="#e8913a" stroke-width="1.6"/>
+                <text x="115" y="51" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="800" fill="#ffffff">Platform Master Console</text>
+                <text x="115" y="68" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#f4b168">/master-admin • Root HQ</text>
 
-                <!-- Center: Zero-Trust Core -->
-                <rect x="304" y="24" width="276" height="212" rx="14" fill="#011835" stroke="#e8913a" stroke-width="2"/>
-                <text x="442" y="54" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#f4b168">ZERO-TRUST LARAVEL CORE</text>
-                <text x="442" y="76" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Multi-Tenant API &amp; FSM</text>
+                <rect x="14" y="94" width="202" height="54" rx="9" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
+                <text x="115" y="117" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="800" fill="#011835">ISP 5-Role NOC Console</text>
+                <text x="115" y="134" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#475569">Dispatch • GIS • 4s Pulse</text>
 
-                <rect x="326" y="94" width="232" height="36" rx="7" fill="#0f3559"/>
-                <text x="442" y="116" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#e2e8f0">TenantScope • AES-256 Vault</text>
+                <rect x="14" y="160" width="202" height="54" rx="9" fill="#fff7ed" stroke="#e8913a" stroke-width="1.8"/>
+                <text x="115" y="183" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="800" fill="#011835">Technician PWA &amp; APK</text>
+                <text x="115" y="200" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#9a3412">Hybrid GPS • FIFO Queue</text>
 
-                <rect x="326" y="139" width="232" height="36" rx="7" fill="#0f3559"/>
-                <text x="442" y="161" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#86efac">ShouldQueue Async Workers</text>
+                <rect x="14" y="226" width="202" height="54" rx="9" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
+                <text x="115" y="249" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="800" fill="#011835">Public Subscriber Portals</text>
+                <text x="115" y="266" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#475569">/request • /track • /bast</text>
 
-                <rect x="326" y="184" width="232" height="36" rx="7" fill="#0f3559"/>
-                <text x="442" y="206" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#fbbf24">SHA-256 BAST &amp; Audit Ledger</text>
+                <!-- Tier 2: Zero-Trust Core -->
+                <rect x="266" y="28" width="238" height="252" rx="13" fill="#011835" stroke="#0f3559" stroke-width="2"/>
+                <text x="385" y="54" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#f4b168">LARAVEL 10 + SANCTUM</text>
+                <text x="385" y="75" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">Zero-Trust Domain Core</text>
 
-                <!-- Right Column: Hardware & Fintech -->
-                <rect x="660" y="18" width="244" height="62" rx="10" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
-                <text x="782" y="44" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#011835">MikroTik RouterOS v7 REST</text>
-                <text x="782" y="63" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#475569">PPPoE Provision • ISOLIR • Unblock</text>
+                <rect x="284" y="92" width="202" height="34" rx="7" fill="#0f3559"/>
+                <text x="385" y="113" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#e2e8f0">IdentifyTenant + TenantScope</text>
 
-                <rect x="660" y="99" width="244" height="62" rx="10" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
-                <text x="782" y="125" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#011835">OLT / GenieACS TR-069</text>
-                <text x="782" y="144" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#475569">Live ONT Rx Power (-dBm Gate)</text>
+                <rect x="284" y="134" width="202" height="34" rx="7" fill="#0f3559"/>
+                <text x="385" y="155" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#93c5fd">Cache::lock Idempotency</text>
 
-                <rect x="660" y="180" width="244" height="62" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.8"/>
-                <text x="782" y="206" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#065f46">Midtrans Dynamic QRIS</text>
-                <text x="782" y="225" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#047857">Signed Webhook &lt;150ms • 3s Restore</text>
+                <rect x="284" y="176" width="202" height="34" rx="7" fill="#0f3559"/>
+                <text x="385" y="197" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#86efac">TaskStateMachine + BOM Lock</text>
 
-                <!-- Arrows Left -> Center -->
-                <line x1="226" y1="49" x2="298" y2="75" stroke="#0f3559" stroke-width="1.8" stroke-dasharray="4 4" marker-end="url(#arrowNavy)"/>
-                <line x1="226" y1="130" x2="298" y2="130" stroke="#e8913a" stroke-width="2.2" stroke-dasharray="5 4" marker-end="url(#arrowAmber)"/>
-                <line x1="226" y1="211" x2="298" y2="188" stroke="#0f3559" stroke-width="1.8" stroke-dasharray="4 4" marker-end="url(#arrowNavy)"/>
+                <rect x="284" y="218" width="202" height="34" rx="7" fill="#0f3559"/>
+                <text x="385" y="239" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#fbbf24">AES-256 Vault + SHA-256 Log</text>
 
-                <!-- Arrows Center -> Right -->
-                <line x1="580" y1="84" x2="654" y2="49" stroke="#e8913a" stroke-width="2.2" stroke-dasharray="5 4" marker-end="url(#arrowAmber)"/>
-                <line x1="580" y1="130" x2="654" y2="130" stroke="#0f3559" stroke-width="1.8" stroke-dasharray="4 4" marker-end="url(#arrowNavy)"/>
-                <line x1="580" y1="176" x2="654" y2="211" stroke="#e8913a" stroke-width="2.2" stroke-dasharray="5 4" marker-end="url(#arrowAmber)"/>
+                <!-- Tier 3: Async Queue Backbone -->
+                <rect x="550" y="58" width="170" height="192" rx="12" fill="#f0fdf4" stroke="#059669" stroke-width="1.8"/>
+                <text x="635" y="84" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#047857">SHOULDQUEUE</text>
+                <text x="635" y="103" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#064e3b">Async Job Workers</text>
+                <text x="635" y="128" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#065f46">• UnIsolateCustomer</text>
+                <text x="635" y="148" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#065f46">• ProvisionPppoe</text>
+                <text x="635" y="168" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#065f46">• DispatchWebhook</text>
+                <text x="635" y="188" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#065f46">• CustomerNotify</text>
+                <rect x="568" y="206" width="134" height="28" rx="6" fill="#059669"/>
+                <text x="635" y="224" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#ffffff">Backoff: 5s / 30s / 120s</text>
+
+                <!-- Tier 4: Hardware & Fintech -->
+                <rect x="764" y="34" width="202" height="68" rx="10" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
+                <text x="865" y="60" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="800" fill="#011835">Multi-Router MikroTik</text>
+                <text x="865" y="77" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#475569">RouterOS v7 REST • POP Fleet</text>
+                <text x="865" y="92" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#0f3559">1-Click Sync • Auto-Unblock</text>
+
+                <rect x="764" y="118" width="202" height="68" rx="10" fill="#f8fafc" stroke="#0f3559" stroke-width="1.6"/>
+                <text x="865" y="144" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="800" fill="#011835">OLT / GenieACS TR-069</text>
+                <text x="865" y="161" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#475569">Live ONT Rx Power (-dBm)</text>
+                <text x="865" y="176" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#0f3559">Strict ONT SN Gate (HTTP 422)</text>
+
+                <rect x="764" y="202" width="202" height="68" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.8"/>
+                <text x="865" y="228" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11.5" font-weight="800" fill="#065f46">Stripe USD + Midtrans</text>
+                <text x="865" y="245" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#047857">HMAC-SHA256 &amp; SHA-512</text>
+                <text x="865" y="260" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#065f46">Provider-Locked Webhooks</text>
+
+                <!-- Arrows Tier 1 -> Tier 2 -->
+                <line x1="216" y1="55" x2="260" y2="75" stroke="#e8913a" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#arrowAmber)"/>
+                <line x1="216" y1="121" x2="260" y2="121" stroke="#0f3559" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#arrowNavy)"/>
+                <line x1="216" y1="187" x2="260" y2="187" stroke="#e8913a" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrowAmber)"/>
+                <line x1="216" y1="253" x2="260" y2="233" stroke="#0f3559" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#arrowNavy)"/>
+
+                <!-- Arrow Tier 2 -> Tier 3 -->
+                <line x1="504" y1="154" x2="544" y2="154" stroke="#059669" stroke-width="2.2" marker-end="url(#arrowGreen)"/>
+
+                <!-- Arrows Tier 3 -> Tier 4 -->
+                <line x1="720" y1="110" x2="758" y2="68" stroke="#e8913a" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrowAmber)"/>
+                <line x1="720" y1="152" x2="758" y2="152" stroke="#0f3559" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#arrowNavy)"/>
+                <line x1="720" y1="196" x2="758" y2="236" stroke="#059669" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrowGreen)"/>
               </svg>
             </div>
           </article>
 
-          <article id="rbac">
-            <h2>2. Strict Row-Level Multi-Tenant SaaS &amp; 5-Role RBAC</h2>
+          <!-- SECTION 2: 3-LEVEL MULTI-TENANT ISOLATION & 5+1 RBAC -->
+          <article id="multitenant">
+            <h2>2. 3-Level Multi-Tenant Isolation &amp; 5+1 RBAC Architecture</h2>
             <p>
-              Every ISP tenant operates inside an isolated logical boundary enforced at both HTTP middleware and Eloquent Global Scope layers. Subscribers, GIS nodes (OLT/ODC/ODP), work orders, warehouse BOM materials, payment records, and technician GPS breadcrumbs are permanently partitioned by <code>tenant_id</code>.
+              Whether you operate Benteng Siber as a multi-tenant ISP cloud platform ($500–$1,000/mo per ISP) or deploy a dedicated single-tenant white-label stack ($2,500 Full Setup), authorization and database boundaries are enforced across three strict tiers:
             </p>
+
+            <div class="arch-layer-grid arch-layer-grid--3">
+              <div class="arch-layer-card arch-layer-card--dark">
+                <span class="arch-layer-kicker">LEVEL 0 • PLATFORM HQ</span>
+                <h3>Platform Owner Console</h3>
+                <p>Exclusive Root Tenant (<code>tenant_id = 1</code>) governance at <code>/master-admin</code>, protected by <code>isPlatformOwner()</code> and optional <code>PLATFORM_OWNER_EMAILS</code> env allowlist.</p>
+                <ul class="arch-layer-list">
+                  <li>Live tenant fleet metrics &amp; usage tracking</li>
+                  <li>1-click tenant Suspend / Reactivate &amp; plan upgrade</li>
+                  <li>Immutable SHA-256 hash-chained audit ledger</li>
+                </ul>
+              </div>
+
+              <div class="arch-layer-card">
+                <span class="arch-layer-kicker">LEVEL 1 • ISP TENANT CLOUD</span>
+                <h3>Isolated ISP Workspace (5 Roles)</h3>
+                <p>Each subscribed ISP receives a cryptographically partitioned workspace (<code>tenant_id = 2, 3...</code>) via Eloquent <code>TenantScope</code> &amp; route-model anti-IDOR guards.</p>
+                <ul class="arch-layer-list">
+                  <li>Zero cross-tenant SQL/API leakage</li>
+                  <li>Dedicated AES-256 router &amp; payment vault</li>
+                  <li>Canonical quota enforcer (<code>Tenant::planLimits</code>)</li>
+                </ul>
+              </div>
+
+              <div class="arch-layer-card">
+                <span class="arch-layer-kicker">LEVEL 2 • SUBSCRIBER EDGE</span>
+                <h3>Public Zero-Auth Portals</h3>
+                <p>Token-scoped public interfaces that redact internal warehouse costs, private staff PII, and expire tracking links automatically 24 hours post-completion.</p>
+                <ul class="arch-layer-list">
+                  <li><code>/request</code> — Branded service request inbox</li>
+                  <li><code>/track/{token}</code> — Live GPS ETA &amp; CSAT rating</li>
+                  <li><code>/bast/verify/{hash}</code> — Public QR BAST seal</li>
+                </ul>
+              </div>
+            </div>
+
             <div class="spec-table-wrap">
               <table class="spec-table">
                 <thead>
                   <tr>
                     <th>Role</th>
-                    <th>Operational Scope</th>
-                    <th>Permissions &amp; Security Guardrails</th>
+                    <th>Portal / App</th>
+                    <th>Operational Scope &amp; Security Guardrails</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
+                    <td><strong>Platform Owner</strong></td>
+                    <td><code>/master-admin</code></td>
+                    <td>Root HQ only (<code>isPlatformOwner()</code>). Manages all ISP tenants, subscription quotas (Starter 10/100, Growth 40/500, Full Setup Unlimited), suspensions, and global audit chain verification.</td>
+                  </tr>
+                  <tr>
                     <td><strong>Super Admin (ISP)</strong></td>
-                    <td>Tenant-Wide NOC &amp; Vault</td>
-                    <td>Full tenant controls, AES-256 MikroTik/OLT/Midtrans credentials, staff RBAC management, financial/BOM CSV exports, SLA policies, and BAST audits.</td>
+                    <td>Web Admin Portal</td>
+                    <td>Full tenant-scoped NOC control: AES-256 MikroTik POP fleet, OLT/GenieACS, Stripe/Midtrans keys, staff RBAC accounts, CSV exports (Excel formula-injection neutralized), and SLA rules.</td>
                   </tr>
                   <tr>
                     <td><strong>NOC Dispatcher</strong></td>
-                    <td>Live Dispatch &amp; GIS</td>
-                    <td>Live GPS fleet radar, nearest-technician auto-dispatch, OLT/ODC/ODP port occupancy, MikroTik PPPoE sync triggers, and SLA escalation.</td>
+                    <td>Web Admin Portal</td>
+                    <td>Live GPS technician radar, nearest-tech auto-dispatch, GIS OLT/ODC/ODP port occupancy, 1-click MikroTik PPPoE sync, CSV subscriber import, and SLA escalation sweeps.</td>
                   </tr>
                   <tr>
                     <td><strong>Warehouse Admin</strong></td>
-                    <td>Inventory &amp; BOM Ledger</td>
-                    <td>Manage ONT, drop-core fiber cable, patch cords, splice sleeves, restock ledger, and audit atomic row-locked BOM deductions.</td>
+                    <td>Web Admin Portal</td>
+                    <td>Manages ONT serial stocks, drop-core fiber cables, patch cords, splice sleeves, atomic BOM stock adjustments, and inventory audit exports.</td>
                   </tr>
                   <tr>
                     <td><strong>Field Supervisor</strong></td>
-                    <td>QA &amp; Work Order Review</td>
-                    <td>Inspect 3-slot optical dBm photo proofs, validate live OLT readings, approve BAST handovers, or trigger formal rework states.</td>
+                    <td>Web Admin Portal</td>
+                    <td>Monitors real-time field fleet map, reviews 3-slot optical <code>-dBm</code> photo proofs, validates OLT telemetry, approves BAST seals, or issues formal rework orders.</td>
                   </tr>
                   <tr>
                     <td><strong>Field Technician</strong></td>
-                    <td>Assigned Tickets Only</td>
-                    <td>Ionic/Capacitor PWA &amp; Android APK: strict anti-IDOR ownership checks (HTTP 403 on unassigned tickets), offline queue, Dynamic QRIS, e-sign.</td>
+                    <td>Mobile PWA / APK</td>
+                    <td>Ionic 8 / Angular 20 / Capacitor 8 app. Strict ownership guard (HTTP 403 on other techs' tickets), Hybrid GPS, offline FIFO queue, on-site Stripe/QRIS checkout, Sign-on-Glass.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </article>
 
+          <!-- SECTION 3: MULTI-ROUTER POP FLEET & OLT/GENIEACS -->
           <article id="orchestrator">
-            <h2>3. Active Network Orchestrator: MikroTik RouterOS v7 &amp; OLT/GenieACS</h2>
+            <h2>3. Multi-Router POP Fleet &amp; OLT/GenieACS Hardware Orchestrator</h2>
             <p>
-              Benteng Siber bridges field labor directly to live network state via pluggable, SSRF-protected driver interfaces—eliminating manual Winbox CLI edits and WhatsApp back-and-forth with NOC staff:
+              Regional ISPs rarely run a single router. FiberOps v4.0 includes a dedicated <strong>Multi-Router POP Fleet</strong> architecture (<code>tenant_routers</code>) plus live optical telemetry verification—replacing manual Winbox edits and unverified field installations:
             </p>
-            <ul>
-              <li><strong>MikroTik RouterOS v7 REST Driver (<code>MikrotikRestDriver</code>):</strong> Provisions PPPoE secrets on new FTTH installs, isolates overdue subscribers into the <code>ISOLIR</code> profile, and restores original bandwidth profiles automatically upon settlement.</li>
-              <li><strong>OLT / GenieACS TR-069 Optical Gate (<code>GenieAcsDriver</code>):</strong> Queries live ONT Rx optical attenuation (<code>-dBm</code>) from ACS/OLT hardware. Sub-standard fiber splices (e.g., worse than <code>-27.0 dBm</code>) trigger immediate QA flags prior to completion.</li>
-              <li><strong>Simulator &amp; Production Drivers:</strong> Each tenant can verify end-to-end workflows in safe Simulator Mode before toggling Production RouterOS REST / GenieACS credentials inside encrypted tenant settings.</li>
-            </ul>
+
+            <div class="arch-layer-grid arch-layer-grid--2">
+              <div class="arch-layer-card">
+                <span class="arch-layer-kicker">MIKROTIK ROUTEROS v7 REST FLEET</span>
+                <h3>Multi-POP Router Orchestration</h3>
+                <p>Register unlimited district POP routers with per-router isolation profiles (e.g., <code>ISOLIR</code>), automatic default failover promotion, and 1-click live connectivity tests.</p>
+                <ul class="arch-layer-list">
+                  <li><strong>AES-256 Encrypted Passwords:</strong> Decrypted only in memory inside queue workers.</li>
+                  <li><strong>SSRF Perimeter Guard:</strong> Blocks loopback (<code>127.0.0.1</code>, <code>::1</code>) and cloud metadata (<code>169.254.169.254</code>) hosts.</li>
+                  <li><strong>1-Click PPPoE Sync &amp; CSV Import:</strong> Pulls up to 500 active/isolated PPPoE secrets directly from RouterOS or auto-detects comma (<code>,</code>) and semicolon (<code>;</code>) CSV files.</li>
+                </ul>
+              </div>
+
+              <div class="arch-layer-card">
+                <span class="arch-layer-kicker">OLT &amp; GENIEACS TR-069 GATE</span>
+                <h3>Strict Optical Power (-dBm) Enforcement</h3>
+                <p>Before a technician can close an FTTH activation or LOS outage ticket, <code>OltService</code> verifies real-time ONT health directly against the tenant's ACS/OLT controller.</p>
+                <ul class="arch-layer-list">
+                  <li><strong>Zero Silent Bypass:</strong> If OLT gate is enabled and a task links a subscriber or ODP node without an <code>ont_serial_number</code>, completion fails closed with HTTP 422.</li>
+                  <li><strong>Attenuation Threshold:</strong> Rejects poor fiber splices worse than the configured ceiling (default <code>-27.0 dBm</code>) or offline ONTs.</li>
+                  <li><strong>Permanent Seal:</strong> Live Rx/Tx dBm readings are stamped onto the task and embedded in the SHA-256 BAST certificate.</li>
+                </ul>
+              </div>
+            </div>
           </article>
 
-          <article id="qris-flow">
-            <h2>4. On-Site Dynamic QRIS &amp; Async Queue Architecture</h2>
+          <!-- SECTION 4: GLOBAL STRIPE USD & MIDTRANS QRIS ORCHESTRATION -->
+          <article id="payments">
+            <h2>4. Global Payment Gateway Orchestration (Stripe USD + Midtrans QRIS)</h2>
             <p>
-              On-site cash collection leaks ISP revenue and delays service restoration. Benteng Siber embeds live Dynamic QRIS inside both the Technician PWA and Admin Console—backed by asynchronous queue workers so external routers never stall payment callbacks.
+              FiberOps v4.0 eliminates field cash leakage for both global USD/EUR/GBP/AUD ISPs and Indonesian IDR ISPs via a pluggable, provider-locked payment architecture:
             </p>
+
+            <div class="arch-badge-row">
+              <span class="arch-badge arch-badge--green">Stripe Checkout (Cards, Apple Pay, Google Pay, Link)</span>
+              <span class="arch-badge arch-badge--green">Midtrans Core API (Dynamic QRIS)</span>
+              <span class="arch-badge arch-badge--amber">Zero-Config Simulator Mode</span>
+              <span class="arch-badge">Currency-Aware Min Validation (USD $1 / IDR 1,000)</span>
+            </div>
+
             <div class="step-timeline">
               <div class="step-card">
                 <div class="step-num">01</div>
                 <div>
-                  <h3>On-Site QRIS Invoice Creation</h3>
-                  <p>Technician taps <strong>Generate QRIS</strong> inside the work order. The API uses the tenant's AES-256 decrypted Midtrans key to mint a dynamic invoice QR code displayed on the technician's device.</p>
+                  <h3>Currency-Aware On-Site Invoice Generation</h3>
+                  <p>Technician or NOC generates a live payment link/QR in the tenant's currency (<code>USD</code>, <code>EUR</code>, <code>GBP</code>, <code>AUD</code>, or <code>IDR</code>). <code>StripePaymentDriver</code> applies official Stripe minor-unit rules (two-decimal vs. zero-decimal currencies) with zero external SDK bloat.</p>
                 </div>
               </div>
               <div class="step-card">
                 <div class="step-num">02</div>
                 <div>
-                  <h3>Rate-Limited Signed Webhook (&lt; 150 ms)</h3>
-                  <p>The subscriber pays via any QRIS e-wallet or bank app. Benteng Siber verifies the cryptographic signature and exact <code>gross_amount</code>, marks the invoice settled atomically, and responds HTTP 200 in under 150 ms.</p>
+                  <h3>Provider-Locked Cryptographic Webhook (&lt; 150 ms)</h3>
+                  <p><code>/api/webhooks/stripe</code> verifies HMAC-SHA256 <code>Stripe-Signature</code> (with 5-minute replay guard) strictly against <code>StripePaymentDriver</code>; <code>/api/webhooks/payment</code> locks verification to each transaction's original provider (Midtrans SHA-512 vs. Simulator)—blocking cross-driver forgery even if settings change mid-flight.</p>
                 </div>
               </div>
               <div class="step-card">
                 <div class="step-num">03</div>
                 <div>
-                  <h3>Resilient Background Execution (<code>ShouldQueue</code>)</h3>
-                  <p><code>UnIsolateCustomerOnPaymentJob</code> runs asynchronously (<code>tries=3</code>, exponential backoff <code>5s / 30s / 120s</code>), calling MikroTik RouterOS REST to restore PPPoE access even if the ISP router experiences transient packet loss.</p>
+                  <h3>Atomic Settlement &amp; Async MikroTik Auto-Unblock</h3>
+                  <p>Inside a row-locked DB transaction (<code>lockForUpdate()</code>), exact <code>gross_amount</code> is validated, status flips to <code>paid</code> idempotently, and <code>UnIsolateCustomerOnPaymentJob</code> dispatches <code>afterCommit()</code> with <code>tries=3</code> exponential backoff (<code>5s / 30s / 120s</code>).</p>
                 </div>
               </div>
               <div class="step-card">
                 <div class="step-num">04</div>
                 <div>
-                  <h3>3-Second Live Sync to Mobile &amp; NOC</h3>
-                  <p>Both Technician PWA and NOC Dashboard reflect <strong>PAID &amp; ACTIVE</strong> within seconds and embed the payment settlement reference straight into the SHA-256 BAST certificate.</p>
+                  <h3>3-Second Live Sync + Customer Receipt Notification</h3>
+                  <p>The technician's PWA (with bounded, tab-visibility-aware polling) and NOC Live Pulse flip to <strong>PAID &amp; ACTIVE</strong> automatically while sending payment confirmation to the subscriber.</p>
                 </div>
               </div>
             </div>
           </article>
 
-          <article id="fsm-bom">
-            <h2>5. Deterministic Work Order FSM &amp; Atomic BOM Concurrency</h2>
+          <!-- SECTION 5: DETERMINISTIC WORK ORDER FSM & ATOMIC CONCURRENCY -->
+          <article id="fsm-concurrency">
+            <h2>5. Deterministic Work Order FSM &amp; Atomic Concurrency Engine</h2>
             <p>
-              Tickets move strictly through server-enforced transitions: <code>pending</code> &rarr; <code>assigned</code> &rarr; <code>en_route</code> &rarr; <code>in_progress</code> &rarr; <code>completed</code> (with controlled <code>rework</code> or <code>cancelled</code> branches).
+              Work orders cannot jump randomly between statuses. Every transition executes inside <code>TaskStateMachine::transition()</code> under pessimistic row locking (<code>Task::lockForUpdate()</code>), appending an immutable entry to <code>task_status_histories</code>:
             </p>
+
+            <div class="fsm-flow-box">
+              <div class="fsm-flow" aria-label="Deterministic Work Order State Transition Graph">
+                <div class="fsm-node">
+                  <strong>pending</strong>
+                  <span>Intake / Queue</span>
+                </div>
+                <span class="fsm-arrow">&rarr;</span>
+                <div class="fsm-node">
+                  <strong>assigned</strong>
+                  <span>Tech Dispatched</span>
+                </div>
+                <span class="fsm-arrow">&rarr;</span>
+                <div class="fsm-node">
+                  <strong>accepted</strong>
+                  <span>Tech Confirmed</span>
+                </div>
+                <span class="fsm-arrow">&rarr;</span>
+                <div class="fsm-node fsm-node--active">
+                  <strong>on-going</strong>
+                  <span>Geofence Checked</span>
+                </div>
+                <span class="fsm-arrow">&rarr;</span>
+                <div class="fsm-node fsm-node--sealed">
+                  <strong>completed</strong>
+                  <span>BAST SHA-256 Sealed</span>
+                </div>
+              </div>
+              <div class="fsm-branches">
+                <div class="fsm-node fsm-node--branch">
+                  <strong>rejected</strong>
+                  <span>Declined / Re-queued</span>
+                </div>
+                <span><strong>Admin Override Guard:</strong> Portal staff can reopen or override transitions <em>only</em> with an explicit audit reason, automatically resealing BAST &amp; rolling back ODP ports atomically.</span>
+              </div>
+            </div>
+
             <div class="callout-box callout-box--navy">
-              <strong>Pessimistic Row-Level Concurrency:</strong> Warehouse BOM deductions (drop-core cable, ONTs, patch cords) and ODP port occupancy increments execute inside MySQL transactions using <code>lockForUpdate()</code>. Concurrent mobile syncs can never oversell an ODP port or produce negative stock balances.
+              <strong>3 Concurrency &amp; Boundary Hardening Guarantees:</strong>
+              <ul style="margin:0.55rem 0 0;padding-left:1.2rem;font-size:0.88rem;line-height:1.65;">
+                <li><strong>Atomic <code>Cache::lock</code> Idempotency Middleware:</strong> Serializes simultaneous <code>&lt; 50ms</code> double-taps sharing the same <code>Idempotency-Key</code> per tenant/user/path and replays cached 2xx responses with <code>X-Idempotent-Replay: true</code>.</li>
+                <li><strong>Pessimistic BOM &amp; ODP Locking:</strong> Warehouse material deductions and ODP port increments run inside <code>lockForUpdate()</code> transactions—preventing negative stock or double-booked ODP ports.</li>
+                <li><strong>Equator &amp; Prime Meridian Exact Coordinates:</strong> Geofence validation uses strict null checks (<code>latitude === null</code>) so sites at <code>0.0°</code> (Indonesia, Kenya, Ecuador, Brazil) enforce GPS radius checks reliably.</li>
+              </ul>
             </div>
           </article>
 
-          <article id="bast-verify">
-            <h2>6. Certified Public BAST Cryptographic Payload</h2>
+          <!-- SECTION 6: INTERACTIVE PRODUCTION PAYLOAD & API CONTRACT INSPECTOR -->
+          <article id="payload-inspector">
+            <h2>6. Interactive Production Payload &amp; API Contract Inspector</h2>
             <p>
-              When a job completes, Benteng Siber seals all field proofs, optical readings, BOM usage, QRIS payment references, and the subscriber's signature into a canonical SHA-256 hash verifiable publicly via QR scan at <code>/bast/verify/{hash}</code>:
+              Inspect the exact JSON structures, cryptographic headers, and hardware payloads exchanged across FiberOps v4.0 in production. Select any integration contract below:
             </p>
-            <div class="code-window">
-              <div class="code-window-bar">
-                <span class="code-dots"><span></span><span></span><span></span></span>
-                <span>GET /bast/verify/8f4c...92e1 — Verified Payload Structure</span>
+
+            <div class="payload-inspector" data-payload-inspector>
+              <div class="payload-tabs" role="tablist" aria-label="Production Payload Contracts">
+                <button class="payload-tab-btn is-active" type="button" role="tab" aria-selected="true" data-payload-tab="bast">1. SHA-256 BAST</button>
+                <button class="payload-tab-btn" type="button" role="tab" aria-selected="false" data-payload-tab="stripe">2. Stripe Webhook</button>
+                <button class="payload-tab-btn" type="button" role="tab" aria-selected="false" data-payload-tab="mikrotik">3. MikroTik Unblock</button>
+                <button class="payload-tab-btn" type="button" role="tab" aria-selected="false" data-payload-tab="olt">4. OLT -dBm Gate</button>
+                <button class="payload-tab-btn" type="button" role="tab" aria-selected="false" data-payload-tab="offline">5. Offline Batch</button>
               </div>
+
+              <!-- Panel 1: BAST -->
+              <div class="payload-panel is-active" role="tabpanel" data-payload-panel="bast">
+                <div class="payload-panel-meta">
+                  <span>GET /bast/verify/8f4c9a12...92e1 &bull; Public Cryptographic Certificate</span>
+                  <button class="payload-copy-btn" type="button" data-copy-payload>Copy JSON</button>
+                </div>
 <pre>{
   <span class="code-key">"certificate_status"</span>: <span class="code-str">"VERIFIED_AUTHENTIC"</span>,
-  <span class="code-key">"task_code"</span>: <span class="code-str">"WO-2026-04182"</span>,
+  <span class="code-key">"task_code"</span>: <span class="code-str">"#TSK-04182"</span>,
+  <span class="code-key">"tenant"</span>: <span class="code-str">"Global Fiber Networks LLC"</span>,
   <span class="code-key">"optical_gate"</span>: {
     <span class="code-key">"source"</span>: <span class="code-str">"OLT_GENIEACS_TR069"</span>,
+    <span class="code-key">"ont_serial_number"</span>: <span class="code-str">"ZTEG00112233"</span>,
     <span class="code-key">"rx_power_dbm"</span>: <span class="code-num">-18.42</span>,
+    <span class="code-key">"max_attenuation_dbm"</span>: <span class="code-num">-27.0</span>,
     <span class="code-key">"tolerance_pass"</span>: <span class="code-num">true</span>
   },
-  <span class="code-key">"mikrotik_sync"</span>: { <span class="code-key">"pppoe_state"</span>: <span class="code-str">"ACTIVE"</span>, <span class="code-key">"unblock_ms"</span>: <span class="code-num">2480</span> },
-  <span class="code-key">"qris_settlement"</span>: { <span class="code-key">"status"</span>: <span class="code-str">"PAID"</span>, <span class="code-key">"verified_webhook"</span>: <span class="code-num">true</span> },
-  <span class="code-key">"sha256_seal"</span>: <span class="code-str">"8f4c9a12d7e5b04f3c81...7e19c4b092e1"</span>
+  <span class="code-key">"mikrotik_sync"</span>: { <span class="code-key">"router_code"</span>: <span class="code-str">"POP-WEST-01"</span>, <span class="code-key">"pppoe_state"</span>: <span class="code-str">"ACTIVE"</span>, <span class="code-key">"unblock_ms"</span>: <span class="code-num">2140</span> },
+  <span class="code-key">"payment_settlement"</span>: { <span class="code-key">"provider"</span>: <span class="code-str">"stripe"</span>, <span class="code-key">"currency"</span>: <span class="code-str">"USD"</span>, <span class="code-key">"amount"</span>: <span class="code-num">49.00</span>, <span class="code-key">"status"</span>: <span class="code-str">"paid"</span> },
+  <span class="code-key">"sha256_seal"</span>: <span class="code-str">"8f4c9a12d7e5b04f3c81a9e2b4d7c1094a21f38e7e19c4b092e1"</span>
 }</pre>
+              </div>
+
+              <!-- Panel 2: Stripe Webhook -->
+              <div class="payload-panel" role="tabpanel" data-payload-panel="stripe">
+                <div class="payload-panel-meta">
+                  <span>POST /api/webhooks/stripe &bull; Header: Stripe-Signature: t=...,v1=hmac_sha256</span>
+                  <button class="payload-copy-btn" type="button" data-copy-payload>Copy JSON</button>
+                </div>
+<pre>{
+  <span class="code-key">"id"</span>: <span class="code-str">"evt_1Q9xFiberOpsSettled2026"</span>,
+  <span class="code-key">"type"</span>: <span class="code-str">"checkout.session.completed"</span>,
+  <span class="code-key">"data"</span>: {
+    <span class="code-key">"object"</span>: {
+      <span class="code-key">"client_reference_id"</span>: <span class="code-str">"STR-4182-A8F9K2M1"</span>,
+      <span class="code-key">"payment_status"</span>: <span class="code-str">"paid"</span>,
+      <span class="code-key">"currency"</span>: <span class="code-str">"usd"</span>,
+      <span class="code-key">"amount_total"</span>: <span class="code-num">4900</span>,
+      <span class="code-key">"metadata"</span>: { <span class="code-key">"tenant_id"</span>: <span class="code-str">"2"</span>, <span class="code-key">"task_id"</span>: <span class="code-str">"4182"</span> }
+    }
+  }
+}</pre>
+              </div>
+
+              <!-- Panel 3: MikroTik REST -->
+              <div class="payload-panel" role="tabpanel" data-payload-panel="mikrotik">
+                <div class="payload-panel-meta">
+                  <span>PATCH https://10.20.30.1/rest/ppp/secret/*1A &bull; Async UnIsolateCustomerOnPaymentJob</span>
+                  <button class="payload-copy-btn" type="button" data-copy-payload>Copy JSON</button>
+                </div>
+<pre>{
+  <span class="code-key">"profile"</span>: <span class="code-str">"FTTH-100MBPS-HOME"</span>,
+  <span class="code-key">"disabled"</span>: <span class="code-str">"false"</span>,
+  <span class="code-key">"comment"</span>: <span class="code-str">"Auto-restored by FiberOps v4.0 | Ref: STR-4182-A8F9K2M1"</span>,
+  <span class="code-key">"_worker_meta"</span>: {
+    <span class="code-key">"queue"</span>: <span class="code-str">"default"</span>,
+    <span class="code-key">"tries"</span>: <span class="code-num">3</span>,
+    <span class="code-key">"backoff_sec"</span>: [<span class="code-num">5</span>, <span class="code-num">30</span>, <span class="code-num">120</span>],
+    <span class="code-key">"active_session_drop"</span>: <span class="code-str">"DELETE /rest/ppp/active/*8F (forces instant reconnect)"</span>
+  }
+}</pre>
+              </div>
+
+              <!-- Panel 4: OLT Optical Gate -->
+              <div class="payload-panel" role="tabpanel" data-payload-panel="olt">
+                <div class="payload-panel-meta">
+                  <span>OltService::assertOpticalHealth("ZTEG00112233", -27.0) &bull; Pre-Completion Gate</span>
+                  <button class="payload-copy-btn" type="button" data-copy-payload>Copy JSON</button>
+                </div>
+<pre>{
+  <span class="code-key">"driver"</span>: <span class="code-str">"genieacs_tr069"</span>,
+  <span class="code-key">"ont_serial_number"</span>: <span class="code-str">"ZTEG00112233"</span>,
+  <span class="code-key">"online"</span>: <span class="code-num">true</span>,
+  <span class="code-key">"rx_power_dbm"</span>: <span class="code-num">-19.15</span>,
+  <span class="code-key">"tx_power_dbm"</span>: <span class="code-num">2.34</span>,
+  <span class="code-key">"temperature_c"</span>: <span class="code-num">44.2</span>,
+  <span class="code-key">"gate_result"</span>: <span class="code-str">"PASS (within -27.0 dBm optical budget)"</span>
+}</pre>
+              </div>
+
+              <!-- Panel 5: Offline Batch & Idempotency -->
+              <div class="payload-panel" role="tabpanel" data-payload-panel="offline">
+                <div class="payload-panel-meta">
+                  <span>POST /api/location/batch &bull; Header: Idempotency-Key: uuid-v4</span>
+                  <button class="payload-copy-btn" type="button" data-copy-payload>Copy JSON</button>
+                </div>
+<pre>{
+  <span class="code-key">"points"</span>: [
+    {
+      <span class="code-key">"client_uuid"</span>: <span class="code-str">"7f2c1b04-91a2-4c0e-b8a1-3d210f4c19a0"</span>,
+      <span class="code-key">"latitude"</span>: <span class="code-num">-6.208812</span>,
+      <span class="code-key">"longitude"</span>: <span class="code-num">106.845599</span>,
+      <span class="code-key">"accuracy_m"</span>: <span class="code-num">14.2</span>,
+      <span class="code-key">"task_id"</span>: <span class="code-num">4182</span>,
+      <span class="code-key">"source"</span>: <span class="code-str">"background"</span>,
+      <span class="code-key">"captured_at"</span>: <span class="code-str">"2026-11-23T05:14:22.000Z"</span>
+    }
+  ]
+}</pre>
+              </div>
             </div>
           </article>
 
-          <article id="mobile-sync">
-            <h2>7. Offline-First Technician PWA &amp; Android APK Sync</h2>
+          <!-- SECTION 7: HYBRID MOBILE GPS & BIDIRECTIONAL OFFLINE SYNC -->
+          <article id="mobile-gps-sync">
+            <h2>7. Hybrid Mobile GPS &amp; Zero-Loss Offline-First Sync Engine</h2>
             <p>
-              Built on <strong>Ionic 8, Angular 20, and Capacitor 8</strong>, the field app is engineered for zero-signal basements and rural splice enclosures:
+              Built with <strong>Ionic 8, Angular 20, and Capacitor 8</strong>, the Technician PWA &amp; Android APK is built to survive basements, rural FTTH enclosures, indoor concrete buildings, and spotty 3G/4G towers without dropping field evidence:
             </p>
+
+            <div class="gps-stage-grid">
+              <div class="gps-stage-card">
+                <span class="gps-stage-num">STAGE 1 • SATELLITE</span>
+                <h4>High-Accuracy GPS Lock</h4>
+                <p>Requests hardware GNSS fix (<code>enableHighAccuracy: true</code>, 8s timeout) for precise pole/ODP coordinates and geofence verification.</p>
+              </div>
+              <div class="gps-stage-card gps-stage-card--fallback">
+                <span class="gps-stage-num">STAGE 2 • AUTO FALLBACK</span>
+                <h4>Wi-Fi &amp; Cell Network Location</h4>
+                <p>Indoors or on desktop browsers where satellite times out, automatically falls back to network triangulation (accepting up to 10km with honest indoor accuracy badges).</p>
+              </div>
+              <div class="gps-stage-card gps-stage-card--demo">
+                <span class="gps-stage-num">STAGE 3 • SANDBOX READY</span>
+                <h4>Smooth Demo Mode Telemetry</h4>
+                <p>In evaluation mode (<code>?demo=1</code>), synthesizes realistic live coordinates when no sensor exists so live prospect demos never flash false GPS errors.</p>
+              </div>
+            </div>
+
             <ul>
-              <li><strong>FIFO Idempotent Queue:</strong> Offline status changes, BOM consumption, and photo uploads attach unique <code>X-Idempotency-Key</code> headers so cellular retries never create duplicates.</li>
-              <li><strong>Batch GPS Flushing:</strong> Coordinates cache locally and flush to <code>/api/location/batch</code> automatically once signal returns.</li>
-              <li><strong>3-Second Lightweight Sync Signal:</strong> Compact delta polling keeps dispatch status, QRIS settlement confirmation, and new assignments instant without draining battery.</li>
+              <li><strong>Mutex-Locked FIFO Offline Queue (<code>flushOfflinePromise</code>):</strong> Compresses field proof photos via HTML5 Canvas, persists accept/start/progress/proof/BOM/signature/complete mutations locally with UUIDv4 <code>Idempotency-Key</code>s, and coalesces reconnect triggers so zero duplicate uploads occur.</li>
+              <li><strong>Zero Data Loss on Auth/Throttle (<code>401/403/408/429</code>):</strong> Offline work orders are <em>never</em> discarded if a Sanctum token expires or a server rate-limits during a long underground shift—queue replay simply pauses safely until re-authentication.</li>
+              <li><strong>True 2-Way Manual Sync &amp; Battery Discipline:</strong> Manual Sync flushes pending offline mutations + buffered GPS first before pulling fresh dispatches; background polling pauses automatically when <code>document.hidden</code> is true, and Web Audio alert contexts close cleanly via <code>osc.onended</code>.</li>
             </ul>
+          </article>
+
+          <!-- SECTION 8: CLOUD SAAS VS $2,500 FULL SETUP INFRASTRUCTURE SIZING -->
+          <article id="infrastructure">
+            <h2>8. Deployment Models &amp; Production Infrastructure Sizing</h2>
+            <p>
+              Launch in 60 seconds on Benteng Siber Managed Cloud (<strong>$500/mo</strong> Starter or <strong>$1,000/mo</strong> Growth), or commission a <strong>$2,500 Full Setup</strong> deployed directly onto your ISP's own Linux VPS or on-premise data center in 7 days:
+            </p>
+
+            <div class="spec-table-wrap">
+              <table class="spec-table">
+                <thead>
+                  <tr>
+                    <th>ISP Scale Tier</th>
+                    <th>Recommended Compute</th>
+                    <th>Database &amp; Queue Stack</th>
+                    <th>Recommended Commercial Model</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Local WISP / Starter</strong><br><span style="font-size:0.76rem;color:#64748b;">Up to 3,000 Subscribers</span></td>
+                    <td>2 vCPU • 4 GB RAM<br>40 GB NVMe SSD</td>
+                    <td>MySQL 8.0 + Supervisor Queue Worker (PHP 8.2, Nginx TLS 1.3)</td>
+                    <td><strong>Starter Cloud ($500/mo)</strong> or <strong>Full Setup ($2,500)</strong></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Regional FTTH Operator</strong><br><span style="font-size:0.76rem;color:#64748b;">3,000 – 15,000 Subscribers</span></td>
+                    <td>4 vCPU • 8 GB RAM<br>100 GB NVMe SSD</td>
+                    <td>MySQL 8.0 + Redis Cache/Lock + 2–4 Supervisor Queue Workers</td>
+                    <td><strong>Growth Cloud ($1,000/mo)</strong> or <strong>Full Setup ($2,500)</strong></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Multi-Region Carrier</strong><br><span style="font-size:0.76rem;color:#64748b;">15,000 – 50,000+ Subscribers</span></td>
+                    <td>8 vCPU • 16 GB RAM<br>Managed DB + Object Storage</td>
+                    <td>HA Load Balancer, Managed MySQL Replica, Redis Cluster, S3 Proof Archive</td>
+                    <td><strong>Full Setup ($2,500)</strong> + Optional Managed SLA ($500–$1,000/mo)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- SECTION 9: AUTOMATED VERIFICATION & AUDIT PROOF -->
+          <article id="qa-verification">
+            <h2>9. Continuous Automated Verification &amp; Audit Proof</h2>
+            <p>
+              Every release of Benteng Siber FiberOps v4.0 is gated by an automated full-stack test suite covering multi-tenant isolation, security hardening, hardware orchestration, payment webhooks, and production TypeScript/Angular builds:
+            </p>
+            <div class="arch-badge-row">
+              <span class="arch-badge arch-badge--green">✓ 97 PHPUnit Feature &amp; Security Tests Passed</span>
+              <span class="arch-badge arch-badge--green">✓ 963 Automated Assertions Verified</span>
+              <span class="arch-badge arch-badge--green">✓ Zero Cross-Tenant IDOR / SSRF Leaks</span>
+              <span class="arch-badge arch-badge--green">✓ Ionic 8 / Angular 20 Strict Production Build</span>
+            </div>
             <div style="margin-top:1.75rem;display:flex;gap:0.9rem;flex-wrap:wrap;">
               <a class="btn btn-primary" href="security-governance.html">Read Security &amp; Zero-Trust Whitepaper &rarr;</a>
-              <a class="btn btn-outline-navy" href="solutions-isp.html">Calculate ISP ROI &amp; Savings</a>
+              <a class="btn btn-outline-navy" href="solutions-isp.html">Calculate ISP ROI &amp; Payback</a>
+              <a class="btn btn-ghost" href="proposal.html">Download 1-Page Executive Proposal &rarr;</a>
             </div>
           </article>
         </div>
@@ -387,10 +716,10 @@
     <section class="cta-band">
       <div class="container">
         <h2>Deploy FiberOps v4.0 on Cloud ($500–$1,000/mo) or Full Setup ($2,500)</h2>
-        <p>Start an isolated 14-day cloud trial immediately, or commission a complete white-label deployment on your ISP's own infrastructure.</p>
+        <p>Start an isolated 14-day cloud trial in 60 seconds, or reserve your 7-day white-label Full Setup slot on your own ISP server.</p>
         <div class="cta-band-actions">
           <a class="btn btn-primary" href="https://admin.bentengsiber.com/register-isp" target="_blank" rel="noopener noreferrer">Start 14-Day Free Trial &rarr;</a>
-          <a class="btn btn-outline-white" href="https://wa.me/6281223554539" target="_blank" rel="noopener noreferrer">Discuss $2,500 Dedicated Project</a>
+          <a class="btn btn-outline-white" href="https://admin.bentengsiber.com/register-isp?inquiry=project" target="_blank" rel="noopener noreferrer">Book $2,500 Full Setup</a>
         </div>
       </div>
     </section>
@@ -415,6 +744,7 @@
             <li><a href="platform-architecture.html">Platform Architecture</a></li>
             <li><a href="security-governance.html">Security &amp; Zero-Trust</a></li>
             <li><a href="solutions-isp.html">ISP Solutions &amp; ROI</a></li>
+            <li><a href="proposal.html">Executive Proposal (PDF)</a></li>
             <li><a href="playstore.html">Technician Mobile App</a></li>
             <li><a href="about.html">About &amp; 7-Day Delivery</a></li>
           </ul>
@@ -422,7 +752,7 @@
         <div class="footer-col">
           <h3>Live Portals</h3>
           <ul>
-            <li><a href="https://admin.bentengsiber.com/login" target="_blank" rel="noopener noreferrer">Super Admin NOC Console</a></li>
+            <li><a href="https://admin.bentengsiber.com/login?demo=admin" target="_blank" rel="noopener noreferrer">Super Admin NOC Console (1-Click)</a></li>
             <li><a href="https://app.bentengsiber.com/?demo=1" target="_blank" rel="noopener noreferrer">Technician Mobile PWA</a></li>
             <li><a href="https://admin.bentengsiber.com/request" target="_blank" rel="noopener noreferrer">Client Service Request</a></li>
             <li><a href="https://admin.bentengsiber.com/track" target="_blank" rel="noopener noreferrer">Subscriber Ticket Radar</a></li>
@@ -451,6 +781,17 @@
     </div>
   </footer>
 
-  <script src="script.js?v=1.7" defer></script>
+  <!-- Floating High-Converting WhatsApp & Executive Proposal Dock -->
+  <div class="floating-wa-dock" aria-label="Quick Sales & Proposal Actions">
+    <a class="floating-dock-pill floating-dock-pill--proposal" href="proposal.html">
+      Executive Proposal (PDF) &rarr;
+    </a>
+    <a class="floating-dock-pill floating-dock-pill--wa" href="https://wa.me/6281223554539?text=Hi%20Benteng%20Siber!%20I%20just%20reviewed%20your%20Platform%20Architecture%20and%20want%20to%20discuss%20FiberOps%20(%24500-%241%2C000%2Fmo%20Cloud%20or%20%242%2C500%20Full%20Setup)." target="_blank" rel="noopener noreferrer">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+      <span>WhatsApp Architect</span>
+    </a>
+  </div>
+
+  <script src="script.js?v=1.8" defer></script>
 </body>
 </html>
